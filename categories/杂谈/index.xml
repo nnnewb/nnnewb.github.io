@@ -1,0 +1,983 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>杂谈 on weakptr's 笔记</title><link>https://weakptr.site/categories/%E6%9D%82%E8%B0%88/</link><description>Recent content in 杂谈 on weakptr's 笔记</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Sun, 24 Mar 2024 16:16:00 +0800</lastBuildDate><atom:link href="https://weakptr.site/categories/%E6%9D%82%E8%B0%88/index.xml" rel="self" type="application/rss+xml"/><item><title>前后端分离模式下的MVC架构</title><link>https://weakptr.site/p/mvc-in-frontend-backend-separated/</link><pubDate>Sun, 24 Mar 2024 16:16:00 +0800</pubDate><guid>https://weakptr.site/p/mvc-in-frontend-backend-separated/</guid><description>&lt;blockquote>
+&lt;p>刚买了计时器，这篇尝试在 15 分钟内写完。&lt;/p>
+&lt;/blockquote>
+&lt;p>首先啥是 MVC 架构，国内有很多实践，有些在我看来跟 MVC 其实没啥关系了，Controller或者View或者Model都是业务胶水，就是名义上分成这样几个模块而已。&lt;/p>
+&lt;p>MVC 我的理解中是这样的：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>M&lt;/strong> 是业务模型，主管业务的数据模型的定义和变更逻辑，换个角度理解其实就是我们平时开发的业务逻辑代码、数据访问都属于 &lt;strong>M&lt;/strong>，&lt;strong>Model&lt;/strong> 指的是业务模型不是数据库。&lt;/li>
+&lt;li>&lt;strong>V&lt;/strong> 是视图层，前后端不分离的时候就是HTML模板，分离的时候包括前端的UI和渲染UI需要的数据接口。&lt;/li>
+&lt;li>&lt;strong>C&lt;/strong> 其实是和视图层一起的，用户直接接触到的除了渲染出来的数据，还有交互。把V看成输出，C就是输入，定义的是用户的操作，包括前端的UI（按钮、表单）和对应的后端业务接口。&lt;/li>
+&lt;/ul>
+&lt;p>网站还是一把梭的前后端不分离或者单机GUI应用模式下不怎么会关注到UI和业务之间的衔接，前端和后端开发也分得不那么开，MVC 架构还是有一定的参考价值的，因为很明确地提出了UI渲染和
+业务逻辑分离，俗话说软件工程遇到问题都可以通过分层解决，MVC提出的那个时代里MVC就是个很有意义的开创。&lt;/p>
+&lt;p>实际上到现在也还是，不同的是以前业务模型 &lt;strong>M&lt;/strong> 还不是很膨胀，但现在 &lt;strong>M&lt;/strong> 已经膨胀到需要再另外分层了，于是就又有了 &lt;strong>DDD&lt;/strong> 之类的架构模式针对业务模型进行分层设计，尝试
+在不停变动的业务里找到不变的东西。&lt;/p>
+&lt;p>最后关于 MVC 实际实践，我个人看法中 &lt;strong>C&lt;/strong> 指的是遥控器那样的用户交互界面，包括 UI 和接口，然而很多公司实践中是把 Controller 当成业务胶水用的，也就是 View 层实际承担了
+MVC 中的 View 和 Controller 作用，这些公司实践中的 Controller 和 Model 则担起 MVC 中的 Model 作用。&lt;/p>
+&lt;p>这种 MVC 其实是变现实现了原来的 MVC 意图，虽然很怪但是能跑。&lt;/p>
+&lt;blockquote>
+&lt;p>时间到，就到这里。&lt;/p>
+&lt;/blockquote></description></item><item><title>2024-03-16 惯常的自我怀疑和抑郁想法</title><link>https://weakptr.site/p/2024-03-16-self-doubt-and-depression/</link><pubDate>Sat, 16 Mar 2024 00:00:00 +0800</pubDate><guid>https://weakptr.site/p/2024-03-16-self-doubt-and-depression/</guid><description>&lt;p>3月14晚上又搜索了一下有什么无痛苦的死亡方式，发现跳楼是一个很有美感的死法。&lt;/p>
+&lt;p>选个晴朗有云的好天气，挑一个视野没什么阻碍的高楼层，翻过护栏。说不定还能看到成群的鸟。风吹在脸上，会很舒服。&lt;/p>
+&lt;p>然后就站在护栏外面，回忆下自己的失败和错误，否定下自己存在的意义，可能再妄想一下会有人记得我？&lt;/p>
+&lt;p>当然，最后是一跃而下，想象自己是一只自由的鸟儿，虽然没有翅膀，一生只会有一次自由地飞翔，感受心脏跳动、收缩，一瞬的恐怖和终极的轻松。&lt;/p>
+&lt;p>好，打住。&lt;/p>
+&lt;p>然后是昨天，3月15。在家看完了 FSN 的 HF 线动画。&lt;/p>
+&lt;p>怎么说呢。&lt;/p>
+&lt;p>故事是可以给人力量的，无论是悲喜。&lt;/p>
+&lt;p>3月16，暂时摆脱了消沉的情绪。虽然还是有不好的消息，人生也没有 ctrl+z 可以 undo 。&lt;/p>
+&lt;p>但还能再坚持一下。&lt;/p></description></item><item><title>2023年度总结</title><link>https://weakptr.site/p/2023%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/</link><pubDate>Sun, 18 Feb 2024 12:01:00 +0800</pubDate><guid>https://weakptr.site/p/2023%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/</guid><description>&lt;img src="https://weakptr.site/p/2023%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/erwan-hesry-WPTHZkA-M4I-unsplash.jpg" alt="Featured image of post 2023年度总结" />&lt;h2 id="2023-总结">2023 总结&lt;/h2>
+&lt;p>回顾下2023年农历春节前后写的2022年度总结，有些感慨。&lt;/p>
+&lt;p>计划要在2023年减肥，年后一看又长了几斤肉，体检查出脂肪肝。智齿拔了一颗，今年看情况要不要再拔掉剩下两颗。23年没怎么犯通风，但减肥尚未成功，药不能停。咖啡戒了半年，下半年又开始喝了。&lt;/p>
+&lt;p>23年初感觉前司钱少事多离家远，项目组给裁了个干净。23年年底，12月，协商离职了，有点怅然。&lt;/p>
+&lt;p>蜜罐项目组干了两年，公司跟着经济大趋势走下坡路很明显，毕竟目标客户没钱了。和商务同事聊下来，感觉是因为蜜罐产品市场已经是一片红海，大客户基本都已经有了固定供应商，中小客户挖掘也不是能短期见效的，船大难掉头。公司又想搞靶场产品，和安服结合，卖培训之类的。然而靶场那个项目组就是被裁了个干净的那个组，重新拉了一票人在原来的基础上干。实在是迷惑行为。&lt;/p>
+&lt;p>离职契机是两个部门空降的奇葩领导。&lt;/p>
+&lt;p>其中一个领导是个水货，咱就直言不讳了。别说带一线技术部门，你就算作为一个前端开发者，浏览器缓存导致的页面异常跑来问后端服务有没有问题，拿出证据答复没问题之后还坚持是后端的锅，有点过分了吧&amp;hellip;&amp;hellip;&lt;/p>
+&lt;p>还有其他沟通困难，产出和设计不符之类的就不说了，最后前端这位空降兵拿了低绩效做一线研发了。我对他这个人倒是没太大意见，工作的事情我们就事论事。&lt;/p>
+&lt;p>至于另一个领导，是唯品会出来的傻逼，我要对他人身攻击了。&lt;/p>
+&lt;p>在这个傻逼来之前，公司的办公室政治斗争虽然恶心，但起码干活的主力员工不会被轻易弄走。而这位傻逼半年不到，自己团队成员换血3/4，工作超过一年的主力只剩一个，还顺带改逼走好几个开发，具体事迹我都懒得一一细说，越想越气，还是保重身体。&lt;/p>
+&lt;p>总之，先是这个傻逼毫无原因地压工时，和老员工产生矛盾后把人踢走。然后公司又悄悄无理由解雇了另一个23年入职的正式工，又因为有其他员工问解雇原因，直接出了份公告给人扣帽子，然后喜提诉讼。&lt;/p>
+&lt;p>经历这些，我很难说不失望。&lt;/p>
+&lt;p>员工矛盾，踢走老员工，没问题。项目延期，踢走背锅侠，没问题。经营需要，裁员降本增效，没问题。入职的时候有个员工手册会让人过一眼，每个人都很清楚这份霸王条款合订本就是用来推卸责任，让员工闭嘴听话，不服就滚蛋的。这些都没问题，但凡还想要这份工作，员工就没得选。&lt;/p>
+&lt;p>我失望的是给这个雇主干了两年，投入的青春，搞垮的身体，得到的是什么？离职当月，下班时间基本不晚于8点30，离职前一天刚从湖北出差回到广州。出差回来第一天，协商离职，上午协商完成，下午就收拾好东西拿离职证明走人。回头看2022年写的博客和对23年的期许，感觉自己活成了笑话。&lt;/p>
+&lt;p>伤心事就此打住，还是回归总结吧。&lt;/p>
+&lt;p>2023年只写了8篇博客，都是一些短小的实践问题记录。而22年有59篇，大部分是学习笔记。23年底离职后，24年开始读深度学习的鱼书，博客也开始恢复更新。这一年基本没怎么参与开源，github提交空空荡荡。也没怎么玩游戏，还是 2077 和 rimworld。&lt;/p>
+&lt;p>生活上，没女朋友，亚健康。实话实说也没什么交个女朋友的想法，真有好感反而要离远点，以免被攻击破防。&lt;/p>
+&lt;h2 id="2024-展望">2024 展望&lt;/h2>
+&lt;p>今年目标是新工作拿到税前 15~20，期望年底能攒下 10 个以上。&lt;/p>
+&lt;p>然后是搬个离公司近的地方，通勤时间在10~30分钟。&lt;/p>
+&lt;p>拿下自考，有空再拿个 CISP 证，看情况拿 RHCE 证。&lt;/p>
+&lt;p>最好不要太多加班。&lt;/p>
+&lt;p>另外准备私活，现有技能基础上学下怎么搞 App 赚小钱。&lt;/p>
+&lt;p>2024 要活得更好！&lt;/p></description></item><item><title>2022年度总结</title><link>https://weakptr.site/p/2022%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/</link><pubDate>Sun, 26 Feb 2023 22:40:00 +0800</pubDate><guid>https://weakptr.site/p/2022%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/</guid><description>&lt;p>不写前言了。鸽了一个月终于想起来写去年的年终总结了。&lt;/p>
+&lt;p>22年最大的感受就是累，入职这家公司半年感觉身体都有点要垮的样子。痛风确诊到现在犯了大概有五六次了，检测治疗出去大几千，医生建议是减肥，但996的节奏真的没那个精力。另外牙疼、牙龈红肿也犯了几次，一直想找时间约牙医，同样是因为时间问题没找。当然牙齿的问题最后还是怪不到公司头上，毕竟没主动请假。约个时间看下医生至少心安一点。身体要垮的另一个征兆是开始频繁有心慌、心悸的感觉，特别是下午惯例一杯咖啡后更明显。23年不好好练一下身体，30前真可能猝死，有点怕了。&lt;/p>
+&lt;p>22年最大的决策就是跳槽，从制造/教育跨行业跳到了信息安全。最初的考虑是安全方向有国家扶持的情况下增长比较稳定，能长期在这个行业内求职，有一定积累后甚至创业。试用期考虑过佛山的另一家公司，至少HR给我的感觉是更专业和正规的，背景也不差。但因为种种原因反正是没选，预计方向虚拟化、网络，当时考虑是合同签广州有点风险，薪资空间/WLB/技术方向要不要走虚拟化/网络有疑虑，而且家里反对，加上面试中隐隐有点被PUA的感觉不太舒服，再者是和部门领导谈了之后确实有被说服。综合各种原因吧，最后还是拒了offer。&lt;/p>
+&lt;p>现在这家呢，体验就是卷，钱多事少离家近一个不占。一边压人力成本一边高要求高标准，典型既要又要。入职半年待的第一个项目组和前领导就裁光/走光了，说没有点唇亡齿寒是假的。那为什么不走？那也得先找到下家，尽管现在这家公司不行，但看得到信安这行还是有饭吃的，基础技术层面像 OS、网络上的发挥空间也比较大，潜心干一段时间攒下信安圈工作的资历，是能做到习得屠龙术，货与帝王家的。哦，当然公司不会教你屠龙术，还得自己业余时间学。在找到下家信安-攻防方向、待遇和工作压力合适的公司，或者基层开发之外职位前，应该还会先继续干下去。身体问题只能压一下业余娱乐生活的时间了，找不到女朋友就找不到吧。&lt;/p>
+&lt;p>说到业余时间，前年买电钢琴烧了两千多软妹币，22年又买了电吉他，烧一千多软妹币，至今没学会啥。倒是弟弟去报了个钢琴班，砸下去接近一个w，能弹两首了。可惜他应该是没兴趣，在家基本不练。而我，买了两本书，电吉他还是没学起来，小星星都弹不流畅。&lt;/p>
+&lt;p>学不起来想找理由可太多了，但没有投入大把时间练习和学习也是真的。所以这事儿也不能怪别的，就是惰性使然。但我是真的想学乐器来着，只不过烧w也真的奢侈……唉。&lt;/p>
+&lt;p>钱的问题，22年没攒什么钱。但算算，之前公司给的薪酬待遇还是很够意思的，过节还能送 JD购物卡，21年年终奖也实打实十几k到手，优秀员工3k，比这家铁公鸡好多了。唯一不爽的就是没啥成果，但关于这点，还是我图样了。明明找到了正确的搞法，摸鱼学技术就好，结果非要跳这家坑壁公司。想想都是泪。&lt;/p>
+&lt;p>再说别的，还在上家公司的时候决定自考本科，22年10月拿下了马原、C++、数据库系统，算开门红。23年4月争取管理信息系统、管理经济学、计算机原理、近代史，要背的东西比较多。马上就3月报名了，还没吃完管理信息系统。近代史要背的那么多还没背。考虑换一门把握大点的，不浪费一次考试机会，近代史可以换普通逻辑或数据结构导论。&lt;/p>
+&lt;p>另外就是打算考几张证，因为学历确实不太好拿出手，有证给双方都多点信心。考虑有 RHCE、网络工程师、系统分析师，其中网工或者网络规划设计师个人比较感兴趣，35岁被裁了还可以去拉线打水晶头哈哈哈（无感情）。CKA也可以考下，太多沙比公司瞎上k8s了。目前顾虑的是含金量不太行，难度上来说软考居然还是比较高的。CKA和RHCE这种要续期的难度还低点，感觉像收智商税了。&lt;/p>
+&lt;p>那么，娱乐环节！&lt;/p>
+&lt;h3 id="ender-lilies">《Ender Lilies》&lt;/h3>
+&lt;p>老游戏了，记得是前两年有看到B站上的评测，映像不多了，但音乐和角色到现在还记着。趁打折买了，我唯一一款手柄游玩的游戏，手残党打到狂骑士狼实在过不去了，但又不想云，不得不作弊。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/2022%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/image-20230127010117399.png"
+width="1428"
+height="490"
+srcset="https://weakptr.site/p/2022%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/image-20230127010117399_hu48a946660ff0e9cbb561b09834323622_982516_480x0_resize_box_3.png 480w, https://weakptr.site/p/2022%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/image-20230127010117399_hu48a946660ff0e9cbb561b09834323622_982516_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20230127010117399"
+class="gallery-image"
+data-flex-grow="291"
+data-flex-basis="699px"
+>&lt;/p>
+&lt;h3 id="赛博朋克边缘行者赛博朋克-2077">《赛博朋克：边缘行者》、《赛博朋克 2077》&lt;/h3>
+&lt;p>如果没有年底的孤独摇滚的话，那就算是年度番了。对夜之城，“逐梦之城”给出了另一番诠释。别的我不多说，看我游戏时间。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/2022%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/image-20230226215559391.png"
+width="1147"
+height="388"
+srcset="https://weakptr.site/p/2022%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/image-20230226215559391_hu396683f321377403d2ff1260903e20ac_448150_480x0_resize_box_3.png 480w, https://weakptr.site/p/2022%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/image-20230226215559391_hu396683f321377403d2ff1260903e20ac_448150_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20230226215559391"
+class="gallery-image"
+data-flex-grow="295"
+data-flex-basis="709px"
+>&lt;/p>
+&lt;p>能点评的东西太多了。中配接地气但有些地方语气感觉不对，bug确实多，映像最深的还是黑梦的bug，全黑我一度以为是什么超大胆的表现形式创新，而且确实效果特别好，让我激动好一会儿。结果居然是个bug。别的就还好吧，不影响我把夜之城烧成灰。&lt;/p>
+&lt;h3 id="脑叶公司">《脑叶公司》&lt;/h3>
+&lt;p>&lt;img src="https://weakptr.site/p/2022%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/image-20230226215738220.png"
+width="1150"
+height="390"
+srcset="https://weakptr.site/p/2022%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/image-20230226215738220_hub775a7f42951b3af87708d48371682c9_134166_480x0_resize_box_3.png 480w, https://weakptr.site/p/2022%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/image-20230226215738220_hub775a7f42951b3af87708d48371682c9_134166_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20230226215738220"
+class="gallery-image"
+data-flex-grow="294"
+data-flex-basis="707px"
+>&lt;/p>
+&lt;p>这游戏很早买的，记得应该是这游戏才出没多久，当时还是我第一份工作来着，第一次和同事一起去温泉旅馆，可惜没留什么照片。晚上拿第一份工资买的 surface laptop 玩这游戏。之后嘛，直到22年才第一次完全通关。非常有 SCP 味的叙事，三渣的惊悚乐园里玩脑叶和SCP的捏他的时候还兴奋了两天来着（诶，是这本吗，记不清了）。我也是 SCP中分 wiki-dot 注册会员来着，当初想写点啥，但没写出来，惯例了。&lt;/p>
+&lt;p>感觉自从第一本同人烂尾之后就再没写出啥东西。&lt;/p>
+&lt;h3 id="孤独摇滚">《孤独摇滚》&lt;/h3>
+&lt;p>年度番，很触动。&lt;/p>
+&lt;p>混迹的互联网粪坑多了会发现网上话痨多少都有点社恐，我愿称之为赛博社恐幸存者效应。毕竟现充谁天天上网冲浪对线啊。但凡网上评论区24小时在线的熟面孔（非利益驱动的）多少都有点小社恐，社交恐怖分子也算。&lt;/p>
+&lt;p>但是呢，小孤独年纪轻轻坐拥3w粉丝，一手吉他出神入化，只是有点小社恐。而你除了社恐什么都没有。&lt;/p>
+&lt;p>（有被冒犯到 2333）&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/2022%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/SVabEt8RlqNUzfL.jpg"
+width="1117"
+height="1500"
+srcset="https://weakptr.site/p/2022%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/SVabEt8RlqNUzfL_hub2fc0bd33727c763c5a8981789ea3098_181886_480x0_resize_q75_box.jpg 480w, https://weakptr.site/p/2022%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/SVabEt8RlqNUzfL_hub2fc0bd33727c763c5a8981789ea3098_181886_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+alt="img"
+class="gallery-image"
+data-flex-grow="74"
+data-flex-basis="178px"
+>&lt;/p>
+&lt;p>当然，最重要的还是，第8集，第12集的演出，看过一遍之后就会有种抓心挠肝的痒，恨不得自己拿上吉他来两下。&lt;/p>
+&lt;h3 id="最后">最后！！！&lt;/h3>
+&lt;p>2023 必然是个烂年，又或者在之后的更烂的年份中较好的一年。历史的螺旋上升正在进入下行轨道。人口拐点其实早在15年就到了，16年全面二孩强行拉了两年出生率，但16年开始，往后的出生人口就一直是下降了。到了23年，16年出生人口7岁，也差不多全都上小学了，再往后入学只会一年比一年少。出生人口下降带来的对经济的冲击其实早就有出现，幼儿园招不满、招生难早几年就开始出现了，只是这种冲击还在传导中。&lt;/p>
+&lt;p>2016年出生人口1786万，2017年1723万，2018年1523万，2019年1465万，2020年1200万，2021年1062万，22年未公布，但22年是首个出生人口小于死亡人口的年份。&lt;/p>
+&lt;p>未来20年，随着这波人口潮汐的顶峰扫过各行各业，适龄人口从1700万在5年间锐减700万乃至越来越低的压力层层传递，已经可以预见好日子真的在后头，再过20年就业人口不足的压力就要传导到招聘方了。只可惜再过20年现在这批二十多岁的韭菜就变成40多的韭菜啦，给老爷们养完老，人口潮汐的压力差不多也要到养老领域了，社保公积金收不抵支也是可以预见的。实惨呗。&lt;/p>
+&lt;p>一代人有一代人的惨，没啥可哭的，早八辈子就知道活着就是受罪了，地狱说的就是人间。&lt;/p>
+&lt;p>现在就看伟大的party能有啥对策，要不然快进到三战也是能接受的，种完蘑菇大家也可以相信下一季智慧生物的智慧嘛。&lt;/p>
+&lt;p>祝大家2023都能快快乐乐享受尚在高点的人生！&lt;/p></description></item><item><title>元旦快乐</title><link>https://weakptr.site/p/%E5%85%83%E6%97%A6%E5%BF%AB%E4%B9%90/</link><pubDate>Mon, 02 Jan 2023 16:05:21 +0800</pubDate><guid>https://weakptr.site/p/%E5%85%83%E6%97%A6%E5%BF%AB%E4%B9%90/</guid><description>&lt;h2 id="元旦快乐">元旦快乐！&lt;/h2>
+&lt;p>2023 也要努力活下去！&lt;/p></description></item><item><title>羊了</title><link>https://weakptr.site/p/%E7%BE%8A%E4%BA%86/</link><pubDate>Sat, 24 Dec 2022 14:36:31 +0800</pubDate><guid>https://weakptr.site/p/%E7%BE%8A%E4%BA%86/</guid><description>&lt;img src="https://weakptr.site/p/%E7%BE%8A%E4%BA%86/cover.webp" alt="Featured image of post 羊了" />&lt;p>简述下感受。&lt;/p>
+&lt;p>几乎就是放开之后几天，先是弟弟在佛山有感冒症状给送回家，然后是父母阳了，接着就是我。&lt;/p>
+&lt;p>从 12/9 得知家人阳性开始居家，12/12开始发热，最高烧到40°，然后进入恢复期等转阴。&lt;/p>
+&lt;p>上次抗原在 12/21 还是清晰的两条杠。&lt;/p>
+&lt;p>今天，12/24，咳嗽症状还在。另外不知道是不是新冠确实削弱了免疫系统，在发热症状消退后两天就出现了严重的牙龈炎，持续到现在还肿着，伴随偶尔来一下的神经痛，十分刺激。&lt;/p>
+&lt;p>以上。&lt;/p>
+&lt;p>另外还有点别的想说。&lt;/p>
+&lt;p>今年11月因为广州疫情爆发，居家办公了一个月，放开后上班不到两天，又先后全家阳性，11~12两个月几乎没怎么好好上班。以至于前段时间听说本部门老大离职了，我居然成了最后一个知道的。&lt;/p>
+&lt;p>心里五味杂陈，真的是难以言喻。转正前那段时间本来不想留的，还是被他劝下来的。结果才个月就立场互换。同期两个试用期同事都没留，入职前联系的HR在我入职后就跑了。&lt;/p>
+&lt;p>难顶。&lt;/p>
+&lt;p>说起来还有点惭愧，本来居家办公还少了2小时/天的通勤时间，不管是写博客、看书还是培养点兴趣爱好都是好的，但果然还是和以往一样，多出来的时间没有得到有效利用。说起来上家也是真的待遇挺好的，但凡项目管理上要是有现在这家的80%的功夫，也不至于几年都出不了一个那么简单的产品，今后估计想找到这样一家公司难了。&lt;/p>
+&lt;p>不说工作的屁事了。&lt;/p>
+&lt;p>双11买了几本书，惯例买重了一本（我都为自己这脑子悲哀），不久前才送到。&lt;/p>
+&lt;ul>
+&lt;li>《深入理解Linux网络技术内幕》x2&lt;/li>
+&lt;li>《CSAPP》&lt;/li>
+&lt;li>《深入理解Linux内核》&lt;/li>
+&lt;li>《计算机网络-自顶向下方法》&lt;/li>
+&lt;li>《Rust系统编程》&lt;/li>
+&lt;li>《CTF竞赛权威指南-PWN》&lt;/li>
+&lt;li>一整套《鲁迅全集》二十本。&lt;/li>
+&lt;/ul>
+&lt;p>按惯例还是没开始看，拿来压书架了。&lt;/p>
+&lt;p>工作里发现《TCP/IP 协议详解：卷一》这本有点实用到意外，必须找时间看了。&lt;/p>
+&lt;p>最后，在看《孤独摇滚》，芳文社 yyds ！电吉他已下单，燥起来！把东京塔烧成灰（精神错乱）！&lt;/p></description></item><item><title>systemd 配置 ssh-agent 用户服务自启</title><link>https://weakptr.site/p/systemd-%E9%85%8D%E7%BD%AE-ssh-agent-%E7%94%A8%E6%88%B7%E6%9C%8D%E5%8A%A1%E8%87%AA%E5%90%AF/</link><pubDate>Mon, 27 Jun 2022 11:17:00 +0800</pubDate><guid>https://weakptr.site/p/systemd-%E9%85%8D%E7%BD%AE-ssh-agent-%E7%94%A8%E6%88%B7%E6%9C%8D%E5%8A%A1%E8%87%AA%E5%90%AF/</guid><description>&lt;h2 id="前言">前言&lt;/h2>
+&lt;p>主要是想解决一个问题：ssh 只自动尝试了 &lt;code>~/.ssh/id_ed25519&lt;/code> 这个硬编码的路径，但我有两个 ed25519 秘钥（工作用一个，私人一个），除非用 &lt;code>ssh -i&lt;/code> 指定不然不会被自动发现和使用。&lt;/p>
+&lt;p>但我又不想多打个 &lt;code>-i ~/.ssh/id_ed25519.xxx&lt;/code> ，所以就想配个 &lt;code>ssh-agent&lt;/code> 好了，手动&lt;code>ssh-add&lt;/code> 还是自动都可。&lt;/p>
+&lt;h2 id="配置">配置&lt;/h2>
+&lt;h3 id="创建服务配置">创建服务配置&lt;/h3>
+&lt;p>位置：&lt;code>~/.config/systemd/user/ssh-agent.service&lt;/code>&lt;/p>
+&lt;p>内容&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-ini" data-lang="ini">&lt;span class="line">&lt;span class="cl">&lt;span class="k">[Unit]&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="na">Description&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">SSH key agent&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">[Service]&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="na">Type&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">simple&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="na">Environment&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">SSH_AUTH_SOCK=%t/ssh-agent.socket&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="na">ExecStart&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">/usr/bin/ssh-agent -D -a $SSH_AUTH_SOCK&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">[Install]&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="na">WantedBy&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">default.target&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>添加 &lt;code>SSH_AUTH_SOCK DEFAULT=&amp;quot;${XDG_RUNTIME_DIR}/ssh-agent.socket&amp;quot;&lt;/code> 到 &lt;code>~/.pam_environment&lt;/code>。&lt;/p>
+&lt;p>在我的系统上 &lt;code>XDG_RUNTIME_DIR&lt;/code> 对应 &lt;code>/run/user/你的用户id&lt;/code> ，不同发行版自己看下这个全局变量对应哪个位置。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> SSH_AUTH_SOCK &lt;span class="nv">DEFAULT&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="si">${&lt;/span>&lt;span class="nv">XDG_RUNTIME_DIR&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">/ssh-agent.socket&amp;#34;&lt;/span> &lt;span class="p">|&lt;/span> tee -a ~/.pam_environment
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>可选，自动添加秘钥（OpenSSH版本&amp;gt;=7.2）：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="nb">echo&lt;/span> &lt;span class="s1">&amp;#39;AddKeysToAgent yes&amp;#39;&lt;/span> &amp;gt;&amp;gt; ~/.ssh/config
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="启用服务">启用服务&lt;/h3>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">systemctl --user &lt;span class="nb">enable&lt;/span> ssh-agent
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">systemctl --user start ssh-agent
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>重新登录后生效。&lt;/p>
+&lt;h2 id="总结">总结&lt;/h2>
+&lt;p>参考：&lt;a class="link" href="https://unix.stackexchange.com/questions/339840/how-to-start-and-use-ssh-agent-as-systemd-service" target="_blank" rel="noopener"
+>How to start and use ssh-agent as systemd service?&lt;/a>&lt;/p></description></item><item><title>2022年5月27日 面试记录</title><link>https://weakptr.site/p/2022-05-27-interview-note/</link><pubDate>Fri, 27 May 2022 18:33:00 +0800</pubDate><guid>https://weakptr.site/p/2022-05-27-interview-note/</guid><description>&lt;h2 id="前言">前言&lt;/h2>
+&lt;p>面试完，结果只能说我对自己也不算很满意，顺带反思了一下是不是表现得太着急了。&lt;/p>
+&lt;p>原本以为一个小时足矣，结果面到快12点，才结束完面试，还没出门就碰到泼水一样的暴雨。花了一个多钟头到家，已经是下午1点十几分了。原本打算去公司继续上下午的班，但累到没有一点心情，于是把上午的假延长到下午。&lt;/p>
+&lt;p>typora 建好文件后就着住房改造家的视频吃了午饭，再看会儿 boss 上的的 jd ，还是劝自己把面试的复盘写完，迟早都是要写的。&lt;/p>
+&lt;h2 id="技术面">技术面&lt;/h2>
+&lt;p>开场技术面，自我介绍、关于离职原因一类的问题就略了。我不记得所有问题，所以就单独把还有映像的问题拿出来复盘下。鉴于我技术栈两门语言，面试官 Python 和 Go 的题混合问的，我回忆的顺序大概也对不上实际面试中问的顺序。&lt;/p>
+&lt;h2 id="简答题">简答题&lt;/h2>
+&lt;h3 id="深浅拷贝">深浅拷贝&lt;/h3>
+&lt;p>基础题。复盘中自我感觉回答应该没什么遗漏，但沟通中感觉和面试官就 &lt;strong>拷贝&lt;/strong> 意指 &lt;code>a=b&lt;/code> 还是 &lt;code>a=list(b)&lt;/code> 有点误会，但总之问题不大。&lt;/p>
+&lt;h3 id="哈希冲突哈希表时间复杂度哈希表实现dict是不是哈希表">哈希冲突、哈希表时间复杂度、哈希表实现、dict是不是哈希表&lt;/h3>
+&lt;p>简单的算法和一点CPython实现细节。&lt;/p>
+&lt;p>哈希冲突实质是摘要函数输入空间和输出空间不对等，冲突无法避免。&lt;/p>
+&lt;p>哈希表的时间复杂度是 &lt;code>O(1)&lt;/code> ，面试官还问了为什么是 &lt;code>O(1)&lt;/code>，emm，我的回答是直接拿哈希值当索引的情况下空间换时间，最理想的情况一条指令就能取到元素了。回答不太准，问了下谷歌说是最坏O(n)，平均O1。显然最坏的情况就是碰撞了。&lt;/p>
+&lt;p>哈希表实现的话，当时没敢答。现在想想的话，在 leetcode 做过相关的题，简单的实现比如把ascii码表（或者随便什么序列）映射到一块连续内存上然后就能直接去索引了，复杂的实现问谷歌回答是 Java 的 HashMap 是红黑树实现，Go 的 map 也是哈希表，但实现也不是我说的那种直接映射到一块内存上。总之就是各有不同吧。&lt;/p>
+&lt;p>&lt;code>dict&lt;/code> 底层也是哈希表，下次记得问 &lt;code>map&lt;/code>/&lt;code>dict&lt;/code> 都回答哈希表就是了。&lt;/p>
+&lt;p>具体 Go 和 Python 的实现抽时间再找解析看看，不行就硬读源码了。&lt;/p>
+&lt;h3 id="并发和并行">并发和并行&lt;/h3>
+&lt;p>可能是几年前看过，但当时印象不深，太偏理论了，实践中很少能碰到抠这俩字眼的情况。重温下。&lt;/p>
+&lt;p>并发是 concurrent，并行是 parallel ，有个比较形象的说法是并发是同一时间发生几件事，并行是这几件事同时发生。&lt;/p>
+&lt;p>放到操作系统原理来解释就是并发可以是单核CPU给两个进程都分了时间片，所以 &lt;strong>看起来&lt;/strong> 两者同时执行，但实际上两者还是有先后，或者交错进行的。并行就是多核 CPU &lt;strong>同时&lt;/strong>在跑两个进程的代码，两个程序是真的同时处于运行状态。&lt;/p>
+&lt;h3 id="gil">GIL&lt;/h3>
+&lt;p>基础题。我当时回答是执行字节码的时候加的锁，确保同时只有一个线程在执行字节码，目的是简化编程，后来因为各种原因就变成了历史遗留，各种去除GIL改成细粒度锁的尝试目前还没有很好的结果。&lt;/p>
+&lt;p>特地回顾了下python文档，确定了文档的说法和我记忆中是一样的。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/2022-05-27-interview-note/image-20220527170018461.png"
+width="815"
+height="103"
+srcset="https://weakptr.site/p/2022-05-27-interview-note/image-20220527170018461_hud3e9d34ad8ba2fd890523a9182bdfc8d_29027_480x0_resize_box_3.png 480w, https://weakptr.site/p/2022-05-27-interview-note/image-20220527170018461_hud3e9d34ad8ba2fd890523a9182bdfc8d_29027_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220527170018461"
+class="gallery-image"
+data-flex-grow="791"
+data-flex-basis="1899px"
+>&lt;/p>
+&lt;p>但感觉面试官不太满意的样子…为啥呢。&lt;/p>
+&lt;h3 id="gmp">GMP&lt;/h3>
+&lt;p>基础题。但没背八股，照着映像乱讲一通了。&lt;/p>
+&lt;p>G就是goroutine，M是操作系统线程，P是处理器。好像也有管P叫管理器。&lt;/p>
+&lt;p>整个模型就是 M 绑定 P，M 有个 G 队列，然后就是抢占式调度。&lt;/p>
+&lt;blockquote>
+&lt;p>2022年5月30日 订正&lt;/p>
+&lt;p>这里我的理解是错的，参考下面这图&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/GMP%e6%a8%a1%e5%9e%8b.jpg"
+loading="lazy"
+alt="gmp模型"
+>&lt;/p>
+&lt;p>P 维护队列，M 绑定 P 运行 G，当 G 阻塞的时候视阻塞类型放到 netpoller 里，或者sysmon标记成可以被抢占，或者把 G 和 M 分出去（解绑P），让其他 M 绑定 P 继续处理其他 G 。&lt;/p>
+&lt;/blockquote>
+&lt;p>要说遗漏的内容的话 emm&lt;/p>
+&lt;ul>
+&lt;li>GMP 还有个全局 G 队列&lt;/li>
+&lt;li>work stealing：M 在没有任务的时候会抢其他 M 队列里的 G 去调度&lt;/li>
+&lt;li>hand off：M 阻塞的时候会释放 P，让其他线程跑。（不太理解）&lt;/li>
+&lt;li>P 数量不一定对应物理核心或者逻辑核心数量，可以调。&lt;/li>
+&lt;li>M 是 Go runtime 阻塞的时候自动创建新的，有上限。&lt;/li>
+&lt;li>M0 和 G0&lt;/li>
+&lt;/ul>
+&lt;p>漏的东西还挺多的。因为面 Python 都忘了要看下 Go 的经典八股。&lt;/p>
+&lt;h3 id="gc">GC&lt;/h3>
+&lt;p>基础题。Go的 GC 是从 Mark-Sweep 到三色标记算法（黑白灰），面试中具体的算法内容没提。还提到Go的内存返还机制，但没表达清楚。&lt;code>MADV_FREE&lt;/code> 的坑也没提。&lt;/p>
+&lt;h3 id="混合写屏障">混合写屏障&lt;/h3>
+&lt;p>GC进阶一点的题？面试时没答上来。讲真应该把Go的八股先看看的…&lt;/p>
+&lt;p>写屏障是一个无STW场景才存在的问题，STW的话就不会在扫描的时候有谁在写了。写屏障是为了解决扫描的时候有人在写对象的问题，避免三色标记错误。&lt;/p>
+&lt;p>混合写屏障是混合了两种写屏障算法（ Dijkstra 插入屏障和 Yuasa 删除屏障）。&lt;/p>
+&lt;p>具体的我先放个链接在这里吧=。=&lt;/p>
+&lt;p>懒得抄一遍。&lt;/p>
+&lt;ul>
+&lt;li>&lt;a class="link" href="https://golang.design/under-the-hood/zh-cn/part2runtime/ch08gc/barrier/#heading2" target="_blank" rel="noopener"
+>写屏障技术 - Go语言原本&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://www.jianshu.com/p/4c5a303af470" target="_blank" rel="noopener"
+>Golang 三色标记、混合写屏障GC模式图文全分析&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h3 id="innodb">InnoDB&lt;/h3>
+&lt;p>数据库题。问题有点宽泛到摸不着头脑，但真要我介绍下 InnoDB 是个啥有啥特性我也真说不上来。&lt;/p>
+&lt;p>先留个链接等之后再细读。&lt;/p>
+&lt;ul>
+&lt;li>&lt;a class="link" href="https://dev.mysql.com/doc/refman/5.7/en/innodb-introduction.html" target="_blank" rel="noopener"
+>mysql 5.7 innodb introduction&lt;/a>&lt;/li>
+&lt;li>《MySQL技术内幕（InnoDB引擎）》&lt;/li>
+&lt;/ul>
+&lt;p>面试官居然问你们不用MySQL的吗…我…&lt;/p>
+&lt;p>行吧……&lt;/p>
+&lt;p>简直是暴击。&lt;/p>
+&lt;h3 id="docker隔离原理">docker隔离原理&lt;/h3>
+&lt;p>基础题吧。&lt;/p>
+&lt;p>基本原理就是利用内核的 namespace 隔离了 pid、mount、network，chroot 隔离了文件系统，cgroup 控制资源使用。&lt;/p>
+&lt;p>面试的时候忘记了一个 &lt;code>UTS&lt;/code> ，就是隔离 hostname ，还有 IPC，还有 USER 。另外就是 cgroup 也是有 namespace 的。&lt;/p>
+&lt;p>具体可以看 &lt;code>unshare&lt;/code>，直接 &lt;code>man unshare&lt;/code> 就行。&lt;/p>
+&lt;h2 id="论述题">论述题&lt;/h2>
+&lt;h3 id="python给函数加超时装饰器">python给函数加超时装饰器&lt;/h3>
+&lt;p>面试的时候回答是&lt;code>async def&lt;/code> 可以直接用 &lt;code>future&lt;/code> 实现。普通函数可以用线程，完成后信号量统治下调用方。当时就中途返回的问题拉扯了一下，感觉还是没讲清楚。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;span class="lnt">25
+&lt;/span>&lt;span class="lnt">26
+&lt;/span>&lt;span class="lnt">27
+&lt;/span>&lt;span class="lnt">28
+&lt;/span>&lt;span class="lnt">29
+&lt;/span>&lt;span class="lnt">30
+&lt;/span>&lt;span class="lnt">31
+&lt;/span>&lt;span class="lnt">32
+&lt;/span>&lt;span class="lnt">33
+&lt;/span>&lt;span class="lnt">34
+&lt;/span>&lt;span class="lnt">35
+&lt;/span>&lt;span class="lnt">36
+&lt;/span>&lt;span class="lnt">37
+&lt;/span>&lt;span class="lnt">38
+&lt;/span>&lt;span class="lnt">39
+&lt;/span>&lt;span class="lnt">40
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">&lt;span class="kn">import&lt;/span> &lt;span class="nn">threading&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kn">from&lt;/span> &lt;span class="nn">time&lt;/span> &lt;span class="kn">import&lt;/span> &lt;span class="n">sleep&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">def&lt;/span> &lt;span class="nf">timeout&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">seconds&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="nb">float&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">wrapper&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">f&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">wrapped&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="n">args&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">**&lt;/span>&lt;span class="n">kwargs&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1"># 构造一个 0 信号量&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">s&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">threading&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Semaphore&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">result&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="kc">None&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1"># 包装一下，任务完成时返回结果并发出完成信号&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">_f&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">sem&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">threading&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Semaphore&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">nonlocal&lt;/span> &lt;span class="n">result&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">result&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">f&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="n">args&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">**&lt;/span>&lt;span class="n">kwargs&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">sem&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">release&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">t&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">threading&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">Thread&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">target&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="k">lambda&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">_f&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">s&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">t&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">start&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1"># acquire 会把信号量 -1 ，不满足时等待，这里利用了 acquire 自带的 timeout 参数&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1"># 如果问到更底层的话比如C/C++甚至汇编，可能要依赖OS功能（信号机制之类的）来唤醒，大概这样。&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="n">s&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">acquire&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">timeout&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="n">seconds&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="ow">is&lt;/span> &lt;span class="kc">False&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">raise&lt;/span> &lt;span class="ne">Exception&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;timeout&amp;#39;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">result&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">wrapped&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">wrapper&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">if&lt;/span> &lt;span class="vm">__name__&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="s1">&amp;#39;__main__&amp;#39;&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nd">@timeout&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mf">3.0&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">f&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">seconds&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">seconds&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">sleep&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">seconds&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="s1">&amp;#39;hahaha&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">f&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mf">1.0&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">f&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mf">2.0&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">f&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mf">3.0&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>这就是我说的信号量解法。但面试官后来又问是不是每个装饰器都要一个信号量，我猜面试官对这个解还不满意。&lt;/p>
+&lt;p>不使用信号量也能实现，但无论如何这个等待和唤醒要依赖一个异步通知机制，总是没法避免。&lt;/p>
+&lt;p>分离到另一个线程里执行也是个比较头疼的做法，但面试那儿会想不出更好的主意。&lt;/p>
+&lt;h3 id="三个goroutine循环输出abc">三个goroutine循环输出abc&lt;/h3>
+&lt;p>面试的时候下意识回答用&lt;code>mutex&lt;/code>，但拿纸笔整理了下思路，改成了用&lt;code>chan&lt;/code>感觉更好。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;span class="lnt">25
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="line">&lt;span class="cl">&lt;span class="kn">package&lt;/span> &lt;span class="nx">main&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kn">import&lt;/span> &lt;span class="s">&amp;#34;sync&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kd">func&lt;/span> &lt;span class="nf">main&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">a&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">b&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">c&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nb">make&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kd">chan&lt;/span> &lt;span class="kd">struct&lt;/span>&lt;span class="p">{},&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="nb">make&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kd">chan&lt;/span> &lt;span class="kd">struct&lt;/span>&lt;span class="p">{},&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="nb">make&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kd">chan&lt;/span> &lt;span class="kd">struct&lt;/span>&lt;span class="p">{},&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">wg&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="o">&amp;amp;&lt;/span>&lt;span class="nx">sync&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">WaitGroup&lt;/span>&lt;span class="p">{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">wg&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Add&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">3&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">go&lt;/span> &lt;span class="nf">f&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;a&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">a&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">b&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">wg&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">go&lt;/span> &lt;span class="nf">f&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;b&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">b&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">c&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">wg&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">go&lt;/span> &lt;span class="nf">f&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;c&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">c&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">a&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">wg&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">a&lt;/span> &lt;span class="o">&amp;lt;-&lt;/span> &lt;span class="kd">struct&lt;/span>&lt;span class="p">{}{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">wg&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Wait&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kd">func&lt;/span> &lt;span class="nf">f&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">s&lt;/span> &lt;span class="kt">string&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">in&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">out&lt;/span> &lt;span class="kd">chan&lt;/span> &lt;span class="kd">struct&lt;/span>&lt;span class="p">{},&lt;/span> &lt;span class="nx">wg&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="nx">sync&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">WaitGroup&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">defer&lt;/span> &lt;span class="nx">wg&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Done&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="nx">i&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="nx">i&lt;/span> &lt;span class="p">&amp;lt;&lt;/span> &lt;span class="mi">5&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="nx">i&lt;/span>&lt;span class="o">++&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">_&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="o">&amp;lt;-&lt;/span>&lt;span class="nx">in&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">s&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">out&lt;/span> &lt;span class="o">&amp;lt;-&lt;/span> &lt;span class="kd">struct&lt;/span>&lt;span class="p">{}{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// abcabcabcabcabc
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>面试官还问到是不是无buffer的 &lt;code>chan&lt;/code>，我说是1 。当时没想那么多，实际分析代码会发现必须是1，不能是无缓冲的，因为循环末尾&lt;code>c&lt;/code>会再发信号给&lt;code>a&lt;/code>，而那时候&lt;code>a&lt;/code>已经退出了，无缓冲的情况下&lt;code>c&lt;/code>会阻塞死，会报错 &lt;code>all goroutines are asleep&lt;/code> 。但1缓冲就不会有这个问题。&lt;/p>
+&lt;h3 id="分布式追踪架构和实现侵入非侵入">分布式追踪架构和实现（侵入/非侵入）&lt;/h3>
+&lt;p>这个主要是吹逼。&lt;/p>
+&lt;p>讲了下分布式追踪基本的架构，也就是从 &lt;code>Agent&lt;/code> 到 &lt;code>Collector&lt;/code> 再到存储，然后前端从存储查数据展示，基本数据结构 Span 啦什么的。&lt;/p>
+&lt;p>面试官还问能不能非侵入，非侵入和侵入有什么区别，这部分就是吹水了。侵入的话自然是什么都能做，把分布式追踪当日志用。非侵入的话就是外面挂 sidecar，代理流量，也能拿到 RPC 调用、HTTP请求之类的数据，举例就是服务网格。当然还有 pprof 也能拿到一些统计数据但那个是时序性的，应该叫 metrics ，和追踪又不太一样。&lt;/p>
+&lt;p>但后来发现和面试官理解有点偏差，面试官只想不侵入业务代码，但应用代码是可以侵入的，那就好办多了。不管是 sql.driver 还是自定义 logger 都行，很多组件都支持插中间件，这种情况下基本和侵入业务代码差不多了，除了一些更细致的像是统计某个循环跑了多久之类的还需要单独写 span 办不到之外（要是封装个&lt;code>timeit&lt;/code>之类的也不算侵入的话那就0限制了，想干啥都行）。&lt;/p>
+&lt;h3 id="upv-登录界面几个接口">UPV 登录界面几个接口&lt;/h3>
+&lt;p>面试官画了个图问这界面要几个后端接口。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/2022-05-27-interview-note/image-20220527181148464.png"
+width="800"
+height="600"
+srcset="https://weakptr.site/p/2022-05-27-interview-note/image-20220527181148464_hu060edb4cd2e9977ccffafca537a042b4_41474_480x0_resize_box_3.png 480w, https://weakptr.site/p/2022-05-27-interview-note/image-20220527181148464_hu060edb4cd2e9977ccffafca537a042b4_41474_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220527181148464"
+class="gallery-image"
+data-flex-grow="133"
+data-flex-basis="320px"
+>&lt;/p>
+&lt;p>U是用户名，P是密码，V是验证码。&lt;/p>
+&lt;p>我的回答是2~3个，看验证码刷新要不要单独给个接口。&lt;/p>
+&lt;p>然后又问你会怎么实现这个登录接口。&lt;/p>
+&lt;p>emm，感觉题有点怪，想考察思维全面不全面？答了几个点：&lt;/p>
+&lt;ul>
+&lt;li>密码加盐哈希，一般就直接 HMAC&lt;/li>
+&lt;li>SESSION_ID 取正确验证码来验证&lt;/li>
+&lt;li>给 ratelimit，验证码刷新和登录尝试都要限&lt;/li>
+&lt;li>CSRF Token，可以是直接从服务端返回（服务端渲染）或者Ajax 拿到&lt;/li>
+&lt;/ul>
+&lt;p>现在的话想起来几个新的点&lt;/p>
+&lt;ul>
+&lt;li>用户量很大的话查数据库压力太大，可以加一层缓存，验证密码的时候不访问数据库了&lt;/li>
+&lt;li>错误信息控制，防止爆破用户名&lt;/li>
+&lt;li>响应时间控制，防止 Timing Attack （虽然可能性真的很低，但结合下数据库压力，能让走数据库和不走数据库的请求有明显时间差异的话还是可能爆出用户名的，感觉是非常极端的情况了）&lt;/li>
+&lt;li>前后端分离的情况下前端单独nginx部署肯定是没有后端返回的会话ID或者验证码ID什么的，这种情况下会话标识、CSRF Token 都只能 Ajax 拿。最近PHP看多了感觉思路在往后端渲染跑。前后端分离最少也要2个接口，CSRF、验证码+验证码ID（或者会话ID，总之要把登录请求和验证码联系起来）&lt;/li>
+&lt;/ul>
+&lt;h2 id="总结">总结&lt;/h2>
+&lt;p>薄弱点基本确定了。&lt;/p>
+&lt;p>一个是Go方面，八股背熟真的有用。&lt;/p>
+&lt;p>另一个是MySQL，一方面是需要切实再深入一下，另外MySQL的八股也得找找。&lt;/p>
+&lt;p>虽然面完让我有点幻灭的感觉，安全行业不止卷还抠=。=&lt;/p>
+&lt;p>虽然让我等联系，但估计也没下文了。骑驴找马还得继续。&lt;/p></description></item><item><title>好事儿来乐</title><link>https://weakptr.site/p/good-thing-happens-2022-5-25/</link><pubDate>Wed, 25 May 2022 16:18:52 +0800</pubDate><guid>https://weakptr.site/p/good-thing-happens-2022-5-25/</guid><description>&lt;p>分享下喜讯，倒不是找到女朋友了，而是投简历三天终于约到了第一个面试。虽然和最初期待的安全方向有点偏差，没面到渗透测试的岗位，但薪资能涨点的话还是挺不错的。&lt;/p>
+&lt;p>不过往安全行业继续探索的想法暂时还没变，互联网别的行业兴趣确实不大，非互联网的做软件我是真的担心项目管理的水平行不行，全看团队合不合得来，越做越糟心，还不如一开始就拒绝。安全还算有一点兴趣，不管是干开发还是做安服起码都还是技术岗，营收靠技术起码保证能活下来的公司技术管理上不会太糊吧。我希望是这样。&lt;/p>
+&lt;p>另外一个重大问题就是学历、证书、开源项目（技术文章）三个重大问题，学历有望解决，别的证书主要是烧钱。学历和证书都要时间，所以如果看对眼的话期望工作之余能顺利拿到学位证，再看情况考个 CISP 之类的证（emm，但看起来渗透测试月薪开得比较低，不值一个 CISP-PTE 这样要几个w 的证，安全开发职位看起来并不是很多）。&lt;/p>
+&lt;p>开源项目和技术文章质量还得提高，开源项目目前的问题是没找到适合的参与，自己写也没有方向。技术文章受限于自己水平有限，写起来基本是一边做一边写，时不时发现自己理解有误又改一下，最后产出乱七八糟的，感觉远没有那些精品文章写得好。这个没啥好主意，练呗。&lt;/p>
+&lt;p>就这样啦，开心一下。&lt;/p></description></item><item><title>雨</title><link>https://weakptr.site/p/2022-05-16-rain/</link><pubDate>Mon, 16 May 2022 10:28:00 +0800</pubDate><guid>https://weakptr.site/p/2022-05-16-rain/</guid><description>&lt;img src="https://weakptr.site/p/2022-05-16-rain/geetanjal-khanna-8CwoHpZe3qE-unsplash.jpg" alt="Featured image of post 雨" />&lt;blockquote>
+&lt;p>图片来自 unsplash.com，图文无关。&lt;/p>
+&lt;/blockquote>
+&lt;p>周一的上午是惯例的摸鱼时间。&lt;/p>
+&lt;p>项目依然是半死不活的样子，前端大量的 bug 待修，后端要么没事要么就是异想天开的麻烦事。或者修两个小 bug。说是上线了生产环境，但看起来没人有这个意识，线上也没有什么可观察性基础设施。&lt;/p>
+&lt;p>所以就这样了，对我来说这个项目就是一潭死水了。&lt;/p>
+&lt;p>看了看时间，现在是 2022 年 5 月了，记忆里还残存着电视里 2008 年奥运会的盛景，初高中那会儿愣头青干的蠢事，想想就连在入行以来第一份工作里说的蠢话干的蠢事都像是很久以前发生的事情了。&lt;/p>
+&lt;p>算算年龄，然后周期性地恐慌：离30岁还有6、5、4、3&amp;hellip;.年。哦，我的恐慌周期还要短一点，应该是&amp;hellip;N年零M个月，以此类推。&lt;/p>
+&lt;p>昨天晚上从书架底下的纸箱里翻出一副旧耳机，映像里最初是在18还是19年入手，用了一年不到陶瓷壳就碎了，于是过了段时间又买了同款。昨晚翻出来的这幅当然是后来买的同款。记得最后一次用这幅耳机应该是20年的事情，现在戴上这幅耳机，感觉就像是回到了过去，刚入职这家公司的那会儿。&lt;/p>
+&lt;p>又在说蠢话了。&lt;/p>
+&lt;p>不知道什么时候开始，对敲代码的执念逐渐放松，而现在渐渐接近消逝了。回首过去，我是个爱幻想的孩子，有些过于沉溺于那些奇幻瑰丽的脑内世界。我也曾经相信敲代码能改变什么，与人工智能共赴什么。我也尝试把这些幻想分享给更多人，但总而言之，很遗憾。&lt;/p>
+&lt;p>过去的一切造就了现在的我。&lt;/p>
+&lt;p>这两天广州的雨未停歇，7点清晨的雨滴落在掌心，渗透到我的内里。浸润，浸润。&lt;/p></description></item><item><title>2022年5月12日 一件小事</title><link>https://weakptr.site/p/2022-5-12-one-small-thing/</link><pubDate>Thu, 12 May 2022 10:33:08 +0800</pubDate><guid>https://weakptr.site/p/2022-5-12-one-small-thing/</guid><description>&lt;p>胡言乱语几句。&lt;/p>
+&lt;p>先分享一个比较开心的事情，下狠心拿一个月工资报了个机构自考本科，目标是把学位证也拿下，最好还能混到奖学金。顺便申请了继续教育退税，虽然退不了多少。也不指望还能靠这些把学费赚回来。&lt;/p>
+&lt;p>嗯，就是这样啦。&lt;/p>
+&lt;p>原本的想法是考个 CISP 之类的证（注意到培训价格也是8k+，而且是强制培训。CISP-PTE 更是快 2w。），后来因为同事报了个自考，想想这个价完全可以先把自考拿下，学历比这几个技能证有用多了，至少以后投简历不会那么轻易被筛掉了。&lt;/p>
+&lt;p>惨。为了能有个和别人公平竞争的机会真的是又烧钱又费时间。这种时候才会后悔自己当初怎么就会有学历就是个敲门砖的傻卵想法，就算是砖也不是遍地都能捡的啊。还好学了点手艺才能混到现在，年收入还够不到个税自主申报线。想想自己四五年工作经历只感觉自己就是个傻卵废物。&lt;/p>
+&lt;p>发泄完还得继续生活。&lt;/p>
+&lt;p>看了下自考科目感觉有几门还是比较容易过的，数学几门还是有点发憷。不过今年好像没有考数学，复习时间应该是够长的。&lt;/p>
+&lt;p>除了自考还打算考虑下软考或者安全方向的证，趁现在工作比较清闲充电，期望在30岁前能赚到税后年入接近20w吧，也不奢求超过这个数了，有个十七八都好。&lt;/p>
+&lt;p>说到年龄，还有点比较烦心的事情。过了30想再解决终身大事恐怕就有点难了，烦，烦，烦。&lt;/p>
+&lt;p>就这样吧，胡言乱语水了一篇博客。&lt;/p></description></item><item><title>2022年5月5日 未来规划</title><link>https://weakptr.site/p/diary-2022-05-05/</link><pubDate>Thu, 05 May 2022 11:29:51 +0800</pubDate><guid>https://weakptr.site/p/diary-2022-05-05/</guid><description>&lt;p>主要是方向性的一些记录和一些想法。&lt;/p>
+&lt;h2 id="大体方向">大体方向&lt;/h2>
+&lt;h3 id="清单">清单&lt;/h3>
+&lt;p>只列出初步了解到的。&lt;/p>
+&lt;ul>
+&lt;li>二进制安全
+&lt;ul>
+&lt;li>反病毒&lt;/li>
+&lt;li>反破解/软件保护&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>web安全
+&lt;ul>
+&lt;li>蓝队（防御，监测，反制）&lt;/li>
+&lt;li>红队（渗透突防）&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>漏洞挖掘
+&lt;ul>
+&lt;li>二进制、内核&lt;/li>
+&lt;li>web&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>安全开发
+&lt;ul>
+&lt;li>扫描器、防火墙、流量监测&amp;hellip;&amp;hellip;安全软件开发&lt;/li>
+&lt;li>代码审计&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>安全管理&lt;/li>
+&lt;/ul>
+&lt;h3 id="可选方向">可选方向&lt;/h3>
+&lt;p>研发工作做得比较多，个人知识面在广不在深，考虑代码审计是比较容易上手的。安全开发方向还欠缺很多安全相关的专业知识，但补一补课还有机会，应该吧。&lt;/p>
+&lt;p>安全管理了解很浅，转型会很难，而且刚转的话待遇大概没开发好，预计是这样。&lt;/p>
+&lt;p>二进制相关方向很难，需要极大精力投入。自学了x86汇编并做了一点简单的实践（52pojie的新年活动CTF，逆向）发现这块真的需要很多知识和经验积累而且很枯燥，有非常多平台相关的 trick。只能说非常难，非常吃经验和知识积累。但总体来说，二进制安全这块的基础知识更新迭代是比较慢的，有非常重的历史包袱。学习曲线应该是入门难，入门后保持学习的压力就会比较轻了。&lt;/p>
+&lt;p>Web是个有点过于概括的大方向，基于我目前的了解是感觉囊括了一般Web开发中应用到基础设施在内的一切内容，从前端到后端应用、后端基础设施（web服务器、代理、缓存、数据库、消息队列、容器引擎、容器编排系统、虚拟化等等），非常综合性的方向。但这块目前了解到的很少，从先知社区和其他平台了解到的主要还是两类：攻防和漏洞挖掘。&lt;/p>
+&lt;p>这块不能说零基础，但真的缺乏积累，不过基础岗应该很快就能达到要求，大概。&lt;/p>
+&lt;p>总结一下下面的方向都还可能：&lt;/p>
+&lt;ul>
+&lt;li>安全开发 - 代码审计&lt;/li>
+&lt;li>漏洞挖掘 - Web&lt;/li>
+&lt;li>Web 安全 - 攻防&lt;/li>
+&lt;/ul>
+&lt;h3 id="路线">路线&lt;/h3>
+&lt;p>前期方向比较接近，主要是补安全领域的基础知识。&lt;/p>
+&lt;ul>
+&lt;li>取得 CISP 证书（初步了解发现要求强制培训和工作经验，机构报价很贵，8k 左右的成本，需要考虑下）。&lt;/li>
+&lt;li>摸清 OWASP Top 10 ，了解当前主要安全威胁来源。可能的话找靶场具体了解。&lt;/li>
+&lt;li>收集一些安全情报来源，CNVD、CVE。搞清楚去哪儿找安全情报。&lt;/li>
+&lt;li>收集一些安全领域的工具，主要覆盖已经了解的 Web 安全领域细分方向，摸清基本使用方法和原理。&lt;/li>
+&lt;li>补必要的编程语言知识，Java、PHP。给代码审计打基础。&lt;/li>
+&lt;li>培养一点基本的安全意识，靶场实践里积累一点方法论。&lt;/li>
+&lt;/ul>
+&lt;p>综合来说，这个阶段主要是在迷雾里找个方向，不一定正确但要先走起来。路在脚下。&lt;/p>
+&lt;h3 id="求职计划">求职计划&lt;/h3>
+&lt;p>初级~中级，安全领域技术类岗位，个人倾向于攻防和挖洞，因为比较酷也是兴趣所在的方向。但安全领域的研发也可以接受，看能得到什么样的岗位。做安全的公司和其他领域比起来还是少得可怜的，竞争可能会很激烈。个人推测是人才缺口可能在安全+研发这块，攻防挖洞不能说饱和但应该不会特别缺人吧？就是瞎猜下。门槛应该都不会太低，开发是条狗都能干点基础的活，几年干下来我已经见识到没水平的开发是什么样子了。安全领域虽然不熟悉，但猜测安全没点脑子应该是干不动的（也不绝对吧&amp;hellip;傻x哪儿都有）。&lt;/p>
+&lt;h2 id="文末碎碎念">文末碎碎念&lt;/h2>
+&lt;p>想要换工作一个理所当然的原因就是对现在的干的活不满意。不满意的理由有很多，概括起来就是委屈和没钱。&lt;/p>
+&lt;p>工作快5年下来，换了三四个老板，多少是看清了一点现实，期望值腰斩再腰斩。曾经我以为有钱有闲满足一个就行，现在发现好像和我预期的不太一样。&lt;/p>
+&lt;p>开始工作的前两年我就差不多意识到了，我不是那种自制力很强的人，三分钟热度说的就是我。不过兴趣能提供的驱动力持续时间多少还是比三分钟长的，只要开始的时候顺利，没有硬门槛或者太大的挫折给弄委屈了，基本还是能达到入门的。然后下一个阶段就是恐慌焦虑，后悔折腾的事情无法变现没有意义，继续的成本太高等等。开始工作前我还写过本同人小说来着，发在刺猬猫上，40多w字，现在想起来还有点惊奇那时候怎么坚持每天在word里水上一个小时两个小时的。至于后来嘛，发生了一些事，和家里闹翻了，出来找工作，总之是阴差阳错吧，我又是早早学过 C/C++/Java 的，基础不错，运气好碰到家愿意收的公司，就开始干码农这行了。&lt;/p>
+&lt;p>转行安全是现在的想法，很难说是因为看了几篇大佬的博客产生的三分钟热度还是长久以来的梦想什么的。所以现实一点，转行的目的是抬高收入的天花板，减轻学历歧视的负担。换句话说，就是找机会多赚点钱，在现有条件下拿高那么点点的工资。&lt;/p>
+&lt;p>不管怎么说转方向都是个很重大的事情，过去的后端研发经验价值要缩水不少但不会归零，想转回来也会有机会但并不会容易，损失最大的就是时间。&lt;/p>
+&lt;p>真的是一件很需要勇气去做的事，而且我也真的不能肯定会达成目的。&lt;/p>
+&lt;p>路在脚下，且行且珍惜吧。&lt;/p></description></item><item><title>尝鲜keepassxc的ssh集成</title><link>https://weakptr.site/p/keepassxc-ssh-integration/</link><pubDate>Thu, 21 Apr 2022 10:27:00 +0800</pubDate><guid>https://weakptr.site/p/keepassxc-ssh-integration/</guid><description>&lt;h2 id="前言">前言&lt;/h2>
+&lt;p>突发奇想，先前一直把密码存在 keepassxc 里，但 SSH 秘钥是存在 keepassxc 的备注里，用的时候还得先复制出来建个文件，虽然只用折腾一次但还是嫌麻烦。&lt;/p>
+&lt;p>于是想到 keepassxc 自带 SSH 集成，于是研究了下怎么用 SSH 集成在 keepassxc 里保存秘钥对，省掉复制出秘钥内容到文件里的过程，还更安全。&lt;/p>
+&lt;h2 id="过程">过程&lt;/h2>
+&lt;h3 id="平台和选型">平台和选型&lt;/h3>
+&lt;p>首先确定 keepassxc 和 ssh 运行的平台，keepassxc 本体是支持 Windows/MacOS/Linux 三端的，ssh 在Windows上倒是有几种不同的选型。&lt;/p>
+&lt;p>在 Windows 10 Build 1809 版本之后，Windows 已经内置了 OpenSSH 软件，还在用 PuTTY 的可以省掉 PuTTY 了。&lt;/p>
+&lt;p>旧点的 Windows 可以选择 PuTTY 或者装一个基于 MinGW 的 OpenSSH，如 Git-SCM 自带的 OpenSSH 或者 MSYS2、MinGW64 一类。&lt;/p>
+&lt;h3 id="原理">原理&lt;/h3>
+&lt;p>keepassxc 的 ssh 集成本质是主动往 ssh-agent 添加秘钥，ssh 命令从 ssh-agent 读到秘钥，尝试用秘钥连接服务器。表现出的效果就是和直接把秘钥放在 &lt;code>.ssh/id_rsa&lt;/code> 也没什么区别。&lt;/p>
+&lt;p>keepassxc 还支持解锁自动添加和锁定时自动删除，还有超时自动删除，安全性会稍再好一点，可惜 Windows 自带的 OpenSSH 不支持使用秘钥时给用户确认（见 issue &lt;a class="link" href="https://github.com/PowerShell/Win32-OpenSSH/issues/1056" target="_blank" rel="noopener"
+>#1056&lt;/a>），导致开启 keepassxc 的确认功能时会添加秘钥失败。&lt;/p>
+&lt;p>至于 ssh-agent 的原理就略过不提了，可以理解成一个秘钥代理，ssh 自动问 ssh-agent 有什么秘钥可用，就像保管钥匙的管家。&lt;/p>
+&lt;h3 id="配置-openssh">配置 OpenSSH&lt;/h3>
+&lt;p>参考 keepassxc 的文档，先启动 Windows 自带的 OpenSSH 的 ssh-agent 服务。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-powershell" data-lang="powershell">&lt;span class="line">&lt;span class="cl">&lt;span class="nb">PS &lt;/span>&lt;span class="n">C:&lt;/span>&lt;span class="p">\&lt;/span>&lt;span class="n">Users&lt;/span>&lt;span class="p">\&lt;/span>&lt;span class="n">user&lt;/span>&lt;span class="p">&amp;gt;&lt;/span> &lt;span class="nb">Get-Service&lt;/span> &lt;span class="nb">ssh-agent&lt;/span> &lt;span class="p">|&lt;/span> &lt;span class="nb">Set-Service&lt;/span> &lt;span class="n">-StartupType&lt;/span> &lt;span class="n">Automatic&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">PS &lt;/span>&lt;span class="n">C:&lt;/span>&lt;span class="p">\&lt;/span>&lt;span class="n">Users&lt;/span>&lt;span class="p">\&lt;/span>&lt;span class="n">user&lt;/span>&lt;span class="p">&amp;gt;&lt;/span> &lt;span class="nb">Start-Service&lt;/span> &lt;span class="nb">ssh-agent&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>注意上面的命令需要 &lt;strong>管理员权限&lt;/strong> 运行。&lt;/p>
+&lt;p>就是这样！&lt;/p>
+&lt;h3 id="配置-keepassxc">配置 keepassxc&lt;/h3>
+&lt;p>之后在 keepassxc 里打开 ssh 集成，选中 OpenSSH 作为代理。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/keepassxc-ssh-integration/sshagent-application-settings.png"
+width="1601"
+height="1218"
+srcset="https://weakptr.site/p/keepassxc-ssh-integration/sshagent-application-settings_huf85379ed477f6ac0dbb86a595d8f10b4_56971_480x0_resize_box_3.png 480w, https://weakptr.site/p/keepassxc-ssh-integration/sshagent-application-settings_huf85379ed477f6ac0dbb86a595d8f10b4_56971_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="sshagent application settings"
+class="gallery-image"
+data-flex-grow="131"
+data-flex-basis="315px"
+>&lt;/p>
+&lt;p>然后添加一个常规的密码记录，在高级里添加秘钥文件，并在 SSH 里启用：&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/keepassxc-ssh-integration/sshagent-entry-settings.png"
+width="1758"
+height="1374"
+srcset="https://weakptr.site/p/keepassxc-ssh-integration/sshagent-entry-settings_huc6b8a73468d62e299570a0a7d6f50725_56080_480x0_resize_box_3.png 480w, https://weakptr.site/p/keepassxc-ssh-integration/sshagent-entry-settings_huc6b8a73468d62e299570a0a7d6f50725_56080_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="sshagent entry settings"
+class="gallery-image"
+data-flex-grow="127"
+data-flex-basis="307px"
+>&lt;/p>
+&lt;p>注意勾选 &lt;code>Add key to agent when database is opened/unlocked&lt;/code> 和 &lt;code>Remove key from agent when database is closed/locked&lt;/code>，这两个选项会让 keepassxc 解锁的情况下自动在后台添加 SSH 秘钥到 ssh-agent，同时当你关闭 keepassxc 之后 SSH 就无法再从 ssh-agent 拿到秘钥，体验会更自然。&lt;/p>
+&lt;p>如果不勾选这两个选项，也可以手动在设置了 SSH 代理的项目上右击添加到 ssh-agent。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/keepassxc-ssh-integration/sshagent-context-menu.png"
+width="1758"
+height="1265"
+srcset="https://weakptr.site/p/keepassxc-ssh-integration/sshagent-context-menu_hu5f860989dfb1f00a09b694a656667942_49439_480x0_resize_box_3.png 480w, https://weakptr.site/p/keepassxc-ssh-integration/sshagent-context-menu_hu5f860989dfb1f00a09b694a656667942_49439_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="sshagent context menu"
+class="gallery-image"
+data-flex-grow="138"
+data-flex-basis="333px"
+>&lt;/p>
+&lt;p>这种方式添加到 ssh-agent 的秘钥不会自动从 ssh-agent 删除或自动添加，每次重启都要自己右键添加，比较麻烦。&lt;/p>
+&lt;h3 id="检查">检查&lt;/h3>
+&lt;p>如何确认配置正确无误？&lt;/p>
+&lt;p>可以通过几个方面：&lt;/p>
+&lt;ol>
+&lt;li>在设置-SSH代理界面，顶部有个绿条，提示 ”SSH代理连接工作正常！“&lt;/li>
+&lt;li>在命令行运行&lt;code>ssh-add -l&lt;/code>，会列出你刚添加的秘钥。&lt;/li>
+&lt;li>尝试&lt;code>ssh&lt;/code>连接你的服务器，公钥登陆成功。&lt;/li>
+&lt;/ol>
+&lt;p>如果 “SSH 代理连接工作正常” 没出现的话可能是 ssh-agent 服务没启动或者有问题，可以 &lt;code>stop-service ssh-agent&lt;/code> 停止 &lt;code>ssh-agent&lt;/code> 这个系统服务后再在命令行运行 &lt;code>ssh-agent -d&lt;/code>，输出调试日志，看看具体什么问题。&lt;/p>
+&lt;p>如果&lt;code>ssh-add -l&lt;/code>没有输出，也是一样，检查&lt;code>ssh-agent&lt;/code>是否在运行，如果在运行但依然没有，用&lt;code>-d&lt;/code>参数启动 ssh-agent 看看添加秘钥的步骤有什么问题。&lt;/p>
+&lt;p>如果 &lt;code>ssh-add -l&lt;/code> 有输出了，但 ssh 连接依然问你要密码，有两种可能：&lt;/p>
+&lt;ol>
+&lt;li>你的 ssh 秘钥有密码保护，一般是 &lt;code>ssh-keygen&lt;/code> 的时候设置的。&lt;/li>
+&lt;li>秘钥被拒绝了。&lt;/li>
+&lt;/ol>
+&lt;p>有密码保护的秘钥 ssh 命令有提示，注意看 ssh 命令的输出就行。秘钥被拒绝的情况表面很难看出来，可以用 &lt;code>-vvv&lt;/code> 参数再运行 ssh 命令，看命令输出。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/keepassxc-ssh-integration/image-20220421101423653.png"
+width="1044"
+height="157"
+srcset="https://weakptr.site/p/keepassxc-ssh-integration/image-20220421101423653_hu955d457efbed342c16ebd2cc7efa854b_176372_480x0_resize_box_3.png 480w, https://weakptr.site/p/keepassxc-ssh-integration/image-20220421101423653_hu955d457efbed342c16ebd2cc7efa854b_176372_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220421101423653"
+class="gallery-image"
+data-flex-grow="664"
+data-flex-basis="1595px"
+>&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/keepassxc-ssh-integration/image-20220421101509008.png"
+width="1029"
+height="99"
+srcset="https://weakptr.site/p/keepassxc-ssh-integration/image-20220421101509008_hufdb8d068113679e23d2947d5c9dd2a58_103423_480x0_resize_box_3.png 480w, https://weakptr.site/p/keepassxc-ssh-integration/image-20220421101509008_hufdb8d068113679e23d2947d5c9dd2a58_103423_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220421101509008"
+class="gallery-image"
+data-flex-grow="1039"
+data-flex-basis="2494px"
+>&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/keepassxc-ssh-integration/image-20220421101612311.png"
+width="900"
+height="99"
+srcset="https://weakptr.site/p/keepassxc-ssh-integration/image-20220421101612311_hu416fe79149793836d529a9d87da9135b_46057_480x0_resize_box_3.png 480w, https://weakptr.site/p/keepassxc-ssh-integration/image-20220421101612311_hu416fe79149793836d529a9d87da9135b_46057_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220421101612311"
+class="gallery-image"
+data-flex-grow="909"
+data-flex-basis="2181px"
+>&lt;/p>
+&lt;p>如果 &lt;code>will attempt key&lt;/code> 没有出现 &lt;code>ssh-add -l&lt;/code> 列出的秘钥，还可能是因为 &lt;code>.ssh/config&lt;/code> 里，给你要连接的 Host 设置了 &lt;code>IdentitiesOnly yes&lt;/code>。这个设置项会强制 ssh 只使用本地的 &lt;code>.ssh/id_rsa&lt;/code> 等私钥文件。&lt;/p>
+&lt;p>另外 &lt;code>.ssh/config&lt;/code> 里可能还指定了别的验证方式也会导致不使用公钥，这就要靠自己检查 &lt;code>.ssh/config&lt;/code> 来排错了。&lt;/p>
+&lt;h3 id="配置-git">配置 Git&lt;/h3>
+&lt;p>Windows 下还有个坑，在提交博客的时候才发现。 Git-SCM 默认使用的 SSH 命令不是 Windows 自带的 OpenSSH。这会导致 Git 在推送的时候不使用我们添加到 ssh-agent （Windows 自带的 OpenSSH 版 ssh-agent）的秘钥，而是用 Git-SCM 自带的 MinGW 版 OpenSSH，造成推送时提示 &lt;code>Permission Denied (publickey)&lt;/code> 。&lt;/p>
+&lt;p>解决办法也很简单，&lt;code>git config --global core.SshCommand &amp;quot;C:/Windows/System32/OpenSSH/ssh.exe&amp;quot;&lt;/code> 把 Windows 自带的 OpenSSH 设置成 Git 默认使用的 ssh 即可。需要注意 &lt;strong>这里的路径用正斜杠&lt;code>/&lt;/code>分隔，不要用反斜杠&lt;code>\&lt;/code>&lt;/strong> 。&lt;/p>
+&lt;h2 id="总结">总结&lt;/h2>
+&lt;p>总的来说用 ssh-agent 配合 keepassxc 玩 ssh 还是很舒服的，特别是迁移起来的时候，只要同步和备份 keepassxc 的数据库就完事。&lt;/p>
+&lt;p>keepassxc 的附加文件也非常适合把 GPG 之类的秘钥备份起来，换工作机或者自己电脑重装迁移的时候都能省不少心思。&lt;/p></description></item><item><title>2022新年第一篇博客</title><link>https://weakptr.site/p/first-blog-in-2022/</link><pubDate>Wed, 09 Feb 2022 09:24:00 +0800</pubDate><guid>https://weakptr.site/p/first-blog-in-2022/</guid><description>&lt;h2 id="一">一&lt;/h2>
+&lt;p>其实年前还有一篇写了蛮长的，但因为种种原因反正假期内是没继续动笔写完，今天本来打算继续写，但是看了眼开头，还是把全文 ctrl+a delete 了。&lt;/p>
+&lt;p>这次就短一点。&lt;/p>
+&lt;h2 id="二">二&lt;/h2>
+&lt;p>回顾过去，2021年对我而言是怎样的一年？&lt;/p>
+&lt;p>当我问自己这个问题，我才发现似乎没有一个能脱口而出的答案。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/first-blog-in-2022/image-20220209093132174.png"
+width="870"
+height="154"
+srcset="https://weakptr.site/p/first-blog-in-2022/image-20220209093132174_hu312baa1af15bc0284994619b812524f6_3754_480x0_resize_box_3.png 480w, https://weakptr.site/p/first-blog-in-2022/image-20220209093132174_hu312baa1af15bc0284994619b812524f6_3754_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220209093132174"
+class="gallery-image"
+data-flex-grow="564"
+data-flex-basis="1355px"
+>&lt;/p>
+&lt;p>普普通通地正常工作，顺便也摸摸鱼。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/first-blog-in-2022/image-20220209093249061.png"
+width="728"
+height="147"
+srcset="https://weakptr.site/p/first-blog-in-2022/image-20220209093249061_huc19f43cf1d7a348ef7c6f534f3f07c4a_8775_480x0_resize_box_3.png 480w, https://weakptr.site/p/first-blog-in-2022/image-20220209093249061_huc19f43cf1d7a348ef7c6f534f3f07c4a_8775_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220209093249061"
+class="gallery-image"
+data-flex-grow="495"
+data-flex-basis="1188px"
+>&lt;/p>
+&lt;p>偶尔也上GitHub看两眼，有没有什么新鲜玩意儿。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/first-blog-in-2022/image-20220209093447327.png"
+width="452"
+height="129"
+srcset="https://weakptr.site/p/first-blog-in-2022/image-20220209093447327_hucfe56099574b6d1070a7ba458db01ed2_7134_480x0_resize_box_3.png 480w, https://weakptr.site/p/first-blog-in-2022/image-20220209093447327_hucfe56099574b6d1070a7ba458db01ed2_7134_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220209093447327"
+class="gallery-image"
+data-flex-grow="350"
+data-flex-basis="840px"
+>&lt;/p>
+&lt;p>学了点没用的逆向技术，demo也勉强凑出9+1个star。不过趁这个机会倒是了解了下x86汇编语言，姑且算是个没什么卵用的进步，主流64位的汇编和arm的汇编还是不懂，x86也只能算是盲人摸象。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/first-blog-in-2022/image-20220209093903198.png"
+width="366"
+height="123"
+srcset="https://weakptr.site/p/first-blog-in-2022/image-20220209093903198_hu1a597d42e008a51b6b7e3058561fedc4_7207_480x0_resize_box_3.png 480w, https://weakptr.site/p/first-blog-in-2022/image-20220209093903198_hu1a597d42e008a51b6b7e3058561fedc4_7207_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220209093903198"
+class="gallery-image"
+data-flex-grow="297"
+data-flex-basis="714px"
+>&lt;/p>
+&lt;p>又一个玩具，这类玩具太多了。我水平不够，完成度也低，只能说是写这个的时候就是打发时间。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/first-blog-in-2022/image-20220209094119262.png"
+width="256"
+height="121"
+srcset="https://weakptr.site/p/first-blog-in-2022/image-20220209094119262_huba5eeb6809b4946e971e1798bbd4c32c_4701_480x0_resize_box_3.png 480w, https://weakptr.site/p/first-blog-in-2022/image-20220209094119262_huba5eeb6809b4946e971e1798bbd4c32c_4701_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220209094119262"
+class="gallery-image"
+data-flex-grow="211"
+data-flex-basis="507px"
+>&lt;/p>
+&lt;p>本来不是很看得上 dtm 这个项目。不为别的，就是觉得作者 segmentfault 上刷博文宣传自己的框架有种保险推销员的感觉，让人觉得不靠谱。但还是老实去看了代码，毕竟比起 Java 写得 seata 之类的框架，dtm 封装比较薄，源码稍微好读一点。&lt;/p>
+&lt;p>实际读起来感觉还是有点混乱，最后照着 dtm 文档的时序图写了个案例，配置了opentelemetry。分布式追踪真的很好用，讲真，要是单体应用也能跟着函数追踪出这样一个图就绝了。我觉得可以拿 python 开刀试试。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/first-blog-in-2022/image-20220209095328828.png"
+width="355"
+height="131"
+srcset="https://weakptr.site/p/first-blog-in-2022/image-20220209095328828_hu09413e63593e9e88b5002d57426f4aa7_9471_480x0_resize_box_3.png 480w, https://weakptr.site/p/first-blog-in-2022/image-20220209095328828_hu09413e63593e9e88b5002d57426f4aa7_9471_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220209095328828"
+class="gallery-image"
+data-flex-grow="270"
+data-flex-basis="650px"
+>&lt;/p>
+&lt;p>尝试入门密码学，但数学基础不好，为了搞明白希尔密码用到的矩阵运算翻了半天搜索引擎才写出来。结果还是没继续学下去。2022也许继续看？好歹把传统密码里的DES、AES学完吧，不求能手写，大概能看明白过程就好。要是能再把原理懂个大概就更好了。&lt;/p>
+&lt;p>至于别的，也许我能报菜名一样提一大堆名字，但终究骗不了我自己。是，2021一年时间，各种杂七杂八的技术概念和新名词碰了一堆，但杂而不精，几乎没有什么真正吸收、融会贯通的内容。&lt;/p>
+&lt;h2 id="三">三&lt;/h2>
+&lt;p>工作和生活上还是老一套。&lt;/p>
+&lt;p>产品经理走了，于是部门间的矛盾和磨合又来了。我甚至不愿意管这个叫“磨合”，无非是两边一起摆烂罢了。所以还是到此为止，只能期盼好聚好散，2022尝试跳个愿意出更高工资的地方，也许能在中年危机前攒够本钱，下半生是自己做点生意也好，安心打工也好，至少能安顿好一家人，即便不能富足，也得温饱。真心希望这个渺小的愿望可以实现。&lt;/p>
+&lt;p>生活上，年底才收到一个坏消息，爷爷病了，可能是肺癌。很难描述听到这个消息的时候我的心情。上初中的时候我的曾祖父去世了，我和曾祖父交流接触很少，但还是有种心里缺了一块的感觉。&lt;/p>
+&lt;p>是，人终有一死。但出奇的是我一点也没想什么轻于鸿毛重于泰山。死亡就只是死亡而已，没有意义，什么也没有。时间最终会抚平一切。&lt;/p>
+&lt;p>好了。&lt;/p>
+&lt;p>2022，还是祝愿爷爷他手术顺利，能活到120岁。&lt;/p>
+&lt;h2 id="四">四&lt;/h2>
+&lt;p>还是要展望下未来的。&lt;/p>
+&lt;p>2022年，很快就要26周岁了，还是单身，一年的收入大概能在广州买一两平米的卫生间，存款不比一间卫生间的价值多多少。有一点焦虑。&lt;/p>
+&lt;p>焦虑的原因在于我觉得自己配得上更高的工资，或者说，更好的生活，有看得到希望的未来。但理想和现实的矛盾始终无法解决。&lt;/p>
+&lt;p>不说那么多了。&lt;/p>
+&lt;p>今年有跳槽的想法，也有考个系统分析师证书的想法，但两者恐怕不好兼顾。还好的是系统分析师考试在5月，这段时间来个百日冲刺，运气好的话有机会拿到证书，再在下半年靠证书跳个更高薪的职位。运气不好的话，今年没考上，下半年跳槽还有悬念，那就明年再说了。&lt;/p>
+&lt;p>另外更新简历的时候发现，多写点博客还是挺唬人的。21年下半年几个月写了40篇，2022年继续保持的话起码一年一百篇不过分吧，坚持多写几篇，笔耕不辍。&lt;/p>
+&lt;p>最好再参与下知名的开源项目，发几个PR。&lt;/p>
+&lt;p>小说也想写，短篇整个十几万字总得有。&lt;/p>
+&lt;p>梦想嘛，还是要有的。&lt;/p>
+&lt;h2 id="来吧2022">来吧，2022！&lt;/h2></description></item><item><title>记一次API响应时间优化</title><link>https://weakptr.site/p/an-api-response-time-optimize/</link><pubDate>Fri, 31 Dec 2021 18:30:00 +0800</pubDate><guid>https://weakptr.site/p/an-api-response-time-optimize/</guid><description>&lt;h2 id="前言">前言&lt;/h2>
+&lt;p>刚接手管理后台的后端服务，先随便挑个什么东西下手看看。正好注意到一个简单的接口返回时间都蛮长的，于是拿刚从 opentelemetry 的 issue/pr 里抄来的 sqlmw 包装驱动来分析优化下性能。&lt;/p>
+&lt;h2 id="0x01-性能分析">0x01 性能分析&lt;/h2>
+&lt;h3 id="预判">预判&lt;/h3>
+&lt;p>下手前预估下可能存在瓶颈的地方。对于这次下手的接口（&lt;code>get_users&lt;/code>），整个实现也没几行代码，只有两三个查询，数据量也不大，但是耗时有80ms+。&lt;/p>
+&lt;p>其他接口有快有慢，并没有表现出同时增加耗时，而且开发服务器架在内网，排除网络原因，大概还是服务本身的存在的问题。于是考虑瓶颈在数据库或代码中，但具体肯定是要看代码去分析的。既然判断是代码里的问题，那下一步就是测量下耗时情况了。&lt;/p>
+&lt;p>对于go，&lt;code>pprof&lt;/code>虽然是个不错的主意，但实话说部署在 kubernetes 里，配 &lt;code>pprof&lt;/code> 去拉结果有点麻烦，而且还有点点用不惯。正好这个项目里早就配置了 &lt;code>opentracing&lt;/code>+&lt;code>jaeger&lt;/code>做分布式跟踪，所以就直接抄一下 opentelemetry 的 &lt;a class="link" href="https://github.com/seslattery/otelsql/blob/master/otelsql.go" target="_blank" rel="noopener"
+>otelsql&lt;/a> ，把SQL查询的详细耗时情况记录下来，就可以开始分析了。&lt;/p>
+&lt;h3 id="opentracing收集数据">opentracing收集数据&lt;/h3>
+&lt;p>&lt;code>otelsql&lt;/code> 原理是用 &lt;a class="link" href="https://github.com/ngrok/sqlmw" target="_blank" rel="noopener"
+>sqlmw&lt;/a> 在 sql 驱动层级上进行包装&lt;code>sql ==&amp;gt; sqlmw.Driver{mysql.Driver}&lt;/code> 。go的&lt;code>sql&lt;/code>调用&lt;code>sqlmw.Driver&lt;/code>，&lt;code>sqlmw.Driver&lt;/code>调用&lt;code>mysql.Driver&lt;/code>，如此而已，具体不解释。&lt;/p>
+&lt;p>从&lt;code>otelsql&lt;/code>借鉴下思路即可，现在 &lt;code>opentracing&lt;/code> 已经和 &lt;code>opencensus&lt;/code> 合并成了 &lt;code>opentelemetry&lt;/code>，但项目也没法说升级就升级，毕竟项目架构设计稀烂，太多地方和 &lt;code>opentracing&lt;/code>、&lt;code>jaeger-client&lt;/code> 强耦合了。把&lt;code>otelsql&lt;/code>里用&lt;code>sqlmw&lt;/code>的部分抄出来，改成&lt;code>opentracing&lt;/code>的方式创建&lt;code>span&lt;/code>完事。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="line">&lt;span class="cl">&lt;span class="kd">func&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nx">in&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="nx">sqlInterceptor&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="nf">ConnExecContext&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">ctx&lt;/span> &lt;span class="nx">context&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Context&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">conn&lt;/span> &lt;span class="nx">driver&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">ExecerContext&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">query&lt;/span> &lt;span class="kt">string&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">args&lt;/span> &lt;span class="p">[]&lt;/span>&lt;span class="nx">driver&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">NamedValue&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nx">driver&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Result&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kt">error&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">span&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">ctx&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">opentracing&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">StartSpanFromContext&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">ctx&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s">&amp;#34;ConnExecContext&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">defer&lt;/span> &lt;span class="nx">span&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Finish&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">span&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">LogKV&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;sql.query&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">query&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="nx">conn&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">ExecContext&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">ctx&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">query&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">args&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>如此一来， 当go的&lt;code>sql&lt;/code>库访问数据库的时候，就会在&lt;code>jaeger&lt;/code>里记录一个&lt;code>span&lt;/code>，可以清晰地看到耗时情况。&lt;/p>
+&lt;h3 id="分析">分析&lt;/h3>
+&lt;p>&lt;img src="https://weakptr.site/p/an-api-response-time-optimize/image-20211231103911728.png"
+width="1166"
+height="563"
+srcset="https://weakptr.site/p/an-api-response-time-optimize/image-20211231103911728_hu4ca051d63fb418ff00457f384002403d_37132_480x0_resize_box_3.png 480w, https://weakptr.site/p/an-api-response-time-optimize/image-20211231103911728_hu4ca051d63fb418ff00457f384002403d_37132_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20211231103911728"
+class="gallery-image"
+data-flex-grow="207"
+data-flex-basis="497px"
+>&lt;/p>
+&lt;p>收集到耗时情况后开始观察，注意到两个问题：&lt;/p>
+&lt;ol>
+&lt;li>&lt;code>ConnectorConnect&lt;/code> 在每个请求前出现，每次耗时 2ms 左右。但 &lt;code>sql&lt;/code> 是有连接池的，这里每次执行查询都产生一次连接显然不对劲。&lt;/li>
+&lt;li>&lt;code>StmtQueryContext&lt;/code> 出现一个耗时极长的查询，占据接近1/2的请求耗时，这条查询就是主要瓶颈。&lt;/li>
+&lt;/ol>
+&lt;p>慢查询的SQL如下。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-sql" data-lang="sql">&lt;span class="line">&lt;span class="cl">&lt;span class="k">select&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">count&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">from&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">user&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">where&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">role&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">and&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">create_timestamp&lt;/span>&lt;span class="o">&amp;gt;?&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">and&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">create_timestamp&lt;/span>&lt;span class="o">&amp;lt;?&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>是一个简单的 &lt;code>select count(1)&lt;/code> 查询，初步考虑是 &lt;code>where&lt;/code> 里少了索引。&lt;/p>
+&lt;h2 id="0x02-优化">0x02 优化&lt;/h2>
+&lt;h3 id="索引优化">索引优化&lt;/h3>
+&lt;p>既然少索引，那就考虑下加索引。看了下数据库，&lt;code>role&lt;/code>和&lt;code>create_timestamp&lt;/code>字段都没有索引，于是先分别加上了索引，再 &lt;code>explain&lt;/code> ，发现查询类型已经变成了 &lt;code>ref&lt;/code> 。再运行查询，发现耗时依然有 20ms+。&lt;/p>
+&lt;p>参考 &lt;a class="link" href="https://dev.mysql.com/doc/refman/5.7/en/multiple-column-indexes.html" target="_blank" rel="noopener"
+>multiple-column index&lt;/a> 中的话：&lt;/p>
+&lt;blockquote>
+&lt;p>MySQL can use multiple-column indexes for queries that test all the columns in the index, or queries that test just the first column, the first two columns, the first three columns, and so on. If you specify the columns in the right order in the index definition, a single composite index can speed up several kinds of queries on the same table.&lt;/p>
+&lt;/blockquote>
+&lt;p>文档中还说：&lt;/p>
+&lt;blockquote>
+&lt;p>If a multiple-column index exists on &lt;code>col1&lt;/code> and &lt;code>col2&lt;/code>, the appropriate rows can be fetched directly. If separate single-column indexes exist on &lt;code>col1&lt;/code> and &lt;code>col2&lt;/code>, the optimizer attempts to use the Index Merge optimization (see &lt;a class="link" href="https://dev.mysql.com/doc/refman/5.7/en/index-merge-optimization.html" target="_blank" rel="noopener"
+>Section 8.2.1.3, “Index Merge Optimization”&lt;/a>), or attempts to find the most restrictive index by deciding which index excludes more rows and using that index to fetch the rows.&lt;/p>
+&lt;/blockquote>
+&lt;p>也就是说，如果&lt;code>role&lt;/code>和&lt;code>create_timestamp&lt;/code>分别有索引，&lt;code>mysql&lt;/code>会尝试用 &lt;em>Index Merge Optimization&lt;/em> 算法来优化查询。但如果有多列索引的话，就能直接获取（文档里的场景能直接获取，但上文的 &lt;code>count(1)&lt;/code> 查询应该不行）。&lt;/p>
+&lt;p>于是加上多列索引，再&lt;code>explain&lt;/code>，发现查询类型变成了&lt;code>range&lt;/code>，实际执行发现查询耗时降低至 5ms 左右。&lt;/p>
+&lt;h3 id="连接池优化">连接池优化&lt;/h3>
+&lt;p>go的&lt;code>sql&lt;/code>包自带连接池应该是比较清楚的。原本怀疑是不是对&lt;code>sql.DB&lt;/code>这个结构的用法有问题，但翻了下源码，发现&lt;code>sql.DB.ExecContext&lt;/code>之类的接口都会通过连接池取连接，完成后返回连接池。所以理论上来说都应该走连接池的连接，而不是每次查询都创建——除非连接池里没有可用的连接了。另外也谷歌了一圈，&lt;code>sql.DB&lt;/code> 似乎也没有什么特别的最佳实践，并没有人提到要手动&lt;code>DB.Conn&lt;/code>取连接后自己处理。&lt;/p>
+&lt;p>于是初步怀疑下是不是哪里设置了连接池属性出了问题。通过排查源码中设置连接池属性的地方，发现一个自己埋下的坑。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="line">&lt;span class="cl">&lt;span class="k">if&lt;/span> &lt;span class="nx">env&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">DEBUG&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">mysqldb&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">SetMaxIdleConns&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">cfg&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">err&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">mysql&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">ParseDSN&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">host&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="nx">err&lt;/span> &lt;span class="o">!=&lt;/span> &lt;span class="kc">nil&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">cfg&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="o">&amp;amp;&lt;/span>&lt;span class="nx">mysql&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Config&lt;/span>&lt;span class="p">{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">StartObverseSQLConnPool&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">cfg&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">DBName&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="nx">mysqlDB&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">time&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Duration&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">5&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="nx">time&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Second&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>因为我司这个项目没有配置 metrics 收集和分析，自然也没收集服务的连接池情况。所以当初入职后遇到一个奇怪的连接池耗尽，服务假死，调用栈全部卡在连接池上的问题时，为了判断是不是出现连接泄露，写了个goroutine去监测连接池里连接获取和释放的情况&amp;hellip;&lt;/p>
+&lt;p>为了调试方便，还把&lt;code>SetMaxIdleConns&lt;/code>设置为了0。&lt;/p>
+&lt;p>于是初步怀疑就是这个原因导致连接池罢工，将整段调试代码注释掉之后，再次访问接口，响应时间降低至9.8ms。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/an-api-response-time-optimize/image-20211231110219407.png"
+width="212"
+height="111"
+srcset="https://weakptr.site/p/an-api-response-time-optimize/image-20211231110219407_hu55ac2a3a3dacd3b69ab961805df24cc9_3194_480x0_resize_box_3.png 480w, https://weakptr.site/p/an-api-response-time-optimize/image-20211231110219407_hu55ac2a3a3dacd3b69ab961805df24cc9_3194_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20211231110219407"
+class="gallery-image"
+data-flex-grow="190"
+data-flex-basis="458px"
+>&lt;/p>
+&lt;p>最大头的耗时依然是&lt;code>count(1)&lt;/code>查询。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/an-api-response-time-optimize/image-20211231110316414.png"
+width="1559"
+height="438"
+srcset="https://weakptr.site/p/an-api-response-time-optimize/image-20211231110316414_hu2a272a2603430f6072c0c8e118d561d2_28788_480x0_resize_box_3.png 480w, https://weakptr.site/p/an-api-response-time-optimize/image-20211231110316414_hu2a272a2603430f6072c0c8e118d561d2_28788_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20211231110316414"
+class="gallery-image"
+data-flex-grow="355"
+data-flex-basis="854px"
+>&lt;/p>
+&lt;p>默认情况下 IdleConn 只有 2，超时也比较短。实际参数应该根据业务访问情况来安排。我这也没什么好的计算公式。连接池参数有问题会影响单条SQL的基本耗时，请求里三四条查询，每条加上几个ms，整个请求时间就拖长了十几ms。在微服务系统里影响还可能放大，别的服务要是多次调用，积累的时延可能就要上百ms了。&lt;/p>
+&lt;h3 id="缓存优化">缓存优化&lt;/h3>
+&lt;p>进一步的优化思路就是做缓存。是为了提高服务响应速度，也是为了提高负载能力、减轻查询压力，保护 MySQL 服务。过去年轻无知犯过错，就是考虑性能的时候只关注到了自己写的代码，认为代码跑得快重要——比如把 C 的执行性能吹上天。但事情从来不是这么简单——辩证法说实事求是，要具体问题具体分析。后端从来不是“我的代码”这么简单，如果不能从整个系统的角度出发发现问题，那就算是 CPU 成精了也没辙。&lt;/p>
+&lt;p>对于实时性要求不高的接口，将数据缓存一段时间是绝对没问题的。不过因为做缓存是个系统性的事情——要考虑缓存更新的嘛，也不是每个接口都适合缓存，实时性有要求或者查询太复杂的话宁可考虑换成 ES 一类的分布式系统，把压力分摊到更多机器上。当然也意味着要花更多的钱，更难维护。&lt;/p>
+&lt;p>我司项目就是个很沙雕的例子，因为最初就没设计缓存，连SQL都在用手工拼接，现在干脆变成了混用 &lt;code>xorm&lt;/code> 和 &lt;code>sql&lt;/code>。虽然也可以考虑下用 &lt;code>sqlmw&lt;/code> 插个缓存，但毕竟没验证过，做第一个吃螃蟹的也意味着要第一个背锅。&lt;/p>
+&lt;p>总之，要做那可简单了，直接调 &lt;code>redis&lt;/code> 客户端（已经包装过一个 &lt;code>cachetools&lt;/code>）设置下缓存，给个时限就完了。缓存过期的时候加个 &lt;code>redlock&lt;/code>，让其他客户端先返回旧数据，更新完解锁，所有客户端都返回新数据。&lt;/p>
+&lt;p>更系统化的处理，就要考虑下怎么做一个或多个更通用（对业务场景而言更通用，而不是真的对 &lt;em>所有&lt;/em> 场景都通用）的缓存层——在SQL驱动层做缓存？ORM层缓存？在请求/响应中做缓存？业务/数据访问层（如&lt;code>DAO&lt;/code>）做缓存？缓存用什么键？怎么覆盖尽可能多的查询场景？整个重构的工程量如何把握？值不值得？&lt;/p>
+&lt;h2 id="结论">结论&lt;/h2>
+&lt;p>收集性能数据的主要方式：&lt;/p>
+&lt;ul>
+&lt;li>metrics&lt;/li>
+&lt;li>pprof&lt;/li>
+&lt;li>opentracing/opentelemetry&lt;/li>
+&lt;/ul>
+&lt;p>优化手段：&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>explain&lt;/code> 分析查询、优化和建立索引&lt;/li>
+&lt;li>优化连接池参数&lt;/li>
+&lt;li>加缓存&lt;/li>
+&lt;/ul>
+&lt;p>还有最重要的，&lt;strong>具体问题具体分析&lt;/strong>。&lt;/p></description></item><item><title>一些屁话 2021年11月4日</title><link>https://weakptr.site/p/2021-11-4-diary/</link><pubDate>Thu, 04 Nov 2021 16:06:00 +0800</pubDate><guid>https://weakptr.site/p/2021-11-4-diary/</guid><description>&lt;h2 id="比烂">比烂&lt;/h2>
+&lt;p>不知道什么时候起，对现在的工作失去了激情，连带着对生活也失去了期待。&lt;/p>
+&lt;p>上班下班，例行公事，像是个机器人。虽然一直都是这样，从来没有好过。&lt;/p>
+&lt;p>似乎也不是——至少在peropero工作的那段时间，还是有些兴奋的。只是确实各方面多少有些合不来，但个人原因还是居多数。毕竟多少已经摸爬滚打了几年下来，一定要说哪个老东家很好或者很差，恐怕都不合适。&lt;/p>
+&lt;p>有优点也有缺点是常态，决定能不能持续干下去，最后还是看能不能忍受缺点。&lt;/p>
+&lt;p>所以说到底还是比烂，到底万事万物还是比烂。&lt;/p>
+&lt;h2 id="做人">做人&lt;/h2>
+&lt;p>一个常常出现在脑海里的问题是，我应该做什么样的人？&lt;/p>
+&lt;p>然后忽然就有了答案，那就是我不能决定自己成为什么样的人。环境塑造人，经历塑造人，唯独人不能塑造自己，所以说做什么样的人其实是伪命题。&lt;/p>
+&lt;p>这么想有些悲观，是机械决定论。人一出生就已经决定了命运，所思所想，悲欢离合，早已经决定，生命就是概率之海的小水花，生或死都没有意义。&lt;/p>
+&lt;p>但无论如何吧，至少，还得有一点念想？假装一切都在掌控之中，像是抓住浪潮中的浮木。所以还是得有个什么念想，要做一个什么样的人。&lt;/p>
+&lt;p>我怎么想呢。&lt;/p>
+&lt;p>做正确的事，也许不正确，也许现在以为是正确，将来又觉得不正确。而即便是这样也做不到。&lt;/p>
+&lt;h2 id="时间">时间&lt;/h2>
+&lt;p>现在是2021年11月4日，2021年也快要过去了，天气转凉。&lt;/p>
+&lt;p>现在总结一年的工作或者生活还有些太早，但如今回头看，这一年也就这样吧。&lt;/p>
+&lt;p>事业发展，没有变化。&lt;/p>
+&lt;p>人生大事，没有进展。&lt;/p>
+&lt;p>健康生活？被痛风折磨，头发肉眼可见地变得稀疏，还好发际线没有太明显的移动。精力虽然有些消退，但并没有什么妨害。&lt;/p>
+&lt;p>想要看看还有没有什么提升的机会，发现国家又在教改，成人学历教育明年大概又有什么动作。随便翻了翻招生简章，就看到对25岁以上考生居然有优待。&lt;/p>
+&lt;p>再一对自己的，哦豁，不用等明年，今年12月就成了被优待的对象了。&lt;/p>
+&lt;p>已经快记不起上学时的光景了，好像所有东西都在飞快地远离。&lt;/p>
+&lt;h2 id="变化">变化&lt;/h2>
+&lt;p>时间给人带来最明显的变化就是内敛。&lt;/p>
+&lt;p>不再轻易喜悦，也不再轻易动怒。&lt;/p>
+&lt;p>与其说是沉稳，不如说是更焦虑了，为身边的一切事情焦虑，为自己的能力总是捉襟见肘焦虑。而后又容易放弃，因为总忍不住去对比已知的成本和未知的收益，又或者因为各种内外条件变化而不了了之。&lt;/p>
+&lt;p>明知道抱怨没有意义，还是忍不住抱怨，每天都有发泄不完的情绪。&lt;/p>
+&lt;h2 id="终">终&lt;/h2>
+&lt;p>写了那么多屁话，还是要到这里结束。&lt;/p>
+&lt;p>生活还要继续。&lt;/p></description></item><item><title>2021-04-25 无事发生</title><link>https://weakptr.site/p/2021-04-25-%E6%97%A0%E4%BA%8B%E5%8F%91%E7%94%9F/</link><pubDate>Sun, 25 Apr 2021 10:40:30 +0800</pubDate><guid>https://weakptr.site/p/2021-04-25-%E6%97%A0%E4%BA%8B%E5%8F%91%E7%94%9F/</guid><description>&lt;p>4月25日好像也不是什么节日，对我个人来说也没有什么特殊意义。仅仅是普通的一天——如果不算五一调休导致今天明明是周日但还要上班这一点的话。&lt;/p>
+&lt;p>想想也挺不可思议的，不知不觉已经到2021年这个在不少科学幻想中的“未来”时代了，光算工作年限，我也干了有四五年的程序了吧。&lt;/p>
+&lt;p>从最开始抱着“不写代码还能干啥”到“写代码也挺不错的”，再到现在，“还能写几年代码呢”。&lt;/p>
+&lt;p>反思一下这几年，几乎没干出什么成绩，工作一年一换，工作几年下来，也没几个认识、熟悉到可以称之为“朋友”的人。倒不是我孤僻（这么说的人一般都确实孤僻吧），主要是确实没什么主观能动性。&lt;/p>
+&lt;p>如今这家公司写写 go，折腾折腾 kubernetes，也算清闲，反倒开始忧心起将来了。&lt;/p>
+&lt;p>现在的工作，说好，也就那样。说不好，这个大环境下，但凡没失业，我觉得都算不上不好吧。&lt;/p>
+&lt;p>又是疫情，又是新冷战，又是各种各样的奇葩事。当笑话看，看久了也笑不出来了。&lt;/p>
+&lt;p>我这人爱看小说，以前也是动画漫画来者不拒，特效大片就饭，总之蛮快乐的。过去还写过同人小说，可惜没得家里支持，最后也就是40万字左右就切了。&lt;/p>
+&lt;p>不过起码这段经历算是给我找第一份码农工作加了点助力（大概）。自从开始写代码拿工资，好像写小说这回事就和我没什么关系了的样子。&lt;/p>
+&lt;p>不过我还是一直想写的，几乎每次换工作，心里想的都是空闲的时间多了，就会用来做点有意义的事情。比如学学钢琴啊（买了电钢琴吃灰中），比如写写小说啊（也就开了个头），比如学点新技术啊（有倒是有，新工作新技术栈），总之就是自我提升下。&lt;/p>
+&lt;p>结果当然是没有的。&lt;/p>
+&lt;p>好像从前读书的时候捧着本 C Primer Plus/C++ Primer 看的激情已经完全从身体里消失了一样。不管是什么事情，虽然总是想到，啊，这个想要，那个想要。但一到行动，就完全没了动力。“做了也没用”，“学了也是浪费时间”这种想法就从脑子里冒出来了。&lt;/p>
+&lt;p>不能说和家庭完全没关系——但把责任都推给父母、老师，大概也不合适。&lt;/p>
+&lt;p>我是相信环境会改变人的，当然人也能发挥主观能动性，改造环境。像是叶子随波逐流进了下水道，不能说是水有错，也不能怪叶子没有奋力闪躲，秋风更是无辜。于是环视四周，最后悲哀地发现只能感叹一句命运无常。&lt;/p>
+&lt;p>诸如未来可以改变之类的鸡汤喝了又喝，脑子也有了抗性，不切实际的期待也越来越少，然后发现即使是切实可行的期待也开始落向不切实际的一侧。&lt;/p>
+&lt;p>那便不想未来了吧。俗话说，“把握当下”。于是便来上班，对着屏幕，无事可做，等待 call of work。&lt;/p>
+&lt;p>那便是这样了吧。&lt;/p>
+&lt;p>2021年4月25日，无事发生。&lt;/p></description></item><item><title>关于笔记的考虑</title><link>https://weakptr.site/p/%E5%85%B3%E4%BA%8E%E7%AC%94%E8%AE%B0%E7%9A%84%E8%80%83%E8%99%91/</link><pubDate>Sun, 16 Dec 2018 23:30:00 +0800</pubDate><guid>https://weakptr.site/p/%E5%85%B3%E4%BA%8E%E7%AC%94%E8%AE%B0%E7%9A%84%E8%80%83%E8%99%91/</guid><description>&lt;p>使用了两年多的 One Note，但是 One Note 对代码的支持实在是难受，于是数次折腾之后最终还是选择再找个更合适的笔记工具。&lt;/p>
+&lt;p>在知乎上搜了一圈之后，大多数笔记工具收费且不论，最严重的问题反而是对笔记能否生存下去的怀疑。&lt;/p>
+&lt;p>大多笔记工具用私有格式来处理富文本（比如可用样式排版有限的 HTML），或者其他奇奇怪怪的格式。且不说这些东西导出来怎么办&amp;hellip;..把笔记多地备份本身就够难受了。&lt;/p>
+&lt;p>再者，笔记这玩意儿记了自己都不一定看。偶尔想起来翻一下，还要怀疑自己当初写的什么狗屁玩意儿。&lt;/p>
+&lt;p>所以经过这么多考虑&amp;hellip;&amp;hellip;还是直接搭个博客最自由且不会太担心保存的问题了。&lt;/p>
+&lt;p>比较别的笔记工具可能密码忘了或长时间不登陆，git 天天用（这里应有自嘲），根本离不开。&lt;/p>
+&lt;p>所以想了想，还是转移笔记到博客好了。写笔记可能很随便，写博客总要考据两下的。再说，还可以自定义页面效果，对我这种喜欢折腾的人还是蛮对胃口的。&lt;/p>
+&lt;p>总而言之，先挂上去了，就这样。&lt;/p></description></item></channel></rss>

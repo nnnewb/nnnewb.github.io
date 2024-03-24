@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>git on weakptr's 笔记</title><link>https://weakptr.site/tags/git/</link><description>Recent content in git on weakptr's 笔记</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Tue, 21 Mar 2023 17:21:39 +0800</lastBuildDate><atom:link href="https://weakptr.site/tags/git/index.xml" rel="self" type="application/rss+xml"/><item><title>Windows下go拉取http模块</title><link>https://weakptr.site/p/windows%E4%B8%8Bgo%E6%8B%89%E5%8F%96http%E6%A8%A1%E5%9D%97/</link><pubDate>Tue, 21 Mar 2023 17:21:39 +0800</pubDate><guid>https://weakptr.site/p/windows%E4%B8%8Bgo%E6%8B%89%E5%8F%96http%E6%A8%A1%E5%9D%97/</guid><description>&lt;h2 id="现象">现象&lt;/h2>
+&lt;p>内网搭建的 gitlab 没有开启 https，只有 http 服务。允许通过 8022 端口 SSH 协议 clone 或者 80 HTTP 协议。&lt;/p>
+&lt;p>但是 go 默认不支持（不然就没现在这么多壁画了）。&lt;/p>
+&lt;h2 id="方法">方法&lt;/h2>
+&lt;h3 id="1-编辑-sshconfig">1. 编辑 ~/.ssh/config&lt;/h3>
+&lt;p>先 &lt;code>gvim ~/.ssh/config&lt;/code> 打开 ssh 配置，添加一个 gitlab 的 ssh 配置。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">Host &amp;lt;gitlab的ip&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> HostName &amp;lt;gitlab的ip&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> Port &amp;lt;gitlab的ssh端口&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> User git
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> IdentityFile &amp;lt;你的ssh私钥路径&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>这一步的目的是万一你的端口不是22的话，后续git配置还能读ssh配置选择正确的端口。&lt;/p>
+&lt;h3 id="2-编辑-gitconfig">2. 编辑 ~/.gitconfig&lt;/h3>
+&lt;p>这一步的目的是让配置 &lt;code>GOPRIVATE&lt;/code>、&lt;code>GOINSECURE&lt;/code> 之后 go 走 http 协议下的时候替换成 ssh 协议。&lt;/p>
+&lt;p>直接用 http 也可以但是需要在 &lt;code>go mod download&lt;/code> 时输入账密登录。我的 windows git 客户端会报 &lt;code>terminal prompts disabled&lt;/code> （vscode+remote linux就没事，但windows下各种毛病），所以配成 ssh 之后就免密了，Windows 下少一点麻烦。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-ini" data-lang="ini">&lt;span class="line">&lt;span class="cl">&lt;span class="k">[url &amp;#34;git@&amp;lt;gitlab的ip&amp;gt;:&amp;#34;]&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="na">insteadOf&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="s">http://&amp;lt;gitlab的ip&amp;gt;/&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>注意 &lt;code>url=&lt;/code>后面的&lt;code>:&lt;/code>别漏了，这样才能拼出 &lt;code>git@github.com:nnnew/battery&lt;/code> 这样的合法地址。&lt;/p>
+&lt;h3 id="3-设置-go-env">3. 设置 go env&lt;/h3>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">go env -w &lt;span class="nv">GOPRIVATE&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s2">&amp;#34;&amp;lt;gitlab的ip&amp;gt;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">go env -w &lt;span class="nv">GOINSECURE&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s2">&amp;#34;&amp;lt;gitlab的ip&amp;gt;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>设置 &lt;code>GOPRIVATE&lt;/code> 的目的是让 go 从私有 git 仓库拉代码。&lt;/p>
+&lt;p>设置 &lt;code>GOINSECURE&lt;/code> 的目的是让 go 用 http 而不是 https 协议去拉代码。&lt;/p>
+&lt;p>理论上来说，也可以不设置 &lt;code>GOINSECURE&lt;/code>，但是 &lt;code>~/.gitconfig&lt;/code> 里配置 &lt;code>insteadOf&lt;/code> 的时候要注意写 https 而不是 http，可以自己试试。&lt;/p>
+&lt;h3 id="4-拉代码">4. 拉代码&lt;/h3>
+&lt;p>试试 &lt;code>git clone&lt;/code> 一个私有仓库（http），如果没提示输入账密就成功那就ok了。要是不行就自己搜索下。&lt;/p>
+&lt;p>理论上来说接下来 &lt;code>go mod download&lt;/code> 就不会有问题了。&lt;/p>
+&lt;h2 id="总结">总结&lt;/h2>
+&lt;p>重新配了一遍发现还是 Windows 屁事多。&lt;/p></description></item><item><title>处理一个git问题</title><link>https://weakptr.site/p/%E5%A4%84%E7%90%86%E4%B8%80%E4%B8%AAgit%E9%97%AE%E9%A2%98/</link><pubDate>Tue, 21 Mar 2023 17:07:50 +0800</pubDate><guid>https://weakptr.site/p/%E5%A4%84%E7%90%86%E4%B8%80%E4%B8%AAgit%E9%97%AE%E9%A2%98/</guid><description>&lt;h2 id="现象">现象&lt;/h2>
+&lt;p>环境：Windows+Git 2.39.1 (scoop 安装，git-with-openssh)&lt;/p>
+&lt;p>在 clone 仓库的时候报错。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">Enumerating objects: 27, done.
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Counting objects: 100% (27/27), done.
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Delta compression using up to 16 threads
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Compressing objects: 100% (24/24), done.
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Writing objects: 100% (25/25), 187.79 KiB | 9.39 MiB/s, done.
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Total 25 (delta 1), reused 0 (delta 0), pack-reused 0
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">send-pack: unexpected disconnect while reading sideband packet
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">fatal: the remote end hung up unexpectedly
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>提取关键词 &lt;code>send-pack: unexpected disconnect while reading sideband packet&lt;/code>&lt;/p>
+&lt;h2 id="分析">分析&lt;/h2>
+&lt;p>不太可能是 SSH 层面的错误。&lt;/p>
+&lt;p>之前遇到过奇怪的问题，git 客户端版本可能有影响。&lt;/p>
+&lt;p>搜索 StackOverflow 找到相关问答：&lt;a class="link" href="https://stackoverflow.com/questions/66366582/github-unexpected-disconnect-while-reading-sideband-packet" target="_blank" rel="noopener"
+>Github - unexpected disconnect while reading sideband packet&lt;/a>&lt;/p>
+&lt;h2 id="尝试">尝试&lt;/h2>
+&lt;h3 id="环境变量">环境变量&lt;/h3>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-powershell" data-lang="powershell">&lt;span class="line">&lt;span class="cl">&lt;span class="nv">$env:GIT_TRACE_PACKET&lt;/span>&lt;span class="p">=&lt;/span>&lt;span class="mf">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nv">$env:GIT_TRACE&lt;/span>&lt;span class="p">=&lt;/span>&lt;span class="mf">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nv">$env:GIT_CURL_VERBOSE&lt;/span>&lt;span class="p">=&lt;/span>&lt;span class="mf">1&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>结果：&lt;strong>不行&lt;/strong>&lt;/p>
+&lt;h3 id="配置-httppostbuffer">配置 &lt;code>http.postBuffer&lt;/code>&lt;/h3>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">git config --global http.postBuffer &lt;span class="m">157286400&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>结果：&lt;strong>不行&lt;/strong>&lt;/p>
+&lt;h3 id="corepack-配置">core/pack 配置&lt;/h3>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-ini" data-lang="ini">&lt;span class="line">&lt;span class="cl">&lt;span class="na">[core] &lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="na">packedGitLimit&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="s">512m
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s"> packedGitWindowSize = 512m &lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="na">[pack] &lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="na">deltaCacheSize&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="s">2047m
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s"> packSizeLimit = 2047m
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s"> windowMemory = 2047m&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>结果：&lt;strong>不行&lt;/strong>&lt;/p>
+&lt;h3 id="先浅clone再fetch">先浅clone再fetch&lt;/h3>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">git config --global core.compression &lt;span class="m">0&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git clone --depth &lt;span class="m">1&lt;/span> &amp;lt;repo_URI&amp;gt;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git fetch --unshallow
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>结果：可以 clone 但是不能 fetch ，报错相同。&lt;strong>不行&lt;/strong>。&lt;/p>
+&lt;h3 id="配置-packwindow">配置 &lt;code>pack.window&lt;/code>&lt;/h3>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">git config --global pack.window &lt;span class="m">1&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>和&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-ini" data-lang="ini">&lt;span class="line">&lt;span class="cl">&lt;span class="na">[core] &lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="na">packedGitLimit&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="s">512m
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s"> packedGitWindowSize = 512m &lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="na">[pack] &lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="na">deltaCacheSize&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="s">2047m
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s"> packSizeLimit = 2047m
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s"> windowMemory = 2047m&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>搭配，问题消失。&lt;/p>
+&lt;p>结果：略作变更，&lt;strong>可行&lt;/strong>。&lt;/p>
+&lt;h2 id="另一种办法降级">另一种办法：降级&lt;/h2>
+&lt;p>把 git 降级到2.19.2，不修改配置，也能正常 clone 。&lt;/p>
+&lt;p>因为&lt;a class="link" href="git-scm.com" >git-scm.com&lt;/a>没放开下载历史版本（那个 older release 里没有Windows安装包），所以需要手动改下正常下载的 url 。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="n">https&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="o">//&lt;/span>&lt;span class="n">github&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">com&lt;/span>&lt;span class="o">/&lt;/span>&lt;span class="n">git&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="k">for&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="n">windows&lt;/span>&lt;span class="o">/&lt;/span>&lt;span class="n">git&lt;/span>&lt;span class="o">/&lt;/span>&lt;span class="n">releases&lt;/span>&lt;span class="o">/&lt;/span>&lt;span class="n">download&lt;/span>&lt;span class="o">/&lt;/span>&lt;span class="n">v2&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="mf">19.2&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">windows&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="o">/&lt;/span>&lt;span class="n">Git&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="mf">2.19&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="mi">2&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="mi">64&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="n">bit&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">exe&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">把这个链接的&lt;/span> &lt;span class="mf">2.19&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="mi">2&lt;/span> &lt;span class="err">改成想下载的版本，如果文件还在的话就能正常下了。&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>当然看这个 url 也可以选择从 github 下载，直接打开项目地址然后找 release 就ok。&lt;/p>
+&lt;h2 id="结论">结论&lt;/h2>
+&lt;p>两种办法解决&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>修改 &lt;code>~/.gitconfig&lt;/code>，内容&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-ini" data-lang="ini">&lt;span class="line">&lt;span class="cl">&lt;span class="na">[core] &lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="na">packedGitLimit&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="s">512m
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s"> packedGitWindowSize = 512m &lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="na">[pack] &lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="na">deltaCacheSize&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="s">2047m
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s"> packSizeLimit = 2047m
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s"> windowMemory = 2047m
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s"> window = 1&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>降级 git 到 1.19.2 （或者别的版本，二分法）&lt;/p>
+&lt;/li>
+&lt;/ol></description></item><item><title>git魔法上网的技巧</title><link>https://weakptr.site/p/git-magic-surfing-skill/</link><pubDate>Thu, 23 Jun 2022 17:50:00 +0800</pubDate><guid>https://weakptr.site/p/git-magic-surfing-skill/</guid><description>&lt;h2 id="前言">前言&lt;/h2>
+&lt;p>不想再在配置新虚拟机之类的环境的时候临时现查了。&lt;/p>
+&lt;h2 id="ssh-方式">ssh 方式&lt;/h2>
+&lt;p>简而言之，利用 &lt;code>.ssh/config&lt;/code> 配置一条 &lt;code>ProxyCommand&lt;/code> 即可，linux 下考虑用 &lt;code>nc&lt;/code>，windows 非 git bash 可以装个 nmap 用里面带的 &lt;code>ncat&lt;/code> 工具，git bash 下可以用 &lt;code>connect&lt;/code> 。&lt;/p>
+&lt;h3 id="linux-下用-nc-命令">Linux 下用 nc 命令&lt;/h3>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">Host github.com
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> HostName github.com
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> ProxyCommand nc -X 5 -x 127.0.0.1:7891 %h %p
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> Port 22
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> User git
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> PubKeyAuthentication yes
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>特别注意 &lt;code>-X 5&lt;/code> 表示魔法类型是 s0cks5 ，Windows 下 C 开头的软件在一个端口同时支持了 http 魔法和 s0cks 魔法所以可以直接配同一个端口，Linux 下 C 开头软件社区版是分开监听的，所以别写错了。&lt;/p>
+&lt;h3 id="windows-非-git-bash-下用-ncat-命令">Windows 非 Git Bash 下用 ncat 命令&lt;/h3>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">Host github.com
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> HostName github.com
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> Port 22
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> User git
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> ProxyCommand C:/Users/USER/scoop/shims/ncat.exencat --proxy 127.0.0.1:7890 %h %p
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>特别注意路径，&lt;code>ncat&lt;/code>使用完整路径，而且不要用反斜杠，用正斜杠。&lt;/p>
+&lt;h3 id="windows-git-bash-下可以用-connect-命令">Windows Git Bash 下可以用 connect 命令&lt;/h3>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">Host github.com
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> HostName github.com
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> Port 22
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> User git
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> ProxyCommand connect -S 127.0.0.1:7890 %h %p
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>没用过，不知道有什么坑。&lt;/p>
+&lt;h2 id="https-方式">https 方式&lt;/h2>
+&lt;p>在 &lt;code>~/.gitconfig&lt;/code> 里这样配置。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">[http &amp;#34;https://github.com&amp;#34;]
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> proxy = socks5://192.168.10.120:7890
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>魔法类型和端口注意改成自己的。&lt;/p>
+&lt;h2 id="总结">总结&lt;/h2>
+&lt;p>如果不是工作需要，麻瓜大可用 gitee 一类的服务，反正免费私有仓库对个人把玩用途绝对够了。&lt;/p>
+&lt;p>Pages 的话最好走正规渠道。&lt;/p></description></item><item><title>不常用的 Git 命令</title><link>https://weakptr.site/p/%E4%B8%8D%E5%B8%B8%E7%94%A8%E7%9A%84-git-%E5%91%BD%E4%BB%A4/</link><pubDate>Fri, 09 Jul 2021 09:25:16 +0800</pubDate><guid>https://weakptr.site/p/%E4%B8%8D%E5%B8%B8%E7%94%A8%E7%9A%84-git-%E5%91%BD%E4%BB%A4/</guid><description>&lt;p>大概是不太常用的一些 Git 命令。&lt;/p>
+&lt;!-- more -->
+&lt;h2 id="找回数据">找回数据&lt;/h2>
+&lt;p>两种办法：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">git reflog show
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">git reset --hard HEAD@&lt;span class="o">{&lt;/span>1&lt;span class="o">}&lt;/span> &lt;span class="c1"># 从上一步找到希望回退的位置&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>或者&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">git fsck --lost-found
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">cd&lt;/span> .git/lost-found/
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 用 git show hash 查看悬空对象的内容&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 用 git merge hash 或者 git rebase hash 来恢复到当前分支里&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="合并分支时创建合并commit">合并分支时创建合并commit&lt;/h2>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">git config branch.master.mergeoptions &lt;span class="s2">&amp;#34;--no-ff&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="删除远程分支">删除远程分支&lt;/h2>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">git push --delete origin branch
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="删除已经合并的分支">删除已经合并的分支&lt;/h2>
+&lt;p>&lt;a class="link" href="https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged" target="_blank" rel="noopener"
+>参考&lt;/a>&lt;/p>
+&lt;h3 id="删除已合并的本地分支">删除已合并的本地分支&lt;/h3>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">git branch --merged &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> &lt;span class="p">|&lt;/span> grep -E &lt;span class="s2">&amp;#34;^\\s+(patch|feat|refactor|test|misc)&amp;#34;&lt;/span> &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> &lt;span class="p">|&lt;/span> xargs -I&lt;span class="o">{}&lt;/span> git branch -d &lt;span class="o">{}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="删除已合并的远程分支">删除已合并的远程分支&lt;/h3>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">git branch -r --merged &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> &lt;span class="p">|&lt;/span> grep -E &lt;span class="s2">&amp;#34;^\\s+origin/(patch|feat|refactor|test|misc)&amp;#34;&lt;/span> &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> &lt;span class="p">|&lt;/span> sed &lt;span class="s1">&amp;#39;s/origin\///&amp;#39;&lt;/span> &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> &lt;span class="p">|&lt;/span> xargs -I&lt;span class="o">{}&lt;/span> &lt;span class="nb">echo&lt;/span> git push --delete origin &lt;span class="o">{}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div></description></item></channel></rss>

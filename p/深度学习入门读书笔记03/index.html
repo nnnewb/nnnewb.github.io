@@ -1,0 +1,864 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="神经网络 具体地讲，神经网络的一个重要性质是它可以自动地从数据中学习到合适的权重参数。 神经网络 例子： 图中的神经网络共三层，其中两层有权重（隐藏"><title>《深度学习入门》读书笔记03</title>
+<link rel=canonical href=https://weakptr.site/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/><link rel=stylesheet href=/scss/style.min.709d4f89582c5a09dc94158a722a16093cdffe24d9a8c77dd3f422c786203c41.css><script src=https://unpkg.com/dayjs@1.8.21/dayjs.min.js></script><script src=https://unpkg.com/dayjs@1.8.21/plugin/relativeTime.js></script><script src=https://unpkg.com/dayjs@1.8.21/locale/zh-cn.js></script><script>dayjs.locale("zh-cn"),dayjs.extend(dayjs_plugin_relativeTime)</script><script>var _hmt=_hmt||[];(function(){var e,t=document.createElement("script");t.src="https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad",e=document.getElementsByTagName("script")[0],e.parentNode.insertBefore(t,e)})()</script><meta property="og:title" content="《深度学习入门》读书笔记03"><meta property="og:description" content="神经网络 具体地讲，神经网络的一个重要性质是它可以自动地从数据中学习到合适的权重参数。 神经网络 例子： 图中的神经网络共三层，其中两层有权重（隐藏"><meta property="og:url" content="https://weakptr.site/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/"><meta property="og:site_name" content="weakptr's 笔记"><meta property="og:type" content="article"><meta property="article:section" content="Post"><meta property="article:tag" content="python"><meta property="article:tag" content="numpy"><meta property="article:tag" content="matplotlib"><meta property="article:tag" content="深度学习"><meta property="article:published_time" content="2024-01-07T20:48:00+08:00"><meta property="article:modified_time" content="2024-01-07T20:48:00+08:00"><meta property="og:image" content="https://weakptr.site/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/google-deepmind-ebMFfR2uuJ0-unsplash.jpg"><meta name=twitter:title content="《深度学习入门》读书笔记03"><meta name=twitter:description content="神经网络 具体地讲，神经网络的一个重要性质是它可以自动地从数据中学习到合适的权重参数。 神经网络 例子： 图中的神经网络共三层，其中两层有权重（隐藏"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://weakptr.site/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/google-deepmind-ebMFfR2uuJ0-unsplash.jpg"><link rel="shortcut icon" href=/favicon.ico></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.setItem(e,"light")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hub37949326d1692892aa1e64434c0dda6_382115_300x0_resize_box_3.png width=300 height=300 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🍑</span></figure><div class=site-meta><h1 class=site-name><a href=/>weakptr's 笔记</a></h1><h2 class=site-description>弃船！</h2></div></header><ol class=social-menu><li><a href=https://github.com/nnnewb/ target=_blank title=GitHub><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg><span>首页</span></a></li><li><a href=/about><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg><span>关于我</span></a></li><li><a href=/archive><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg><span>归档</span></a></li><li><a href=/categories><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg><span>分类</span></a></li><li><a href=/tags><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg><span>标签</span></a></li><li><a href=/link><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M10 14a3.5 3.5.0 005 0l4-4a3.5 3.5.0 00-5-5l-.5.5"/><path d="M14 10a3.5 3.5.0 00-5 0l-4 4a3.5 3.5.0 005 5l.5-.5"/></svg><span>友链</span></a></li><li><a href=/search><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg><span>搜索</span></a></li><div class=menu-bottom-section></div></ol></aside><main class="main full-width"><article class="has-image main-article"><header class=article-header><div class=article-image><a href=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/google-deepmind-ebMFfR2uuJ0-unsplash_hu3d03a01dcc18bc5be0e67db3d8d209a6_979553_800x0_resize_q75_box.jpg srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/google-deepmind-ebMFfR2uuJ0-unsplash_hu3d03a01dcc18bc5be0e67db3d8d209a6_979553_800x0_resize_q75_box.jpg 800w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/google-deepmind-ebMFfR2uuJ0-unsplash_hu3d03a01dcc18bc5be0e67db3d8d209a6_979553_1600x0_resize_q75_box.jpg 1600w" width=800 height=450 loading=lazy alt="Featured image of post 《深度学习入门》读书笔记03"></a></div><div class=article-details><header class=article-category><a href=/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/>深度学习</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/>《深度学习入门》读书笔记03</a></h2></div><footer class=article-time><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg><time class=article-time--published datetime=2024-01-07T20:48:00+08:00>2024年 1月 7日</time></div><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><time class=article-time--reading>阅读时长: 10 分钟</time></div></footer></div></header><section class=article-content><h1 id=神经网络>神经网络</h1><blockquote><p>具体地讲，神经网络的一个重要性质是它可以自动地从数据中学习到合适的权重参数。</p></blockquote><h2 id=神经网络-1>神经网络</h2><p>例子：</p><p><img src=/img/neuro-network-fig1.png loading=lazy alt=neuro-network></p><p>图中的神经网络共三层，其中两层有权重（隐藏层和输出层）。</p><p>按顺序分为第0层（输入层）、第1层（隐藏层）、第2层（输出层）。</p><p>这一章有个<strong>无底深坑</strong>要注意：书里明确提示，文中的 n 层神经网络，<strong>n=输入层+隐藏层+输出层-1</strong>。</p><p>在下文的神经网络实现里讲的 3 层神经网络，实际和本章开头配的图完全不一样！
+下文神经网络实现一节中，实现的网络实际有一个输入层，两个隐藏层，一个输出层。</p><h2 id=激活函数>激活函数</h2><p>回顾感知机的定义：</p><p>$$
+y=\begin{cases}
+0 & (w_1x_1 + w_2x_2 + bias \le 0) \
+1 & (w_1x_1 + w_2x_2 + bias \gt 0)
+\end{cases}
+$$</p><p>引入新的函数 $h(x)$ 来表示 $x$ 大于零时返回 1，$x$ 小于 0 返回 0 的行为，将上面的式子简化为：</p><p>$$
+a = w_1x_1 + w_2x_2 + bias
+y = h(a)
+$$</p><p>$y$ 表示输出信号，$a$ 表示输入信号的加权和和偏置的总和，而 $h$ 就是所谓的激活函数。</p><h3 id=阶跃函数>阶跃函数</h3><p>阶跃函数的定义是输入在某个阈值前后发生跳跃的函数，例如上面定义的</p><p>$$
+h = \begin{cases}
+0 & (a \le 0) \
+1 & (a \gt 0)
+\end{cases}
+$$</p><p>函数图像如下</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>numpy</span> <span class=k>as</span> <span class=nn>np</span>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>matplotlib.pyplot</span> <span class=k>as</span> <span class=nn>plt</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>x</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>arange</span><span class=p>(</span><span class=o>-</span><span class=mf>5.0</span><span class=p>,</span> <span class=mf>5.0</span><span class=p>,</span> <span class=mf>0.1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>y</span> <span class=o>=</span> <span class=p>(</span><span class=n>x</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>)</span><span class=o>.</span><span class=n>astype</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>int32</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>plt</span><span class=o>.</span><span class=n>axvline</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=n>color</span><span class=o>=</span><span class=s1>&#39;black&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>plt</span><span class=o>.</span><span class=n>axhline</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=n>color</span><span class=o>=</span><span class=s1>&#39;black&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>plt</span><span class=o>.</span><span class=n>xticks</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>arange</span><span class=p>(</span><span class=o>-</span><span class=mf>5.0</span><span class=p>,</span> <span class=mf>5.0</span><span class=p>,</span> <span class=mi>1</span><span class=p>))</span>
+</span></span><span class=line><span class=cl><span class=n>plt</span><span class=o>.</span><span class=n>plot</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>y</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>plt</span><span class=o>.</span><span class=n>show</span><span class=p>()</span>
+</span></span></code></pre></td></tr></table></div></div><p><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/index_files/index_1_0.png width=547 height=413 srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/index_files/index_1_0_hu00e985b29f63ef92ac9dfdc23803b95e_9988_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/index_files/index_1_0_hu00e985b29f63ef92ac9dfdc23803b95e_9988_1024x0_resize_box_3.png 1024w" loading=lazy alt=png class=gallery-image data-flex-grow=132 data-flex-basis=317px></p><p>阶跃函数的值呈现阶梯状的变化，所以称为阶跃函数。</p><h3 id=sigmoid-函数>sigmoid 函数</h3><p>sigmoid 函数的定义是：</p><p>$$
+h(a) = \frac{1}{1 + e^{-a}}
+$$</p><p>函数图像如下</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>numpy</span> <span class=k>as</span> <span class=nn>np</span>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>matplotlib.pyplot</span> <span class=k>as</span> <span class=nn>plt</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>sigmoid</span><span class=p>(</span><span class=n>x</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>1</span> <span class=o>/</span> <span class=p>(</span><span class=mi>1</span> <span class=o>+</span> <span class=n>np</span><span class=o>.</span><span class=n>exp</span><span class=p>(</span><span class=o>-</span><span class=n>x</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>x</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>arange</span><span class=p>(</span><span class=o>-</span><span class=mf>5.0</span><span class=p>,</span> <span class=mf>5.0</span><span class=p>,</span> <span class=mf>0.1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>y</span> <span class=o>=</span> <span class=mi>1</span> <span class=o>/</span> <span class=p>(</span><span class=mi>1</span> <span class=o>+</span> <span class=n>np</span><span class=o>.</span><span class=n>exp</span><span class=p>(</span><span class=o>-</span><span class=n>x</span><span class=p>))</span>
+</span></span><span class=line><span class=cl><span class=n>plt</span><span class=o>.</span><span class=n>axvline</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=n>color</span><span class=o>=</span><span class=s1>&#39;black&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>plt</span><span class=o>.</span><span class=n>axhline</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=n>color</span><span class=o>=</span><span class=s1>&#39;black&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>plt</span><span class=o>.</span><span class=n>xticks</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>arange</span><span class=p>(</span><span class=o>-</span><span class=mf>5.0</span><span class=p>,</span> <span class=mf>5.0</span><span class=p>,</span> <span class=mi>1</span><span class=p>))</span>
+</span></span><span class=line><span class=cl><span class=n>plt</span><span class=o>.</span><span class=n>plot</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>y</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>plt</span><span class=o>.</span><span class=n>plot</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>sigmoid</span><span class=p>(</span><span class=n>x</span><span class=p>))</span>
+</span></span><span class=line><span class=cl><span class=n>plt</span><span class=o>.</span><span class=n>show</span><span class=p>()</span>
+</span></span></code></pre></td></tr></table></div></div><p><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/index_files/index_3_0.png width=547 height=413 srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/index_files/index_3_0_huec01978ab8aae7830ed3df1b8aaf885b_16458_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/index_files/index_3_0_huec01978ab8aae7830ed3df1b8aaf885b_16458_1024x0_resize_box_3.png 1024w" loading=lazy alt=png class=gallery-image data-flex-grow=132 data-flex-basis=317px></p><p>sigmoid 函数和阶跃函数的区别：</p><ol><li>sigmoid 函数的输出曲线是平滑的，阶跃函数的输出曲线是阶梯状的。</li><li>sigmoid 函数的输出范围是 $x \in \mathbb{R}, 0 \le x \le 1$，阶跃函数的输出范围在 $x \in {0,1}$。</li></ol><p>两者的相似之处：</p><ol><li>sigmoid 和阶跃函数在输入越是大于零，输出接近1，反之输入越小，输出越接近0。换言之，输入重要性（权重）越大，输出越大。</li><li>两者取值都在 $x \in \mathbb{R}, 0 \le x \le 1$ 区间。阶跃函数值域是 sigmoid 函数值域的真子集。</li></ol><h3 id=非线性函数>非线性函数</h3><p>线性函数的定义是 $h(x) = cx$，其中 $c$ 是常数。高中数学知识，$h(x)$ 的函数图像是一条直线。
+而非线性函数顾名思义，函数图像不是一条直线。</p><p>神经网络的激活函数必须是<strong>非线性函数</strong>，原因是线性函数做激活函数时，无论如何叠加层数，都有等效的无隐藏层神经网络。</p><p>例如，将 $h(x) = cx$ 这个函数叠加两层，得到 $h(h(x)) = c^2x$，这个函数的函数图像是一条直线，和原函数区别只在常数项不同。</p><p>依然可以等效为单层神经元，激活函数定义为 $y = ax$，其中 $a = c^2$。这样叠加多层神经网络就没有意义了。</p><h3 id=relu-函数>ReLU 函数</h3><p>ReLU (Rectified Linear Unit) 函数定义如下。</p><p>$$
+h(a) = \max(0, a)
+$$</p><p>python 实现如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>relu</span><span class=p>(</span><span class=n>x</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>np</span><span class=o>.</span><span class=n>maximum</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=n>x</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>函数图像如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>numpy</span> <span class=k>as</span> <span class=nn>np</span>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>matplotlib.pyplot</span> <span class=k>as</span> <span class=nn>plt</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>relu</span><span class=p>(</span><span class=n>x</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>np</span><span class=o>.</span><span class=n>maximum</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=n>x</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>x</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>arange</span><span class=p>(</span><span class=o>-</span><span class=mf>5.0</span><span class=p>,</span> <span class=mf>5.0</span><span class=p>,</span> <span class=mf>0.1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>y</span> <span class=o>=</span> <span class=n>relu</span><span class=p>(</span><span class=n>x</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>plt</span><span class=o>.</span><span class=n>axvline</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=n>color</span><span class=o>=</span><span class=s1>&#39;black&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>plt</span><span class=o>.</span><span class=n>axhline</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=n>color</span><span class=o>=</span><span class=s1>&#39;black&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>plt</span><span class=o>.</span><span class=n>xticks</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>arange</span><span class=p>(</span><span class=o>-</span><span class=mf>5.0</span><span class=p>,</span> <span class=mf>5.0</span><span class=p>,</span> <span class=mi>1</span><span class=p>))</span>
+</span></span><span class=line><span class=cl><span class=n>plt</span><span class=o>.</span><span class=n>plot</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>y</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>plt</span><span class=o>.</span><span class=n>show</span><span class=p>()</span>
+</span></span></code></pre></td></tr></table></div></div><p><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/index_files/index_5_0.png width=534 height=413 srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/index_files/index_5_0_hu71867201f9147c0c2f84b8cfd3b319d3_12380_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/index_files/index_5_0_hu71867201f9147c0c2f84b8cfd3b319d3_12380_1024x0_resize_box_3.png 1024w" loading=lazy alt=png class=gallery-image data-flex-grow=129 data-flex-basis=310px></p><h2 id=矩阵计算>矩阵计算</h2><p><code>ndarray</code> 的 <code>dot</code> 计算的才是点积，<code>*</code> 运算符计算的不是。</p><p>点积的计算方式参考<a class=link href=https://www.shuxuele.com/algebra/matrix-multiplying.html target=_blank rel=noopener>矩阵乘法</a></p><p>$$
+\begin{bmatrix}
+a & b \
+c & d
+\end{bmatrix} \begin{bmatrix}
+e & f \
+g & h
+\end{bmatrix} = \begin{bmatrix}
+ae + bg & af + bh \
+ce + dg & cf + dh
+\end{bmatrix}
+$$</p><p>值得注意的是矩阵点积计算是不满足交换律的，即 $A \dot B \ne B \dot A$。</p><p>要求矩阵的形状满足符号左边的x1的列数等于符号右边的x2的行数。比如说 2x3 矩阵
+可以和 3x2 矩阵求点积，但不能和 2x2 矩阵求点积。</p><p>矩阵点积运算结果形状是左边矩阵的行数和右边矩阵的列数。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>numpy</span> <span class=k>as</span> <span class=nn>np</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>x1</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>],</span> <span class=p>[</span><span class=mi>4</span><span class=p>,</span> <span class=mi>5</span><span class=p>,</span> <span class=mi>6</span><span class=p>]])</span>
+</span></span><span class=line><span class=cl><span class=n>x2</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>],</span> <span class=p>[</span><span class=mi>3</span><span class=p>,</span> <span class=mi>4</span><span class=p>],</span> <span class=p>[</span><span class=mi>5</span><span class=p>,</span> <span class=mi>6</span><span class=p>]])</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>result</span> <span class=o>=</span> <span class=n>x1</span><span class=o>.</span><span class=n>dot</span><span class=p>(</span><span class=n>x2</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>result</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=k>assert</span> <span class=n>result</span><span class=o>.</span><span class=n>shape</span> <span class=o>==</span> <span class=p>(</span><span class=n>x1</span><span class=o>.</span><span class=n>shape</span><span class=p>[</span><span class=mi>0</span><span class=p>],</span> <span class=n>x2</span><span class=o>.</span><span class=n>shape</span><span class=p>[</span><span class=mi>1</span><span class=p>])</span>
+</span></span></code></pre></td></tr></table></div></div><pre><code>[[22 28]
+ [49 64]]
+</code></pre><p>更多关于矩阵计算内容不赘述。</p><p>矩阵乘法可以应用于神经网络层的权重参数计算。</p><p>例如设有 2 个神经元的输入层为 $x_0$ ，3 个神经元的中间层为 $x_1$，2个神经元的输出层为 $y$ 的神经网络：</p><p>$$
+x_0 inputs = \begin{bmatrix}
+x_1 & x_2
+\end{bmatrix}
+\
+x_1 weights = \begin{bmatrix}
+neuro_1w_1 & neuro_2w_1 & neuro_3w_1 \
+neuro_1w_2 & neuro_2w_2 & neuro_3w_2
+\end{bmatrix}
+\
+y weights = \begin{bmatrix}
+neuro_1w_1 & neuro_2w_1 \
+neuro_1w_2 & neuro_2w_2 \
+neuro_1w_3 & neuro_2w_3
+\end{bmatrix}
+$$</p><p>$x_1$ 的矩阵含义可以这么表示。</p><div class=table-wrapper><table><thead><tr><th>/</th><th>神经元1</th><th>神经元2</th><th>神经元3</th></tr></thead><tbody><tr><td>输入权重1</td><td>1.0</td><td>1.0</td><td>1.0</td></tr><tr><td>输入权重2</td><td>1.0</td><td>1.0</td><td>1.0</td></tr></tbody></table></div><p>把神经元和输入权重构建出矩阵后，就可以利用矩阵乘法来计算一整个层每个神经元的输入加权和了(即$y=h(a)$中的$a$)。</p><p>批量处理神经元输入的加权和在机器学习中很重要，因为神经元的数量非常大，计算量非常大。
+批量计算可以充分利用硬件加速机制比如SIMD指令或者CUDA。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>inputs</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mf>1.0</span><span class=p>,</span> <span class=mf>1.0</span><span class=p>]])</span>
+</span></span><span class=line><span class=cl><span class=n>weights</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mf>0.5</span><span class=p>,</span> <span class=mf>0.5</span><span class=p>,</span> <span class=mf>0.5</span><span class=p>],</span> <span class=p>[</span><span class=mf>1.0</span><span class=p>,</span> <span class=mf>1.0</span><span class=p>,</span> <span class=mf>1.0</span><span class=p>]])</span>
+</span></span><span class=line><span class=cl><span class=n>accumulate</span> <span class=o>=</span> <span class=n>inputs</span><span class=o>.</span><span class=n>dot</span><span class=p>(</span><span class=n>weights</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>accumulate</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><pre><code>[[1.5 1.5 1.5]]
+</code></pre><p>那么现在实现一下三层神经网络。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>numpy</span> <span class=k>as</span> <span class=nn>np</span>
+</span></span><span class=line><span class=cl><span class=kn>from</span> <span class=nn>typing</span> <span class=kn>import</span> <span class=n>Callable</span><span class=p>,</span> <span class=n>Sequence</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>identity</span><span class=p>(</span><span class=n>x</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>x</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>sigmoid</span><span class=p>(</span><span class=n>x</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>1</span> <span class=o>/</span> <span class=p>(</span><span class=mi>1</span> <span class=o>+</span> <span class=n>np</span><span class=o>.</span><span class=n>exp</span><span class=p>(</span><span class=o>-</span><span class=n>x</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>Layer</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>name</span><span class=p>:</span> <span class=nb>str</span><span class=p>,</span> <span class=n>weights</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>,</span> <span class=n>biases</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>activation</span><span class=p>:</span> <span class=n>Callable</span><span class=p>[[</span><span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>],</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>]):</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>name</span> <span class=o>=</span> <span class=n>name</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>weights</span> <span class=o>=</span> <span class=n>weights</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>biases</span> <span class=o>=</span> <span class=n>biases</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>activation</span> <span class=o>=</span> <span class=n>activation</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>evaluate</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>inputs</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>activation</span><span class=p>(</span><span class=n>inputs</span><span class=o>.</span><span class=n>dot</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>weights</span><span class=p>)</span> <span class=o>+</span> <span class=bp>self</span><span class=o>.</span><span class=n>biases</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>Network</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>layers</span><span class=p>:</span> <span class=n>Sequence</span><span class=p>[</span><span class=n>Layer</span><span class=p>]):</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>layers</span> <span class=o>=</span> <span class=n>layers</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>evaluate</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>inputs</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=n>layer</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>layers</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>inputs</span> <span class=o>=</span> <span class=n>layer</span><span class=o>.</span><span class=n>evaluate</span><span class=p>(</span><span class=n>inputs</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>inputs</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>layers</span> <span class=o>=</span> <span class=p>[</span>
+</span></span><span class=line><span class=cl>    <span class=c1># 输入层实际就是输入的向量</span>
+</span></span><span class=line><span class=cl>    <span class=c1># 隐藏层</span>
+</span></span><span class=line><span class=cl>    <span class=n>Layer</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;input&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>weights</span><span class=o>=</span><span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mf>0.5</span><span class=p>,</span> <span class=mf>0.5</span><span class=p>,</span> <span class=mf>0.5</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>                          <span class=p>[</span><span class=mf>1.0</span><span class=p>,</span> <span class=mf>1.0</span><span class=p>,</span> <span class=mf>1.0</span><span class=p>]]),</span>
+</span></span><span class=line><span class=cl>        <span class=n>biases</span><span class=o>=</span><span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([</span><span class=o>-</span><span class=mf>1.0</span><span class=p>,</span> <span class=o>-</span><span class=mf>1.0</span><span class=p>,</span> <span class=o>-</span><span class=mf>1.0</span><span class=p>]),</span>
+</span></span><span class=line><span class=cl>        <span class=n>activation</span><span class=o>=</span><span class=n>sigmoid</span>
+</span></span><span class=line><span class=cl>    <span class=p>),</span>
+</span></span><span class=line><span class=cl>    <span class=c1># 隐藏层</span>
+</span></span><span class=line><span class=cl>    <span class=n>Layer</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;middle&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>weights</span><span class=o>=</span><span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mf>1.0</span><span class=p>,</span> <span class=mf>1.0</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>                          <span class=p>[</span><span class=mf>1.0</span><span class=p>,</span> <span class=mf>1.0</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>                          <span class=p>[</span><span class=mf>1.0</span><span class=p>,</span> <span class=mf>1.0</span><span class=p>]]),</span>
+</span></span><span class=line><span class=cl>        <span class=n>biases</span><span class=o>=</span><span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([</span><span class=o>-</span><span class=mf>1.0</span><span class=p>,</span> <span class=o>-</span><span class=mf>1.0</span><span class=p>]),</span>
+</span></span><span class=line><span class=cl>        <span class=n>activation</span><span class=o>=</span><span class=n>sigmoid</span>
+</span></span><span class=line><span class=cl>    <span class=p>),</span>
+</span></span><span class=line><span class=cl>    <span class=c1># 输出层</span>
+</span></span><span class=line><span class=cl>    <span class=n>Layer</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;output&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>weights</span><span class=o>=</span><span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mf>1.0</span><span class=p>,</span> <span class=mf>1.0</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>                          <span class=p>[</span><span class=mf>1.0</span><span class=p>,</span> <span class=mf>1.0</span><span class=p>]]),</span>
+</span></span><span class=line><span class=cl>        <span class=n>biases</span><span class=o>=</span><span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([</span><span class=o>-</span><span class=mf>1.0</span><span class=p>,</span> <span class=o>-</span><span class=mf>1.0</span><span class=p>]),</span>
+</span></span><span class=line><span class=cl>        <span class=n>activation</span><span class=o>=</span><span class=n>identity</span>
+</span></span><span class=line><span class=cl>    <span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>]</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>network</span> <span class=o>=</span> <span class=n>Network</span><span class=p>(</span><span class=n>layers</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>output</span> <span class=o>=</span> <span class=n>network</span><span class=o>.</span><span class=n>evaluate</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mf>1.0</span><span class=p>,</span> <span class=mf>1.0</span><span class=p>]]))</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>output</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><pre><code>[[0.40839964 0.40839964]]
+</code></pre><p>其中有个让我很困惑的地方就是所谓的<strong>偏置单元</strong>。</p><p>偏置单元恒定输出 1 连接下一层神经网络，在前文的激活函数公式 $h(x) = wx+b$ 里以及案例代码中偏置值都是一个矩阵或<code>np.ndarray</code>，
+但在图例中偏置值看起来是个标量常数。而我预期的是每个神经元有个独立的偏置值。</p><p>钻了几分钟的牛角尖后注意到，当偏置单元恒定输出 1 的时候，那偏置单元输出的权重其实就等于偏置值了。
+所以输出层得到的输入其实是 $h(w_b+x_1w_1+x_2w_2+x_3w_3)$，其中 $w_b$ 就是偏置值。</p><p>不过实际算的时候还是套最初的加权和公式。用偏置单元来表示应该是方便后面的反向传播理解和计算。</p><h2 id=输出层设计>输出层设计</h2><p>神经网络可以用在分类问题和回归问题上，不过需要根据情况改变输出层的激活函数。
+一般而言，回归问题用恒等函数，分类问题用softmax函数。</p><blockquote><p>注：恒等函数就是上面例子代码里的<code>identity</code>函数，其定义就是 $h(a) = a$。</p><p>又注: 分类问题是指像前两章里学的感知机实现逻辑门，即数据属于哪个类别的问题。
+回归问题则是根据输入预测一个(可能连续的)数值的问题，比如根据人的照片预测体重。</p></blockquote><p>这一节引入了 softmax 函数，定义如下：</p><p>$$
+softmax(a_k)=\frac{\exp(a_k)}{\sum_{i=1}^{n}\exp(a_i)}
+$$</p><p>其中，下标k表示输出层的第k个神经元，a_k表示第k个神经元的输入信号加权和。
+exp表示e为底的指数函数，比如 $exp(3)=e^3$。
+仔细看下公式会发现其实求的就是第k个神经元激活的概率，其中引入exp的原因我比较好奇搜了下，
+有说是因为指数函数求导比较方便？即 $(e^x)&rsquo;=e^x$。</p><p>python 实现如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>numpy</span> <span class=k>as</span> <span class=nn>np</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>softmax</span><span class=p>(</span><span class=n>x</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>np</span><span class=o>.</span><span class=n>exp</span><span class=p>(</span><span class=n>x</span><span class=p>)</span> <span class=o>/</span> <span class=n>np</span><span class=o>.</span><span class=n>sum</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>exp</span><span class=p>(</span><span class=n>x</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>softmax</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([</span><span class=mf>0.3</span><span class=p>,</span> <span class=mf>2.9</span><span class=p>,</span> <span class=mf>4.0</span><span class=p>])))</span>
+</span></span></code></pre></td></tr></table></div></div><pre><code>[0.01821127 0.24519181 0.73659691]
+</code></pre><p>然后是 softmax 的变体，softmax 的公式直接用 python 实现有个问题是指数函数的输出会爆炸，
+而浮点数类型是会溢出的，溢出就会变成 inf 然后一参与计算就 nan 了。</p><p>在 numpy 的场合可以修改一下 softmax 函数，让 $exp(a_k)$ 中的 $a_k$ 减去常数 $C&rsquo;$，定义为 $C&rsquo;=\max(a_1,a_2,&mldr;,a_n)$，
+numpy 就可以保证不溢出了&mldr;吗？</p><blockquote><p>注：$exp(a_k)$ 输入 $a_k$ 的最小值都会算出 inf 了，那就不是 softmax 的问题了，
+可以先加个 bias 把数值巨大但数值间差异相对小的输入集合降到一个比较小的数字再处理。</p></blockquote><p>公式推导如下，我懒得敲 Latex 了：</p><p><img src=/img/softmax-modified.png loading=lazy alt=softmax-modified></p><p>优化后的实现如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>softmax</span><span class=p>(</span><span class=n>x</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=n>C</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>max</span><span class=p>(</span><span class=n>x</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>np</span><span class=o>.</span><span class=n>exp</span><span class=p>(</span><span class=n>x</span> <span class=o>-</span> <span class=n>C</span><span class=p>)</span> <span class=o>/</span> <span class=n>np</span><span class=o>.</span><span class=n>sum</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>exp</span><span class=p>(</span><span class=n>x</span> <span class=o>-</span> <span class=n>C</span><span class=p>))</span>
+</span></span></code></pre></td></tr></table></div></div><p>顺便吐槽一句，讲完 softmax 才提到因为要计算指数函数所以 softmax 一般在分类问题的输出层忽略以节省性能。</p><p>所以重要的还是 softmax 在训练阶段的作用。</p><p>最后是输出层的神经元数量。</p><p>分类问题中输出层神经元数量一般就是类别的数量，比如手写数字识别就有 10 个类别。</p><h2 id=识别手写数字>识别手写数字</h2><p>mnist 真的没啥可说的，对 ai 感兴趣上手走得第一步弯路就是 <code>import tensorflow as tf</code> 和 mnist 数据集。</p><h3 id=加载数据集>加载数据集</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>sys</span>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>os</span>
+</span></span><span class=line><span class=cl><span class=n>sys</span><span class=o>.</span><span class=n>path</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>os</span><span class=o>.</span><span class=n>pardir</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>numpy</span> <span class=k>as</span> <span class=nn>np</span>
+</span></span><span class=line><span class=cl><span class=kn>from</span> <span class=nn>matplotlib</span> <span class=kn>import</span> <span class=n>pyplot</span> <span class=k>as</span> <span class=n>plt</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kn>from</span> <span class=nn>dataset.mnist</span> <span class=kn>import</span> <span class=n>load_mnist</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=p>(</span><span class=n>x_train</span><span class=p>,</span> <span class=n>t_train</span><span class=p>),</span> <span class=p>(</span><span class=n>x_test</span><span class=p>,</span> <span class=n>t_test</span><span class=p>)</span> <span class=o>=</span> <span class=n>load_mnist</span><span class=p>(</span><span class=n>flatten</span><span class=o>=</span><span class=kc>True</span><span class=p>,</span> <span class=n>normalize</span><span class=o>=</span><span class=kc>False</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>img</span> <span class=o>=</span> <span class=n>x_train</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=n>label</span> <span class=o>=</span> <span class=n>t_train</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>label</span><span class=p>)</span>  <span class=c1># 5</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>img</span><span class=o>.</span><span class=n>shape</span><span class=p>)</span>  <span class=c1># (784,)</span>
+</span></span><span class=line><span class=cl><span class=n>img</span> <span class=o>=</span> <span class=n>img</span><span class=o>.</span><span class=n>reshape</span><span class=p>(</span><span class=mi>28</span><span class=p>,</span> <span class=mi>28</span><span class=p>)</span>  <span class=c1># 把图像的形状变成原来的尺寸</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>img</span><span class=o>.</span><span class=n>shape</span><span class=p>)</span>  <span class=c1># (28, 28)</span>
+</span></span><span class=line><span class=cl><span class=n>plt</span><span class=o>.</span><span class=n>imshow</span><span class=p>(</span><span class=n>img</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>plt</span><span class=o>.</span><span class=n>show</span><span class=p>()</span>
+</span></span></code></pre></td></tr></table></div></div><pre><code>5
+(784,)
+(28, 28)
+</code></pre><p><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/index_files/index_18_1.png width=416 height=413 srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/index_files/index_18_1_huea9d9bde6e9281f4802c56231218988c_7392_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/index_files/index_18_1_huea9d9bde6e9281f4802c56231218988c_7392_1024x0_resize_box_3.png 1024w" loading=lazy alt=png class=gallery-image data-flex-grow=100 data-flex-basis=241px></p><p>代码有几个要解释的地方。</p><p><code>x_train</code> 是训练数据集，图片大小是 28x28 的灰度图，每个字节就是一个灰度值，每张图就是一个 784 长度的 numpy 数组。</p><p><code>t_train</code> 是训练的标签，同一个下标对应的 <code>x_train</code> 就是标签对应的图片。</p><p><code>reshape</code> 函数的作用是把一维的数组转换成二维的数组，比如把 784 长度的数组转换成 28x28 的二维数组。</p><h3 id=评估神经网络>评估神经网络</h3><p>现在定义神经网络。示例的神经网络一共三层，两个隐藏层一个输出层。输入层 784 个神经元，隐藏层分别是 50 个和 100 个神经元，输出层 10 个神经元。</p><p>隐藏层神经元数量是任意的，不过我猜太少会对识别精度有影响，而超过一定数量对识别精度的帮助应该会出现边际效应递减。</p><p>需要注意的是下文示例中 <code>load_mnist</code> 默认使用了 <code>normalize=True</code> 参数，会把输入的灰度值 0~255 转成 0~1 的浮点数。</p><p><code>numpy.argmax</code> 函数的作用是找到最大值的下标，用于找出神经网络输出层10个神经元中哪个下标最大(最可能是哪个数字)，然后和 <code>t_train</code> 的标签对比，确认是否识别正确。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span><span class=lnt>71
+</span><span class=lnt>72
+</span><span class=lnt>73
+</span><span class=lnt>74
+</span><span class=lnt>75
+</span><span class=lnt>76
+</span><span class=lnt>77
+</span><span class=lnt>78
+</span><span class=lnt>79
+</span><span class=lnt>80
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>pickle</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>numpy</span> <span class=k>as</span> <span class=nn>np</span>
+</span></span><span class=line><span class=cl><span class=kn>from</span> <span class=nn>typing</span> <span class=kn>import</span> <span class=n>Callable</span><span class=p>,</span> <span class=n>Sequence</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>Layer</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>name</span><span class=p>:</span> <span class=nb>str</span><span class=p>,</span> <span class=n>weights</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>,</span> <span class=n>biases</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>activation</span><span class=p>:</span> <span class=n>Callable</span><span class=p>[[</span><span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>],</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>]):</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>name</span> <span class=o>=</span> <span class=n>name</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>weights</span> <span class=o>=</span> <span class=n>weights</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>biases</span> <span class=o>=</span> <span class=n>biases</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>activation</span> <span class=o>=</span> <span class=n>activation</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>evaluate</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>inputs</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>activation</span><span class=p>(</span><span class=n>inputs</span><span class=o>.</span><span class=n>dot</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>weights</span><span class=p>)</span> <span class=o>+</span> <span class=bp>self</span><span class=o>.</span><span class=n>biases</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>Network</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>layers</span><span class=p>:</span> <span class=n>Sequence</span><span class=p>[</span><span class=n>Layer</span><span class=p>]):</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>layers</span> <span class=o>=</span> <span class=n>layers</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>evaluate</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>inputs</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=n>layer</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>layers</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>inputs</span> <span class=o>=</span> <span class=n>layer</span><span class=o>.</span><span class=n>evaluate</span><span class=p>(</span><span class=n>inputs</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>inputs</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>softmax</span><span class=p>(</span><span class=n>x</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=n>C</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>max</span><span class=p>(</span><span class=n>x</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>np</span><span class=o>.</span><span class=n>exp</span><span class=p>(</span><span class=n>x</span> <span class=o>-</span> <span class=n>C</span><span class=p>)</span> <span class=o>/</span> <span class=n>np</span><span class=o>.</span><span class=n>sum</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>exp</span><span class=p>(</span><span class=n>x</span> <span class=o>-</span> <span class=n>C</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>sigmoid</span><span class=p>(</span><span class=n>x</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>1</span> <span class=o>/</span> <span class=p>(</span><span class=mi>1</span> <span class=o>+</span> <span class=n>np</span><span class=o>.</span><span class=n>exp</span><span class=p>(</span><span class=o>-</span><span class=n>x</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>with</span> <span class=nb>open</span><span class=p>(</span><span class=s1>&#39;./sample_weight.pkl&#39;</span><span class=p>,</span> <span class=s1>&#39;rb&#39;</span><span class=p>)</span> <span class=k>as</span> <span class=n>f</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>weights</span> <span class=o>=</span> <span class=n>pickle</span><span class=o>.</span><span class=n>load</span><span class=p>(</span><span class=n>f</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>weights</span><span class=o>.</span><span class=n>keys</span><span class=p>())</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>layers</span> <span class=o>=</span> <span class=p>[</span>
+</span></span><span class=line><span class=cl>    <span class=c1># 输入层略</span>
+</span></span><span class=line><span class=cl>    <span class=c1># 隐藏层1</span>
+</span></span><span class=line><span class=cl>    <span class=n>Layer</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=n>name</span><span class=o>=</span><span class=s1>&#39;hidden1&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>weights</span><span class=o>=</span><span class=n>weights</span><span class=p>[</span><span class=s1>&#39;W1&#39;</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>        <span class=n>biases</span><span class=o>=</span><span class=n>weights</span><span class=p>[</span><span class=s1>&#39;b1&#39;</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>        <span class=n>activation</span><span class=o>=</span><span class=n>sigmoid</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=p>),</span>
+</span></span><span class=line><span class=cl>    <span class=c1># 隐藏层2</span>
+</span></span><span class=line><span class=cl>    <span class=n>Layer</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=n>name</span><span class=o>=</span><span class=s1>&#39;hidden2&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>weights</span><span class=o>=</span><span class=n>weights</span><span class=p>[</span><span class=s1>&#39;W2&#39;</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>        <span class=n>biases</span><span class=o>=</span><span class=n>weights</span><span class=p>[</span><span class=s1>&#39;b2&#39;</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>        <span class=n>activation</span><span class=o>=</span><span class=n>sigmoid</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=p>),</span>
+</span></span><span class=line><span class=cl>    <span class=c1># 输出层</span>
+</span></span><span class=line><span class=cl>    <span class=n>Layer</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=n>name</span><span class=o>=</span><span class=s1>&#39;output&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>weights</span><span class=o>=</span><span class=n>weights</span><span class=p>[</span><span class=s1>&#39;W3&#39;</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>        <span class=n>biases</span><span class=o>=</span><span class=n>weights</span><span class=p>[</span><span class=s1>&#39;b3&#39;</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>        <span class=n>activation</span><span class=o>=</span><span class=n>softmax</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=p>),</span>
+</span></span><span class=line><span class=cl><span class=p>]</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>network</span> <span class=o>=</span> <span class=n>Network</span><span class=p>(</span><span class=n>layers</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>(</span><span class=n>x_train</span><span class=p>,</span> <span class=n>t_train</span><span class=p>),</span> <span class=p>(</span><span class=n>x_test</span><span class=p>,</span> <span class=n>t_test</span><span class=p>)</span> <span class=o>=</span> <span class=n>load_mnist</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=n>accuracy</span> <span class=o>=</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl><span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=nb>len</span><span class=p>(</span><span class=n>x_train</span><span class=p>)):</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>i</span> <span class=o>%</span> <span class=mi>1000</span> <span class=o>==</span> <span class=mi>0</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>percent</span> <span class=o>=</span> <span class=n>i</span><span class=o>/</span><span class=nb>len</span><span class=p>(</span><span class=n>x_train</span><span class=p>)</span><span class=o>*</span><span class=mi>100</span>
+</span></span><span class=line><span class=cl>        <span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s1>&#39;evaluating ... %</span><span class=si>{</span><span class=nb>round</span><span class=p>(</span><span class=n>percent</span><span class=p>,</span><span class=mi>2</span><span class=p>)</span><span class=si>}</span><span class=s1>&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>y</span> <span class=o>=</span> <span class=n>network</span><span class=o>.</span><span class=n>evaluate</span><span class=p>(</span><span class=n>x_train</span><span class=p>[</span><span class=n>i</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>    <span class=n>p</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>argmax</span><span class=p>(</span><span class=n>y</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>p</span> <span class=o>==</span> <span class=n>t_train</span><span class=p>[</span><span class=n>i</span><span class=p>]:</span>
+</span></span><span class=line><span class=cl>        <span class=n>accuracy</span> <span class=o>+=</span> <span class=mi>1</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=s1>&#39;accuracy: %&#39;</span><span class=p>,</span> <span class=nb>round</span><span class=p>(</span><span class=n>accuracy</span><span class=o>/</span><span class=nb>len</span><span class=p>(</span><span class=n>x_train</span><span class=p>),</span> <span class=mi>4</span><span class=p>)</span><span class=o>*</span><span class=mi>100</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><pre><code>dict_keys(['b2', 'W1', 'b1', 'W2', 'W3', 'b3'])
+evaluating ... %0.0
+evaluating ... %1.67
+evaluating ... %3.33
+evaluating ... %5.0
+evaluating ... %6.67
+evaluating ... %8.33
+evaluating ... %10.0
+evaluating ... %11.67
+evaluating ... %13.33
+evaluating ... %15.0
+evaluating ... %16.67
+evaluating ... %18.33
+evaluating ... %20.0
+evaluating ... %21.67
+evaluating ... %23.33
+evaluating ... %25.0
+evaluating ... %26.67
+evaluating ... %28.33
+evaluating ... %30.0
+evaluating ... %31.67
+evaluating ... %33.33
+evaluating ... %35.0
+evaluating ... %36.67
+evaluating ... %38.33
+evaluating ... %40.0
+evaluating ... %41.67
+evaluating ... %43.33
+evaluating ... %45.0
+evaluating ... %46.67
+evaluating ... %48.33
+evaluating ... %50.0
+evaluating ... %51.67
+evaluating ... %53.33
+evaluating ... %55.0
+evaluating ... %56.67
+evaluating ... %58.33
+evaluating ... %60.0
+evaluating ... %61.67
+evaluating ... %63.33
+evaluating ... %65.0
+evaluating ... %66.67
+evaluating ... %68.33
+evaluating ... %70.0
+evaluating ... %71.67
+evaluating ... %73.33
+evaluating ... %75.0
+evaluating ... %76.67
+evaluating ... %78.33
+evaluating ... %80.0
+evaluating ... %81.67
+evaluating ... %83.33
+evaluating ... %85.0
+evaluating ... %86.67
+evaluating ... %88.33
+evaluating ... %90.0
+evaluating ... %91.67
+evaluating ... %93.33
+evaluating ... %95.0
+evaluating ... %96.67
+evaluating ... %98.33
+accuracy: % 93.58
+</code></pre><p>然后是更有趣的部分，批量化训练。</p><p>在前面的所有神经网络例子中，输入都是一维的，输出也是一维的。书中的批处理例子，则把输入改成了二维的，每行一个样本，输出也变成了二维的，一行一个结果。</p><p>不修改神经网络代码的情况下是怎么做到的呢？</p><p>还是要依赖矩阵乘法的计算法则。还记得矩阵点积定义吧？</p><p>$$
+\begin{bmatrix}
+a & b \
+c & d
+\end{bmatrix} \begin{bmatrix}
+e & f \
+g & h
+\end{bmatrix} = \begin{bmatrix}
+ae + bg & af + bh \
+ce + dg & cf + dh
+\end{bmatrix}
+$$</p><ol><li>点积用运算符左侧矩阵的行，分别乘以运算符右侧矩阵的列。</li><li>点积计算结果的行数等于运算符左侧的行数，列数等于运算符右侧的列数。</li></ol><p>神经网络的每个层，每个神经元，都有一个输入矩阵和权重矩阵，输出也是一个矩阵。当输入层输入是一维矩阵时，根据上述的定义，神经元的输入加权和总是一维的。</p><p>w 的下标对应的是输入信号的下标（运算符左侧矩阵的列号），上标是神经元的序号。
+下面的公式中 a 的下标是输入样本的索引（运算符左侧矩阵的行号），上标是神经元的序号。</p><p>$$
+\begin{bmatrix}
+x_1 & x_2 & x_3
+\end{bmatrix}
+\begin{bmatrix}
+w_{1}^{1} & w_{1}^{2} & w_{1}^{3} \
+w_{2}^{1} & w_{2}^{2} & w_{2}^{3} \
+w_{3}^{1} & w_{3}^{2} & w_{3}^{3}
+\end{bmatrix}=
+\begin{bmatrix}
+a_{1}^{1} & a_{1}^{2} & a_{1}^{2}
+\end{bmatrix}
+$$</p><p>而神经元的输出不会改变输入加权和矩阵的形状。</p><p>$$
+activation(\begin{bmatrix}
+a_1^1 & a_1^2 & a_1^3
+\end{bmatrix})=
+\begin{bmatrix}
+y_1^1 & y_1^2 & y_1^3
+\end{bmatrix}
+$$</p><p>而神经元输出会作为下一个神经元的输入，于是信号矩阵在神经网络层之间传递时，只有列数会发生变更，行数总是和输入一致的。</p><p>因此当输入是多维的时候，最终输出层输出的结果矩阵，总是和输入层的矩阵行数一致。</p><p>我们实际试一下。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span><span class=lnt>71
+</span><span class=lnt>72
+</span><span class=lnt>73
+</span><span class=lnt>74
+</span><span class=lnt>75
+</span><span class=lnt>76
+</span><span class=lnt>77
+</span><span class=lnt>78
+</span><span class=lnt>79
+</span><span class=lnt>80
+</span><span class=lnt>81
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>pickle</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>numpy</span> <span class=k>as</span> <span class=nn>np</span>
+</span></span><span class=line><span class=cl><span class=kn>from</span> <span class=nn>typing</span> <span class=kn>import</span> <span class=n>Callable</span><span class=p>,</span> <span class=n>Sequence</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>Layer</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>name</span><span class=p>:</span> <span class=nb>str</span><span class=p>,</span> <span class=n>weights</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>,</span> <span class=n>biases</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>activation</span><span class=p>:</span> <span class=n>Callable</span><span class=p>[[</span><span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>],</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>]):</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>name</span> <span class=o>=</span> <span class=n>name</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>weights</span> <span class=o>=</span> <span class=n>weights</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>biases</span> <span class=o>=</span> <span class=n>biases</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>activation</span> <span class=o>=</span> <span class=n>activation</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>evaluate</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>inputs</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>activation</span><span class=p>(</span><span class=n>inputs</span><span class=o>.</span><span class=n>dot</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>weights</span><span class=p>)</span> <span class=o>+</span> <span class=bp>self</span><span class=o>.</span><span class=n>biases</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>Network</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>layers</span><span class=p>:</span> <span class=n>Sequence</span><span class=p>[</span><span class=n>Layer</span><span class=p>]):</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>layers</span> <span class=o>=</span> <span class=n>layers</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>evaluate</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>inputs</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=n>layer</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>layers</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>inputs</span> <span class=o>=</span> <span class=n>layer</span><span class=o>.</span><span class=n>evaluate</span><span class=p>(</span><span class=n>inputs</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>inputs</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>softmax</span><span class=p>(</span><span class=n>x</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=n>C</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>max</span><span class=p>(</span><span class=n>x</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>np</span><span class=o>.</span><span class=n>exp</span><span class=p>(</span><span class=n>x</span> <span class=o>-</span> <span class=n>C</span><span class=p>)</span> <span class=o>/</span> <span class=n>np</span><span class=o>.</span><span class=n>sum</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>exp</span><span class=p>(</span><span class=n>x</span> <span class=o>-</span> <span class=n>C</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>sigmoid</span><span class=p>(</span><span class=n>x</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>1</span> <span class=o>/</span> <span class=p>(</span><span class=mi>1</span> <span class=o>+</span> <span class=n>np</span><span class=o>.</span><span class=n>exp</span><span class=p>(</span><span class=o>-</span><span class=n>x</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>with</span> <span class=nb>open</span><span class=p>(</span><span class=s1>&#39;./sample_weight.pkl&#39;</span><span class=p>,</span> <span class=s1>&#39;rb&#39;</span><span class=p>)</span> <span class=k>as</span> <span class=n>f</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>weights</span> <span class=o>=</span> <span class=n>pickle</span><span class=o>.</span><span class=n>load</span><span class=p>(</span><span class=n>f</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>weights</span><span class=o>.</span><span class=n>keys</span><span class=p>())</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>layers</span> <span class=o>=</span> <span class=p>[</span>
+</span></span><span class=line><span class=cl>    <span class=c1># 输入层略</span>
+</span></span><span class=line><span class=cl>    <span class=c1># 隐藏层1</span>
+</span></span><span class=line><span class=cl>    <span class=n>Layer</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=n>name</span><span class=o>=</span><span class=s1>&#39;hidden1&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>weights</span><span class=o>=</span><span class=n>weights</span><span class=p>[</span><span class=s1>&#39;W1&#39;</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>        <span class=n>biases</span><span class=o>=</span><span class=n>weights</span><span class=p>[</span><span class=s1>&#39;b1&#39;</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>        <span class=n>activation</span><span class=o>=</span><span class=n>sigmoid</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=p>),</span>
+</span></span><span class=line><span class=cl>    <span class=c1># 隐藏层2</span>
+</span></span><span class=line><span class=cl>    <span class=n>Layer</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=n>name</span><span class=o>=</span><span class=s1>&#39;hidden2&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>weights</span><span class=o>=</span><span class=n>weights</span><span class=p>[</span><span class=s1>&#39;W2&#39;</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>        <span class=n>biases</span><span class=o>=</span><span class=n>weights</span><span class=p>[</span><span class=s1>&#39;b2&#39;</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>        <span class=n>activation</span><span class=o>=</span><span class=n>sigmoid</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=p>),</span>
+</span></span><span class=line><span class=cl>    <span class=c1># 输出层</span>
+</span></span><span class=line><span class=cl>    <span class=n>Layer</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=n>name</span><span class=o>=</span><span class=s1>&#39;output&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>weights</span><span class=o>=</span><span class=n>weights</span><span class=p>[</span><span class=s1>&#39;W3&#39;</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>        <span class=n>biases</span><span class=o>=</span><span class=n>weights</span><span class=p>[</span><span class=s1>&#39;b3&#39;</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>        <span class=n>activation</span><span class=o>=</span><span class=n>softmax</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=p>),</span>
+</span></span><span class=line><span class=cl><span class=p>]</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>network</span> <span class=o>=</span> <span class=n>Network</span><span class=p>(</span><span class=n>layers</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>(</span><span class=n>x_train</span><span class=p>,</span> <span class=n>t_train</span><span class=p>),</span> <span class=p>(</span><span class=n>x_test</span><span class=p>,</span> <span class=n>t_test</span><span class=p>)</span> <span class=o>=</span> <span class=n>load_mnist</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=n>accuracy</span> <span class=o>=</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl><span class=n>batch_size</span><span class=o>=</span><span class=mi>100</span>
+</span></span><span class=line><span class=cl><span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span><span class=nb>len</span><span class=p>(</span><span class=n>x_train</span><span class=p>),</span><span class=n>batch_size</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>i</span> <span class=o>%</span> <span class=mi>1000</span> <span class=o>==</span> <span class=mi>0</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>percent</span> <span class=o>=</span> <span class=n>i</span><span class=o>/</span><span class=nb>len</span><span class=p>(</span><span class=n>x_train</span><span class=p>)</span><span class=o>*</span><span class=mi>100</span>
+</span></span><span class=line><span class=cl>        <span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s1>&#39;evaluating ... %</span><span class=si>{</span><span class=nb>round</span><span class=p>(</span><span class=n>percent</span><span class=p>,</span><span class=mi>2</span><span class=p>)</span><span class=si>}</span><span class=s1>&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>y</span> <span class=o>=</span> <span class=n>network</span><span class=o>.</span><span class=n>evaluate</span><span class=p>(</span><span class=n>x_train</span><span class=p>[</span><span class=n>i</span><span class=p>:</span><span class=n>i</span><span class=o>+</span><span class=n>batch_size</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>    <span class=n>p</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>argmax</span><span class=p>(</span><span class=n>y</span><span class=p>,</span> <span class=n>axis</span><span class=o>=</span><span class=mi>1</span><span class=p>)</span> <span class=c1># 取每一行的最大值下标</span>
+</span></span><span class=line><span class=cl>    <span class=n>accuracy</span> <span class=o>+=</span> <span class=n>np</span><span class=o>.</span><span class=n>sum</span><span class=p>(</span><span class=n>p</span> <span class=o>==</span> <span class=n>t_train</span><span class=p>[</span><span class=n>i</span><span class=p>:</span><span class=n>i</span><span class=o>+</span><span class=n>batch_size</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=s1>&#39;accuracy: %&#39;</span><span class=p>,</span> <span class=nb>round</span><span class=p>(</span><span class=n>accuracy</span><span class=o>/</span><span class=nb>len</span><span class=p>(</span><span class=n>x_train</span><span class=p>),</span> <span class=mi>4</span><span class=p>)</span><span class=o>*</span><span class=mi>100</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><pre><code>dict_keys(['b2', 'W1', 'b1', 'W2', 'W3', 'b3'])
+evaluating ... %0.0
+evaluating ... %1.67
+evaluating ... %3.33
+evaluating ... %5.0
+evaluating ... %6.67
+evaluating ... %8.33
+evaluating ... %10.0
+evaluating ... %11.67
+evaluating ... %13.33
+evaluating ... %15.0
+evaluating ... %16.67
+evaluating ... %18.33
+evaluating ... %20.0
+evaluating ... %21.67
+evaluating ... %23.33
+evaluating ... %25.0
+evaluating ... %26.67
+evaluating ... %28.33
+evaluating ... %30.0
+evaluating ... %31.67
+evaluating ... %33.33
+evaluating ... %35.0
+evaluating ... %36.67
+evaluating ... %38.33
+evaluating ... %40.0
+evaluating ... %41.67
+evaluating ... %43.33
+evaluating ... %45.0
+evaluating ... %46.67
+evaluating ... %48.33
+evaluating ... %50.0
+evaluating ... %51.67
+evaluating ... %53.33
+evaluating ... %55.0
+evaluating ... %56.67
+evaluating ... %58.33
+evaluating ... %60.0
+evaluating ... %61.67
+evaluating ... %63.33
+evaluating ... %65.0
+evaluating ... %66.67
+evaluating ... %68.33
+evaluating ... %70.0
+evaluating ... %71.67
+evaluating ... %73.33
+evaluating ... %75.0
+evaluating ... %76.67
+evaluating ... %78.33
+evaluating ... %80.0
+evaluating ... %81.67
+evaluating ... %83.33
+evaluating ... %85.0
+evaluating ... %86.67
+evaluating ... %88.33
+evaluating ... %90.0
+evaluating ... %91.67
+evaluating ... %93.33
+evaluating ... %95.0
+evaluating ... %96.67
+evaluating ... %98.33
+accuracy: % 93.58
+</code></pre><p>我的机器上实测到的结果是，100个样本一批处理，训练集执行只花了0.3秒。一个一个处理则花费了7秒左右。</p><p>可以说批量化加速的效果是很明显的。</p></section><footer class=article-footer><section class=article-tags><a href=/tags/python/>python</a>
+<a href=/tags/numpy/>numpy</a>
+<a href=/tags/matplotlib/>matplotlib</a>
+<a href=/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/>深度学习</a></section><section class=article-copyright><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg><span>Licensed under CC BY-NC-SA 4.0</span></section></footer><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.css integrity=sha384-RZU/ijkSsFbcmivfdRBQDtwuwVqK7GMOw6IMvKyeWL2K5UAlyp6WonmB8m7Jd0Hn crossorigin=anonymous><script src=https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.js integrity=sha384-pK1WpvzWVBQiP0/GjnvRxV4mOb0oxFuyRxJlk6vVw146n3egcN5C925NCP7a7BY8 crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/contrib/auto-render.min.js integrity=sha384-vZTG03m+2yp6N6BNi5iM4rW4oIwk5DfcNdFfxkk9ZWpDriOkXX8voJBFrAO7MpVl crossorigin=anonymous defer></script><script>window.addEventListener("DOMContentLoaded",()=>{renderMathInElement(document.querySelector(`.article-content`),{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1},{left:"\\(",right:"\\)",display:!1},{left:"\\[",right:"\\]",display:!0}]})})</script></article><aside class=related-contents--wrapper><h2 class=section-title>相关文章</h2><div class=related-contents><div class="flex article-list--tile"><article class=has-image><a href=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/><div class=article-image><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/_hu3d03a01dcc18bc5be0e67db3d8d209a6_979553_a53e49056056d533e079c83d0a5a8dd3.jpg width=250 height=150 loading=lazy alt="Featured image of post 《深度学习入门》读书笔记06" data-hash="md5-jlIWxrqlz/FC144LUKLorg=="></div><div class=light><div class=lamp></div></div><div class=article-details><h2 class=article-title>《深度学习入门》读书笔记06</h2></div></a></article><article class=has-image><a href=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/><div class=article-image><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/_hu3d03a01dcc18bc5be0e67db3d8d209a6_979553_a53e49056056d533e079c83d0a5a8dd3.jpg width=250 height=150 loading=lazy alt="Featured image of post 《深度学习入门》读书笔记05" data-hash="md5-jlIWxrqlz/FC144LUKLorg=="></div><div class=light><div class=lamp></div></div><div class=article-details><h2 class=article-title>《深度学习入门》读书笔记05</h2></div></a></article><article class=has-image><a href=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B004/><div class=article-image><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B004/_hu3d03a01dcc18bc5be0e67db3d8d209a6_979553_a53e49056056d533e079c83d0a5a8dd3.jpg width=250 height=150 loading=lazy alt="Featured image of post 《深度学习入门》读书笔记04" data-hash="md5-jlIWxrqlz/FC144LUKLorg=="></div><div class=light><div class=lamp></div></div><div class=article-details><h2 class=article-title>《深度学习入门》读书笔记04</h2></div></a></article><article class=has-image><a href=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B002/><div class=article-image><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B002/_hu3d03a01dcc18bc5be0e67db3d8d209a6_979553_a53e49056056d533e079c83d0a5a8dd3.jpg width=250 height=150 loading=lazy alt="Featured image of post 《深度学习入门》读书笔记02" data-hash="md5-jlIWxrqlz/FC144LUKLorg=="></div><div class=light><div class=lamp></div></div><div class=article-details><h2 class=article-title>《深度学习入门》读书笔记02</h2></div></a></article><article class=has-image><a href=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B001/><div class=article-image><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B001/_hu3d03a01dcc18bc5be0e67db3d8d209a6_979553_a53e49056056d533e079c83d0a5a8dd3.jpg width=250 height=150 loading=lazy alt="Featured image of post 《深度学习入门》读书笔记01" data-hash="md5-jlIWxrqlz/FC144LUKLorg=="></div><div class=light><div class=lamp></div></div><div class=article-details><h2 class=article-title>《深度学习入门》读书笔记01</h2></div></a></article></div></div></aside><footer class=site-footer><section class=copyright>&copy;
+2021 -
+2024 weakptr's 笔记</section><section class=powerby><a href=https://beian.miit.gov.cn/>浙ICP备2021032371号-1</a>
+<span style=margin-left:16px></span>
+<a target=_blank href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=33032402002231" style=display:inline-block;text-decoration:none;height:20px;line-height:20px><img src=/image/beian.png style=float:left>
+浙公网安备 33032402002231号</a><br>Built with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a><br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.11.0>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计
+，由 <a href=https://nnnewb.github.io/blog/>nnnewb</a> 修改</section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css integrity="sha256-c0uckgykQ9v5k+IqViZOZKc47Jn7KQil4/MP3ySA3F8=" crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css integrity="sha256-SBLU4vv6CA6lHsZ1XyTdhyjJxCjPif/TRkjnsyGAGnE=" crossorigin=anonymous></main><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav id=TableOfContents><ol><li><a href=#神经网络-1>神经网络</a></li><li><a href=#激活函数>激活函数</a><ol><li><a href=#阶跃函数>阶跃函数</a></li><li><a href=#sigmoid-函数>sigmoid 函数</a></li><li><a href=#非线性函数>非线性函数</a></li><li><a href=#relu-函数>ReLU 函数</a></li></ol></li><li><a href=#矩阵计算>矩阵计算</a></li><li><a href=#输出层设计>输出层设计</a></li><li><a href=#识别手写数字>识别手写数字</a><ol><li><a href=#加载数据集>加载数据集</a></li><li><a href=#评估神经网络>评估神经网络</a></li></ol></li></ol></nav></div></section></aside></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>

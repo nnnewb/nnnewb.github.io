@@ -1,0 +1,1052 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="反向传播 本章主要是反向传播算法的学习。 计算图 计算图的概念很好理解，它本身是一种有向无环图，构成基本就是按运算符优先级分割得到的语法树。 例如 $z=xy+b$"><title>《深度学习入门》读书笔记05</title>
+<link rel=canonical href=https://weakptr.site/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/><link rel=stylesheet href=/scss/style.min.709d4f89582c5a09dc94158a722a16093cdffe24d9a8c77dd3f422c786203c41.css><script src=https://unpkg.com/dayjs@1.8.21/dayjs.min.js></script><script src=https://unpkg.com/dayjs@1.8.21/plugin/relativeTime.js></script><script src=https://unpkg.com/dayjs@1.8.21/locale/zh-cn.js></script><script>dayjs.locale("zh-cn"),dayjs.extend(dayjs_plugin_relativeTime)</script><script>var _hmt=_hmt||[];(function(){var e,t=document.createElement("script");t.src="https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad",e=document.getElementsByTagName("script")[0],e.parentNode.insertBefore(t,e)})()</script><meta property="og:title" content="《深度学习入门》读书笔记05"><meta property="og:description" content="反向传播 本章主要是反向传播算法的学习。 计算图 计算图的概念很好理解，它本身是一种有向无环图，构成基本就是按运算符优先级分割得到的语法树。 例如 $z=xy+b$"><meta property="og:url" content="https://weakptr.site/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/"><meta property="og:site_name" content="weakptr's 笔记"><meta property="og:type" content="article"><meta property="article:section" content="Post"><meta property="article:tag" content="python"><meta property="article:tag" content="numpy"><meta property="article:tag" content="matplotlib"><meta property="article:tag" content="深度学习"><meta property="article:published_time" content="2024-02-26T21:33:00+08:00"><meta property="article:modified_time" content="2024-03-07T14:55:00+08:00"><meta property="og:image" content="https://weakptr.site/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/google-deepmind-ebMFfR2uuJ0-unsplash.jpg"><meta name=twitter:title content="《深度学习入门》读书笔记05"><meta name=twitter:description content="反向传播 本章主要是反向传播算法的学习。 计算图 计算图的概念很好理解，它本身是一种有向无环图，构成基本就是按运算符优先级分割得到的语法树。 例如 $z=xy+b$"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://weakptr.site/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/google-deepmind-ebMFfR2uuJ0-unsplash.jpg"><link rel="shortcut icon" href=/favicon.ico></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.setItem(e,"light")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hub37949326d1692892aa1e64434c0dda6_382115_300x0_resize_box_3.png width=300 height=300 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🍑</span></figure><div class=site-meta><h1 class=site-name><a href=/>weakptr's 笔记</a></h1><h2 class=site-description>弃船！</h2></div></header><ol class=social-menu><li><a href=https://github.com/nnnewb/ target=_blank title=GitHub><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg><span>首页</span></a></li><li><a href=/about><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg><span>关于我</span></a></li><li><a href=/archive><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg><span>归档</span></a></li><li><a href=/categories><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg><span>分类</span></a></li><li><a href=/tags><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg><span>标签</span></a></li><li><a href=/link><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M10 14a3.5 3.5.0 005 0l4-4a3.5 3.5.0 00-5-5l-.5.5"/><path d="M14 10a3.5 3.5.0 00-5 0l-4 4a3.5 3.5.0 005 5l.5-.5"/></svg><span>友链</span></a></li><li><a href=/search><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg><span>搜索</span></a></li><div class=menu-bottom-section></div></ol></aside><main class="main full-width"><article class="has-image main-article"><header class=article-header><div class=article-image><a href=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/google-deepmind-ebMFfR2uuJ0-unsplash_hu3d03a01dcc18bc5be0e67db3d8d209a6_979553_800x0_resize_q75_box.jpg srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/google-deepmind-ebMFfR2uuJ0-unsplash_hu3d03a01dcc18bc5be0e67db3d8d209a6_979553_800x0_resize_q75_box.jpg 800w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/google-deepmind-ebMFfR2uuJ0-unsplash_hu3d03a01dcc18bc5be0e67db3d8d209a6_979553_1600x0_resize_q75_box.jpg 1600w" width=800 height=450 loading=lazy alt="Featured image of post 《深度学习入门》读书笔记05"></a></div><div class=article-details><header class=article-category><a href=/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/>深度学习</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/>《深度学习入门》读书笔记05</a></h2></div><footer class=article-time><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg><time class=article-time--published datetime=2024-02-26T21:33:00+08:00>2024年 2月 26日</time></div><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><time class=article-time--reading>阅读时长: 11 分钟</time></div></footer></div></header><section class=article-content><h1 id=反向传播>反向传播</h1><p>本章主要是反向传播算法的学习。</p><h2 id=计算图>计算图</h2><p>计算图的概念很好理解，它本身是一种有向无环图，构成基本就是按运算符优先级分割得到的语法树。</p><p>例如 $z=xy+b$ 这条简单的公式可以表达为下面的计算图。</p><pre class=mermaid>flowchart LR
+    z[z]
+    x[x]
+    y[y]
+    b[b]
+    times((*))
+    plus((+))
+
+    x --> times
+    y --> times
+    times --> plus
+    b --> plus
+</pre><p>计算图的正向传播可以看成从入度为零的节点出发，经过计算节点时递归遍历求值输入节点，得到计算节点的输入，递归执行得到输出的过程。</p><p>例如上图，从节点 x 出发则得到下面的遍历顺序：<code>((x y *) b +)</code></p><p>实质是从计算图构造出了一个后缀表达式并运算得到结果。</p><p>当然也可以反过来从出度为 0 的节点出发，反过来遍历输入节点，得到前缀表达式 <code>(+ (* x y) b)</code> 求值。</p><h2 id=反向传播-1>反向传播</h2><p>反向传播利用<strong>链式法则</strong>将复杂的公式分解成多个简单公式求导。一方面简单函数求导可以直接数学推导出来得到分析解，更准确，另一方面就是极大减少了不必要的计算。</p><h3 id=链式法则>链式法则</h3><p>例如求函数 $z=(x+y)^2$ 的导数。首先这条式子可以表述为两个函数的组合：$z=t^2$ 和 $t=x+y$</p><p>链式法则的定义是：</p><blockquote><p>如果某个函数由复合函数表示，则该复合函数的导数可以用构成该复合函数的各个函数的导数的乘积来表示。</p></blockquote><p>也就是 $z=(x+y)^2$ 的导数，可以表示为 $\frac{\partial z}{\partial t}\frac{\partial t}{\partial x}$</p><p>上面的式子约分一下可以得到 $\frac{\partial z}{\partial x}$ ，也就是原来的函数 $z=(x+y)^2$ 关于 $x$ 的导数了。</p><p>利用链式法则我们试着求原函数的解析解。</p><p>$\frac{\partial t}{\partial x}$ 的导数是 $1$ 。</p><p>$\frac{\partial z}{\partial t}$ 的导数是 $2t$ （查基本初等函数的导数公式表）</p><p>相乘得到原函数的导数 $\frac{\partial z}{\partial x}=2t=2(x+y)$，对照导数公式表无误。</p><h3 id=结合计算图>结合计算图</h3><p>依然是 $z=(x+y)^2$ 为例，构造计算图如下。</p><pre class=mermaid>flowchart LR
+    x[x]
+    y[y]
+    plus[+]
+    exponential[exponential]
+
+    x --> plus
+    y --> plus
+    plus -->|底部分，命名为t| exponential
+    2 -->|指数部分| exponential
+    exponential -->|结果| z
+</pre><p>接着从 $z$ 出发反向推导各个节点的导数。</p><pre class=mermaid>flowchart LR
+    x[x]
+    y[y]
+    plus[+]
+    exponential[exponential]
+
+    z -->|导数：1| exponential
+    exponential -->|指数| 2
+    exponential -->|导数：1×2t| plus
+    plus -->|导数：1×2t×1=2x+2y| x
+    plus -->|导数：1×2t×1=2x+2y| y
+</pre><p>需要注意的是，像 $t=xy$ 这样的计算节点，求导会需要输入信号。比如求 $\frac{\partial t}{\partial x}=y$，就要求保留 y 的输入才能求得导数。</p><p>尝试解书中例题，设消费税 $t=1.1$，苹果单价 $p_a=100$，橘子单价 $p_b=150$，计算图如下：</p><pre class=mermaid>flowchart LR
+    苹果数量 -->|2| 苹果总价((×))
+    苹果单价 -->|100| 苹果总价
+    苹果总价 -->|200| 商品总价((+))
+
+    橘子数量 -->|3| 橘子总价((×))
+    橘子单价 -->|150| 橘子总价
+    橘子总价 -->|450| 商品总价
+
+    商品总价 -->|650| 税后总价((×))
+    消费税率 -->|1.1| 税后总价
+
+    税后总价 -->|715| 实际支付
+</pre><p>现在逆推每个节点的导数。</p><pre class=mermaid>flowchart LR
+    实际支付 -->|导数：1| 税后总价
+
+    税后总价 -->|导数：650| 消费税率
+    税后总价 -->|导数：1.1| 商品总价((+))
+
+    商品总价 -->|导数：1.1| 苹果总价((×))
+    商品总价 -->|导数：1.1| 橘子总价((×))
+
+    苹果总价 -->|导数：2.2| 苹果单价
+    苹果总价 -->|导数：110| 苹果数量
+
+    橘子总价 -->|导数：3.3| 橘子单价
+    橘子总价 -->|导数：165| 橘子数量
+</pre><h3 id=计算图的-python-实现>计算图的 python 实现</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span><span class=lnt>71
+</span><span class=lnt>72
+</span><span class=lnt>73
+</span><span class=lnt>74
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>from</span> <span class=nn>typing</span> <span class=kn>import</span> <span class=n>Optional</span>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>numpy</span> <span class=k>as</span> <span class=nn>np</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>Num</span> <span class=o>=</span> <span class=nb>float</span> <span class=o>|</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>MulLayer</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=kc>None</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>x</span><span class=p>:</span> <span class=n>Optional</span><span class=p>[</span><span class=n>Num</span><span class=p>]</span> <span class=o>=</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>y</span><span class=p>:</span> <span class=n>Optional</span><span class=p>[</span><span class=n>Num</span><span class=p>]</span> <span class=o>=</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>forward</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>x</span><span class=p>:</span> <span class=n>Num</span><span class=p>,</span> <span class=n>y</span><span class=p>:</span> <span class=n>Num</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=n>Num</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>x</span> <span class=o>=</span> <span class=n>x</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>y</span> <span class=o>=</span> <span class=n>y</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>x</span> <span class=o>*</span> <span class=n>y</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>backward</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>dout</span><span class=p>:</span> <span class=n>Num</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=nb>tuple</span><span class=p>[</span><span class=n>Num</span><span class=p>,</span> <span class=n>Num</span><span class=p>]:</span>
+</span></span><span class=line><span class=cl>        <span class=s2>&#34;&#34;&#34; 反向传播
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>        :return: 返回本层输入 x,y 的导数 (dx,dy)
+</span></span></span><span class=line><span class=cl><span class=s2>        &#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>y</span> <span class=o>*</span> <span class=n>dout</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>x</span> <span class=o>*</span> <span class=n>dout</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>AddLayer</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=kc>None</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>pass</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>forward</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>x</span><span class=p>:</span> <span class=n>Num</span><span class=p>,</span> <span class=n>y</span><span class=p>:</span> <span class=n>Num</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=n>Num</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>x</span> <span class=o>+</span> <span class=n>y</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>backward</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>dout</span><span class=p>:</span> <span class=n>Num</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=nb>tuple</span><span class=p>[</span><span class=n>Num</span><span class=p>,</span> <span class=n>Num</span><span class=p>]:</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>dout</span><span class=p>,</span> <span class=n>dout</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>apple_price</span> <span class=o>=</span> <span class=mf>100.</span>
+</span></span><span class=line><span class=cl><span class=n>apple_num</span> <span class=o>=</span> <span class=mf>2.</span>
+</span></span><span class=line><span class=cl><span class=n>orange_price</span> <span class=o>=</span> <span class=mf>150.</span>
+</span></span><span class=line><span class=cl><span class=n>orange_num</span> <span class=o>=</span> <span class=mf>3.</span>
+</span></span><span class=line><span class=cl><span class=n>tax_ratio</span> <span class=o>=</span> <span class=mf>1.1</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 苹果总价</span>
+</span></span><span class=line><span class=cl><span class=n>m1</span> <span class=o>=</span> <span class=n>MulLayer</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=c1># 橘子总价</span>
+</span></span><span class=line><span class=cl><span class=n>m2</span> <span class=o>=</span> <span class=n>MulLayer</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=c1># 商品总价</span>
+</span></span><span class=line><span class=cl><span class=n>a1</span> <span class=o>=</span> <span class=n>AddLayer</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=c1># 税后总价</span>
+</span></span><span class=line><span class=cl><span class=n>m3</span> <span class=o>=</span> <span class=n>MulLayer</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 正向传播过程</span>
+</span></span><span class=line><span class=cl><span class=c1># --------------</span>
+</span></span><span class=line><span class=cl><span class=c1># 苹果总价</span>
+</span></span><span class=line><span class=cl><span class=n>apple_total</span> <span class=o>=</span> <span class=n>m1</span><span class=o>.</span><span class=n>forward</span><span class=p>(</span><span class=n>apple_price</span><span class=p>,</span> <span class=n>apple_num</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=c1># 橘子总价</span>
+</span></span><span class=line><span class=cl><span class=n>orange_total</span> <span class=o>=</span> <span class=n>m2</span><span class=o>.</span><span class=n>forward</span><span class=p>(</span><span class=n>orange_price</span><span class=p>,</span> <span class=n>orange_num</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=c1># 商品总价</span>
+</span></span><span class=line><span class=cl><span class=n>good_total</span> <span class=o>=</span> <span class=n>a1</span><span class=o>.</span><span class=n>forward</span><span class=p>(</span><span class=n>apple_total</span><span class=p>,</span> <span class=n>orange_total</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=c1># 税后总价</span>
+</span></span><span class=line><span class=cl><span class=n>total</span> <span class=o>=</span> <span class=n>m3</span><span class=o>.</span><span class=n>forward</span><span class=p>(</span><span class=n>good_total</span><span class=p>,</span> <span class=n>tax_ratio</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 反向传播过程</span>
+</span></span><span class=line><span class=cl><span class=c1># --------------</span>
+</span></span><span class=line><span class=cl><span class=c1># 税率和商品总价导数</span>
+</span></span><span class=line><span class=cl><span class=n>good_total_diff</span><span class=p>,</span> <span class=n>tax_ratio_diff</span> <span class=o>=</span> <span class=n>m3</span><span class=o>.</span><span class=n>backward</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s1>&#39;商品总价导数：</span><span class=si>{</span><span class=n>good_total_diff</span><span class=si>}</span><span class=s1>, 税率导数：</span><span class=si>{</span><span class=n>tax_ratio_diff</span><span class=si>}</span><span class=s1>&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=c1># 各项水果总价导数</span>
+</span></span><span class=line><span class=cl><span class=n>apple_total_diff</span><span class=p>,</span> <span class=n>orange_total_diff</span> <span class=o>=</span> <span class=n>a1</span><span class=o>.</span><span class=n>backward</span><span class=p>(</span><span class=n>good_total_diff</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s1>&#39;苹果总价导数：</span><span class=si>{</span><span class=n>good_total_diff</span><span class=si>}</span><span class=s1>, 橘子总价导数：</span><span class=si>{</span><span class=n>tax_ratio_diff</span><span class=si>}</span><span class=s1>&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=c1># 苹果单价和数量的导数</span>
+</span></span><span class=line><span class=cl><span class=n>apple_price_diff</span><span class=p>,</span> <span class=n>apple_num_diff</span> <span class=o>=</span> <span class=n>m1</span><span class=o>.</span><span class=n>backward</span><span class=p>(</span><span class=n>apple_total_diff</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s1>&#39;苹果单价导数：</span><span class=si>{</span><span class=n>apple_price_diff</span><span class=si>}</span><span class=s1>, 苹果数量导数：</span><span class=si>{</span><span class=n>apple_num_diff</span><span class=si>}</span><span class=s1>&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>orange_price_diff</span><span class=p>,</span> <span class=n>orange_num_diff</span> <span class=o>=</span> <span class=n>m2</span><span class=o>.</span><span class=n>backward</span><span class=p>(</span><span class=n>orange_total_diff</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s1>&#39;橘子单价导数：</span><span class=si>{</span><span class=n>orange_price_diff</span><span class=si>}</span><span class=s1>, 橘子数量导数：</span><span class=si>{</span><span class=n>orange_num_diff</span><span class=si>}</span><span class=s1>&#39;</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><pre><code>商品总价导数：1.1, 税率导数：650.0
+苹果总价导数：1.1, 橘子总价导数：650.0
+苹果单价导数：2.2, 苹果数量导数：110.00000000000001
+橘子单价导数：3.3000000000000003, 橘子数量导数：165.0
+</code></pre><h3 id=计算层反向传播推导和实现>计算层反向传播推导和实现</h3><h4 id=要用到的-numpy-特性>要用到的 numpy 特性</h4><p>涉及一个 <code>numpy.ndarray</code> 的技巧。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>numpy</span> <span class=k>as</span> <span class=nn>np</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>x</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([</span><span class=o>-</span><span class=mf>2.</span><span class=p>,</span> <span class=o>-</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>0.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>,</span> <span class=mf>2.</span><span class=p>])</span>
+</span></span><span class=line><span class=cl><span class=c1># ndarray 直接参与比较运算，得到一个 bit mask 数组表示比较结果</span>
+</span></span><span class=line><span class=cl><span class=n>mask</span> <span class=o>=</span> <span class=p>(</span><span class=n>x</span> <span class=o>&lt;=</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>mask</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=c1># 可以用这个 bit mask 作为索引</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>x</span><span class=p>[</span><span class=n>mask</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 可以用这个 bit mask 索引修改原数组内容</span>
+</span></span><span class=line><span class=cl><span class=n>y</span> <span class=o>=</span> <span class=n>x</span><span class=o>.</span><span class=n>copy</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=n>y</span><span class=p>[</span><span class=n>mask</span><span class=p>]</span> <span class=o>=</span> <span class=mf>0.0</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>y</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><pre><code>[ True  True  True False False]
+[-2. -1.  0.]
+[0. 0. 0. 1. 2.]
+</code></pre><h4 id=relu-反向传播推导和实现>ReLU 反向传播推导和实现</h4><p>ReLU 层定义和实现都很简单。定义是</p><p>$$
+y=\begin{cases}
+0 & (x&lt;=0) \\
+x & (x>0)
+\end{cases}
+$$</p><p>可知在输入 $x&lt;=0$ 的情况下导数为 0，其他情况导数为 1。</p><p>注意输入是 <code>ndarray</code> ，<code>ReLU</code> 传入参数是多维向量，用到上面说的技巧。</p><p>下面实现 ReLU 激活函数的</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>numpy</span> <span class=k>as</span> <span class=nn>np</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>ReLULayer</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=kc>None</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=c1># 输入信号 &lt;= 0 的下标数组</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>mask</span> <span class=o>=</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>forward</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>x</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>,</span> <span class=o>**</span><span class=n>kwargs</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>out</span> <span class=o>=</span> <span class=n>x</span><span class=o>.</span><span class=n>copy</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>mask</span> <span class=o>=</span> <span class=p>(</span><span class=n>x</span> <span class=o>&lt;=</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>out</span><span class=p>[</span><span class=bp>self</span><span class=o>.</span><span class=n>mask</span><span class=p>]</span> <span class=o>=</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>out</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>backward</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>dout</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>ndout</span> <span class=o>=</span> <span class=n>dout</span><span class=o>.</span><span class=n>copy</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>        <span class=n>ndout</span><span class=p>[</span><span class=bp>self</span><span class=o>.</span><span class=n>mask</span><span class=p>]</span> <span class=o>=</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>ndout</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>optimize</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>lr</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>pass</span>
+</span></span></code></pre></td></tr></table></div></div><h4 id=sigmoid-反向传播推导和实现>sigmoid 反向传播推导和实现</h4><p>复习下 sigmoid 函数的定义。</p><p>$$
+y = \frac{1}{1+{e}^{-x}}
+$$</p><p>手动推导下 sigmoid 函数的导数。先拆分成多个简单的基本初等函数。</p><p>$$
+\begin{aligned}
+y &= \frac{1}{t} \\
+t &= 1+z \\
+z &= {e}^{a} \\
+a &= -1 \times x
+\end{aligned}
+$$</p><p>然后从右往左推导各个计算节点的导数。</p><p><strong>y=1/t 求导</strong></p><p>$$
+\begin{aligned}
+\frac{d}{dt}y&=\lim_{h \to 0} \frac{\frac{1}{t+h}-\frac{1}{t}}{h} \\
+&=\lim_{h \to 0} \frac{\frac{t}{t(t+h)}-\frac{t+h}{t(t+h)}}{h} \\
+&=\lim_{h \to 0} \frac{\frac{t-(t+h)}{t(t+h)}}{h} \\
+&=\lim_{h \to 0} \frac{\frac{t-(t+h)}{t(t+h)} t(t+h)}{h t(t+h)} \\
+&=\lim_{h \to 0} \frac{t-(t+h)}{h(t(t+h))} \\
+&=\lim_{h \to 0} \frac{-h}{h(t^2+ht)} \\
+&=\lim_{h \to 0} \frac{-1}{t^2+ht} \\
+&=-\frac{1}{t^2} \\
+&=-\frac{1}{(1+e^{-x})^2} \\
+&=-y^2 \
+\end{aligned}
+$$</p><p><strong>t=1+z 求导</strong></p><p>加法导数固定为1。</p><p><strong>z=e^a求导</strong></p><p>$e^a$ 的导数为 $e^a$ ，所以 $\frac{d}{da}z=e^a=e^{-x}$</p><p><strong>a=-x求导</strong></p><p>关于 x 的导数是 <code>-1</code> 。</p><p>链式法则串联起来可得原式导数分析解： $\frac{dy}{dx}=1 \times - y^2 \times e^{-x} \times -1 = y^2e^{-x}$</p><p>进一步化简可以展开 $y^2e^{-x}$，得到</p><p>$$
+\begin{aligned}
+y^2e^{-x} &= \frac{e^{-x}}{(1+e^{-x})^2} \\
+&= \frac{1}{1+e^{-x}} \frac{e^{-x}}{1+e^{-x}} \\
+&= \frac{1}{1+e^{-x}} \frac{(1+e^{-x})-1}{1+e^{-x}} \\
+&= \frac{1}{1+e^{-x}} (\frac{1+e^{-x}}{1+e^{-x}} - \frac{1}{1+e^{-x}}) \\
+&= y(1-y)
+\end{aligned}
+$$</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>numpy</span> <span class=k>as</span> <span class=nn>np</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>SigmoidLayer</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=kc>None</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>y</span> <span class=o>=</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>forward</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>x</span><span class=p>,</span> <span class=o>**</span><span class=n>kwargs</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>y</span> <span class=o>=</span> <span class=mf>1.0</span> <span class=o>/</span> <span class=p>(</span><span class=mf>1.0</span> <span class=o>+</span> <span class=n>np</span><span class=o>.</span><span class=n>exp</span><span class=p>(</span><span class=o>-</span><span class=n>x</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>y</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>backward</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>dout</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>y</span> <span class=o>*</span> <span class=p>(</span><span class=mf>1.0</span> <span class=o>-</span> <span class=bp>self</span><span class=o>.</span><span class=n>y</span><span class=p>)</span> <span class=o>*</span> <span class=n>dout</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>optimize</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>lr</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>pass</span>
+</span></span></code></pre></td></tr></table></div></div><h4 id=affine-层反向传播推导和实现>affine 层反向传播推导和实现</h4><p>affine 层直译仿射层，指的是 $y=wx+b$ ，这条式子在几何领域称为仿射变换因此称仿射层。</p><p>affine 层正向传播的计算可以画出下面的图</p><pre class=mermaid>flowchart LR
+    x1[x1]
+    x2[x2]
+
+    subgraph neuro1
+    w11[w11]
+    w12[w12]
+    end
+
+    subgraph neuro2
+    w21[w21]
+    w22[w22]
+    end
+
+    subgraph neuro3
+    w31[w31]
+    w32[w32]
+    end
+
+    w11 --> x1w11((*))
+    w12 --> x1w12((*))
+    w21 --> x1w21((*))
+    w22 --> x1w22((*))
+    w31 --> x1w31((*))
+    w32 --> x1w32((*))
+
+    x1 ---> x1w11((*))
+    x2 ---> x1w12((*))
+    x1 ---> x1w21((*))
+    x2 ---> x1w22((*))
+    x1 ---> x1w31((*))
+    x2 ---> x1w32((*))
+
+    x1w11 & x1w12 --> a1((+))
+    x1w21 & x1w22 --> a2((+))
+    x1w31 & x1w32 --> a3((+))
+
+    a1 & a2 & a3 --> a
+</pre><p>已知</p><p>$$
+\begin{aligned}
+a
+&=
+\begin{bmatrix}
+a_1 & a_2 & a_3
+\end{bmatrix} \\
+x
+&=
+\begin{bmatrix}
+x_1 & x_2
+\end{bmatrix} \\
+w
+&=
+\begin{bmatrix}
+w_{11} & w_{21} & w_{31} \\
+w_{12} & w_{22} & w_{32}
+\end{bmatrix} \\
+\frac{\partial a}{\partial w}
+&=
+\begin{bmatrix}
+x_1 & x_1 & x_1 \\
+x_2 & x_2 & x_2
+\end{bmatrix}
+\end{aligned}
+$$</p><p>不难发现，在 $w$ 中，第 $i$ 行的元素的偏导数，就是 $x$ 的第 $i$ 列输入。</p><p>所以求 $w$ 的偏导数就是将 $x$ 转置（列旋转为行，第 $i$ 列转为第 $i$ 行），然后把这个矩阵改成每个行含 n 个相同的列，n为神经元个数。</p><p>转置很好处理，后面将每个行改成n个列的过程可以表述成 $X^T\frac{\partial a}{\partial a}$，其中 $\frac{\partial a}{\partial a}=\begin{bmatrix}1 & 1 & 1\end{bmatrix}$</p><p>从计算图角度看就是 a 出发分别求每个神经元输入权重的偏导数，然后排列成和权重矩阵一样的形状。</p><p>手动计算过程如下。</p><p>$$
+\begin{aligned}
+X^T &= \begin{bmatrix} x_1 \\ x_2 \end{bmatrix} \\
+\frac{\partial L}{\partial Y} &= \begin{bmatrix} 1 & 1 & 1 \end{bmatrix} \\
+X^T \frac{\partial L}{\partial Y} &= \begin{bmatrix} x_1 \\ x_2 \end{bmatrix} \begin{bmatrix} 1 & 1 & 1 \end{bmatrix} \\
+&= \begin{bmatrix} x_1 & x_1 & x_1 \\ x_2 & x_2 & x_2 \end{bmatrix}
+\end{aligned}
+$$</p><p>输入 $x$ 有多行的情况下则是：</p><p>$$
+\begin{aligned}
+a &= \begin{bmatrix} a\_{11} & a\_{12} & a\_{13} \\ a\_{21} & a\_{22} & a\_{23} \end{bmatrix} \\
+x &= \begin{bmatrix} x\_{11} & x\_{12} \\ x\_{21} & x\_{22} \end{bmatrix} \\
+w &= \begin{bmatrix} w\_{11} & w\_{21} & w\_{31} \\ w\_{12} & w\_{22} & w\_{32} \end{bmatrix} \\
+X^T &= \begin{bmatrix} x\_{11} x\_{21} \\ x\_{12} x\_{22} \end{bmatrix}\\
+\frac{\partial L}{\partial Y} &= \begin{bmatrix} 1 & 1 & 1 \\ 1 & 1 & 1 \end{bmatrix} \\
+X^T \frac{\partial L}{\partial Y} &= \begin{bmatrix} x\_{11} x\_{12} \\ x\_{21} x\_{22} \end{bmatrix} \begin{bmatrix} 1 & 1 & 1 \\ 1 & 1 & 1 \end{bmatrix} \\
+&= \begin{bmatrix} x\_{11}+x\_{12} & x\_{11}+x\_{12} & x\_{11}+x\_{12} \\ x\_{21}+x\_{22} & x\_{21}+x\_{22} & x\_{21}+x\_{22} \\ \end{bmatrix} \\
+\end{aligned}
+$$</p><p>也就是输入多个样本得到的 $w$ 的偏导数之和。</p><p>最后是考虑偏置 $b$ ，书中实现是 $\frac{\partial L}{\partial Y}$ 按列求和，其实和上面的多个样本的 $w$ 偏导数之和一样。
+如果把偏置理解为输入始终为 1 的神经元，加入上面的式子推导，可以得到最终多出来的行其实就等于原 $\frac{\partial L}{\partial Y}$ 各列元素之和。</p><p>$$
+\begin{aligned}
+a &=\begin{bmatrix}
+a_{11} &
+a_{12} &
+a_{13} \\
+a_{21} &
+a_{22} &
+a_{23}
+\end{bmatrix} \\
+x &=\begin{bmatrix}
+x_{11} &
+x_{12} &
+1 \\
+x_{21} &
+x_{22} &
+1
+\end{bmatrix} \\
+w &=\begin{bmatrix}
+w_{11} &
+w_{21} &
+w_{31} \\
+w_{12} &
+w_{22} &
+w_{32} \\
+b &
+b &
+b
+\end{bmatrix} \\
+X^T &= \begin{bmatrix}
+x_{11} &
+x_{21} \\
+x_{12} &
+x_{22} \\
+1 &
+1
+\end{bmatrix} \\
+\frac{\partial L}{\partial Y} &=\begin{bmatrix}
+\frac{\partial L}{\partial Y_{11}} &
+\frac{\partial L}{\partial Y_{12}} &
+\frac{\partial L}{\partial Y_{13}} \\
+\frac{\partial L}{\partial Y_{21}} &
+\frac{\partial L}{\partial Y_{22}} &
+\frac{\partial L}{\partial Y_{23}}
+\end{bmatrix} \\
+X^T \frac{\partial L}{\partial Y} &=\begin{bmatrix}
+x_{11} &
+x_{12} \\
+x_{12} &
+x_{22} \\
+1 &
+1 \\
+\end{bmatrix}
+\begin{bmatrix}
+\frac{\partial L}{\partial Y_{11}} &
+\frac{\partial L}{\partial Y_{12}} &
+\frac{\partial L}{\partial Y_{13}} \\
+\frac{\partial L}{\partial Y_{21}} &
+\frac{\partial L}{\partial Y_{22}} &
+\frac{\partial L}{\partial Y_{23}}
+\end{bmatrix} \\
+&=\begin{bmatrix}
+\frac{\partial L}{\partial Y_{11}} x_{11}+\frac{\partial L}{\partial Y_{12}} x_{12} &
+\frac{\partial L}{\partial Y_{11}} x_{11}+\frac{\partial L}{\partial Y_{12}} x_{12} &
+\frac{\partial L}{\partial Y_{11}} x_{11}+\frac{\partial L}{\partial Y_{12}} x_{12} \\
+\frac{\partial L}{\partial Y_{21}} x_{21}+\frac{\partial L}{\partial Y_{22}} x_{22} &
+\frac{\partial L}{\partial Y_{21}} x_{21}+\frac{\partial L}{\partial Y_{22}} x_{22} &
+\frac{\partial L}{\partial Y_{21}} x_{21}+\frac{\partial L}{\partial Y_{22}} x_{22} \\
+\frac{\partial L}{\partial Y_{11}} + \frac{\partial L}{\partial Y_{21}} &
+\frac{\partial L}{\partial Y_{12}} + \frac{\partial L}{\partial Y_{22}} &
+\frac{\partial L}{\partial Y_{13}} + \frac{\partial L}{\partial Y_{23}} \\
+\end{bmatrix} \\
+\end{aligned}
+$$</p><p>下面就按上面的推导实现下，注意 affine 层前还可以连接别的层，反向传播并不是在 affine 层终止的。
+书中 <code>backward</code> 返回的结果会作为上一层的 <code>dout</code>，所以 affine 层保存了 <code>dw</code> 而返回的是 <code>dx</code>。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>class</span> <span class=nc>AffineLayer</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>w</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>,</span> <span class=n>b</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=kc>None</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>w</span> <span class=o>=</span> <span class=n>w</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>b</span> <span class=o>=</span> <span class=n>b</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>x</span><span class=p>:</span> <span class=n>Optional</span><span class=p>[</span><span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>]</span> <span class=o>=</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>dw</span><span class=p>:</span> <span class=n>Optional</span><span class=p>[</span><span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>]</span> <span class=o>=</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>db</span><span class=p>:</span> <span class=n>Optional</span><span class=p>[</span><span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>]</span> <span class=o>=</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>forward</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>x</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>,</span> <span class=o>**</span><span class=n>kwargs</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>x</span> <span class=o>=</span> <span class=n>x</span>
+</span></span><span class=line><span class=cl>        <span class=n>out</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>dot</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>x</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>w</span><span class=p>)</span> <span class=o>+</span> <span class=bp>self</span><span class=o>.</span><span class=n>b</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>out</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>backward</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>dout</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>dx</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>dot</span><span class=p>(</span><span class=n>dout</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>w</span><span class=o>.</span><span class=n>T</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>dw</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>dot</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>x</span><span class=o>.</span><span class=n>T</span><span class=p>,</span> <span class=n>dout</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>db</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>sum</span><span class=p>(</span><span class=n>dout</span><span class=p>,</span> <span class=n>axis</span><span class=o>=</span><span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>dx</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>optimize</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>lr</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=bp>self</span><span class=o>.</span><span class=n>dw</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span> <span class=ow>and</span> <span class=bp>self</span><span class=o>.</span><span class=n>w</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=bp>self</span><span class=o>.</span><span class=n>w</span> <span class=o>-=</span> <span class=n>lr</span> <span class=o>*</span> <span class=bp>self</span><span class=o>.</span><span class=n>dw</span>
+</span></span></code></pre></td></tr></table></div></div><h4 id=softmax-with-loss-实现>softmax-with-loss 实现</h4><p>回顾 softmax 函数的定义</p><p>$$
+y_k=\frac{exp(a_k)}{\sum_{i=1}^{n} exp(a_i)}
+$$</p><p>其中 $k$ 表示 softmax 输出下标，$i$ 表示 softmax 输入的下标，输入总数为 $n$。</p><p>题中的 with-loss 意指这一层还包含一个损失函数，书中是交叉熵损失函数，定义如下。</p><p>$$
+L=-\sum_{k}t_k \log_{e}y_k
+$$</p><p>书中计算图如下</p><p><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/img/5-29.png width=1234 height=510 srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/img/5-29_hufe297e79c85b9c39d6bf484e33ceadc7_106013_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/img/5-29_hufe297e79c85b9c39d6bf484e33ceadc7_106013_1024x0_resize_box_3.png 1024w" loading=lazy alt=图5-29 class=gallery-image data-flex-grow=241 data-flex-basis=580px></p><p>计算图反向传播结果：</p><p><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/img/A-5.png width=1231 height=520 srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/img/A-5_huc256edb7de30e758e59a08949c69fc21_116353_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/img/A-5_huc256edb7de30e758e59a08949c69fc21_116353_1024x0_resize_box_3.png 1024w" loading=lazy alt=图A-5 class=gallery-image data-flex-grow=236 data-flex-basis=568px></p><p>计算过程在书中附录A，如下。</p><p><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/img/A-5-1.png width=1192 height=903 srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/img/A-5-1_hu9240978b4b4077891aab2dc86b0980ed_97085_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/img/A-5-1_hu9240978b4b4077891aab2dc86b0980ed_97085_1024x0_resize_box_3.png 1024w" loading=lazy alt=图A-5-1 class=gallery-image data-flex-grow=132 data-flex-basis=316px>
+<img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/img/A-5-2.png width=1200 height=878 srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/img/A-5-2_hu0ca66b72d41ef719a34c833364de7e9e_115058_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/img/A-5-2_hu0ca66b72d41ef719a34c833364de7e9e_115058_1024x0_resize_box_3.png 1024w" loading=lazy alt=图A-5-2 class=gallery-image data-flex-grow=136 data-flex-basis=328px>
+<img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/img/A-5-3.png width=1206 height=872 srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/img/A-5-3_hu02bfd840c70adffa1fb808220beb2291_119676_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/img/A-5-3_hu02bfd840c70adffa1fb808220beb2291_119676_1024x0_resize_box_3.png 1024w" loading=lazy alt=图A-5-3 class=gallery-image data-flex-grow=138 data-flex-basis=331px>
+<img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/img/A-5-4.png width=1204 height=881 srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/img/A-5-4_hu6bca44dee1aa21f443a0343e718f28c3_118452_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/img/A-5-4_hu6bca44dee1aa21f443a0343e718f28c3_118452_1024x0_resize_box_3.png 1024w" loading=lazy alt=图A-5-4 class=gallery-image data-flex-grow=136 data-flex-basis=327px>
+<img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/img/A-5-5.png width=1205 height=888 srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/img/A-5-5_hu1c8f468b36c5e265ba6fb3e2f91cbf81_123501_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/img/A-5-5_hu1c8f468b36c5e265ba6fb3e2f91cbf81_123501_1024x0_resize_box_3.png 1024w" loading=lazy alt=图A-5-5 class=gallery-image data-flex-grow=135 data-flex-basis=325px>
+<img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/img/A-5-6.png width=1214 height=886 srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/img/A-5-6_hu95e2a5d34a605a636635da0c9359b339_127471_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/img/A-5-6_hu95e2a5d34a605a636635da0c9359b339_127471_1024x0_resize_box_3.png 1024w" loading=lazy alt=图A-5-6 class=gallery-image data-flex-grow=137 data-flex-basis=328px></p><p>公式中的 $t_1$,$t_2$,$t_3$ 是监督数据（one-hot表示），最终简化的结果非常简洁 $(y_1-t_1,y_2-t_2,y_3-t_3)$ ，即 $y-t$ 。</p><p>代码实现如下。注意反向传播中除以批大小，得到整批样本的平均误差。因为 Layer 的 <code>backward</code> 设计是接收的 <code>dout</code> 是一个向量，所以这里除以 <code>batch_size</code>。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>from</span> <span class=nn>common.functions</span> <span class=kn>import</span> <span class=n>cross_entropy_error</span><span class=p>,</span> <span class=n>softmax</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>SoftmaxWithLossLayer</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>loss</span> <span class=o>=</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>y</span> <span class=o>=</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>t</span> <span class=o>=</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>forward</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>x</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>,</span> <span class=o>*</span><span class=p>,</span> <span class=n>t</span><span class=p>:</span> <span class=n>Optional</span><span class=p>[</span><span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>]</span> <span class=o>=</span> <span class=kc>None</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>y</span> <span class=o>=</span> <span class=n>softmax</span><span class=p>(</span><span class=n>x</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=n>t</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=bp>self</span><span class=o>.</span><span class=n>t</span> <span class=o>=</span> <span class=n>t</span>
+</span></span><span class=line><span class=cl>            <span class=bp>self</span><span class=o>.</span><span class=n>loss</span> <span class=o>=</span> <span class=n>cross_entropy_error</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>y</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>t</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>y</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>backward</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>dout</span><span class=o>=</span><span class=mi>1</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>batch_size</span> <span class=o>=</span> <span class=bp>self</span><span class=o>.</span><span class=n>t</span><span class=o>.</span><span class=n>shape</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>        <span class=n>dx</span> <span class=o>=</span> <span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>y</span> <span class=o>-</span> <span class=bp>self</span><span class=o>.</span><span class=n>t</span><span class=p>)</span> <span class=o>/</span> <span class=n>batch_size</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>dx</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>optimize</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>lr</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>pass</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=梯度确认>梯度确认</h3><p>为了验证正确性，可以使用梯度确认方法。</p><p>梯度确认法是比较数值微分的结果和误差反向传播法结果，以确认误差反向传播法的实现是否正确。</p><p>数值微分法的结果和误差反向传播法结果的差值，如果很大，则说明反向传播法的实现有误。
+因为数值微分法本身结果是存在误差的，所以只要差值非常小，就可以认为反向传播法的实现是正确的。
+（对菜鸡而言，大佬应该一眼就看出来对不对了）</p><p>那么梯度接下来用梯度确认法验证上面的 <code>ReLU</code>、<code>Sigmoid</code>、<code>Affine</code>、<code>SoftmaxWithLoss</code> 的实现是否正确。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>  1
+</span><span class=lnt>  2
+</span><span class=lnt>  3
+</span><span class=lnt>  4
+</span><span class=lnt>  5
+</span><span class=lnt>  6
+</span><span class=lnt>  7
+</span><span class=lnt>  8
+</span><span class=lnt>  9
+</span><span class=lnt> 10
+</span><span class=lnt> 11
+</span><span class=lnt> 12
+</span><span class=lnt> 13
+</span><span class=lnt> 14
+</span><span class=lnt> 15
+</span><span class=lnt> 16
+</span><span class=lnt> 17
+</span><span class=lnt> 18
+</span><span class=lnt> 19
+</span><span class=lnt> 20
+</span><span class=lnt> 21
+</span><span class=lnt> 22
+</span><span class=lnt> 23
+</span><span class=lnt> 24
+</span><span class=lnt> 25
+</span><span class=lnt> 26
+</span><span class=lnt> 27
+</span><span class=lnt> 28
+</span><span class=lnt> 29
+</span><span class=lnt> 30
+</span><span class=lnt> 31
+</span><span class=lnt> 32
+</span><span class=lnt> 33
+</span><span class=lnt> 34
+</span><span class=lnt> 35
+</span><span class=lnt> 36
+</span><span class=lnt> 37
+</span><span class=lnt> 38
+</span><span class=lnt> 39
+</span><span class=lnt> 40
+</span><span class=lnt> 41
+</span><span class=lnt> 42
+</span><span class=lnt> 43
+</span><span class=lnt> 44
+</span><span class=lnt> 45
+</span><span class=lnt> 46
+</span><span class=lnt> 47
+</span><span class=lnt> 48
+</span><span class=lnt> 49
+</span><span class=lnt> 50
+</span><span class=lnt> 51
+</span><span class=lnt> 52
+</span><span class=lnt> 53
+</span><span class=lnt> 54
+</span><span class=lnt> 55
+</span><span class=lnt> 56
+</span><span class=lnt> 57
+</span><span class=lnt> 58
+</span><span class=lnt> 59
+</span><span class=lnt> 60
+</span><span class=lnt> 61
+</span><span class=lnt> 62
+</span><span class=lnt> 63
+</span><span class=lnt> 64
+</span><span class=lnt> 65
+</span><span class=lnt> 66
+</span><span class=lnt> 67
+</span><span class=lnt> 68
+</span><span class=lnt> 69
+</span><span class=lnt> 70
+</span><span class=lnt> 71
+</span><span class=lnt> 72
+</span><span class=lnt> 73
+</span><span class=lnt> 74
+</span><span class=lnt> 75
+</span><span class=lnt> 76
+</span><span class=lnt> 77
+</span><span class=lnt> 78
+</span><span class=lnt> 79
+</span><span class=lnt> 80
+</span><span class=lnt> 81
+</span><span class=lnt> 82
+</span><span class=lnt> 83
+</span><span class=lnt> 84
+</span><span class=lnt> 85
+</span><span class=lnt> 86
+</span><span class=lnt> 87
+</span><span class=lnt> 88
+</span><span class=lnt> 89
+</span><span class=lnt> 90
+</span><span class=lnt> 91
+</span><span class=lnt> 92
+</span><span class=lnt> 93
+</span><span class=lnt> 94
+</span><span class=lnt> 95
+</span><span class=lnt> 96
+</span><span class=lnt> 97
+</span><span class=lnt> 98
+</span><span class=lnt> 99
+</span><span class=lnt>100
+</span><span class=lnt>101
+</span><span class=lnt>102
+</span><span class=lnt>103
+</span><span class=lnt>104
+</span><span class=lnt>105
+</span><span class=lnt>106
+</span><span class=lnt>107
+</span><span class=lnt>108
+</span><span class=lnt>109
+</span><span class=lnt>110
+</span><span class=lnt>111
+</span><span class=lnt>112
+</span><span class=lnt>113
+</span><span class=lnt>114
+</span><span class=lnt>115
+</span><span class=lnt>116
+</span><span class=lnt>117
+</span><span class=lnt>118
+</span><span class=lnt>119
+</span><span class=lnt>120
+</span><span class=lnt>121
+</span><span class=lnt>122
+</span><span class=lnt>123
+</span><span class=lnt>124
+</span><span class=lnt>125
+</span><span class=lnt>126
+</span><span class=lnt>127
+</span><span class=lnt>128
+</span><span class=lnt>129
+</span><span class=lnt>130
+</span><span class=lnt>131
+</span><span class=lnt>132
+</span><span class=lnt>133
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>unittest</span>
+</span></span><span class=line><span class=cl><span class=kn>from</span> <span class=nn>common</span> <span class=kn>import</span> <span class=n>layers</span>
+</span></span><span class=line><span class=cl><span class=kn>from</span> <span class=nn>common.functions</span> <span class=kn>import</span> <span class=n>relu</span><span class=p>,</span> <span class=n>sigmoid</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>TestReLU</span><span class=p>(</span><span class=n>unittest</span><span class=o>.</span><span class=n>TestCase</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=o>*</span><span class=n>args</span><span class=p>,</span> <span class=o>**</span><span class=n>kwargs</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=nb>super</span><span class=p>()</span><span class=o>.</span><span class=fm>__init__</span><span class=p>(</span><span class=o>*</span><span class=n>args</span><span class=p>,</span> <span class=o>**</span><span class=n>kwargs</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>layer</span> <span class=o>=</span> <span class=n>ReLULayer</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>test_forward</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=c1># 正向传播结果</span>
+</span></span><span class=line><span class=cl>        <span class=n>x</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>                      <span class=p>[</span><span class=mi>3</span><span class=p>,</span> <span class=mi>4</span><span class=p>]])</span>
+</span></span><span class=line><span class=cl>        <span class=n>expected</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>                             <span class=p>[</span><span class=mi>3</span><span class=p>,</span> <span class=mi>4</span><span class=p>]])</span>
+</span></span><span class=line><span class=cl>        <span class=c1># 比较手算结果</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>assertTrue</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>array_equal</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>layer</span><span class=o>.</span><span class=n>forward</span><span class=p>(</span><span class=n>x</span><span class=p>),</span> <span class=n>expected</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>        <span class=c1># 比较书附带源码的 relu 实现结果</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>assertTrue</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>array_equal</span><span class=p>(</span><span class=n>relu</span><span class=p>(</span><span class=n>x</span><span class=p>),</span> <span class=bp>self</span><span class=o>.</span><span class=n>layer</span><span class=o>.</span><span class=n>forward</span><span class=p>(</span><span class=n>x</span><span class=p>)))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>test_backward</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>x</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>2.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>                      <span class=p>[</span><span class=mf>3.</span><span class=p>,</span> <span class=mf>4.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>                      <span class=p>[</span><span class=o>-</span><span class=mf>1.</span><span class=p>,</span> <span class=o>-</span><span class=mf>1.</span><span class=p>]])</span>
+</span></span><span class=line><span class=cl>        <span class=n>dout</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>                         <span class=p>[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>                         <span class=p>[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>]])</span>
+</span></span><span class=line><span class=cl>        <span class=n>expected</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>                             <span class=p>[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>                             <span class=p>[</span><span class=mf>0.</span><span class=p>,</span> <span class=mf>0.</span><span class=p>]])</span>
+</span></span><span class=line><span class=cl>        <span class=c1># 先做一次正向传播才能计算反向传播</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>layer</span><span class=o>.</span><span class=n>forward</span><span class=p>(</span><span class=n>x</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=c1># 对比手算结果</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>assertTrue</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>array_equal</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>layer</span><span class=o>.</span><span class=n>backward</span><span class=p>(</span><span class=n>dout</span><span class=p>),</span> <span class=n>expected</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>        <span class=c1># 对比数值微分法结果</span>
+</span></span><span class=line><span class=cl>        <span class=n>d</span> <span class=o>=</span> <span class=mf>1.e-5</span>
+</span></span><span class=line><span class=cl>        <span class=n>dx</span> <span class=o>=</span> <span class=p>(</span><span class=n>relu</span><span class=p>(</span><span class=n>x</span> <span class=o>+</span> <span class=n>d</span><span class=p>)</span> <span class=o>-</span> <span class=n>relu</span><span class=p>(</span><span class=n>x</span> <span class=o>-</span> <span class=n>d</span><span class=p>))</span> <span class=o>/</span> <span class=p>(</span><span class=mi>2</span> <span class=o>*</span> <span class=n>d</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>assertTrue</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>allclose</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>layer</span><span class=o>.</span><span class=n>backward</span><span class=p>(</span><span class=n>dout</span><span class=p>),</span> <span class=n>dx</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>TestSigmoid</span><span class=p>(</span><span class=n>unittest</span><span class=o>.</span><span class=n>TestCase</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=o>*</span><span class=n>args</span><span class=p>,</span> <span class=o>**</span><span class=n>kwargs</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=nb>super</span><span class=p>()</span><span class=o>.</span><span class=fm>__init__</span><span class=p>(</span><span class=o>*</span><span class=n>args</span><span class=p>,</span> <span class=o>**</span><span class=n>kwargs</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>layer</span> <span class=o>=</span> <span class=n>SigmoidLayer</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>test_forward</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>x</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>2.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>                      <span class=p>[</span><span class=mf>3.</span><span class=p>,</span> <span class=mf>4.</span><span class=p>]])</span>
+</span></span><span class=line><span class=cl>        <span class=n>expected</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mf>0.73105858</span><span class=p>,</span> <span class=mf>0.88079708</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>                             <span class=p>[</span><span class=mf>0.95257413</span><span class=p>,</span> <span class=mf>0.98201379</span><span class=p>]])</span>
+</span></span><span class=line><span class=cl>        <span class=c1># 比较手算结果</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>assertTrue</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>allclose</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>layer</span><span class=o>.</span><span class=n>forward</span><span class=p>(</span><span class=n>x</span><span class=p>),</span> <span class=n>expected</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>        <span class=c1># 比较书附带源码的 sigmoid 计算结果</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>assertTrue</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>allclose</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>layer</span><span class=o>.</span><span class=n>forward</span><span class=p>(</span><span class=n>x</span><span class=p>),</span> <span class=n>sigmoid</span><span class=p>(</span><span class=n>x</span><span class=p>)))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>test_backward</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>x</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>2.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>                      <span class=p>[</span><span class=mf>3.</span><span class=p>,</span> <span class=mf>4.</span><span class=p>]])</span>
+</span></span><span class=line><span class=cl>        <span class=n>dout</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>                         <span class=p>[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>]])</span>
+</span></span><span class=line><span class=cl>        <span class=n>expected</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mf>0.19661193</span><span class=p>,</span> <span class=mf>0.10499359</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>                             <span class=p>[</span><span class=mf>0.04517666</span><span class=p>,</span> <span class=mf>0.01766271</span><span class=p>]])</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>layer</span><span class=o>.</span><span class=n>forward</span><span class=p>(</span><span class=n>x</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>dx</span> <span class=o>=</span> <span class=bp>self</span><span class=o>.</span><span class=n>layer</span><span class=o>.</span><span class=n>backward</span><span class=p>(</span><span class=n>dout</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=c1># 比较手算结果</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>assertTrue</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>allclose</span><span class=p>(</span><span class=n>dx</span><span class=p>,</span> <span class=n>expected</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>        <span class=c1># 比较数值微分法结果</span>
+</span></span><span class=line><span class=cl>        <span class=n>d</span> <span class=o>=</span> <span class=mf>1.e-5</span>
+</span></span><span class=line><span class=cl>        <span class=n>ndx</span> <span class=o>=</span> <span class=p>(</span><span class=n>sigmoid</span><span class=p>(</span><span class=n>x</span> <span class=o>+</span> <span class=n>d</span><span class=p>)</span> <span class=o>-</span> <span class=n>sigmoid</span><span class=p>(</span><span class=n>x</span> <span class=o>-</span> <span class=n>d</span><span class=p>))</span> <span class=o>/</span> <span class=p>(</span><span class=mi>2</span> <span class=o>*</span> <span class=n>d</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>assertTrue</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>allclose</span><span class=p>(</span><span class=n>dx</span><span class=p>,</span> <span class=n>ndx</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>TestAffine</span><span class=p>(</span><span class=n>unittest</span><span class=o>.</span><span class=n>TestCase</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=o>*</span><span class=n>args</span><span class=p>,</span> <span class=o>**</span><span class=n>kwargs</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=nb>super</span><span class=p>()</span><span class=o>.</span><span class=fm>__init__</span><span class=p>(</span><span class=o>*</span><span class=n>args</span><span class=p>,</span> <span class=o>**</span><span class=n>kwargs</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=c1># 2输入3神经元</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>layer</span> <span class=o>=</span> <span class=n>AffineLayer</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>                                           <span class=p>[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>]]),</span>
+</span></span><span class=line><span class=cl>                                 <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([</span><span class=mf>0.</span><span class=p>,</span> <span class=mf>0.</span><span class=p>,</span> <span class=mf>0.</span><span class=p>]))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>test_forward</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>x</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>2.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>                      <span class=p>[</span><span class=mf>3.</span><span class=p>,</span> <span class=mf>4.</span><span class=p>]])</span>
+</span></span><span class=line><span class=cl>        <span class=n>expected</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mf>3.</span><span class=p>,</span> <span class=mf>3.</span><span class=p>,</span> <span class=mf>3.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>                             <span class=p>[</span><span class=mf>7.</span><span class=p>,</span> <span class=mf>7.</span><span class=p>,</span> <span class=mf>7.</span><span class=p>]])</span>
+</span></span><span class=line><span class=cl>        <span class=n>y</span> <span class=o>=</span> <span class=bp>self</span><span class=o>.</span><span class=n>layer</span><span class=o>.</span><span class=n>forward</span><span class=p>(</span><span class=n>x</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>assertTrue</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>allclose</span><span class=p>(</span><span class=n>y</span><span class=p>,</span> <span class=n>expected</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>test_backward</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>x</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>2.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>                      <span class=p>[</span><span class=mf>3.</span><span class=p>,</span> <span class=mf>4.</span><span class=p>]])</span>
+</span></span><span class=line><span class=cl>        <span class=n>dout</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>                         <span class=p>[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>]])</span>
+</span></span><span class=line><span class=cl>        <span class=n>y</span> <span class=o>=</span> <span class=bp>self</span><span class=o>.</span><span class=n>layer</span><span class=o>.</span><span class=n>forward</span><span class=p>(</span><span class=n>x</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>dx</span> <span class=o>=</span> <span class=bp>self</span><span class=o>.</span><span class=n>layer</span><span class=o>.</span><span class=n>backward</span><span class=p>(</span><span class=n>dout</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=c1># TODO: 如何数值微分法计算dx？</span>
+</span></span><span class=line><span class=cl>        <span class=n>layer</span> <span class=o>=</span> <span class=n>layers</span><span class=o>.</span><span class=n>Affine</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>layer</span><span class=o>.</span><span class=n>w</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>layer</span><span class=o>.</span><span class=n>b</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>layer</span><span class=o>.</span><span class=n>forward</span><span class=p>(</span><span class=n>x</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>expected</span> <span class=o>=</span> <span class=n>layer</span><span class=o>.</span><span class=n>backward</span><span class=p>(</span><span class=n>dout</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=c1># 验证</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>assertTrue</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>allclose</span><span class=p>(</span><span class=n>dx</span><span class=p>,</span> <span class=n>expected</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>TestSoftmaxWithLoss</span><span class=p>(</span><span class=n>unittest</span><span class=o>.</span><span class=n>TestCase</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=o>*</span><span class=n>args</span><span class=p>,</span> <span class=o>**</span><span class=n>kwargs</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=nb>super</span><span class=p>()</span><span class=o>.</span><span class=fm>__init__</span><span class=p>(</span><span class=o>*</span><span class=n>args</span><span class=p>,</span> <span class=o>**</span><span class=n>kwargs</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>layer</span> <span class=o>=</span> <span class=n>SoftmaxWithLossLayer</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>test_forward</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>x</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>2.</span><span class=p>,</span> <span class=mf>3.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>                      <span class=p>[</span><span class=mf>4.</span><span class=p>,</span> <span class=mf>5.</span><span class=p>,</span> <span class=mf>6.</span><span class=p>]])</span>
+</span></span><span class=line><span class=cl>        <span class=n>t</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mf>0.</span><span class=p>,</span> <span class=mf>0.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>                      <span class=p>[</span><span class=mf>0.</span><span class=p>,</span> <span class=mf>0.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>]])</span>
+</span></span><span class=line><span class=cl>        <span class=n>expected</span> <span class=o>=</span> <span class=mf>0.4076058141229194</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>layer</span><span class=o>.</span><span class=n>forward</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>t</span><span class=o>=</span><span class=n>t</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>assertAlmostEqual</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>layer</span><span class=o>.</span><span class=n>loss</span><span class=p>,</span> <span class=n>expected</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>test_backward</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>x</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>4.</span><span class=p>,</span> <span class=mf>5.</span><span class=p>]])</span>
+</span></span><span class=line><span class=cl>        <span class=n>t</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mf>0.</span><span class=p>,</span> <span class=mf>0.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>]])</span>
+</span></span><span class=line><span class=cl>        <span class=n>dout</span> <span class=o>=</span> <span class=mf>1.</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>layer</span><span class=o>.</span><span class=n>forward</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>t</span><span class=o>=</span><span class=n>t</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>dx</span> <span class=o>=</span> <span class=bp>self</span><span class=o>.</span><span class=n>layer</span><span class=o>.</span><span class=n>backward</span><span class=p>(</span><span class=n>dout</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=c1># TODO: 如何验证 softmax-with-loss 的反向传播结果？</span>
+</span></span><span class=line><span class=cl>        <span class=n>layer</span> <span class=o>=</span> <span class=n>layers</span><span class=o>.</span><span class=n>SoftmaxWithLoss</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>        <span class=n>layer</span><span class=o>.</span><span class=n>forward</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>t</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>expected</span> <span class=o>=</span> <span class=n>layer</span><span class=o>.</span><span class=n>backward</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>        <span class=c1># 验证</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>assertTrue</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>allclose</span><span class=p>(</span><span class=n>dx</span><span class=p>,</span> <span class=n>expected</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>_</span> <span class=o>=</span> <span class=n>unittest</span><span class=o>.</span><span class=n>main</span><span class=p>(</span><span class=n>argv</span><span class=o>=</span><span class=p>[</span><span class=s1>&#39;&#39;</span><span class=p>],</span> <span class=n>verbosity</span><span class=o>=</span><span class=mi>2</span><span class=p>,</span> <span class=n>exit</span><span class=o>=</span><span class=kc>False</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><pre><code>test_backward (__main__.TestAffine) ... ok
+test_forward (__main__.TestAffine) ... ok
+test_backward (__main__.TestReLU) ... ok
+test_forward (__main__.TestReLU) ... ok
+test_backward (__main__.TestSigmoid) ... ok
+test_forward (__main__.TestSigmoid) ... ok
+test_backward (__main__.TestSoftmaxWithLoss) ... ok
+test_forward (__main__.TestSoftmaxWithLoss) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.005s
+
+OK
+</code></pre><h3 id=反向传播学习实例>反向传播学习实例</h3><p>不使用书中代码。模型还是采用3层神经网络，输入层、隐藏层、输出层。输入层神经元50个，隐藏层神经元100个，输出层神经元10个。输入信号 784 个。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>from</span> <span class=nn>dataset.mnist</span> <span class=kn>import</span> <span class=n>load_mnist</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>SimpleNet</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>layers</span> <span class=o>=</span> <span class=p>[</span>
+</span></span><span class=line><span class=cl>            <span class=n>AffineLayer</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>random</span><span class=o>.</span><span class=n>randn</span><span class=p>(</span><span class=mi>784</span><span class=p>,</span> <span class=mi>50</span><span class=p>),</span> <span class=n>np</span><span class=o>.</span><span class=n>random</span><span class=o>.</span><span class=n>randn</span><span class=p>(</span><span class=mi>50</span><span class=p>)),</span>
+</span></span><span class=line><span class=cl>            <span class=n>ReLULayer</span><span class=p>(),</span>
+</span></span><span class=line><span class=cl>            <span class=n>AffineLayer</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>random</span><span class=o>.</span><span class=n>randn</span><span class=p>(</span><span class=mi>50</span><span class=p>,</span> <span class=mi>100</span><span class=p>),</span> <span class=n>np</span><span class=o>.</span><span class=n>random</span><span class=o>.</span><span class=n>randn</span><span class=p>(</span><span class=mi>100</span><span class=p>)),</span>
+</span></span><span class=line><span class=cl>            <span class=n>ReLULayer</span><span class=p>(),</span>
+</span></span><span class=line><span class=cl>            <span class=n>AffineLayer</span><span class=p>(</span><span class=n>np</span><span class=o>.</span><span class=n>random</span><span class=o>.</span><span class=n>randn</span><span class=p>(</span><span class=mi>100</span><span class=p>,</span> <span class=mi>10</span><span class=p>),</span> <span class=n>np</span><span class=o>.</span><span class=n>random</span><span class=o>.</span><span class=n>randn</span><span class=p>(</span><span class=mi>10</span><span class=p>)),</span>
+</span></span><span class=line><span class=cl>            <span class=n>SoftmaxWithLossLayer</span><span class=p>(),</span>
+</span></span><span class=line><span class=cl>        <span class=p>]</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>predict</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>x</span><span class=p>,</span> <span class=n>t</span><span class=o>=</span><span class=kc>None</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>y</span> <span class=o>=</span> <span class=n>x</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=n>l</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>layers</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>y</span> <span class=o>=</span> <span class=n>l</span><span class=o>.</span><span class=n>forward</span><span class=p>(</span><span class=n>y</span><span class=p>,</span> <span class=n>t</span><span class=o>=</span><span class=n>t</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>y</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>backward</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>dout</span> <span class=o>=</span> <span class=mi>1</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=n>l</span> <span class=ow>in</span> <span class=nb>reversed</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>layers</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>            <span class=n>dout</span> <span class=o>=</span> <span class=n>l</span><span class=o>.</span><span class=n>backward</span><span class=p>(</span><span class=n>dout</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>optimize</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>lr</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=n>l</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>layers</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>l</span><span class=o>.</span><span class=n>optimize</span><span class=p>(</span><span class=n>lr</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>loss</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=nb>hasattr</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>layers</span><span class=p>[</span><span class=o>-</span><span class=mi>1</span><span class=p>],</span> <span class=s1>&#39;loss&#39;</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>layers</span><span class=p>[</span><span class=o>-</span><span class=mi>1</span><span class=p>]</span><span class=o>.</span><span class=n>loss</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>accuracy</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>x</span><span class=p>,</span> <span class=n>t</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>y</span> <span class=o>=</span> <span class=bp>self</span><span class=o>.</span><span class=n>predict</span><span class=p>(</span><span class=n>x</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>y</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>argmax</span><span class=p>(</span><span class=n>y</span><span class=p>,</span> <span class=n>axis</span><span class=o>=</span><span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>t</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>argmax</span><span class=p>(</span><span class=n>t</span><span class=p>,</span> <span class=n>axis</span><span class=o>=</span><span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>np</span><span class=o>.</span><span class=n>sum</span><span class=p>(</span><span class=n>y</span> <span class=o>==</span> <span class=n>t</span><span class=p>)</span> <span class=o>/</span> <span class=nb>float</span><span class=p>(</span><span class=n>x</span><span class=o>.</span><span class=n>shape</span><span class=p>[</span><span class=mi>0</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>mini_batch</span><span class=p>(</span><span class=n>training_data</span><span class=p>,</span> <span class=n>labels</span><span class=p>,</span> <span class=n>batch_size</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34; 在数据集中随机抽取 mini-batch 
+</span></span></span><span class=line><span class=cl><span class=s2>    &#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=n>mask</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>random</span><span class=o>.</span><span class=n>choice</span><span class=p>(</span><span class=n>training_data</span><span class=o>.</span><span class=n>shape</span><span class=p>[</span><span class=mi>0</span><span class=p>],</span> <span class=n>batch_size</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>training_data</span><span class=p>[</span><span class=n>mask</span><span class=p>],</span> <span class=n>labels</span><span class=p>[</span><span class=n>mask</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 加载数据</span>
+</span></span><span class=line><span class=cl><span class=p>(</span><span class=n>x_train</span><span class=p>,</span> <span class=n>t_train</span><span class=p>),</span> <span class=p>(</span><span class=n>x_test</span><span class=p>,</span> <span class=n>t_test</span><span class=p>)</span> <span class=o>=</span> <span class=n>load_mnist</span><span class=p>(</span><span class=n>one_hot_label</span><span class=o>=</span><span class=kc>True</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>n</span> <span class=o>=</span> <span class=n>SimpleNet</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 训练</span>
+</span></span><span class=line><span class=cl><span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=mi>10000</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=n>x</span><span class=p>,</span> <span class=n>t</span> <span class=o>=</span> <span class=n>mini_batch</span><span class=p>(</span><span class=n>x_train</span><span class=p>,</span> <span class=n>t_train</span><span class=p>,</span> <span class=mi>100</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>n</span><span class=o>.</span><span class=n>predict</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>t</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>n</span><span class=o>.</span><span class=n>backward</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>    <span class=n>n</span><span class=o>.</span><span class=n>optimize</span><span class=p>(</span><span class=mf>0.01</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>i</span> <span class=o>%</span> <span class=mi>1000</span> <span class=o>==</span> <span class=mi>0</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>x</span><span class=p>,</span> <span class=n>t</span> <span class=o>=</span> <span class=n>mini_batch</span><span class=p>(</span><span class=n>x_test</span><span class=p>,</span> <span class=n>t_test</span><span class=p>,</span> <span class=mi>100</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s1>&#39;第</span><span class=si>{</span><span class=n>i</span><span class=si>}</span><span class=s1>次训练 损失 </span><span class=si>{</span><span class=n>n</span><span class=o>.</span><span class=n>loss</span><span class=p>()</span><span class=si>}</span><span class=s1> 正确率 </span><span class=si>{</span><span class=n>n</span><span class=o>.</span><span class=n>accuracy</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>t</span><span class=p>)</span><span class=si>}</span><span class=s1>&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 训练后的正确率</span>
+</span></span><span class=line><span class=cl><span class=n>x</span><span class=p>,</span> <span class=n>t</span> <span class=o>=</span> <span class=n>mini_batch</span><span class=p>(</span><span class=n>x_test</span><span class=p>,</span> <span class=n>t_test</span><span class=p>,</span> <span class=mi>100</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=s1>&#39;验证正确率&#39;</span><span class=p>,</span> <span class=n>n</span><span class=o>.</span><span class=n>accuracy</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>t</span><span class=p>))</span>
+</span></span></code></pre></td></tr></table></div></div><pre><code>第0次训练 损失 14.786135330514808 正确率 0.1
+第1000次训练 损失 3.5467239155184798 正确率 0.83
+第2000次训练 损失 2.286845867506459 正确率 0.77
+第3000次训练 损失 1.2440765516672603 正确率 0.87
+第4000次训练 损失 1.9765579805296412 正确率 0.75
+第5000次训练 损失 0.8591504698224851 正确率 0.87
+第6000次训练 损失 1.180173605455945 正确率 0.87
+第7000次训练 损失 0.5386356986940977 正确率 0.84
+第8000次训练 损失 0.7360734923263227 正确率 0.82
+第9000次训练 损失 0.9423206740379103 正确率 0.82
+验证正确率 0.83
+</code></pre></section><footer class=article-footer><section class=article-tags><a href=/tags/python/>python</a>
+<a href=/tags/numpy/>numpy</a>
+<a href=/tags/matplotlib/>matplotlib</a>
+<a href=/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/>深度学习</a></section><section class=article-copyright><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg><span>Licensed under CC BY-NC-SA 4.0</span></section><section class=article-lastmod><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><span>最后更新于 2024年 3月 7日</span></section></footer><script type=module>
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true });
+    </script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.css integrity=sha384-RZU/ijkSsFbcmivfdRBQDtwuwVqK7GMOw6IMvKyeWL2K5UAlyp6WonmB8m7Jd0Hn crossorigin=anonymous><script src=https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.js integrity=sha384-pK1WpvzWVBQiP0/GjnvRxV4mOb0oxFuyRxJlk6vVw146n3egcN5C925NCP7a7BY8 crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/contrib/auto-render.min.js integrity=sha384-vZTG03m+2yp6N6BNi5iM4rW4oIwk5DfcNdFfxkk9ZWpDriOkXX8voJBFrAO7MpVl crossorigin=anonymous defer></script><script>window.addEventListener("DOMContentLoaded",()=>{renderMathInElement(document.querySelector(`.article-content`),{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1},{left:"\\(",right:"\\)",display:!1},{left:"\\[",right:"\\]",display:!0}]})})</script></article><aside class=related-contents--wrapper><h2 class=section-title>相关文章</h2><div class=related-contents><div class="flex article-list--tile"><article class=has-image><a href=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/><div class=article-image><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/_hu3d03a01dcc18bc5be0e67db3d8d209a6_979553_a53e49056056d533e079c83d0a5a8dd3.jpg width=250 height=150 loading=lazy alt="Featured image of post 《深度学习入门》读书笔记06" data-hash="md5-jlIWxrqlz/FC144LUKLorg=="></div><div class=light><div class=lamp></div></div><div class=article-details><h2 class=article-title>《深度学习入门》读书笔记06</h2></div></a></article><article class=has-image><a href=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B004/><div class=article-image><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B004/_hu3d03a01dcc18bc5be0e67db3d8d209a6_979553_a53e49056056d533e079c83d0a5a8dd3.jpg width=250 height=150 loading=lazy alt="Featured image of post 《深度学习入门》读书笔记04" data-hash="md5-jlIWxrqlz/FC144LUKLorg=="></div><div class=light><div class=lamp></div></div><div class=article-details><h2 class=article-title>《深度学习入门》读书笔记04</h2></div></a></article><article class=has-image><a href=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/><div class=article-image><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/_hu3d03a01dcc18bc5be0e67db3d8d209a6_979553_a53e49056056d533e079c83d0a5a8dd3.jpg width=250 height=150 loading=lazy alt="Featured image of post 《深度学习入门》读书笔记03" data-hash="md5-jlIWxrqlz/FC144LUKLorg=="></div><div class=light><div class=lamp></div></div><div class=article-details><h2 class=article-title>《深度学习入门》读书笔记03</h2></div></a></article><article class=has-image><a href=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B002/><div class=article-image><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B002/_hu3d03a01dcc18bc5be0e67db3d8d209a6_979553_a53e49056056d533e079c83d0a5a8dd3.jpg width=250 height=150 loading=lazy alt="Featured image of post 《深度学习入门》读书笔记02" data-hash="md5-jlIWxrqlz/FC144LUKLorg=="></div><div class=light><div class=lamp></div></div><div class=article-details><h2 class=article-title>《深度学习入门》读书笔记02</h2></div></a></article><article class=has-image><a href=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B001/><div class=article-image><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B001/_hu3d03a01dcc18bc5be0e67db3d8d209a6_979553_a53e49056056d533e079c83d0a5a8dd3.jpg width=250 height=150 loading=lazy alt="Featured image of post 《深度学习入门》读书笔记01" data-hash="md5-jlIWxrqlz/FC144LUKLorg=="></div><div class=light><div class=lamp></div></div><div class=article-details><h2 class=article-title>《深度学习入门》读书笔记01</h2></div></a></article></div></div></aside><footer class=site-footer><section class=copyright>&copy;
+2021 -
+2024 weakptr's 笔记</section><section class=powerby><a href=https://beian.miit.gov.cn/>浙ICP备2021032371号-1</a>
+<span style=margin-left:16px></span>
+<a target=_blank href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=33032402002231" style=display:inline-block;text-decoration:none;height:20px;line-height:20px><img src=/image/beian.png style=float:left>
+浙公网安备 33032402002231号</a><br>Built with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a><br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.11.0>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计
+，由 <a href=https://nnnewb.github.io/blog/>nnnewb</a> 修改</section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css integrity="sha256-c0uckgykQ9v5k+IqViZOZKc47Jn7KQil4/MP3ySA3F8=" crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css integrity="sha256-SBLU4vv6CA6lHsZ1XyTdhyjJxCjPif/TRkjnsyGAGnE=" crossorigin=anonymous></main><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav id=TableOfContents><ol><li><a href=#计算图>计算图</a></li><li><a href=#反向传播-1>反向传播</a><ol><li><a href=#链式法则>链式法则</a></li><li><a href=#结合计算图>结合计算图</a></li><li><a href=#计算图的-python-实现>计算图的 python 实现</a></li><li><a href=#计算层反向传播推导和实现>计算层反向传播推导和实现</a><ol><li><a href=#要用到的-numpy-特性>要用到的 numpy 特性</a></li><li><a href=#relu-反向传播推导和实现>ReLU 反向传播推导和实现</a></li><li><a href=#sigmoid-反向传播推导和实现>sigmoid 反向传播推导和实现</a></li><li><a href=#affine-层反向传播推导和实现>affine 层反向传播推导和实现</a></li><li><a href=#softmax-with-loss-实现>softmax-with-loss 实现</a></li></ol></li><li><a href=#梯度确认>梯度确认</a></li><li><a href=#反向传播学习实例>反向传播学习实例</a></li></ol></li></ol></nav></div></section></aside></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>

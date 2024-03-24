@@ -1,0 +1,671 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="CNN卷积神经网络 概述 卷积神经网络是一种神经网络，它主要用来处理图像和语音。 全连接神经网络在图像处理任务中存在缺陷，因其输入是一个向量，丢失"><title>《深度学习入门》读书笔记06</title>
+<link rel=canonical href=https://weakptr.site/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/><link rel=stylesheet href=/scss/style.min.709d4f89582c5a09dc94158a722a16093cdffe24d9a8c77dd3f422c786203c41.css><script src=https://unpkg.com/dayjs@1.8.21/dayjs.min.js></script><script src=https://unpkg.com/dayjs@1.8.21/plugin/relativeTime.js></script><script src=https://unpkg.com/dayjs@1.8.21/locale/zh-cn.js></script><script>dayjs.locale("zh-cn"),dayjs.extend(dayjs_plugin_relativeTime)</script><script>var _hmt=_hmt||[];(function(){var e,t=document.createElement("script");t.src="https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad",e=document.getElementsByTagName("script")[0],e.parentNode.insertBefore(t,e)})()</script><meta property="og:title" content="《深度学习入门》读书笔记06"><meta property="og:description" content="CNN卷积神经网络 概述 卷积神经网络是一种神经网络，它主要用来处理图像和语音。 全连接神经网络在图像处理任务中存在缺陷，因其输入是一个向量，丢失"><meta property="og:url" content="https://weakptr.site/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/"><meta property="og:site_name" content="weakptr's 笔记"><meta property="og:type" content="article"><meta property="article:section" content="Post"><meta property="article:tag" content="深度学习"><meta property="article:tag" content="python"><meta property="article:tag" content="numpy"><meta property="article:tag" content="matplotlib"><meta property="article:published_time" content="2024-02-28T16:00:00+08:00"><meta property="article:modified_time" content="2024-02-28T16:00:00+08:00"><meta property="og:image" content="https://weakptr.site/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/google-deepmind-ebMFfR2uuJ0-unsplash.jpg"><meta name=twitter:title content="《深度学习入门》读书笔记06"><meta name=twitter:description content="CNN卷积神经网络 概述 卷积神经网络是一种神经网络，它主要用来处理图像和语音。 全连接神经网络在图像处理任务中存在缺陷，因其输入是一个向量，丢失"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://weakptr.site/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/google-deepmind-ebMFfR2uuJ0-unsplash.jpg"><link rel="shortcut icon" href=/favicon.ico></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.setItem(e,"light")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hub37949326d1692892aa1e64434c0dda6_382115_300x0_resize_box_3.png width=300 height=300 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🍑</span></figure><div class=site-meta><h1 class=site-name><a href=/>weakptr's 笔记</a></h1><h2 class=site-description>弃船！</h2></div></header><ol class=social-menu><li><a href=https://github.com/nnnewb/ target=_blank title=GitHub><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg><span>首页</span></a></li><li><a href=/about><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg><span>关于我</span></a></li><li><a href=/archive><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg><span>归档</span></a></li><li><a href=/categories><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg><span>分类</span></a></li><li><a href=/tags><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg><span>标签</span></a></li><li><a href=/link><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M10 14a3.5 3.5.0 005 0l4-4a3.5 3.5.0 00-5-5l-.5.5"/><path d="M14 10a3.5 3.5.0 00-5 0l-4 4a3.5 3.5.0 005 5l.5-.5"/></svg><span>友链</span></a></li><li><a href=/search><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg><span>搜索</span></a></li><div class=menu-bottom-section></div></ol></aside><main class="main full-width"><article class="has-image main-article"><header class=article-header><div class=article-image><a href=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/google-deepmind-ebMFfR2uuJ0-unsplash_hu3d03a01dcc18bc5be0e67db3d8d209a6_979553_800x0_resize_q75_box.jpg srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/google-deepmind-ebMFfR2uuJ0-unsplash_hu3d03a01dcc18bc5be0e67db3d8d209a6_979553_800x0_resize_q75_box.jpg 800w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/google-deepmind-ebMFfR2uuJ0-unsplash_hu3d03a01dcc18bc5be0e67db3d8d209a6_979553_1600x0_resize_q75_box.jpg 1600w" width=800 height=450 loading=lazy alt="Featured image of post 《深度学习入门》读书笔记06"></a></div><div class=article-details><header class=article-category><a href=/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/>深度学习</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/>《深度学习入门》读书笔记06</a></h2></div><footer class=article-time><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg><time class=article-time--published datetime=2024-02-28T16:00:00+08:00>2024年 2月 28日</time></div><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><time class=article-time--reading>阅读时长: 11 分钟</time></div></footer></div></header><section class=article-content><h2 id=cnn卷积神经网络>CNN卷积神经网络</h2><h3 id=概述>概述</h3><p>卷积神经网络是一种神经网络，它主要用来处理图像和语音。</p><p>全连接神经网络在图像处理任务中存在缺陷，因其输入是一个向量，丢失了图像的空间特征，如相邻像素之间的关系。
+在图像处理任务中，卷积层可以提取图像的空间特征，如相邻像素之间的关系。</p><p>典型的 CNN 卷积神经网络如图所示。</p><p><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-2.png width=735 height=203 srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-2_huba6c168f48ab95a001993abe47c63eb6_25669_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-2_huba6c168f48ab95a001993abe47c63eb6_25669_1024x0_resize_box_3.png 1024w" loading=lazy alt=图7-2 class=gallery-image data-flex-grow=362 data-flex-basis=868px></p><h3 id=卷积层>卷积层</h3><p>书中卷积定义为：图像处理中的滤波器运算。</p><p><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-3.png width=749 height=308 srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-3_hu8c0caf7d69ccc03439187b50b0e49bf1_26719_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-3_hu8c0caf7d69ccc03439187b50b0e49bf1_26719_1024x0_resize_box_3.png 1024w" loading=lazy alt=图7-3 class=gallery-image data-flex-grow=243 data-flex-basis=583px></p><p>输入数据为三维图像信息(<code>channel</code>,<code>height</code>,<code>width</code>)，也称特征图，
+定义卷积核（或者卷积滤波器）为二维矩阵，
+卷积核的大小为（<code>channel</code>,<code>kernel_height</code>,<code>kernel_width</code>），
+卷积核的移动步长为<code>stride</code>，
+卷积核的填充为<code>padding</code>。
+矩阵元素的值就是卷积核的权重。</p><p>想象将卷积核从图像的左上角开始，向右移动<code>stride</code>个像素，然后从卷积核的左上角开始，向下移动<code>stride</code>个像素，重复这个过程，直到卷积核到达图像的右下角。</p><p>对卷积核覆盖的区域，与卷积核矩阵对位元素相乘，然后求和，得到卷积结果。</p><p><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-4.png width=718 height=924 srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-4_hud7005c279ca78f9e20ea2b840c8ebacb_62882_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-4_hud7005c279ca78f9e20ea2b840c8ebacb_62882_1024x0_resize_box_3.png 1024w" loading=lazy alt=图7-4 class=gallery-image data-flex-grow=77 data-flex-basis=186px></p><p>对于多通道图像的卷积如下。</p><p><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-8.png width=707 height=324 srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-8_hu703e68487c22ce13e8885ad8faacfaf1_41104_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-8_hu703e68487c22ce13e8885ad8faacfaf1_41104_1024x0_resize_box_3.png 1024w" loading=lazy alt=图7-8 class=gallery-image data-flex-grow=218 data-flex-basis=523px></p><p>卷积层同样也有偏置值。</p><p><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-5.png width=717 height=227 srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-5_hu916fe591ca0f0b4cabfbd3f66d8bc00f_36914_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-5_hu916fe591ca0f0b4cabfbd3f66d8bc00f_36914_1024x0_resize_box_3.png 1024w" loading=lazy alt=图7-5 class=gallery-image data-flex-grow=315 data-flex-basis=758px></p><p>卷积核的填充，指的是对输入图像四周的填充，目的是为了保证卷积结果的大小不变。</p><p>无填充的情况下，应用卷积操作后，卷积结果的大小为：<code>height</code>-<code>kernel_height</code>+1, <code>width</code>-<code>kernel_width</code>+1。
+多应用几次卷积操作，卷积结果的大小会越来越小。在某个时刻，卷积结果的大小会等于1，此时无法再继续应用卷积操作。</p><p>填充的作用是，保持卷积结果的大小和原输入图像大小一致。可以保持空间大小不变的情况下把数据传给下一层。</p><p>其次是步幅<code>stride</code>，步幅大小影响卷积结果的大小。
+带<code>padding</code>时，步幅大小为1，卷积结果的大小不变。
+步幅大小为2时，卷积结果的大小变为原来的1/2。
+步幅大小为3时，卷积结果的大小变为原来的1/3。</p><p>书中提供了一条公式：</p><p><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/formula-7-1.png width=746 height=205 srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/formula-7-1_hu49e72c9f6b63b0939174e0c844b8e730_39635_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/formula-7-1_hu49e72c9f6b63b0939174e0c844b8e730_39635_1024x0_resize_box_3.png 1024w" loading=lazy alt=式7-1 class=gallery-image data-flex-grow=363 data-flex-basis=873px></p><p>以上。对于多通道图像卷积我们会发现，卷积结果的通道数固定是1，也就是输出空间对比输入空间还是缩小了。
+如果我们需要输出多个通道的结果，则可以定义多个卷积核。卷积核数量等于输出通道数。</p><p><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-11.png width=720 height=456 srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-11_hu328468076dc296a08d0526c343fd378e_43904_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-11_hu328468076dc296a08d0526c343fd378e_43904_1024x0_resize_box_3.png 1024w" loading=lazy alt=图7-11 class=gallery-image data-flex-grow=157 data-flex-basis=378px></p><p>注意多个卷积核的情况下，偏置是一个三维的张量 (FN,1,1)。</p><p><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-12.png width=719 height=282 srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-12_hu753aea4a3e4715bcba4c3d7b8e1f1b7b_35175_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-12_hu753aea4a3e4715bcba4c3d7b8e1f1b7b_35175_1024x0_resize_box_3.png 1024w" loading=lazy alt=图7-12 class=gallery-image data-flex-grow=254 data-flex-basis=611px></p><h3 id=卷积层批处理>卷积层批处理</h3><p>卷积层的批处理就是给输入的特征图再增加一个维度，批样本数量 N。</p><p>之后的处理就是对这个 N 个特征图进行卷积操作，输出N个数据。</p><p><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-13.png width=718 height=283 srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-13_hu8b6140c88d3158cc3452a9d70c55f9ac_38499_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-13_hu8b6140c88d3158cc3452a9d70c55f9ac_38499_1024x0_resize_box_3.png 1024w" loading=lazy alt=图7-13 class=gallery-image data-flex-grow=253 data-flex-basis=608px></p><h2 id=卷积层的实现>卷积层的实现</h2><h3 id=im2col>im2col</h3><p>首先定义卷积层的参数，即上面提到的四维数组 (卷积核数量FN,通道数量C,卷积核高度FH,卷积核宽度FW)，使用 <code>numpy.ndarray</code> 实现。</p><p>输入同样是四维数组， 定义为 (批样本数N,通道数量C,特征图高度H,特征图宽度W)。</p><p>卷积运算的实现用的是 <code>im2col</code>。其基本思路是把每个卷积运算都转换为一个矩阵的运算。参考文章 <a class=link href=https://zhuanlan.zhihu.com/p/63974249 target=_blank rel=noopener>im2col方法实现卷积算法</a>。</p><p>例如对下面的 4<em>4 的输入 X，应用 3</em>3 的卷积核 W，我们需要对输入X做四次卷积运算。我们先提取四次卷积运算的参数 $X^i$</p><p>输入 X 如下</p><div class=table-wrapper><table><thead><tr><th>/</th><th>1</th><th>2</th><th>3</th><th>4</th></tr></thead><tbody><tr><td>1</td><td>x(1,1)</td><td>x(1,2)</td><td>x(1,3)</td><td>x(1,4)</td></tr><tr><td>2</td><td>x(2,1)</td><td>x(2,2)</td><td>x(2,3)</td><td>x(2,4)</td></tr><tr><td>3</td><td>x(3,1)</td><td>x(3,2)</td><td>x(3,3)</td><td>x(3,4)</td></tr><tr><td>4</td><td>x(4,1)</td><td>x(4,2)</td><td>x(4,3)</td><td>x(4,4)</td></tr></tbody></table></div><p>第一次卷积(X的坐标1,1到3,3的卷积运算)的参数 $X^1$ 是输入 $X$ 的一部分。</p><div class=table-wrapper><table><thead><tr><th>/</th><th>1</th><th>2</th><th>3</th></tr></thead><tbody><tr><td>1</td><td>x(1,1)</td><td>x(1,2)</td><td>x(1,3)</td></tr><tr><td>2</td><td>x(2,1)</td><td>x(2,2)</td><td>x(2,3)</td></tr><tr><td>3</td><td>x(3,1)</td><td>x(3,2)</td><td>x(3,3)</td></tr></tbody></table></div><p>将这个矩阵平坦化，转换成一个行向量，得到下面的向量。</p><div class=table-wrapper><table><thead><tr><th>/</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th></tr></thead><tbody><tr><td>1</td><td>x(1,1)</td><td>x(1,2)</td><td>x(1,3)</td><td>x(2,1)</td><td>x(2,2)</td><td>x(2,3)</td><td>x(3,1)</td><td>x(3,2)</td><td>x(3,3)</td></tr></tbody></table></div><p>卷积核 W 的定义如下。</p><div class=table-wrapper><table><thead><tr><th>/</th><th>1</th><th>2</th><th>3</th></tr></thead><tbody><tr><td>1</td><td>w(1,1)</td><td>w(1,2)</td><td>w(1,3)</td></tr><tr><td>2</td><td>w(2,1)</td><td>w(2,2)</td><td>w(2,3)</td></tr><tr><td>3</td><td>w(3,1)</td><td>w(3,2)</td><td>w(3,3)</td></tr></tbody></table></div><p>同样平坦化为行向量，然后转置成只有一个列的矩阵，得到下面的矩阵。</p><div class=table-wrapper><table><thead><tr><th>/</th><th>1</th></tr></thead><tbody><tr><td>1</td><td>w(1,1)</td></tr><tr><td>2</td><td>w(1,2)</td></tr><tr><td>3</td><td>w(1,3)</td></tr><tr><td>4</td><td>w(2,1)</td></tr><tr><td>5</td><td>w(2,2)</td></tr><tr><td>6</td><td>w(2,3)</td></tr><tr><td>7</td><td>w(3,1)</td></tr><tr><td>8</td><td>w(3,2)</td></tr><tr><td>9</td><td>w(3,3)</td></tr></tbody></table></div><p>这样一个卷积运算就可以转换为一个简单的矩阵乘法运算。</p><p><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/formula-author-1.png width=969 height=484 srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/formula-author-1_huec2717d715b4200c8071eee93a9091dc_25317_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/formula-author-1_huec2717d715b4200c8071eee93a9091dc_25317_1024x0_resize_box_3.png 1024w" loading=lazy alt=式-author-1 class=gallery-image data-flex-grow=200 data-flex-basis=480px></p><p>然后全局地看，4x4 特征图对 3x3 卷积核的卷积操作，可以视为四次上述矩阵运算的结果，定义为</p><p>$$
+\begin{aligned}
+A &= \begin{bmatrix} A^1 \ A^2 \ A^3 \ A^4 \end{bmatrix} \
+&= \begin{bmatrix} X^1 \ X^2 \ X^3 \ X^4 \end{bmatrix} W\
+&= \begin{bmatrix} X^1 W \ X^2 W\ X^3 W\ X^4 W\end{bmatrix} \
+\end{aligned}
+$$</p><p>也就是四次卷积，我们可以提取出输入特征图子集构成输入矩阵 X，合并成一个矩阵乘法运算 $A=XW$。</p><p>我们尝试用 python 验证下计算过程是否符合预期。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>numpy</span> <span class=k>as</span> <span class=nn>np</span>
+</span></span><span class=line><span class=cl><span class=kn>from</span> <span class=nn>common.util</span> <span class=kn>import</span> <span class=n>im2col</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 输入特征图 (N,C,H,W)=(1,1,4,4)</span>
+</span></span><span class=line><span class=cl><span class=n>X</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span>
+</span></span><span class=line><span class=cl>    <span class=p>[[</span><span class=mf>1.0</span><span class=p>,</span> <span class=mf>2.0</span><span class=p>,</span> <span class=mf>3.0</span><span class=p>,</span> <span class=mf>4.0</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>     <span class=p>[</span><span class=mf>5.0</span><span class=p>,</span> <span class=mf>6.0</span><span class=p>,</span> <span class=mf>7.0</span><span class=p>,</span> <span class=mf>8.0</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>     <span class=p>[</span><span class=mf>9.0</span><span class=p>,</span> <span class=mf>10.</span><span class=p>,</span> <span class=mf>11.</span><span class=p>,</span> <span class=mf>12.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>     <span class=p>[</span><span class=mf>13.</span><span class=p>,</span> <span class=mf>14.</span><span class=p>,</span> <span class=mf>15.</span><span class=p>,</span> <span class=mf>16.</span><span class=p>]],</span>
+</span></span><span class=line><span class=cl><span class=p>]])</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 卷积核 (FN,C,FH,FW)=(1,1,3,3)</span>
+</span></span><span class=line><span class=cl><span class=n>W</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>2.</span><span class=p>,</span> <span class=mf>3.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>              <span class=p>[</span><span class=mf>4.</span><span class=p>,</span> <span class=mf>5.</span><span class=p>,</span> <span class=mf>6.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>              <span class=p>[</span><span class=mf>7.</span><span class=p>,</span> <span class=mf>8.</span><span class=p>,</span> <span class=mf>9.</span><span class=p>]])</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># im2col 卷积参数为 3x3 步长1 无填充</span>
+</span></span><span class=line><span class=cl><span class=n>cols</span> <span class=o>=</span> <span class=n>im2col</span><span class=p>(</span><span class=n>X</span><span class=p>,</span> <span class=mi>3</span><span class=p>,</span> <span class=mi>3</span><span class=p>,</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=c1># 得到矩阵 [X^1 X^2 X^3 X^4]</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=s1>&#39;X =&#39;</span><span class=p>,</span> <span class=n>cols</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 平坦化W再转置</span>
+</span></span><span class=line><span class=cl><span class=n>Wt</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([</span><span class=n>W</span><span class=o>.</span><span class=n>flatten</span><span class=p>()])</span><span class=o>.</span><span class=n>T</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=s1>&#39;W =&#39;</span><span class=p>,</span> <span class=n>Wt</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 点乘！</span>
+</span></span><span class=line><span class=cl><span class=n>A</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>dot</span><span class=p>(</span><span class=n>cols</span><span class=p>,</span> <span class=n>Wt</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 结果平坦化后再 reshape 成 2x2</span>
+</span></span><span class=line><span class=cl><span class=n>At</span> <span class=o>=</span> <span class=n>A</span><span class=o>.</span><span class=n>flatten</span><span class=p>()</span><span class=o>.</span><span class=n>reshape</span><span class=p>((</span><span class=mi>2</span><span class=p>,</span> <span class=mi>2</span><span class=p>))</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s1>&#39;A = </span><span class=si>{</span><span class=n>At</span><span class=si>}</span><span class=s1>&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 验算过程。ndarray 切片取矩阵子集，平坦化后和卷积核W对位相乘求和。</span>
+</span></span><span class=line><span class=cl><span class=n>a1</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>sum</span><span class=p>(</span><span class=n>X</span><span class=p>[</span><span class=mi>0</span><span class=p>,</span> <span class=mi>0</span><span class=p>,</span> <span class=p>:</span><span class=mi>3</span><span class=p>,</span> <span class=p>:</span><span class=mi>3</span><span class=p>]</span><span class=o>.</span><span class=n>flatten</span><span class=p>()</span> <span class=o>*</span> <span class=n>W</span><span class=o>.</span><span class=n>flatten</span><span class=p>())</span>
+</span></span><span class=line><span class=cl><span class=n>a2</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>sum</span><span class=p>(</span><span class=n>X</span><span class=p>[</span><span class=mi>0</span><span class=p>,</span> <span class=mi>0</span><span class=p>,</span> <span class=p>:</span><span class=mi>3</span><span class=p>,</span> <span class=mi>1</span><span class=p>:</span><span class=mi>4</span><span class=p>]</span><span class=o>.</span><span class=n>flatten</span><span class=p>()</span> <span class=o>*</span> <span class=n>W</span><span class=o>.</span><span class=n>flatten</span><span class=p>())</span>
+</span></span><span class=line><span class=cl><span class=n>a3</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>sum</span><span class=p>(</span><span class=n>X</span><span class=p>[</span><span class=mi>0</span><span class=p>,</span> <span class=mi>0</span><span class=p>,</span> <span class=mi>1</span><span class=p>:</span><span class=mi>4</span><span class=p>,</span> <span class=p>:</span><span class=mi>3</span><span class=p>]</span><span class=o>.</span><span class=n>flatten</span><span class=p>()</span> <span class=o>*</span> <span class=n>W</span><span class=o>.</span><span class=n>flatten</span><span class=p>())</span>
+</span></span><span class=line><span class=cl><span class=n>a4</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>sum</span><span class=p>(</span><span class=n>X</span><span class=p>[</span><span class=mi>0</span><span class=p>,</span> <span class=mi>0</span><span class=p>,</span> <span class=mi>1</span><span class=p>:</span><span class=mi>4</span><span class=p>,</span> <span class=mi>1</span><span class=p>:</span><span class=mi>4</span><span class=p>]</span><span class=o>.</span><span class=n>flatten</span><span class=p>()</span> <span class=o>*</span> <span class=n>W</span><span class=o>.</span><span class=n>flatten</span><span class=p>())</span>
+</span></span><span class=line><span class=cl><span class=n>expected</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([[</span><span class=n>a1</span><span class=p>,</span> <span class=n>a2</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>                     <span class=p>[</span><span class=n>a3</span><span class=p>,</span> <span class=n>a4</span><span class=p>]])</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s1>&#39;expected </span><span class=si>{</span><span class=n>expected</span><span class=si>}</span><span class=s1>&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=k>assert</span> <span class=n>np</span><span class=o>.</span><span class=n>allclose</span><span class=p>(</span><span class=n>At</span><span class=p>,</span> <span class=n>expected</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><pre><code>X = [[ 1.  2.  3.  5.  6.  7.  9. 10. 11.]
+ [ 2.  3.  4.  6.  7.  8. 10. 11. 12.]
+ [ 5.  6.  7.  9. 10. 11. 13. 14. 15.]
+ [ 6.  7.  8. 10. 11. 12. 14. 15. 16.]]
+W = [[1.]
+ [2.]
+ [3.]
+ [4.]
+ [5.]
+ [6.]
+ [7.]
+ [8.]
+ [9.]]
+A = [[348. 393.]
+ [528. 573.]]
+expected [[348. 393.]
+ [528. 573.]]
+</code></pre><p>对于多通道的输入，卷积核也是多通道的。多通道特征图的卷积操作和单通道的卷积操作类似。只需要把各通道的输入上下拼接成矩阵得到 $X^1$ ，然后同样平坦化。</p><p>对于多通道卷积核 W 也是一样操作，将各通道的 W 上下拼接得到矩阵 W ，然后平坦化再转置得到新的单列矩阵 $W^T$。</p><p>如下：</p><p>输入特征图通道1</p><div class=table-wrapper><table><thead><tr><th>/</th><th>1</th><th>2</th><th>3</th><th>4</th></tr></thead><tbody><tr><td>1</td><td>x(1,1,1)</td><td>x(1,1,2)</td><td>x(1,1,3)</td><td>x(1,1,4)</td></tr><tr><td>2</td><td>x(1,2,1)</td><td>x(1,2,2)</td><td>x(1,2,3)</td><td>x(1,2,4)</td></tr><tr><td>3</td><td>x(1,3,1)</td><td>x(1,3,2)</td><td>x(1,3,3)</td><td>x(1,3,4)</td></tr><tr><td>4</td><td>x(1,4,1)</td><td>x(1,4,2)</td><td>x(1,4,3)</td><td>x(1,4,4)</td></tr></tbody></table></div><p>输入特征图通道2</p><div class=table-wrapper><table><thead><tr><th>/</th><th>1</th><th>2</th><th>3</th><th>4</th></tr></thead><tbody><tr><td>1</td><td>x(2,1,1)</td><td>x(2,1,2)</td><td>x(2,1,3)</td><td>x(2,1,4)</td></tr><tr><td>2</td><td>x(2,2,1)</td><td>x(2,2,2)</td><td>x(2,2,3)</td><td>x(2,2,4)</td></tr><tr><td>3</td><td>x(2,3,1)</td><td>x(2,3,2)</td><td>x(2,3,3)</td><td>x(2,3,4)</td></tr><tr><td>4</td><td>x(2,4,1)</td><td>x(2,4,2)</td><td>x(2,4,3)</td><td>x(2,4,4)</td></tr></tbody></table></div><p>则创建的 $X^1$ 矩阵为：</p><div class=table-wrapper><table><thead><tr><th>/</th><th>1</th><th>2</th><th>3</th></tr></thead><tbody><tr><td>1</td><td>x(1,1,1)</td><td>x(1,1,2)</td><td>x(1,1,3)</td></tr><tr><td>2</td><td>x(1,2,1)</td><td>x(1,2,2)</td><td>x(1,2,3)</td></tr><tr><td>3</td><td>x(1,3,1)</td><td>x(1,3,2)</td><td>x(1,3,3)</td></tr><tr><td>4</td><td>x(2,1,1)</td><td>x(2,1,2)</td><td>x(2,1,3)</td></tr><tr><td>5</td><td>x(2,2,1)</td><td>x(2,2,2)</td><td>x(2,2,3)</td></tr><tr><td>6</td><td>x(2,3,1)</td><td>x(2,3,2)</td><td>x(2,3,3)</td></tr></tbody></table></div><p>类似的，创建的 $W^T$ 矩阵为：</p><div class=table-wrapper><table><thead><tr><th>/</th><th>1</th><th>2</th><th>3</th></tr></thead><tbody><tr><td>1</td><td>w(1,1,1)</td><td>w(1,1,2)</td><td>w(1,1,3)</td></tr><tr><td>2</td><td>w(1,2,1)</td><td>w(1,2,2)</td><td>w(1,2,3)</td></tr><tr><td>3</td><td>w(1,3,1)</td><td>w(1,3,2)</td><td>w(1,3,3)</td></tr><tr><td>4</td><td>w(2,1,1)</td><td>w(2,1,2)</td><td>w(2,1,3)</td></tr><tr><td>5</td><td>w(2,2,1)</td><td>w(2,2,2)</td><td>w(2,2,3)</td></tr><tr><td>6</td><td>w(2,3,1)</td><td>w(2,3,2)</td><td>w(2,3,3)</td></tr></tbody></table></div><p>多通道卷积核输出是单通道的，计算和单通道卷积核差异不大。
+我们接着考虑多个卷积核的情况，即完整的卷积层 Conv(FN,C,FH,FW) 使用 im2col 实现卷积运算的思路。</p><p>依然很简单，考虑 $W^T=\begin{bmatrix}W_1 & W_2\end{bmatrix}$，也就是第一个卷积核元素放在 $W^T$ 的第一列，第二个卷积核放在第二列&mldr;</p><p>最后依然是简单的矩阵乘法运算。</p><p>为什么可以这样？考虑矩阵点积的定义，X 矩阵的 行是单个卷积操作的输入特征图子集，$W^T$ 矩阵的列 是单个卷积操作的卷积核权重。
+$XW$ 运算将 X 的行乘 W 的列然后求和，即完成一个卷积运算。$W^T$ 有多个列的情况下，X的行逐个和列运算，相当于多个卷积核在同一个输入特征图上进行卷积。
+最终输出的每个列，对应一个卷积核的结果。</p><p>完整的卷积层看完，最后是批量化。</p><p>批量化依然是同样的思路，例如对输入(2,2,4,4)，卷积参数(2,2,3,3)，把样本1和样本2的 $X^1$ 纵向拼接得到 $\begin{bmatrix}X_{1,1} \ X_{1,2} \ X_{1,3} \ X_{1,4} \ X_{2,1} \ X_{2,2} \ X_{2,3} \ X_{2,4} \ \end{bmatrix}$ ，其中 $X_{1,2}$ 表示样本 1 的第 2 步卷积操作的输入特征图子集。</p><p>创建出矩阵 $X$ 之后和卷积核矩阵 $W$ 求点积即可。</p><p>我们实现一下完整的卷积层 Conv(FN,C,FH,FW) 正向传播运算。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span><span class=lnt>71
+</span><span class=lnt>72
+</span><span class=lnt>73
+</span><span class=lnt>74
+</span><span class=lnt>75
+</span><span class=lnt>76
+</span><span class=lnt>77
+</span><span class=lnt>78
+</span><span class=lnt>79
+</span><span class=lnt>80
+</span><span class=lnt>81
+</span><span class=lnt>82
+</span><span class=lnt>83
+</span><span class=lnt>84
+</span><span class=lnt>85
+</span><span class=lnt>86
+</span><span class=lnt>87
+</span><span class=lnt>88
+</span><span class=lnt>89
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>numpy</span> <span class=k>as</span> <span class=nn>np</span>
+</span></span><span class=line><span class=cl><span class=kn>from</span> <span class=nn>common.util</span> <span class=kn>import</span> <span class=n>im2col</span>
+</span></span><span class=line><span class=cl><span class=kn>from</span> <span class=nn>common.layers</span> <span class=kn>import</span> <span class=n>Convolution</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>Conv</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>fn</span><span class=p>:</span> <span class=nb>int</span><span class=p>,</span> <span class=n>c</span><span class=p>:</span> <span class=nb>int</span><span class=p>,</span> <span class=n>fh</span><span class=p>:</span> <span class=nb>int</span><span class=p>,</span> <span class=n>fw</span><span class=p>:</span> <span class=nb>int</span><span class=p>,</span> <span class=n>stride</span><span class=p>:</span> <span class=nb>int</span><span class=p>,</span> <span class=n>padding</span><span class=p>:</span> <span class=nb>int</span><span class=p>,</span> <span class=n>bias</span><span class=p>:</span> <span class=nb>float</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>fn</span> <span class=o>=</span> <span class=n>fn</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>c</span> <span class=o>=</span> <span class=n>c</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>fh</span> <span class=o>=</span> <span class=n>fh</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>fw</span> <span class=o>=</span> <span class=n>fw</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>stride</span> <span class=o>=</span> <span class=n>stride</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>padding</span> <span class=o>=</span> <span class=n>padding</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>b</span> <span class=o>=</span> <span class=n>bias</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_kernels</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>random</span><span class=o>.</span><span class=n>randn</span><span class=p>(</span><span class=n>fn</span><span class=p>,</span> <span class=n>c</span><span class=p>,</span> <span class=n>fh</span><span class=p>,</span> <span class=n>fw</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_w_columns</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>reshape</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>kernels</span><span class=p>,</span> <span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>fn</span><span class=p>,</span> <span class=o>-</span><span class=mi>1</span><span class=p>))</span><span class=o>.</span><span class=n>T</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>x_columns</span> <span class=o>=</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nd>@property</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>kernels</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>_kernels</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nd>@kernels.setter</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>kernels</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>k</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_kernels</span> <span class=o>=</span> <span class=n>k</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_w_columns</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>reshape</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>kernels</span><span class=p>,</span> <span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>fn</span><span class=p>,</span> <span class=o>-</span><span class=mi>1</span><span class=p>))</span><span class=o>.</span><span class=n>T</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nd>@property</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>w_columns</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>_w_columns</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>forward</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>x</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>n</span><span class=p>,</span> <span class=n>c</span><span class=p>,</span> <span class=n>h</span><span class=p>,</span> <span class=n>w</span> <span class=o>=</span> <span class=n>x</span><span class=o>.</span><span class=n>shape</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>x_columns</span> <span class=o>=</span> <span class=n>im2col</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>fh</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>fw</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>stride</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>padding</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>out</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>dot</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>x_columns</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>w_columns</span><span class=p>)</span> <span class=o>+</span> <span class=bp>self</span><span class=o>.</span><span class=n>b</span>
+</span></span><span class=line><span class=cl>        <span class=n>out_h</span> <span class=o>=</span> <span class=mi>1</span> <span class=o>+</span> <span class=nb>int</span><span class=p>((</span><span class=n>h</span> <span class=o>+</span> <span class=mi>2</span> <span class=o>*</span> <span class=bp>self</span><span class=o>.</span><span class=n>padding</span> <span class=o>-</span> <span class=bp>self</span><span class=o>.</span><span class=n>fh</span><span class=p>)</span> <span class=o>/</span> <span class=bp>self</span><span class=o>.</span><span class=n>stride</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>out_w</span> <span class=o>=</span> <span class=mi>1</span> <span class=o>+</span> <span class=nb>int</span><span class=p>((</span><span class=n>w</span> <span class=o>+</span> <span class=mi>2</span> <span class=o>*</span> <span class=bp>self</span><span class=o>.</span><span class=n>padding</span> <span class=o>-</span> <span class=bp>self</span><span class=o>.</span><span class=n>fw</span><span class=p>)</span> <span class=o>/</span> <span class=bp>self</span><span class=o>.</span><span class=n>stride</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>out</span> <span class=o>=</span> <span class=n>out</span><span class=o>.</span><span class=n>reshape</span><span class=p>(</span><span class=n>n</span><span class=p>,</span> <span class=n>out_h</span><span class=p>,</span> <span class=n>out_w</span><span class=p>,</span> <span class=o>-</span><span class=mi>1</span><span class=p>)</span><span class=o>.</span><span class=n>transpose</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=mi>3</span><span class=p>,</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>out</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 批量输入特征图，(2,2,4,4)</span>
+</span></span><span class=line><span class=cl><span class=n>x</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([</span>
+</span></span><span class=line><span class=cl>    <span class=p>[</span>
+</span></span><span class=line><span class=cl>        <span class=p>[[</span><span class=mf>1.0</span><span class=p>,</span> <span class=mf>2.0</span><span class=p>,</span> <span class=mf>3.0</span><span class=p>,</span> <span class=mf>4.0</span><span class=p>],</span>  <span class=c1># 样本 1 通道 1</span>
+</span></span><span class=line><span class=cl>         <span class=p>[</span><span class=mf>5.0</span><span class=p>,</span> <span class=mf>6.0</span><span class=p>,</span> <span class=mf>7.0</span><span class=p>,</span> <span class=mf>8.0</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>         <span class=p>[</span><span class=mf>9.0</span><span class=p>,</span> <span class=mf>10.</span><span class=p>,</span> <span class=mf>11.</span><span class=p>,</span> <span class=mf>12.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>         <span class=p>[</span><span class=mf>13.</span><span class=p>,</span> <span class=mf>14.</span><span class=p>,</span> <span class=mf>15.</span><span class=p>,</span> <span class=mf>16.</span><span class=p>]],</span>
+</span></span><span class=line><span class=cl>        <span class=p>[[</span><span class=mf>1.0</span><span class=p>,</span> <span class=mf>2.0</span><span class=p>,</span> <span class=mf>3.0</span><span class=p>,</span> <span class=mf>4.0</span><span class=p>],</span>  <span class=c1># 样本 1 通道 2</span>
+</span></span><span class=line><span class=cl>         <span class=p>[</span><span class=mf>5.0</span><span class=p>,</span> <span class=mf>6.0</span><span class=p>,</span> <span class=mf>7.0</span><span class=p>,</span> <span class=mf>8.0</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>         <span class=p>[</span><span class=mf>9.0</span><span class=p>,</span> <span class=mf>10.</span><span class=p>,</span> <span class=mf>11.</span><span class=p>,</span> <span class=mf>12.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>         <span class=p>[</span><span class=mf>13.</span><span class=p>,</span> <span class=mf>14.</span><span class=p>,</span> <span class=mf>15.</span><span class=p>,</span> <span class=mf>16.</span><span class=p>]],</span>
+</span></span><span class=line><span class=cl>    <span class=p>],</span>
+</span></span><span class=line><span class=cl>    <span class=p>[</span>
+</span></span><span class=line><span class=cl>        <span class=p>[[</span><span class=mf>1.0</span><span class=p>,</span> <span class=mf>2.0</span><span class=p>,</span> <span class=mf>3.0</span><span class=p>,</span> <span class=mf>4.0</span><span class=p>],</span>  <span class=c1># 样本 2 通道 1</span>
+</span></span><span class=line><span class=cl>         <span class=p>[</span><span class=mf>5.0</span><span class=p>,</span> <span class=mf>6.0</span><span class=p>,</span> <span class=mf>7.0</span><span class=p>,</span> <span class=mf>8.0</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>         <span class=p>[</span><span class=mf>9.0</span><span class=p>,</span> <span class=mf>10.</span><span class=p>,</span> <span class=mf>11.</span><span class=p>,</span> <span class=mf>12.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>         <span class=p>[</span><span class=mf>13.</span><span class=p>,</span> <span class=mf>14.</span><span class=p>,</span> <span class=mf>15.</span><span class=p>,</span> <span class=mf>16.</span><span class=p>]],</span>
+</span></span><span class=line><span class=cl>        <span class=p>[[</span><span class=mf>1.0</span><span class=p>,</span> <span class=mf>2.0</span><span class=p>,</span> <span class=mf>3.0</span><span class=p>,</span> <span class=mf>4.0</span><span class=p>],</span>  <span class=c1># 样本 2 通道 2</span>
+</span></span><span class=line><span class=cl>         <span class=p>[</span><span class=mf>5.0</span><span class=p>,</span> <span class=mf>6.0</span><span class=p>,</span> <span class=mf>7.0</span><span class=p>,</span> <span class=mf>8.0</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>         <span class=p>[</span><span class=mf>9.0</span><span class=p>,</span> <span class=mf>10.</span><span class=p>,</span> <span class=mf>11.</span><span class=p>,</span> <span class=mf>12.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>         <span class=p>[</span><span class=mf>13.</span><span class=p>,</span> <span class=mf>14.</span><span class=p>,</span> <span class=mf>15.</span><span class=p>,</span> <span class=mf>16.</span><span class=p>]],</span>
+</span></span><span class=line><span class=cl>    <span class=p>],</span>
+</span></span><span class=line><span class=cl><span class=p>])</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>c</span> <span class=o>=</span> <span class=n>Conv</span><span class=p>(</span><span class=mi>2</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>,</span> <span class=mi>3</span><span class=p>,</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>0</span><span class=p>,</span> <span class=mf>1.0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=c1># 初始化一个简单的卷积核 (2,2,3,3)</span>
+</span></span><span class=line><span class=cl><span class=n>c</span><span class=o>.</span><span class=n>kernels</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>([</span>
+</span></span><span class=line><span class=cl>    <span class=p>[</span>
+</span></span><span class=line><span class=cl>        <span class=p>[[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>],</span>  <span class=c1># 卷积核 1 通道 1</span>
+</span></span><span class=line><span class=cl>         <span class=p>[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>         <span class=p>[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>]],</span>
+</span></span><span class=line><span class=cl>        <span class=p>[[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>],</span>  <span class=c1># 卷积核 1 通道 2</span>
+</span></span><span class=line><span class=cl>         <span class=p>[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>         <span class=p>[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>]],</span>
+</span></span><span class=line><span class=cl>    <span class=p>],</span>
+</span></span><span class=line><span class=cl>    <span class=p>[</span>
+</span></span><span class=line><span class=cl>        <span class=p>[[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>],</span>  <span class=c1># 卷积核 2 通道 1</span>
+</span></span><span class=line><span class=cl>         <span class=p>[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>         <span class=p>[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>]],</span>
+</span></span><span class=line><span class=cl>        <span class=p>[[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>],</span>  <span class=c1># 卷积核 2 通道 2</span>
+</span></span><span class=line><span class=cl>         <span class=p>[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>         <span class=p>[</span><span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>,</span> <span class=mf>1.</span><span class=p>]],</span>
+</span></span><span class=line><span class=cl>    <span class=p>],</span>
+</span></span><span class=line><span class=cl><span class=p>])</span>
+</span></span><span class=line><span class=cl><span class=n>a</span> <span class=o>=</span> <span class=n>c</span><span class=o>.</span><span class=n>forward</span><span class=p>(</span><span class=n>x</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>expected</span> <span class=o>=</span> <span class=n>Convolution</span><span class=p>(</span><span class=n>c</span><span class=o>.</span><span class=n>kernels</span><span class=p>,</span> <span class=n>c</span><span class=o>.</span><span class=n>b</span><span class=p>)</span><span class=o>.</span><span class=n>forward</span><span class=p>(</span><span class=n>x</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>a</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=k>assert</span> <span class=n>np</span><span class=o>.</span><span class=n>allclose</span><span class=p>(</span><span class=n>a</span><span class=p>,</span> <span class=n>expected</span><span class=p>),</span> <span class=s1>&#39;forward result not equals to expected&#39;</span>
+</span></span></code></pre></td></tr></table></div></div><pre><code>[[[[109. 127.]
+   [181. 199.]]
+
+  [[109. 127.]
+   [181. 199.]]]
+
+
+ [[[109. 127.]
+   [181. 199.]]
+
+  [[109. 127.]
+   [181. 199.]]]]
+</code></pre><p>文中实现最为魔术的地方就是对 <code>out</code> 的 <code>reshape</code> 和 <code>transpose</code> 了。</p><p>要理解 <code>out = out.reshape(n, out_h, out_w, -1).transpose(0, 3, 1, 2)</code> 这句代码需要从批量卷积，点积结果矩阵的构成说起。</p><p>我们知道单张输入特征图 (C,H,W) 在点积运算中体现为矩阵 X 的一行，单个卷积核 (C,FH,FW) 在点积运算中体现为矩阵 W 的一列。
+而最终结果矩阵 A 的点是单张特征图对单个卷积核的卷积结果，矩阵 A 的一个行对应输入的一张特征图，矩阵 A 的一个列则对应一个卷积核。</p><p>而我们预期的卷积层输出结果是 (N,C,H,W) 这样一个四维数组，可以作为下一个卷积层的输入。结果矩阵 A 则是 (样本数N,样本多个卷积核的卷积结果C)。</p><p>注意 A 的行实际是多个卷积核卷积结果横向连接起来的，单个卷积核的结果又是 (H,W) 矩阵平坦化组成的。也就是：</p><div class=table-wrapper><table><thead><tr><th>/</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th></tr></thead><tbody><tr><td>1</td><td>a(1,1,1)</td><td>a(1,1,2)</td><td>a(1,2,1)</td><td>a(1,2,2)</td><td>a(2,1,1)</td><td>a(2,1,2)</td><td>a(2,2,1)</td><td>a(2,2,2)</td></tr></tbody></table></div><p>其中 <code>a(1,2,1)</code> 表示卷积核 1 输出的第 2 行第 1 列</p><p>所以我们先进行 <code>reshape</code> 操作，目的是把卷积结果 C 转换成矩阵形式 (H,W)，因此 <code>reshape</code> 参数是 <code>(n,out_h,out_w,-1)</code>，
+即把矩阵 A 拆成一个四维数组 (N,OH,OW,C)，此时 C 维度的大小为 2，2 个元素分别表示两个卷积核在 (N,OH,OW) 上的卷积结果。</p><p>然后进行 <code>transpose</code> 操作调整轴的顺序，这是个非常魔术的过程。这里直接看书中图示。</p><p><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-20.png width=739 height=251 srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-20_hu5f60599382541acec4012c10d3581c5e_31954_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-20_hu5f60599382541acec4012c10d3581c5e_31954_1024x0_resize_box_3.png 1024w" loading=lazy alt=图7-20 class=gallery-image data-flex-grow=294 data-flex-basis=706px></p><p><code>transpose</code> 后的多维数组，我们对各个维度的解读发生了改变。如图所示，<code>transpose</code> 后得到的是 (N,C,OH,OW) 的数组，
+其中 N 表示样本数，C 对应卷积核个数(输出通道数)，OH 表示输出特征图的高度，OW 表示输出特征图的宽度。</p><h3 id=反向传播>反向传播</h3><p>卷积层的反向传播书中说法是和 Affine 层的反向传播实现类似。</p><p>我们知道 Affine 层的反向传播计算公式是</p><p>$$
+\begin{aligned}
+\frac{\partial L}{\partial X}&=\frac{\partial L}{\partial Y} \times W^T \
+\frac{\partial L}{\partial W}&=\frac{\partial L}{\partial Y} \times X^T \
+\end{aligned}
+$$</p><p>Affine 层的正向传播中，$X$ 的每个行对应样本，$W$ 的每个列对应神经元。这与 Convolution 层很相似。Convolution 层的 $W$ 每个列对应卷积核。</p><p>Convolution 层和 Affine 层正向传播的差异在于 Convolution 层的卷积核和输入特征图需要先变换成矩阵形式再参与运算。
+影响是，预期传入的 <code>dout</code> 会是一个四维数组 (N,C,H,W) 元素对应 $W$ 矩阵元素的偏导数。
+在计算前，要先把 <code>dout</code> 转换为矩阵形式，同样的 $W$ 也要转为矩阵，然后用 Affine 的反向传播公式求关于 $W$ 和 $X$ 的梯度。
+最后将求得的关于 $X$ 的梯度转为四维数组 (N,C,H,W) 形式返回，保存 $\frac{\partial L}{\partial W}$。</p><p>我实在懒得再写一遍了，以后精读的时候可能再针对每个层都进行详细分析。迫不及待想刷完这书再去看下一本进阶了。
+这里就略过反向传播的实现细节了。</p><h2 id=池化层>池化层</h2><p>池化层是缩小空间的运算。</p><p>和卷积层一样有大小和步长参数，但没有卷积核（权重），只单纯对输入压缩。</p><p>书中例子如下：</p><p><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-14.png width=747 height=438 srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-14_hu472700f025e4815a469ec538e6a7b0a7_55452_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-14_hu472700f025e4815a469ec538e6a7b0a7_55452_1024x0_resize_box_3.png 1024w" loading=lazy alt=图7-14 class=gallery-image data-flex-grow=170 data-flex-basis=409px></p><p>常见的池化层有最大池化和平均池化两种。最大池化是取池化窗口内的最大值，平均池化是取池化窗口内的平均值。</p><h3 id=正向传播实现>正向传播实现</h3><p>池化层的正向传播和卷积层类似，区别在于不需要把一个样本的所有卷积参数 $X^i$ 平坦化到一个行，而是每个 $X^i$ 一个行。
+把不同通道的输入特征图拆出来的 $X^i$ 上下连接起来。</p><p>书中图示比较清楚：</p><p><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-21.png width=729 height=557 srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-21_hue5c75639ced2f82a57f86116efd24e8e_59640_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B006/img/7-21_hue5c75639ced2f82a57f86116efd24e8e_59640_1024x0_resize_box_3.png 1024w" loading=lazy alt=图7-21 class=gallery-image data-flex-grow=130 data-flex-basis=314px></p><p>处理完之后按行池化，得到结果，再 <code>reshape</code> 回 4 维数组 (N,C,H,W) 即可。注意池化层输入多少通道输出就是多少通道。</p><h3 id=反向传播实现>反向传播实现</h3><p>池化层的反向传播和 ReLU 类似，例如最大池化，除最大元素外其他元素在池化后是置0的，也就是这些位置的系数为0，偏导数为0。</p><p>具体实现细节这里略。</p><h2 id=使用-pytorch-实现-cnn>使用 pytorch 实现 CNN</h2><p>从这里就偏离原书了，直接上 pytorch 玩玩。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span><span class=lnt>71
+</span><span class=lnt>72
+</span><span class=lnt>73
+</span><span class=lnt>74
+</span><span class=lnt>75
+</span><span class=lnt>76
+</span><span class=lnt>77
+</span><span class=lnt>78
+</span><span class=lnt>79
+</span><span class=lnt>80
+</span><span class=lnt>81
+</span><span class=lnt>82
+</span><span class=lnt>83
+</span><span class=lnt>84
+</span><span class=lnt>85
+</span><span class=lnt>86
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>import</span> <span class=nn>torch</span>
+</span></span><span class=line><span class=cl><span class=kn>from</span> <span class=nn>torch.utils.data</span> <span class=kn>import</span> <span class=n>DataLoader</span>
+</span></span><span class=line><span class=cl><span class=kn>from</span> <span class=nn>torchvision</span> <span class=kn>import</span> <span class=n>datasets</span>
+</span></span><span class=line><span class=cl><span class=kn>from</span> <span class=nn>torchvision.transforms</span> <span class=kn>import</span> <span class=n>ToTensor</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Download training data from open datasets.</span>
+</span></span><span class=line><span class=cl><span class=n>training_data</span> <span class=o>=</span> <span class=n>datasets</span><span class=o>.</span><span class=n>MNIST</span><span class=p>(</span><span class=n>root</span><span class=o>=</span><span class=s2>&#34;data&#34;</span><span class=p>,</span> <span class=n>train</span><span class=o>=</span><span class=kc>True</span><span class=p>,</span> <span class=n>download</span><span class=o>=</span><span class=kc>True</span><span class=p>,</span> <span class=n>transform</span><span class=o>=</span><span class=n>ToTensor</span><span class=p>())</span>
+</span></span><span class=line><span class=cl><span class=c1># Download test data from open datasets.</span>
+</span></span><span class=line><span class=cl><span class=n>test_data</span> <span class=o>=</span> <span class=n>datasets</span><span class=o>.</span><span class=n>MNIST</span><span class=p>(</span><span class=n>root</span><span class=o>=</span><span class=s2>&#34;data&#34;</span><span class=p>,</span> <span class=n>train</span><span class=o>=</span><span class=kc>False</span><span class=p>,</span> <span class=n>download</span><span class=o>=</span><span class=kc>True</span><span class=p>,</span> <span class=n>transform</span><span class=o>=</span><span class=n>ToTensor</span><span class=p>())</span>
+</span></span><span class=line><span class=cl><span class=c1># batch size</span>
+</span></span><span class=line><span class=cl><span class=n>batch_size</span> <span class=o>=</span> <span class=mi>64</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Create data loaders.</span>
+</span></span><span class=line><span class=cl><span class=n>train_dataloader</span> <span class=o>=</span> <span class=n>DataLoader</span><span class=p>(</span><span class=n>training_data</span><span class=p>,</span> <span class=n>batch_size</span><span class=o>=</span><span class=n>batch_size</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>test_dataloader</span> <span class=o>=</span> <span class=n>DataLoader</span><span class=p>(</span><span class=n>test_data</span><span class=p>,</span> <span class=n>batch_size</span><span class=o>=</span><span class=n>batch_size</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>device</span> <span class=o>=</span> <span class=s1>&#39;cuda&#39;</span> <span class=k>if</span> <span class=n>torch</span><span class=o>.</span><span class=n>cuda</span><span class=o>.</span><span class=n>is_available</span><span class=p>()</span> <span class=k>else</span> <span class=s1>&#39;cpu&#39;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>MyNetwork</span><span class=p>(</span><span class=n>torch</span><span class=o>.</span><span class=n>nn</span><span class=o>.</span><span class=n>Module</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=nb>super</span><span class=p>()</span><span class=o>.</span><span class=fm>__init__</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>flatten</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>nn</span><span class=o>.</span><span class=n>Flatten</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>linear</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>nn</span><span class=o>.</span><span class=n>Sequential</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>            <span class=n>torch</span><span class=o>.</span><span class=n>nn</span><span class=o>.</span><span class=n>Conv2d</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=mi>30</span><span class=p>,</span> <span class=mi>5</span><span class=p>,</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>0</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>            <span class=n>torch</span><span class=o>.</span><span class=n>nn</span><span class=o>.</span><span class=n>ReLU</span><span class=p>(),</span>
+</span></span><span class=line><span class=cl>            <span class=n>torch</span><span class=o>.</span><span class=n>nn</span><span class=o>.</span><span class=n>MaxPool2d</span><span class=p>(</span><span class=mi>2</span><span class=p>,</span> <span class=mi>1</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>            <span class=n>torch</span><span class=o>.</span><span class=n>nn</span><span class=o>.</span><span class=n>Flatten</span><span class=p>(),</span> <span class=c1># 为了把 Convolution/Pooling 层的输出和 Affine 层输入串起来，需要先把 Convolution/Pooling 层输出的 4D 数组平坦化</span>
+</span></span><span class=line><span class=cl>            <span class=n>torch</span><span class=o>.</span><span class=n>nn</span><span class=o>.</span><span class=n>Linear</span><span class=p>(</span><span class=mi>15870</span><span class=p>,</span> <span class=mi>100</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>            <span class=n>torch</span><span class=o>.</span><span class=n>nn</span><span class=o>.</span><span class=n>ReLU</span><span class=p>(),</span>
+</span></span><span class=line><span class=cl>            <span class=n>torch</span><span class=o>.</span><span class=n>nn</span><span class=o>.</span><span class=n>Linear</span><span class=p>(</span><span class=mi>100</span><span class=p>,</span> <span class=mi>10</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>            <span class=n>torch</span><span class=o>.</span><span class=n>nn</span><span class=o>.</span><span class=n>Softmax</span><span class=p>(),</span>
+</span></span><span class=line><span class=cl>        <span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>forward</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>x</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>linear</span><span class=p>(</span><span class=n>x</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>train</span><span class=p>(</span><span class=n>dataloader</span><span class=p>,</span> <span class=n>model</span><span class=p>,</span> <span class=n>loss_fn</span><span class=p>,</span> <span class=n>optimizer</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=n>size</span> <span class=o>=</span> <span class=nb>len</span><span class=p>(</span><span class=n>dataloader</span><span class=o>.</span><span class=n>dataset</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>model</span><span class=o>.</span><span class=n>train</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>batch</span><span class=p>,</span> <span class=p>(</span><span class=n>X</span><span class=p>,</span> <span class=n>y</span><span class=p>)</span> <span class=ow>in</span> <span class=nb>enumerate</span><span class=p>(</span><span class=n>dataloader</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>X</span><span class=p>,</span> <span class=n>y</span> <span class=o>=</span> <span class=n>X</span><span class=o>.</span><span class=n>to</span><span class=p>(</span><span class=n>device</span><span class=p>),</span> <span class=n>y</span><span class=o>.</span><span class=n>to</span><span class=p>(</span><span class=n>device</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>X</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>reshape</span><span class=p>(</span><span class=n>X</span><span class=p>,</span> <span class=p>(</span><span class=n>X</span><span class=o>.</span><span class=n>shape</span><span class=p>[</span><span class=mi>0</span><span class=p>],</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>28</span><span class=p>,</span> <span class=mi>28</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1># Compute prediction error</span>
+</span></span><span class=line><span class=cl>        <span class=n>pred</span> <span class=o>=</span> <span class=n>model</span><span class=p>(</span><span class=n>X</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>loss</span> <span class=o>=</span> <span class=n>loss_fn</span><span class=p>(</span><span class=n>pred</span><span class=p>,</span> <span class=n>y</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1># Backpropagation</span>
+</span></span><span class=line><span class=cl>        <span class=n>loss</span><span class=o>.</span><span class=n>backward</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>        <span class=n>optimizer</span><span class=o>.</span><span class=n>step</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>        <span class=n>optimizer</span><span class=o>.</span><span class=n>zero_grad</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=n>batch</span> <span class=o>%</span> <span class=mi>100</span> <span class=o>==</span> <span class=mi>0</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>loss</span><span class=p>,</span> <span class=n>current</span> <span class=o>=</span> <span class=n>loss</span><span class=o>.</span><span class=n>item</span><span class=p>(),</span> <span class=p>(</span><span class=n>batch</span> <span class=o>+</span> <span class=mi>1</span><span class=p>)</span> <span class=o>*</span> <span class=nb>len</span><span class=p>(</span><span class=n>X</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;loss: </span><span class=si>{</span><span class=n>loss</span><span class=si>:</span><span class=s2>&gt;7f</span><span class=si>}</span><span class=s2>  [</span><span class=si>{</span><span class=n>current</span><span class=si>:</span><span class=s2>&gt;5d</span><span class=si>}</span><span class=s2>/</span><span class=si>{</span><span class=n>size</span><span class=si>:</span><span class=s2>&gt;5d</span><span class=si>}</span><span class=s2>]&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>test</span><span class=p>(</span><span class=n>dataloader</span><span class=p>,</span> <span class=n>model</span><span class=p>,</span> <span class=n>loss_fn</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=n>size</span> <span class=o>=</span> <span class=nb>len</span><span class=p>(</span><span class=n>dataloader</span><span class=o>.</span><span class=n>dataset</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>num_batches</span> <span class=o>=</span> <span class=nb>len</span><span class=p>(</span><span class=n>dataloader</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>model</span><span class=o>.</span><span class=n>eval</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>    <span class=n>test_loss</span><span class=p>,</span> <span class=n>correct</span> <span class=o>=</span> <span class=mi>0</span><span class=p>,</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl>    <span class=k>with</span> <span class=n>torch</span><span class=o>.</span><span class=n>no_grad</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=n>X</span><span class=p>,</span> <span class=n>y</span> <span class=ow>in</span> <span class=n>dataloader</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>X</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>reshape</span><span class=p>(</span><span class=n>X</span><span class=p>,</span> <span class=p>(</span><span class=n>X</span><span class=o>.</span><span class=n>shape</span><span class=p>[</span><span class=mi>0</span><span class=p>],</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>28</span><span class=p>,</span> <span class=mi>28</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>            <span class=n>X</span><span class=p>,</span> <span class=n>y</span> <span class=o>=</span> <span class=n>X</span><span class=o>.</span><span class=n>to</span><span class=p>(</span><span class=n>device</span><span class=p>),</span> <span class=n>y</span><span class=o>.</span><span class=n>to</span><span class=p>(</span><span class=n>device</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=n>pred</span> <span class=o>=</span> <span class=n>model</span><span class=p>(</span><span class=n>X</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=n>test_loss</span> <span class=o>+=</span> <span class=n>loss_fn</span><span class=p>(</span><span class=n>pred</span><span class=p>,</span> <span class=n>y</span><span class=p>)</span><span class=o>.</span><span class=n>item</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>            <span class=n>correct</span> <span class=o>+=</span> <span class=p>(</span><span class=n>pred</span><span class=o>.</span><span class=n>argmax</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span> <span class=o>==</span> <span class=n>y</span><span class=p>)</span><span class=o>.</span><span class=n>type</span><span class=p>(</span><span class=n>torch</span><span class=o>.</span><span class=n>float</span><span class=p>)</span><span class=o>.</span><span class=n>sum</span><span class=p>()</span><span class=o>.</span><span class=n>item</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>    <span class=n>test_loss</span> <span class=o>/=</span> <span class=n>num_batches</span>
+</span></span><span class=line><span class=cl>    <span class=n>correct</span> <span class=o>/=</span> <span class=n>size</span>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;Test Error: </span><span class=se>\n</span><span class=s2> Accuracy: </span><span class=si>{</span><span class=p>(</span><span class=mi>100</span> <span class=o>*</span> <span class=n>correct</span><span class=p>)</span><span class=si>:</span><span class=s2>&gt;0.1f</span><span class=si>}</span><span class=s2>%, Avg loss: </span><span class=si>{</span><span class=n>test_loss</span><span class=si>:</span><span class=s2>&gt;8f</span><span class=si>}</span><span class=s2> </span><span class=se>\n</span><span class=s2>&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>n</span> <span class=o>=</span> <span class=n>MyNetwork</span><span class=p>()</span><span class=o>.</span><span class=n>to</span><span class=p>(</span><span class=n>device</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>loss_fn</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>nn</span><span class=o>.</span><span class=n>CrossEntropyLoss</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=n>optimizer</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>optim</span><span class=o>.</span><span class=n>SGD</span><span class=p>(</span><span class=n>n</span><span class=o>.</span><span class=n>parameters</span><span class=p>(),</span> <span class=n>lr</span><span class=o>=</span><span class=mf>0.01</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>epochs</span> <span class=o>=</span> <span class=mi>10</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>for</span> <span class=n>t</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=n>epochs</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;Epoch </span><span class=si>{</span><span class=n>t</span> <span class=o>+</span> <span class=mi>1</span><span class=si>}</span><span class=se>\n</span><span class=s2>-------------------------------&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>train</span><span class=p>(</span><span class=n>train_dataloader</span><span class=p>,</span> <span class=n>n</span><span class=p>,</span> <span class=n>loss_fn</span><span class=p>,</span> <span class=n>optimizer</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>test</span><span class=p>(</span><span class=n>test_dataloader</span><span class=p>,</span> <span class=n>n</span><span class=p>,</span> <span class=n>loss_fn</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=s2>&#34;Done!&#34;</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><pre><code>Files already downloaded
+Files already downloaded
+Epoch 1
+-------------------------------
+
+
+F:\repos\deep-learning\venv\lib\site-packages\torch\nn\modules\module.py:1511: UserWarning: Implicit dimension choice for softmax has been deprecated. Change the call to include dim=X as an argument.
+  return self._call_impl(*args, **kwargs)
+
+
+loss: 2.301144  [   64/60000]
+loss: 2.279937  [ 6464/60000]
+loss: 2.266119  [12864/60000]
+loss: 2.148455  [19264/60000]
+loss: 2.036764  [25664/60000]
+loss: 1.925048  [32064/60000]
+loss: 1.805400  [38464/60000]
+loss: 1.857848  [44864/60000]
+loss: 1.821546  [51264/60000]
+loss: 1.758208  [57664/60000]
+Test Error: 
+ Accuracy: 74.0%, Avg loss: 1.750762 
+
+Epoch 2
+-------------------------------
+loss: 1.735336  [   64/60000]
+loss: 1.741934  [ 6464/60000]
+loss: 1.733680  [12864/60000]
+loss: 1.639817  [19264/60000]
+loss: 1.652467  [25664/60000]
+loss: 1.673727  [32064/60000]
+loss: 1.586213  [38464/60000]
+loss: 1.640192  [44864/60000]
+loss: 1.644729  [51264/60000]
+loss: 1.602930  [57664/60000]
+Test Error: 
+ Accuracy: 89.7%, Avg loss: 1.588926 
+
+Epoch 3
+-------------------------------
+loss: 1.579320  [   64/60000]
+loss: 1.579364  [ 6464/60000]
+loss: 1.563474  [12864/60000]
+loss: 1.592638  [19264/60000]
+loss: 1.576006  [25664/60000]
+loss: 1.623149  [32064/60000]
+loss: 1.539580  [38464/60000]
+loss: 1.600444  [44864/60000]
+loss: 1.608010  [51264/60000]
+loss: 1.577690  [57664/60000]
+Test Error: 
+ Accuracy: 91.1%, Avg loss: 1.566124 
+
+Epoch 4
+-------------------------------
+loss: 1.552503  [   64/60000]
+loss: 1.560335  [ 6464/60000]
+loss: 1.546871  [12864/60000]
+loss: 1.581722  [19264/60000]
+loss: 1.556692  [25664/60000]
+loss: 1.605762  [32064/60000]
+loss: 1.528894  [38464/60000]
+loss: 1.589878  [44864/60000]
+loss: 1.591401  [51264/60000]
+loss: 1.566346  [57664/60000]
+Test Error: 
+ Accuracy: 91.6%, Avg loss: 1.555532 
+
+Epoch 5
+-------------------------------
+loss: 1.538584  [   64/60000]
+loss: 1.551226  [ 6464/60000]
+loss: 1.536254  [12864/60000]
+loss: 1.573621  [19264/60000]
+loss: 1.545673  [25664/60000]
+loss: 1.588099  [32064/60000]
+loss: 1.522446  [38464/60000]
+loss: 1.584719  [44864/60000]
+loss: 1.583256  [51264/60000]
+loss: 1.560601  [57664/60000]
+Test Error: 
+ Accuracy: 92.3%, Avg loss: 1.548232 
+
+Epoch 6
+-------------------------------
+loss: 1.529052  [   64/60000]
+loss: 1.545700  [ 6464/60000]
+loss: 1.527557  [12864/60000]
+loss: 1.567937  [19264/60000]
+loss: 1.539456  [25664/60000]
+loss: 1.574068  [32064/60000]
+loss: 1.516613  [38464/60000]
+loss: 1.580732  [44864/60000]
+loss: 1.576618  [51264/60000]
+loss: 1.558007  [57664/60000]
+Test Error: 
+ Accuracy: 92.7%, Avg loss: 1.542547 
+
+Epoch 7
+-------------------------------
+loss: 1.524871  [   64/60000]
+loss: 1.541902  [ 6464/60000]
+loss: 1.519567  [12864/60000]
+loss: 1.564264  [19264/60000]
+loss: 1.534474  [25664/60000]
+loss: 1.562087  [32064/60000]
+loss: 1.507874  [38464/60000]
+loss: 1.578054  [44864/60000]
+loss: 1.566317  [51264/60000]
+loss: 1.555856  [57664/60000]
+Test Error: 
+ Accuracy: 93.1%, Avg loss: 1.537830 
+
+Epoch 8
+-------------------------------
+loss: 1.522017  [   64/60000]
+loss: 1.538967  [ 6464/60000]
+loss: 1.513827  [12864/60000]
+loss: 1.560773  [19264/60000]
+loss: 1.529202  [25664/60000]
+loss: 1.553353  [32064/60000]
+loss: 1.500312  [38464/60000]
+loss: 1.574624  [44864/60000]
+loss: 1.555169  [51264/60000]
+loss: 1.554117  [57664/60000]
+Test Error: 
+ Accuracy: 93.5%, Avg loss: 1.533476 
+
+Epoch 9
+-------------------------------
+loss: 1.519567  [   64/60000]
+loss: 1.536195  [ 6464/60000]
+loss: 1.510207  [12864/60000]
+loss: 1.557672  [19264/60000]
+loss: 1.524510  [25664/60000]
+loss: 1.547272  [32064/60000]
+loss: 1.495671  [38464/60000]
+loss: 1.570410  [44864/60000]
+loss: 1.543279  [51264/60000]
+loss: 1.552659  [57664/60000]
+Test Error: 
+ Accuracy: 93.8%, Avg loss: 1.529591 
+
+Epoch 10
+-------------------------------
+loss: 1.517417  [   64/60000]
+loss: 1.534307  [ 6464/60000]
+loss: 1.507608  [12864/60000]
+loss: 1.554423  [19264/60000]
+loss: 1.520418  [25664/60000]
+loss: 1.542946  [32064/60000]
+loss: 1.493244  [38464/60000]
+loss: 1.565224  [44864/60000]
+loss: 1.534792  [51264/60000]
+loss: 1.551990  [57664/60000]
+Test Error: 
+ Accuracy: 94.0%, Avg loss: 1.526247 
+
+Done!
+</code></pre></section><footer class=article-footer><section class=article-tags><a href=/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/>深度学习</a>
+<a href=/tags/python/>python</a>
+<a href=/tags/numpy/>numpy</a>
+<a href=/tags/matplotlib/>matplotlib</a></section><section class=article-copyright><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg><span>Licensed under CC BY-NC-SA 4.0</span></section></footer><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.css integrity=sha384-RZU/ijkSsFbcmivfdRBQDtwuwVqK7GMOw6IMvKyeWL2K5UAlyp6WonmB8m7Jd0Hn crossorigin=anonymous><script src=https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.js integrity=sha384-pK1WpvzWVBQiP0/GjnvRxV4mOb0oxFuyRxJlk6vVw146n3egcN5C925NCP7a7BY8 crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/contrib/auto-render.min.js integrity=sha384-vZTG03m+2yp6N6BNi5iM4rW4oIwk5DfcNdFfxkk9ZWpDriOkXX8voJBFrAO7MpVl crossorigin=anonymous defer></script><script>window.addEventListener("DOMContentLoaded",()=>{renderMathInElement(document.querySelector(`.article-content`),{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1},{left:"\\(",right:"\\)",display:!1},{left:"\\[",right:"\\]",display:!0}]})})</script></article><aside class=related-contents--wrapper><h2 class=section-title>相关文章</h2><div class=related-contents><div class="flex article-list--tile"><article class=has-image><a href=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/><div class=article-image><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B005/_hu3d03a01dcc18bc5be0e67db3d8d209a6_979553_a53e49056056d533e079c83d0a5a8dd3.jpg width=250 height=150 loading=lazy alt="Featured image of post 《深度学习入门》读书笔记05" data-hash="md5-jlIWxrqlz/FC144LUKLorg=="></div><div class=light><div class=lamp></div></div><div class=article-details><h2 class=article-title>《深度学习入门》读书笔记05</h2></div></a></article><article class=has-image><a href=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B004/><div class=article-image><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B004/_hu3d03a01dcc18bc5be0e67db3d8d209a6_979553_a53e49056056d533e079c83d0a5a8dd3.jpg width=250 height=150 loading=lazy alt="Featured image of post 《深度学习入门》读书笔记04" data-hash="md5-jlIWxrqlz/FC144LUKLorg=="></div><div class=light><div class=lamp></div></div><div class=article-details><h2 class=article-title>《深度学习入门》读书笔记04</h2></div></a></article><article class=has-image><a href=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/><div class=article-image><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B003/_hu3d03a01dcc18bc5be0e67db3d8d209a6_979553_a53e49056056d533e079c83d0a5a8dd3.jpg width=250 height=150 loading=lazy alt="Featured image of post 《深度学习入门》读书笔记03" data-hash="md5-jlIWxrqlz/FC144LUKLorg=="></div><div class=light><div class=lamp></div></div><div class=article-details><h2 class=article-title>《深度学习入门》读书笔记03</h2></div></a></article><article class=has-image><a href=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B002/><div class=article-image><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B002/_hu3d03a01dcc18bc5be0e67db3d8d209a6_979553_a53e49056056d533e079c83d0a5a8dd3.jpg width=250 height=150 loading=lazy alt="Featured image of post 《深度学习入门》读书笔记02" data-hash="md5-jlIWxrqlz/FC144LUKLorg=="></div><div class=light><div class=lamp></div></div><div class=article-details><h2 class=article-title>《深度学习入门》读书笔记02</h2></div></a></article><article class=has-image><a href=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B001/><div class=article-image><img src=/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B001/_hu3d03a01dcc18bc5be0e67db3d8d209a6_979553_a53e49056056d533e079c83d0a5a8dd3.jpg width=250 height=150 loading=lazy alt="Featured image of post 《深度学习入门》读书笔记01" data-hash="md5-jlIWxrqlz/FC144LUKLorg=="></div><div class=light><div class=lamp></div></div><div class=article-details><h2 class=article-title>《深度学习入门》读书笔记01</h2></div></a></article></div></div></aside><footer class=site-footer><section class=copyright>&copy;
+2021 -
+2024 weakptr's 笔记</section><section class=powerby><a href=https://beian.miit.gov.cn/>浙ICP备2021032371号-1</a>
+<span style=margin-left:16px></span>
+<a target=_blank href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=33032402002231" style=display:inline-block;text-decoration:none;height:20px;line-height:20px><img src=/image/beian.png style=float:left>
+浙公网安备 33032402002231号</a><br>Built with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a><br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.11.0>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计
+，由 <a href=https://nnnewb.github.io/blog/>nnnewb</a> 修改</section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css integrity="sha256-c0uckgykQ9v5k+IqViZOZKc47Jn7KQil4/MP3ySA3F8=" crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css integrity="sha256-SBLU4vv6CA6lHsZ1XyTdhyjJxCjPif/TRkjnsyGAGnE=" crossorigin=anonymous></main><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav id=TableOfContents><ol><li><a href=#cnn卷积神经网络>CNN卷积神经网络</a><ol><li><a href=#概述>概述</a></li><li><a href=#卷积层>卷积层</a></li><li><a href=#卷积层批处理>卷积层批处理</a></li></ol></li><li><a href=#卷积层的实现>卷积层的实现</a><ol><li><a href=#im2col>im2col</a></li><li><a href=#反向传播>反向传播</a></li></ol></li><li><a href=#池化层>池化层</a><ol><li><a href=#正向传播实现>正向传播实现</a></li><li><a href=#反向传播实现>反向传播实现</a></li></ol></li><li><a href=#使用-pytorch-实现-cnn>使用 pytorch 实现 CNN</a></li></ol></nav></div></section></aside></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>

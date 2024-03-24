@@ -1,0 +1,451 @@
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="什么是tree-sitter呢？ tree-sitter 是一个 parser-generator，也是一个增量解析库（incremental parsing library）。它可"><title>玩玩 tree-sitter</title>
+<link rel=canonical href=https://weakptr.site/p/%E7%8E%A9%E7%8E%A9-tree-sitter/><link rel=stylesheet href=/scss/style.min.709d4f89582c5a09dc94158a722a16093cdffe24d9a8c77dd3f422c786203c41.css><script src=https://unpkg.com/dayjs@1.8.21/dayjs.min.js></script><script src=https://unpkg.com/dayjs@1.8.21/plugin/relativeTime.js></script><script src=https://unpkg.com/dayjs@1.8.21/locale/zh-cn.js></script><script>dayjs.locale("zh-cn"),dayjs.extend(dayjs_plugin_relativeTime)</script><script>var _hmt=_hmt||[];(function(){var e,t=document.createElement("script");t.src="https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad",e=document.getElementsByTagName("script")[0],e.parentNode.insertBefore(t,e)})()</script><meta property="og:title" content="玩玩 tree-sitter"><meta property="og:description" content="什么是tree-sitter呢？ tree-sitter 是一个 parser-generator，也是一个增量解析库（incremental parsing library）。它可"><meta property="og:url" content="https://weakptr.site/p/%E7%8E%A9%E7%8E%A9-tree-sitter/"><meta property="og:site_name" content="weakptr's 笔记"><meta property="og:type" content="article"><meta property="article:section" content="Post"><meta property="article:tag" content="编译技术"><meta property="article:tag" content="javascript"><meta property="article:tag" content="vscode"><meta property="article:published_time" content="2021-07-29T10:14:36+08:00"><meta property="article:modified_time" content="2021-07-29T10:14:36+08:00"><meta name=twitter:title content="玩玩 tree-sitter"><meta name=twitter:description content="什么是tree-sitter呢？ tree-sitter 是一个 parser-generator，也是一个增量解析库（incremental parsing library）。它可"><link rel="shortcut icon" href=/favicon.ico></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.setItem(e,"light")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hub37949326d1692892aa1e64434c0dda6_382115_300x0_resize_box_3.png width=300 height=300 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🍑</span></figure><div class=site-meta><h1 class=site-name><a href=/>weakptr's 笔记</a></h1><h2 class=site-description>弃船！</h2></div></header><ol class=social-menu><li><a href=https://github.com/nnnewb/ target=_blank title=GitHub><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg><span>首页</span></a></li><li><a href=/about><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg><span>关于我</span></a></li><li><a href=/archive><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg><span>归档</span></a></li><li><a href=/categories><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg><span>分类</span></a></li><li><a href=/tags><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg><span>标签</span></a></li><li><a href=/link><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M10 14a3.5 3.5.0 005 0l4-4a3.5 3.5.0 00-5-5l-.5.5"/><path d="M14 10a3.5 3.5.0 00-5 0l-4 4a3.5 3.5.0 005 5l.5-.5"/></svg><span>友链</span></a></li><li><a href=/search><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg><span>搜索</span></a></li><div class=menu-bottom-section></div></ol></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/javascript/>javascript</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/%E7%8E%A9%E7%8E%A9-tree-sitter/>玩玩 tree-sitter</a></h2></div><footer class=article-time><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg><time class=article-time--published datetime=2021-07-29T10:14:36+08:00>2021年 7月 29日</time></div><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><time class=article-time--reading>阅读时长: 4 分钟</time></div></footer></div></header><section class=article-content><p>什么是tree-sitter呢？</p><p>tree-sitter 是一个 parser-generator，也是一个增量解析库（incremental parsing library）。它可以为源文件构建完整的语法树，并在源文件被编辑时高效地更新。</p><h2 id=快速开始>快速开始</h2><p>tree-sitter 本身是一个 parser generator ，使用 javascript 来作为描述语法规则的语言（不像其他，如 yacc 一类的工具，以类似 EBNF 的 DSL 来描述语法规则）。</p><p>我们写 tree-sitter 语法规则本质上是类似于写一个 tree-sitter 的语法支持包，可以参考下 <a class=link href=https://github.com/tree-sitter/tree-sitter-go target=_blank rel=noopener>tree-sitter/tree-sitter-go: Go grammar for tree-sitter (github.com)</a> 的项目结构。</p><p>废话不多说，先写个简单的 demo 跑起来。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>mkdir tree-sitter-hello <span class=o>&amp;&amp;</span> <span class=nb>cd</span> tree-sitter-hello
+</span></span><span class=line><span class=cl>npm init
+</span></span><span class=line><span class=cl>npm i --save nan
+</span></span><span class=line><span class=cl>npm i --save-dev tree-sitter-cli
+</span></span></code></pre></td></tr></table></div></div><p>初始化好项目目录，在 package.json 里写个简单的命令，方便之后用。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;scripts&#34;</span><span class=p>:{</span>
+</span></span><span class=line><span class=cl>        <span class=nt>&#34;test&#34;</span><span class=p>:</span> <span class=s2>&#34;tree-sitter generate &amp;&amp; tree-sitter parse test.txt&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>现在开始干正事儿，创建一个 grammar.js</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-js data-lang=js><span class=line><span class=cl><span class=nx>module</span><span class=p>.</span><span class=nx>exports</span> <span class=o>=</span> <span class=nx>grammar</span><span class=p>({</span>
+</span></span><span class=line><span class=cl>    <span class=nx>name</span><span class=o>:</span> <span class=s1>&#39;hello&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nx>rules</span><span class=o>:</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=nx>source_file</span><span class=o>:</span> <span class=nx>$</span> <span class=p>=&gt;</span> <span class=nx>repeat</span><span class=p>(</span><span class=nx>$</span><span class=p>.</span><span class=nx>word</span><span class=p>),</span> <span class=c1>// 非终结符，0或更多的 word
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=nx>word</span><span class=o>:</span> <span class=nx>$</span> <span class=p>=&gt;</span> <span class=o>/</span><span class=err>\</span><span class=nx>w</span><span class=o>+</span><span class=sr>/ /</span><span class=o>/</span> <span class=nx>非常简单的终结符</span><span class=err>，</span><span class=nx>表示一个词</span><span class=err>，</span><span class=nx>可以是数字字母下划线组成</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>})</span>
+</span></span></code></pre></td></tr></table></div></div><p>再写一个 test.txt 作为输入</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>amazing tree sitter
+</span></span></code></pre></td></tr></table></div></div><p>最后运行。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>npm run <span class=nb>test</span>
+</span></span></code></pre></td></tr></table></div></div><p>输出结果</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>&gt; tree-sitter-hello@0.1.0 test
+</span></span><span class=line><span class=cl>&gt; tree-sitter generate &amp;&amp; tree-sitter parse test.txt
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>(source_file [0, 0] - [1, 0]
+</span></span><span class=line><span class=cl>  (word [0, 0] - [0, 7])
+</span></span><span class=line><span class=cl>  (word [0, 8] - [0, 12])
+</span></span><span class=line><span class=cl>  (word [0, 13] - [0, 19]))
+</span></span></code></pre></td></tr></table></div></div><p>就是这样！</p><h2 id=规则-dsl>规则 DSL</h2><p>所有规则都用这种格式编写</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-js data-lang=js><span class=line><span class=cl><span class=nx>rule_name1</span><span class=o>:</span> <span class=nx>$</span> <span class=p>=&gt;</span> <span class=o>/</span><span class=nx>terminal</span><span class=o>-</span><span class=nx>symbol</span><span class=o>/</span><span class=p>,</span>
+</span></span><span class=line><span class=cl><span class=nx>rule_name2</span><span class=o>:</span> <span class=nx>$</span> <span class=p>=&gt;</span> <span class=nx>seq</span><span class=p>(</span><span class=s1>&#39;non&#39;</span><span class=p>,</span> <span class=s1>&#39;terminal&#39;</span><span class=p>,</span> <span class=s1>&#39;symbol&#39;</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>正则表达式或字符串表示终结符，规则函数表示非终结符（token函数是例外）</p><p>一些函数来标识 ENBF 里出现的规则：</p><ul><li><code>repeat</code> 就是重复0或多次，类似 EBNF 的 <code>{ }</code> 含义</li><li><code>repeat1</code> 至少出现一次，可以重复多次，类似 EBNF 的 <code>SYM { SYM }</code> 这样的形式</li><li><code>optional</code> 可选，类似 EBNF 的 <code>[ ]</code> 含义</li><li><code>choice</code> 多选一，类似 EBNF 的 <code>|</code> 含义</li><li><code>seq</code> 序列，表示前后顺序，在 EBNF 里就是符号出现的顺序</li><li><code>token</code> ，把一个复杂规则合并成一个 token，一般是难以用一个正则表达式解决的终结符会用 <code>token(choice(/hex/,/octal/,/decimals/))</code> 这种形式编写。</li></ul><p>还有其他的，用于设置左右联结性优先级什么的，就不多介绍了。可以自己看tree-sitter的文档。</p><h2 id=更复杂一点的例子>更复杂一点的例子</h2><p>贴一个参考 protocol buffer 3 的 spec 写出来的 grammar.js</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>  1
+</span><span class=lnt>  2
+</span><span class=lnt>  3
+</span><span class=lnt>  4
+</span><span class=lnt>  5
+</span><span class=lnt>  6
+</span><span class=lnt>  7
+</span><span class=lnt>  8
+</span><span class=lnt>  9
+</span><span class=lnt> 10
+</span><span class=lnt> 11
+</span><span class=lnt> 12
+</span><span class=lnt> 13
+</span><span class=lnt> 14
+</span><span class=lnt> 15
+</span><span class=lnt> 16
+</span><span class=lnt> 17
+</span><span class=lnt> 18
+</span><span class=lnt> 19
+</span><span class=lnt> 20
+</span><span class=lnt> 21
+</span><span class=lnt> 22
+</span><span class=lnt> 23
+</span><span class=lnt> 24
+</span><span class=lnt> 25
+</span><span class=lnt> 26
+</span><span class=lnt> 27
+</span><span class=lnt> 28
+</span><span class=lnt> 29
+</span><span class=lnt> 30
+</span><span class=lnt> 31
+</span><span class=lnt> 32
+</span><span class=lnt> 33
+</span><span class=lnt> 34
+</span><span class=lnt> 35
+</span><span class=lnt> 36
+</span><span class=lnt> 37
+</span><span class=lnt> 38
+</span><span class=lnt> 39
+</span><span class=lnt> 40
+</span><span class=lnt> 41
+</span><span class=lnt> 42
+</span><span class=lnt> 43
+</span><span class=lnt> 44
+</span><span class=lnt> 45
+</span><span class=lnt> 46
+</span><span class=lnt> 47
+</span><span class=lnt> 48
+</span><span class=lnt> 49
+</span><span class=lnt> 50
+</span><span class=lnt> 51
+</span><span class=lnt> 52
+</span><span class=lnt> 53
+</span><span class=lnt> 54
+</span><span class=lnt> 55
+</span><span class=lnt> 56
+</span><span class=lnt> 57
+</span><span class=lnt> 58
+</span><span class=lnt> 59
+</span><span class=lnt> 60
+</span><span class=lnt> 61
+</span><span class=lnt> 62
+</span><span class=lnt> 63
+</span><span class=lnt> 64
+</span><span class=lnt> 65
+</span><span class=lnt> 66
+</span><span class=lnt> 67
+</span><span class=lnt> 68
+</span><span class=lnt> 69
+</span><span class=lnt> 70
+</span><span class=lnt> 71
+</span><span class=lnt> 72
+</span><span class=lnt> 73
+</span><span class=lnt> 74
+</span><span class=lnt> 75
+</span><span class=lnt> 76
+</span><span class=lnt> 77
+</span><span class=lnt> 78
+</span><span class=lnt> 79
+</span><span class=lnt> 80
+</span><span class=lnt> 81
+</span><span class=lnt> 82
+</span><span class=lnt> 83
+</span><span class=lnt> 84
+</span><span class=lnt> 85
+</span><span class=lnt> 86
+</span><span class=lnt> 87
+</span><span class=lnt> 88
+</span><span class=lnt> 89
+</span><span class=lnt> 90
+</span><span class=lnt> 91
+</span><span class=lnt> 92
+</span><span class=lnt> 93
+</span><span class=lnt> 94
+</span><span class=lnt> 95
+</span><span class=lnt> 96
+</span><span class=lnt> 97
+</span><span class=lnt> 98
+</span><span class=lnt> 99
+</span><span class=lnt>100
+</span><span class=lnt>101
+</span><span class=lnt>102
+</span><span class=lnt>103
+</span><span class=lnt>104
+</span><span class=lnt>105
+</span><span class=lnt>106
+</span><span class=lnt>107
+</span><span class=lnt>108
+</span><span class=lnt>109
+</span><span class=lnt>110
+</span><span class=lnt>111
+</span><span class=lnt>112
+</span><span class=lnt>113
+</span><span class=lnt>114
+</span><span class=lnt>115
+</span><span class=lnt>116
+</span><span class=lnt>117
+</span><span class=lnt>118
+</span><span class=lnt>119
+</span><span class=lnt>120
+</span><span class=lnt>121
+</span><span class=lnt>122
+</span><span class=lnt>123
+</span><span class=lnt>124
+</span><span class=lnt>125
+</span><span class=lnt>126
+</span><span class=lnt>127
+</span><span class=lnt>128
+</span><span class=lnt>129
+</span><span class=lnt>130
+</span><span class=lnt>131
+</span><span class=lnt>132
+</span><span class=lnt>133
+</span><span class=lnt>134
+</span><span class=lnt>135
+</span><span class=lnt>136
+</span><span class=lnt>137
+</span><span class=lnt>138
+</span><span class=lnt>139
+</span><span class=lnt>140
+</span><span class=lnt>141
+</span><span class=lnt>142
+</span><span class=lnt>143
+</span><span class=lnt>144
+</span><span class=lnt>145
+</span><span class=lnt>146
+</span><span class=lnt>147
+</span><span class=lnt>148
+</span><span class=lnt>149
+</span><span class=lnt>150
+</span><span class=lnt>151
+</span><span class=lnt>152
+</span><span class=lnt>153
+</span><span class=lnt>154
+</span><span class=lnt>155
+</span><span class=lnt>156
+</span><span class=lnt>157
+</span><span class=lnt>158
+</span><span class=lnt>159
+</span><span class=lnt>160
+</span><span class=lnt>161
+</span><span class=lnt>162
+</span><span class=lnt>163
+</span><span class=lnt>164
+</span><span class=lnt>165
+</span><span class=lnt>166
+</span><span class=lnt>167
+</span><span class=lnt>168
+</span><span class=lnt>169
+</span><span class=lnt>170
+</span><span class=lnt>171
+</span><span class=lnt>172
+</span><span class=lnt>173
+</span><span class=lnt>174
+</span><span class=lnt>175
+</span><span class=lnt>176
+</span><span class=lnt>177
+</span><span class=lnt>178
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-js data-lang=js><span class=line><span class=cl><span class=nx>module</span><span class=p>.</span><span class=nx>exports</span> <span class=o>=</span> <span class=nx>grammar</span><span class=p>({</span>
+</span></span><span class=line><span class=cl>  <span class=nx>name</span><span class=o>:</span> <span class=s1>&#39;protobuf&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=nx>extras</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=p>[</span><span class=nx>$</span><span class=p>.</span><span class=nx>comment</span><span class=p>,</span> <span class=sr>/\s/</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>  <span class=nx>rules</span><span class=o>:</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// top
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nx>source_file</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span>
+</span></span><span class=line><span class=cl>      <span class=nx>seq</span><span class=p>(</span><span class=nx>$</span><span class=p>.</span><span class=nx>syntax</span><span class=p>,</span> <span class=nx>repeat</span><span class=p>(</span><span class=nx>choice</span><span class=p>(</span><span class=nx>$</span><span class=p>.</span><span class=kr>import</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=kr>package</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>option</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>emptyStatement</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=kr>enum</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>message</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>service</span><span class=p>))),</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// comment
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nx>comment</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>token</span><span class=p>(</span><span class=nx>seq</span><span class=p>(</span><span class=s1>&#39;//&#39;</span><span class=p>,</span> <span class=sr>/.*/</span><span class=p>)),</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// syntax
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nx>syntax</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>seq</span><span class=p>(</span><span class=s1>&#39;syntax&#39;</span><span class=p>,</span> <span class=s1>&#39;=&#39;</span><span class=p>,</span> <span class=sr>/&#34;proto3&#34;/</span><span class=p>,</span> <span class=s1>&#39;;&#39;</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// package
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=kr>package</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>seq</span><span class=p>(</span><span class=s1>&#39;package&#39;</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>fullIdent</span><span class=p>,</span> <span class=s1>&#39;;&#39;</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// imports
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=kr>import</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>seq</span><span class=p>(</span><span class=s1>&#39;import&#39;</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>strLit</span><span class=p>,</span> <span class=s1>&#39;;&#39;</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// option
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nx>option</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>seq</span><span class=p>(</span><span class=s1>&#39;option&#39;</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>optionName</span><span class=p>,</span> <span class=s1>&#39;=&#39;</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>constant</span><span class=p>,</span> <span class=s1>&#39;;&#39;</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>    <span class=nx>optionName</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>choice</span><span class=p>(</span><span class=nx>seq</span><span class=p>(</span><span class=s1>&#39;(&#39;</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>fullIdent</span><span class=p>,</span> <span class=s1>&#39;)&#39;</span><span class=p>),</span> <span class=nx>$</span><span class=p>.</span><span class=nx>fullIdent</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// enum
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=kr>enum</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>seq</span><span class=p>(</span><span class=s1>&#39;enum&#39;</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>enumName</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>enumBody</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>    <span class=nx>enumBody</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>seq</span><span class=p>(</span><span class=s1>&#39;{&#39;</span><span class=p>,</span> <span class=nx>repeat</span><span class=p>(</span><span class=nx>choice</span><span class=p>(</span><span class=nx>$</span><span class=p>.</span><span class=nx>option</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>enumField</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>emptyStatement</span><span class=p>)),</span> <span class=s1>&#39;}&#39;</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>    <span class=nx>enumField</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span>
+</span></span><span class=line><span class=cl>      <span class=nx>seq</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=nx>$</span><span class=p>.</span><span class=nx>ident</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;=&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=nx>optional</span><span class=p>(</span><span class=s1>&#39;-&#39;</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>        <span class=nx>$</span><span class=p>.</span><span class=nx>intLit</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=nx>optional</span><span class=p>(</span><span class=nx>seq</span><span class=p>(</span><span class=s1>&#39;[&#39;</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>enumValueOption</span><span class=p>,</span> <span class=nx>repeat</span><span class=p>(</span><span class=nx>seq</span><span class=p>(</span><span class=s1>&#39;,&#39;</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>enumValueOption</span><span class=p>)),</span> <span class=s1>&#39;]&#39;</span><span class=p>)),</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;;&#39;</span>
+</span></span><span class=line><span class=cl>      <span class=p>),</span>
+</span></span><span class=line><span class=cl>    <span class=nx>enumValueOption</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>seq</span><span class=p>(</span><span class=nx>$</span><span class=p>.</span><span class=nx>optionName</span><span class=p>,</span> <span class=s1>&#39;=&#39;</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>constant</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// message
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nx>message</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>seq</span><span class=p>(</span><span class=s1>&#39;message&#39;</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>messageName</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>messageBody</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>    <span class=nx>messageBody</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span>
+</span></span><span class=line><span class=cl>      <span class=nx>seq</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;{&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=nx>repeat</span><span class=p>(</span><span class=nx>choice</span><span class=p>(</span><span class=nx>$</span><span class=p>.</span><span class=nx>field</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=kr>enum</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>message</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>option</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>oneof</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>mapField</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>reserved</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>emptyStatement</span><span class=p>)),</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;}&#39;</span>
+</span></span><span class=line><span class=cl>      <span class=p>),</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// service
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nx>service</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>seq</span><span class=p>(</span><span class=s1>&#39;service&#39;</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>serviceName</span><span class=p>,</span> <span class=s1>&#39;{&#39;</span><span class=p>,</span> <span class=nx>repeat</span><span class=p>(</span><span class=nx>choice</span><span class=p>(</span><span class=nx>$</span><span class=p>.</span><span class=nx>option</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>rpc</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>emptyStatement</span><span class=p>)),</span> <span class=s1>&#39;}&#39;</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>    <span class=nx>rpc</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span>
+</span></span><span class=line><span class=cl>      <span class=nx>seq</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;rpc&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=nx>$</span><span class=p>.</span><span class=nx>rpcName</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;(&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=nx>optional</span><span class=p>(</span><span class=s1>&#39;stream&#39;</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>        <span class=nx>$</span><span class=p>.</span><span class=nx>enumMessageType</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;)&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;returns&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;(&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=nx>optional</span><span class=p>(</span><span class=s1>&#39;stream&#39;</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>        <span class=nx>$</span><span class=p>.</span><span class=nx>enumMessageType</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;)&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=nx>choice</span><span class=p>(</span><span class=nx>seq</span><span class=p>(</span><span class=s1>&#39;{&#39;</span><span class=p>,</span> <span class=nx>repeat</span><span class=p>(</span><span class=nx>choice</span><span class=p>(</span><span class=nx>$</span><span class=p>.</span><span class=nx>option</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>emptyStatement</span><span class=p>)),</span> <span class=s1>&#39;}&#39;</span><span class=p>),</span> <span class=s1>&#39;;&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>      <span class=p>),</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// field and inline option
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nx>field</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span>
+</span></span><span class=line><span class=cl>      <span class=nx>seq</span><span class=p>(</span><span class=nx>optional</span><span class=p>(</span><span class=s1>&#39;repeated&#39;</span><span class=p>),</span> <span class=nx>$</span><span class=p>.</span><span class=nx>type</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>fieldName</span><span class=p>,</span> <span class=s1>&#39;=&#39;</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>fieldNumber</span><span class=p>,</span> <span class=nx>optional</span><span class=p>(</span><span class=nx>seq</span><span class=p>(</span><span class=s1>&#39;[&#39;</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>fieldOptions</span><span class=p>,</span> <span class=s1>&#39;]&#39;</span><span class=p>)),</span> <span class=s1>&#39;;&#39;</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>    <span class=nx>fieldOptions</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>seq</span><span class=p>(</span><span class=nx>$</span><span class=p>.</span><span class=nx>fieldOption</span><span class=p>,</span> <span class=nx>repeat</span><span class=p>(</span><span class=nx>seq</span><span class=p>(</span><span class=s1>&#39;,&#39;</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>fieldOption</span><span class=p>))),</span>
+</span></span><span class=line><span class=cl>    <span class=nx>fieldOption</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>seq</span><span class=p>(</span><span class=nx>$</span><span class=p>.</span><span class=nx>optionName</span><span class=p>,</span> <span class=s1>&#39;=&#39;</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>constant</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// oneof
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nx>oneof</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>seq</span><span class=p>(</span><span class=s1>&#39;oneof&#39;</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>oneofName</span><span class=p>,</span> <span class=s1>&#39;{&#39;</span><span class=p>,</span> <span class=nx>repeat</span><span class=p>(</span><span class=nx>choice</span><span class=p>(</span><span class=nx>$</span><span class=p>.</span><span class=nx>option</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>oneofField</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>emptyStatement</span><span class=p>)),</span> <span class=s1>&#39;}&#39;</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>    <span class=nx>oneofField</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>seq</span><span class=p>(</span><span class=nx>$</span><span class=p>.</span><span class=nx>type</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>fieldName</span><span class=p>,</span> <span class=s1>&#39;=&#39;</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>fieldNumber</span><span class=p>,</span> <span class=nx>optional</span><span class=p>(</span><span class=nx>seq</span><span class=p>(</span><span class=s1>&#39;[&#39;</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>fieldOptions</span><span class=p>,</span> <span class=s1>&#39;]&#39;</span><span class=p>)),</span> <span class=s1>&#39;;&#39;</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// map
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nx>mapField</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span>
+</span></span><span class=line><span class=cl>      <span class=nx>seq</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;map&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;&lt;&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=nx>$</span><span class=p>.</span><span class=nx>keyType</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;,&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=nx>$</span><span class=p>.</span><span class=nx>type</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;&gt;&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=nx>$</span><span class=p>.</span><span class=nx>mapName</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;=&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=nx>$</span><span class=p>.</span><span class=nx>fieldNumber</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=nx>optional</span><span class=p>(</span><span class=nx>seq</span><span class=p>(</span><span class=s1>&#39;[&#39;</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>fieldOptions</span><span class=p>,</span> <span class=s1>&#39;]&#39;</span><span class=p>)),</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;;&#39;</span>
+</span></span><span class=line><span class=cl>      <span class=p>),</span>
+</span></span><span class=line><span class=cl>    <span class=nx>keyType</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span>
+</span></span><span class=line><span class=cl>      <span class=nx>choice</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;int32&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;int64&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;uint32&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;uint64&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;sint32&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;sint64&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;fixed32&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;fixed64&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;sfixed32&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;sfixed64&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;bool&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;string&#39;</span>
+</span></span><span class=line><span class=cl>      <span class=p>),</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// reserved
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nx>reserved</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>seq</span><span class=p>(</span><span class=s1>&#39;reserved&#39;</span><span class=p>,</span> <span class=nx>choice</span><span class=p>(</span><span class=nx>$</span><span class=p>.</span><span class=nx>ranges</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>fieldNames</span><span class=p>)),</span>
+</span></span><span class=line><span class=cl>    <span class=nx>ranges</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>seq</span><span class=p>(</span><span class=nx>$</span><span class=p>.</span><span class=nx>range</span><span class=p>,</span> <span class=nx>repeat</span><span class=p>(</span><span class=nx>seq</span><span class=p>(</span><span class=s1>&#39;,&#39;</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>range</span><span class=p>))),</span>
+</span></span><span class=line><span class=cl>    <span class=nx>range</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>seq</span><span class=p>(</span><span class=nx>$</span><span class=p>.</span><span class=nx>intLit</span><span class=p>,</span> <span class=nx>optional</span><span class=p>(</span><span class=nx>seq</span><span class=p>(</span><span class=s1>&#39;to&#39;</span><span class=p>,</span> <span class=nx>choice</span><span class=p>(</span><span class=nx>$</span><span class=p>.</span><span class=nx>intLit</span><span class=p>,</span> <span class=s1>&#39;max&#39;</span><span class=p>)))),</span>
+</span></span><span class=line><span class=cl>    <span class=nx>fieldNames</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>seq</span><span class=p>(</span><span class=nx>$</span><span class=p>.</span><span class=nx>fieldName</span><span class=p>,</span> <span class=nx>repeat</span><span class=p>(</span><span class=nx>seq</span><span class=p>(</span><span class=s1>&#39;,&#39;</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>fieldName</span><span class=p>))),</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// integer literals
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nx>intLit</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=o>/</span><span class=p>(</span><span class=err>\</span><span class=nx>d</span><span class=err>\</span><span class=nx>d</span><span class=o>*|</span><span class=mi>0</span><span class=p>[</span><span class=mi>0</span><span class=o>-</span><span class=mi>7</span><span class=p>]</span><span class=o>*|</span><span class=mi>0</span><span class=p>[</span><span class=nx>xX</span><span class=p>][</span><span class=err>\</span><span class=nx>da</span><span class=o>-</span><span class=nx>fA</span><span class=o>-</span><span class=nx>F</span><span class=p>]</span><span class=o>*</span><span class=p>)</span><span class=o>/</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// floating-point literals
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nx>floatLit</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>choice</span><span class=p>(</span><span class=sr>/\d\.\d*([eE][+-]\d*)?/</span><span class=p>,</span> <span class=sr>/\d*[eE][+-]\d*/</span><span class=p>,</span> <span class=sr>/\.\d*[eE][+-]\d*/</span><span class=p>,</span> <span class=s1>&#39;inf&#39;</span><span class=p>,</span> <span class=s1>&#39;nan&#39;</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// boolean literals
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nx>boolLit</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=o>/</span><span class=p>(</span><span class=kc>true</span><span class=o>|</span><span class=kc>false</span><span class=p>)</span><span class=o>/</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// string literals
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nx>strLit</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span>
+</span></span><span class=line><span class=cl>      <span class=nx>choice</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=nx>seq</span><span class=p>(</span><span class=s1>&#39;&#34;&#39;</span><span class=p>,</span> <span class=sr>/([^&#34;\n\\]|\\[xX][\da-fA-F]{2}|\\[0-7]{3}|\\[abfnrtv\\&#39;&#34;])*/</span><span class=p>,</span> <span class=s1>&#39;&#34;&#39;</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>        <span class=nx>seq</span><span class=p>(</span><span class=s2>&#34;&#39;&#34;</span><span class=p>,</span> <span class=sr>/([^&#39;\n\\]|\\[xX][\da-fA-F]{2}|\\[0-7]{3}|\\[abfnrtv\\&#39;&#34;])*/</span><span class=p>,</span> <span class=s2>&#34;&#39;&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>      <span class=p>),</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// built-in field type
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nx>type</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span>
+</span></span><span class=line><span class=cl>      <span class=nx>choice</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;double&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;float&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;int32&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;int64&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;uint32&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;uint64&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;sint32&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;sint64&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;fixed32&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;fixed64&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;sfixed32&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;sfixed64&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;bool&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;string&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;bytes&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=nx>$</span><span class=p>.</span><span class=nx>enumMessageType</span>
+</span></span><span class=line><span class=cl>      <span class=p>),</span>
+</span></span><span class=line><span class=cl>    <span class=nx>fieldNumber</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>$</span><span class=p>.</span><span class=nx>intLit</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// empty statement
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nx>emptyStatement</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=s1>&#39;;&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// constant
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nx>constant</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span>
+</span></span><span class=line><span class=cl>      <span class=nx>choice</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=nx>$</span><span class=p>.</span><span class=nx>fullIdent</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=nx>seq</span><span class=p>(</span><span class=nx>optional</span><span class=p>(</span><span class=sr>/[+-]/</span><span class=p>),</span> <span class=nx>$</span><span class=p>.</span><span class=nx>intLit</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>        <span class=nx>seq</span><span class=p>(</span><span class=nx>optional</span><span class=p>(</span><span class=sr>/[+-]/</span><span class=p>),</span> <span class=nx>$</span><span class=p>.</span><span class=nx>floatLit</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>        <span class=nx>$</span><span class=p>.</span><span class=nx>strLit</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=nx>$</span><span class=p>.</span><span class=nx>boolLit</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=nx>$</span><span class=p>.</span><span class=nx>msgLit</span>
+</span></span><span class=line><span class=cl>      <span class=p>),</span>
+</span></span><span class=line><span class=cl>    <span class=nx>msgLit</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>seq</span><span class=p>(</span><span class=s1>&#39;{&#39;</span><span class=p>,</span> <span class=nx>repeat</span><span class=p>(</span><span class=nx>seq</span><span class=p>(</span><span class=nx>$</span><span class=p>.</span><span class=nx>fieldName</span><span class=p>,</span> <span class=s1>&#39;:&#39;</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>constant</span><span class=p>)),</span> <span class=s1>&#39;}&#39;</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// identifier
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nx>ident</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=o>/</span><span class=p>[</span><span class=nx>a</span><span class=o>-</span><span class=nx>zA</span><span class=o>-</span><span class=nx>Z_</span><span class=p>]</span><span class=err>\</span><span class=nx>w</span><span class=o>*</span><span class=err>/,</span>
+</span></span><span class=line><span class=cl>    <span class=nx>fullIdent</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>seq</span><span class=p>(</span><span class=nx>$</span><span class=p>.</span><span class=nx>ident</span><span class=p>,</span> <span class=nx>repeat</span><span class=p>(</span><span class=nx>seq</span><span class=p>(</span><span class=s1>&#39;.&#39;</span><span class=p>,</span> <span class=nx>$</span><span class=p>.</span><span class=nx>ident</span><span class=p>))),</span>
+</span></span><span class=line><span class=cl>    <span class=nx>messageName</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>$</span><span class=p>.</span><span class=nx>ident</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nx>mapName</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>$</span><span class=p>.</span><span class=nx>ident</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nx>enumName</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>$</span><span class=p>.</span><span class=nx>ident</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nx>fieldName</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>$</span><span class=p>.</span><span class=nx>ident</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nx>oneofName</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>$</span><span class=p>.</span><span class=nx>ident</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nx>serviceName</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>$</span><span class=p>.</span><span class=nx>ident</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nx>rpcName</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>$</span><span class=p>.</span><span class=nx>ident</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nx>enumMessageType</span><span class=o>:</span> <span class=p>(</span><span class=nx>$</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=nx>seq</span><span class=p>(</span><span class=nx>optional</span><span class=p>(</span><span class=s1>&#39;.&#39;</span><span class=p>),</span> <span class=nx>repeat</span><span class=p>(</span><span class=nx>seq</span><span class=p>(</span><span class=nx>$</span><span class=p>.</span><span class=nx>ident</span><span class=p>,</span> <span class=s1>&#39;.&#39;</span><span class=p>)),</span> <span class=nx>$</span><span class=p>.</span><span class=nx>messageName</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>  <span class=p>},</span>
+</span></span><span class=line><span class=cl><span class=p>});</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=编译和使用>编译和使用</h2><p>生成的是c代码，默认是编译成机器码，和cpu指令集架构强相关。有很多语言提供了基于 C 接口的绑定。</p><p>不过现在也支持编译成 wasm，只需要用下面的命令</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>tree-sitter build-wasm
+</span></span></code></pre></td></tr></table></div></div><p>加载方式也是用 <code>Language.load</code> ，不过只有 web-tree-sitter 能加载。web-tree-sitter 可以用 <code>npm i --save tree-sitter</code> 来安装。</p><p>于是写个 main.js ，加载代码如下</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-js data-lang=js><span class=line><span class=cl><span class=kr>const</span> <span class=nx>Parser</span> <span class=o>=</span> <span class=nx>require</span><span class=p>(</span><span class=s2>&#34;web-tree-sitter&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=nx>Parser</span><span class=p>.</span><span class=nx>init</span><span class=p>().</span><span class=nx>then</span><span class=p>(()</span> <span class=p>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nx>Parser</span><span class=p>.</span><span class=nx>Language</span><span class=p>.</span><span class=nx>load</span><span class=p>(</span><span class=s2>&#34;tree-sitter-hello.wasm&#34;</span><span class=p>).</span><span class=nx>then</span><span class=p>((</span><span class=nx>lang</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kr>const</span> <span class=nx>parser</span> <span class=o>=</span> <span class=k>new</span> <span class=nx>Parser</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=nx>parser</span><span class=p>.</span><span class=nx>setLanguage</span><span class=p>(</span><span class=nx>lang</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=kr>const</span> <span class=nx>ast</span> <span class=o>=</span> <span class=nx>parser</span><span class=p>.</span><span class=nx>parse</span><span class=p>(</span><span class=s2>&#34;amazing tree parser&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=nx>ast</span><span class=p>.</span><span class=nx>rootNode</span><span class=p>.</span><span class=nx>toString</span><span class=p>());</span>
+</span></span><span class=line><span class=cl>  <span class=p>});</span>
+</span></span><span class=line><span class=cl><span class=p>});</span>
+</span></span></code></pre></td></tr></table></div></div><p>最终输出是</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>(source_file (word) (word) (word))
+</span></span></code></pre></td></tr></table></div></div><h2 id=编辑和更新>编辑和更新</h2><p>这个还没搞明白。</p><p>回头参考下别的 repo 的代码，看看别人是怎么做语法树更新的。</p></section><footer class=article-footer><section class=article-tags><a href=/tags/%E7%BC%96%E8%AF%91%E6%8A%80%E6%9C%AF/>编译技术</a>
+<a href=/tags/javascript/>javascript</a>
+<a href=/tags/vscode/>vscode</a></section><section class=article-copyright><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg><span>Licensed under CC BY-NC-SA 4.0</span></section></footer><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.css integrity=sha384-RZU/ijkSsFbcmivfdRBQDtwuwVqK7GMOw6IMvKyeWL2K5UAlyp6WonmB8m7Jd0Hn crossorigin=anonymous><script src=https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.js integrity=sha384-pK1WpvzWVBQiP0/GjnvRxV4mOb0oxFuyRxJlk6vVw146n3egcN5C925NCP7a7BY8 crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/contrib/auto-render.min.js integrity=sha384-vZTG03m+2yp6N6BNi5iM4rW4oIwk5DfcNdFfxkk9ZWpDriOkXX8voJBFrAO7MpVl crossorigin=anonymous defer></script><script>window.addEventListener("DOMContentLoaded",()=>{renderMathInElement(document.querySelector(`.article-content`),{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1},{left:"\\(",right:"\\)",display:!1},{left:"\\[",right:"\\]",display:!0}]})})</script></article><aside class=related-contents--wrapper><h2 class=section-title>相关文章</h2><div class=related-contents><div class="flex article-list--tile"><article><a href=/p/%E7%94%A8-tree-sitter-%E5%86%99%E4%B8%80%E4%B8%AA%E4%BB%A3%E7%A0%81%E9%AB%98%E4%BA%AE/><div class=light><div class=lamp></div></div><div class=article-details><h2 class=article-title>用 tree-sitter 写一个代码高亮</h2></div></a></article><article><a href=/p/audiocontext-%E6%8A%80%E6%9C%AF%E5%92%8C%E9%9F%B3%E4%B9%90%E5%8F%AF%E8%A7%86%E5%8C%962/><div class=light><div class=lamp></div></div><div class=article-details><h2 class=article-title>AudioContext 技术和音乐可视化（2）</h2></div></a></article><article><a href=/p/audiocontext%E6%8A%80%E6%9C%AF%E5%92%8C%E9%9F%B3%E4%B9%90%E5%8F%AF%E8%A7%86%E5%8C%961/><div class=light><div class=lamp></div></div><div class=article-details><h2 class=article-title>AudioContext技术和音乐可视化（1）</h2></div></a></article></div></div></aside><footer class=site-footer><section class=copyright>&copy;
+2021 -
+2024 weakptr's 笔记</section><section class=powerby><a href=https://beian.miit.gov.cn/>浙ICP备2021032371号-1</a>
+<span style=margin-left:16px></span>
+<a target=_blank href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=33032402002231" style=display:inline-block;text-decoration:none;height:20px;line-height:20px><img src=/image/beian.png style=float:left>
+浙公网安备 33032402002231号</a><br>Built with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a><br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.11.0>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计
+，由 <a href=https://nnnewb.github.io/blog/>nnnewb</a> 修改</section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css integrity="sha256-c0uckgykQ9v5k+IqViZOZKc47Jn7KQil4/MP3ySA3F8=" crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css integrity="sha256-SBLU4vv6CA6lHsZ1XyTdhyjJxCjPif/TRkjnsyGAGnE=" crossorigin=anonymous></main><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav id=TableOfContents><ol><li><a href=#快速开始>快速开始</a></li><li><a href=#规则-dsl>规则 DSL</a></li><li><a href=#更复杂一点的例子>更复杂一点的例子</a></li><li><a href=#编译和使用>编译和使用</a></li><li><a href=#编辑和更新>编辑和更新</a></li></ol></nav></div></section></aside></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>

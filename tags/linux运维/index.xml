@@ -1,0 +1,862 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>linux运维 on weakptr's 笔记</title><link>https://weakptr.site/tags/linux%E8%BF%90%E7%BB%B4/</link><description>Recent content in linux运维 on weakptr's 笔记</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><lastBuildDate>Thu, 02 Mar 2023 17:36:09 +0800</lastBuildDate><atom:link href="https://weakptr.site/tags/linux%E8%BF%90%E7%BB%B4/index.xml" rel="self" type="application/rss+xml"/><item><title>iptables 调试方法</title><link>https://weakptr.site/p/iptables-%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95/</link><pubDate>Thu, 02 Mar 2023 17:36:09 +0800</pubDate><guid>https://weakptr.site/p/iptables-%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95/</guid><description>&lt;p>工作忙长话短说，写的匆忙，参考文章见文末。&lt;/p>
+&lt;h2 id="应对场景">应对场景&lt;/h2>
+&lt;p>因为工作面对的网络环境有点复杂，业务需要做了基于 Tun 网卡的隧道转发流量，然后流量会经过实体机-虚拟机（隧道网关）-虚拟机（蜜罐网络网关）-虚拟机/docker容器一长串转发，基本靠 &lt;code>ip rule&lt;/code>/&lt;code>ip route&lt;/code> 还有 &lt;code>iptables&lt;/code> 制定流量转发规则。&lt;/p>
+&lt;p>后来简化了整个流量路径，直接从实体机转蜜罐网络。最近就遇到一个 &lt;code>tcpdump&lt;/code> 抓到了隧道网卡流量，但没有进入 docker 创建的网桥的问题。虽然后来是靠重启了一下隧道服务端解决（问题根源没找到），但中间看另一个同事调规则还是直接 &lt;code>-j accept&lt;/code> 然后 &lt;code>iptables -t nat -nvL&lt;/code> 看流量，于是就想起来之前似乎看到过 netfilter 支持 &lt;code>-j LOG&lt;/code> 还是啥来着，可以把流量打条日志出来。&lt;/p>
+&lt;p>不过一个一个链跟过去 &lt;code>iptables -t xxx -I yyy -j LOG&lt;/code> 加日志再看日志很不方便，于是搜了下，发现可以在 &lt;code>raw&lt;/code> 表 &lt;code>PREROUTING&lt;/code> 链增加一条 &lt;code>-j TRACE&lt;/code> 把入站链路匹配的表链规则都打出来。&lt;/p>
+&lt;h2 id="使用">使用&lt;/h2>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 跟踪入站包&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">iptables -t raw -I PREROUTING -p tcp -s 192.168.13.3 -d 192.168.13.6 --dport &lt;span class="m">80&lt;/span> -j TRACE
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 跟踪出站包&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">iptables -t raw -I OUTPUT -p tcp -s 192.168.13.6 -d 192.168.13.3 --sport &lt;span class="m">80&lt;/span> -j TRACE
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>因为 TRACE 打的内容很丰富，说白了要是不加约束的话打出来的日志量大到没法看，所以最好加上详细的匹配规则，只抓感兴趣的流量。&lt;/p>
+&lt;p>比如上面的命令只抓 &lt;code>192.168.13.6:80&lt;/code> 的出站、入站流量，如果遇到像是 80 不知道转发到哪儿了，可以打出来匹配的表链和规则。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">[root@localhost ~]# iptables -t raw -nvL
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Chain PREROUTING (policy ACCEPT 111 packets, 8843 bytes)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> pkts bytes target prot opt in out source destination
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> 0 0 TRACE tcp -- * * 192.168.13.3 192.168.13.6 tcp dpt:80
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Chain OUTPUT (policy ACCEPT 67 packets, 15411 bytes)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> pkts bytes target prot opt in out source destination
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> 0 0 TRACE tcp -- * * 192.168.13.6 192.168.13.3 tcp spt:80
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>现在到 192.168.13.3 尝试请求 192.168.13.6 的 80 端口看看。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">vm :: ~/repos/huanyun » curl -vkL http://192.168.13.6/
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">* Trying 192.168.13.6:80...
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">^C
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>在 192.168.13.6 上使用命令 &lt;code>journalctl -xek&lt;/code> 查看内核日志。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">[root@localhost ~]# journalctl -kxe -n 10 --no-pager
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">-- Logs begin at Tue 2023-02-28 05:48:43 CST, end at Thu 2023-03-02 13:56:16 CST. --
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Mar 02 13:56:16 localhost.localdomain kernel: TRACE: mangle:INPUT:policy:1 IN=enp0s8 OUT= MAC=08:00:27:f1:ac:7a:08:00:27:4e:0e:25:08:00 SRC=192.168.13.3 DST=192.168.13.6 LEN=52 TOS=0x10 PREC=0x00 TTL=64 ID=43341 DF PROTO=TCP SPT=38660 DPT=80 SEQ=548562008 ACK=907923156 WINDOW=502 RES=0x00 ACK URGP=0 OPT (0101080AB2CBAA293337B8FC) UID=48 GID=48
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Mar 02 13:56:16 localhost.localdomain kernel: TRACE: filter:INPUT:policy:1 IN=enp0s8 OUT= MAC=08:00:27:f1:ac:7a:08:00:27:4e:0e:25:08:00 SRC=192.168.13.3 DST=192.168.13.6 LEN=52 TOS=0x10 PREC=0x00 TTL=64 ID=43341 DF PROTO=TCP SPT=38660 DPT=80 SEQ=548562008 ACK=907923156 WINDOW=502 RES=0x00 ACK URGP=0 OPT (0101080AB2CBAA293337B8FC) UID=48 GID=48
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Mar 02 13:56:16 localhost.localdomain kernel: TRACE: raw:PREROUTING:policy:2 IN=enp0s8 OUT= MAC=08:00:27:f1:ac:7a:08:00:27:4e:0e:25:08:00 SRC=192.168.13.3 DST=192.168.13.6 LEN=52 TOS=0x10 PREC=0x00 TTL=64 ID=43342 DF PROTO=TCP SPT=38660 DPT=80 SEQ=548562008 ACK=907923156 WINDOW=502 RES=0x00 ACK FIN URGP=0 OPT (0101080AB2CBAA293337B8FC)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Mar 02 13:56:16 localhost.localdomain kernel: TRACE: mangle:PREROUTING:policy:1 IN=enp0s8 OUT= MAC=08:00:27:f1:ac:7a:08:00:27:4e:0e:25:08:00 SRC=192.168.13.3 DST=192.168.13.6 LEN=52 TOS=0x10 PREC=0x00 TTL=64 ID=43342 DF PROTO=TCP SPT=38660 DPT=80 SEQ=548562008 ACK=907923156 WINDOW=502 RES=0x00 ACK FIN URGP=0 OPT (0101080AB2CBAA293337B8FC)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Mar 02 13:56:16 localhost.localdomain kernel: TRACE: mangle:INPUT:policy:1 IN=enp0s8 OUT= MAC=08:00:27:f1:ac:7a:08:00:27:4e:0e:25:08:00 SRC=192.168.13.3 DST=192.168.13.6 LEN=52 TOS=0x10 PREC=0x00 TTL=64 ID=43342 DF PROTO=TCP SPT=38660 DPT=80 SEQ=548562008 ACK=907923156 WINDOW=502 RES=0x00 ACK FIN URGP=0 OPT (0101080AB2CBAA293337B8FC) UID=48 GID=48
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Mar 02 13:56:16 localhost.localdomain kernel: TRACE: filter:INPUT:policy:1 IN=enp0s8 OUT= MAC=08:00:27:f1:ac:7a:08:00:27:4e:0e:25:08:00 SRC=192.168.13.3 DST=192.168.13.6 LEN=52 TOS=0x10 PREC=0x00 TTL=64 ID=43342 DF PROTO=TCP SPT=38660 DPT=80 SEQ=548562008 ACK=907923156 WINDOW=502 RES=0x00 ACK FIN URGP=0 OPT (0101080AB2CBAA293337B8FC) UID=48 GID=48
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Mar 02 13:56:16 localhost.localdomain kernel: TRACE: raw:OUTPUT:policy:2 IN= OUT=enp0s8 SRC=192.168.13.6 DST=192.168.13.3 LEN=52 TOS=0x00 PREC=0x00 TTL=64 ID=41993 DF PROTO=TCP SPT=80 DPT=38660 SEQ=907923156 ACK=548562009 WINDOW=227 RES=0x00 ACK URGP=0 OPT (0101080A3337B8FFB2CBAA29) UID=48 GID=48
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Mar 02 13:56:16 localhost.localdomain kernel: TRACE: mangle:OUTPUT:policy:1 IN= OUT=enp0s8 SRC=192.168.13.6 DST=192.168.13.3 LEN=52 TOS=0x00 PREC=0x00 TTL=64 ID=41993 DF PROTO=TCP SPT=80 DPT=38660 SEQ=907923156 ACK=548562009 WINDOW=227 RES=0x00 ACK URGP=0 OPT (0101080A3337B8FFB2CBAA29) UID=48 GID=48
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Mar 02 13:56:16 localhost.localdomain kernel: TRACE: filter:OUTPUT:policy:1 IN= OUT=enp0s8 SRC=192.168.13.6 DST=192.168.13.3 LEN=52 TOS=0x00 PREC=0x00 TTL=64 ID=41993 DF PROTO=TCP SPT=80 DPT=38660 SEQ=907923156 ACK=548562009 WINDOW=227 RES=0x00 ACK URGP=0 OPT (0101080A3337B8FFB2CBAA29) UID=48 GID=48
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Mar 02 13:56:16 localhost.localdomain kernel: TRACE: mangle:POSTROUTING:policy:1 IN= OUT=enp0s8 SRC=192.168.13.6 DST=192.168.13.3 LEN=52 TOS=0x00 PREC=0x00 TTL=64 ID=41993 DF PROTO=TCP SPT=80 DPT=38660 SEQ=907923156 ACK=548562009 WINDOW=227 RES=0x00 ACK URGP=0 OPT (0101080A3337B8FFB2CBAA29) UID=48 GID=48
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>我多请求了两次所以日志量会多点，不过内容大概就是这样。&lt;/p>
+&lt;p>日志字段分几个主要部分：匹配的表链（&lt;code>mangle:POSTROUTING:policy:1&lt;/code>）、进出设备（&lt;code>IN= OUT=enp0s8&lt;/code>）、接收方以太网地址（&lt;code>MAC=08:00:27:f1:ac:7a:08:00:27:4e:0e:25:08:00&lt;/code>）、收发IP（&lt;code>SRC=192.168.13.3 DST=192.168.13.6&lt;/code>）、协议（&lt;code>PROTO=TCP&lt;/code>）、收发端口（&lt;code>SPT=38660 DPT=80&lt;/code>）还有 flag（&lt;code>ACK FIN URGP=0&lt;/code>）&lt;/p>
+&lt;h2 id="总结">总结&lt;/h2>
+&lt;p>原理图&lt;/p>
+&lt;p>&lt;img src="https://weakptr.site/p/iptables-%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95/netfilter-packet-flow.png"
+width="1900"
+height="605"
+srcset="https://weakptr.site/p/iptables-%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95/netfilter-packet-flow_hu2fb1d0d2fa972e6a81887037c93699c4_254789_480x0_resize_box_3.png 480w, https://weakptr.site/p/iptables-%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95/netfilter-packet-flow_hu2fb1d0d2fa972e6a81887037c93699c4_254789_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="netfilter-packet-flow"
+class="gallery-image"
+data-flex-grow="314"
+data-flex-basis="753px"
+>&lt;/p>
+&lt;p>就是这样。&lt;/p>
+&lt;p>&lt;code>ip rule&lt;/code> 和 &lt;code>ip route&lt;/code> 把 《TCP/IP 协议详解》读完了再说，Linux 网络实现好几本大部头在我书架上等着我翻，也不知道几年后能看完。&lt;/p>
+&lt;p>参考&lt;/p>
+&lt;ul>
+&lt;li>&lt;a class="link" href="https://thermalcircle.de/doku.php?id=blog:linux:nftables_packet_flow_netfilter_hooks_detail" target="_blank" rel="noopener"
+>https://thermalcircle.de/doku.php?id=blog:linux:nftables_packet_flow_netfilter_hooks_detail&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://backreference.org/2010/06/11/iptables-debugging/" target="_blank" rel="noopener"
+>https://backreference.org/2010/06/11/iptables-debugging/&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;p>建议就直接读原文，写得很细。&lt;/p></description></item><item><title>我的 Ubuntu Server 虚拟机配置</title><link>https://weakptr.site/p/%E6%88%91%E7%9A%84-ubuntu-server-%E8%99%9A%E6%8B%9F%E6%9C%BA%E9%85%8D%E7%BD%AE/</link><pubDate>Sat, 31 Dec 2022 17:15:43 +0800</pubDate><guid>https://weakptr.site/p/%E6%88%91%E7%9A%84-ubuntu-server-%E8%99%9A%E6%8B%9F%E6%9C%BA%E9%85%8D%E7%BD%AE/</guid><description>&lt;p>Ubuntu Server 是我目前比较习惯用的开发用 Linux 虚拟机系统，选择 Ubuntu Server 的原因也很简单：问答资源什么的比较丰富，安装过程足够快捷可控，以及日常开发使用中相对没那么折腾。&lt;/p>
+&lt;p>但 Ubuntu Server 默认配置也有些比较恶心人的东西，比如那个 &lt;code>snapd&lt;/code> ，平时基本用不到，但系统用了一段时间后经常看到 &lt;code>snapd&lt;/code> 关机的时候等待 120s 或者启动报错之类。同样比较烦人的是 &lt;code>systemd-networkd-wait-online&lt;/code> ，会拖慢开机时间，而且经常能看到失败。&lt;/p>
+&lt;p>且不说这个检查机制到底是怎么实现的，虚拟机环境基本不配什么开机启动依赖网络的服务，等网络确实没什么意义。&lt;/p>
+&lt;p>最后还有一个比较迷惑的问题，默认装完 Ubuntu Server 设置的 systemd target 是 graphical ，但安装选项是不含桌面的。所以为了不加载没啥用还可能导致问题的服务，默认 target 也得改成 multi-user 。&lt;/p>
+&lt;p>具体流程：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 卸载和禁用 snapd&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo apt autoremove --purge snapd
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo apt-mark hold snapd
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 修改 systemd-networkd-wait-online 的等待时间&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># ExecStart=/lib/systemd/systemd-networkd-wait-online --timeout 1&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 加上 --timeout 1&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo systemctl edit systemd-networkd-wait-online.service --full
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 修改目标 multi-user&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo systemctl set-default multi-user
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 重启生效&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo reboot
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>这是一方面。&lt;/p>
+&lt;p>另外还有个比较讨厌的问题是网络配置，公司内网不允许虚拟机桥接，而 NAT 模式宿主机是不能直接通过 IP 访问虚拟机的，所以还得加一张 Host-Only 网卡。此外，因为工作需要，还得准备两台用来给公司代码编译打包的虚拟机（也是历史遗留的大坑），以及一台测试用的虚拟机。这些虚拟机之间需要互通，然而 NAT 模式网卡也是不支持虚拟机之间互通的，所以还是要加 Host-Only 网卡。&lt;/p>
+&lt;p>然后就是 Host-Only 网卡的问题了，默认是 DHCP 分配 IP ，会偶发的出现虚拟机 IP 改变，导致一些写好的脚本不得不改下才能跑。所以还得顺便改下静态 IP 。嗯，虚拟机有部分是 CentOS 的，配置静态 IP 方法和 Ubuntu Server 不一样，但这篇只聊下 Ubuntu Server 的配置静态 IP 方法。&lt;/p>
+&lt;p>简而言之，参考 &lt;a class="link" href="https://netplan.io/examples" target="_blank" rel="noopener"
+>Canonical Netplan&lt;/a> 这篇文档。在 &lt;code>/etc/netplan/&lt;/code> 下面新建一个 &lt;code>01-host-only.yaml&lt;/code> 配置如下。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="line">&lt;span class="cl">&lt;span class="nt">network&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">version&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">2&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">renderer&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">networkd&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">ethernets&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">ens37&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">dhcp4&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kc">no&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">addresses&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="m">192.168.129.101&lt;/span>&lt;span class="l">/24]&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">nameservers&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">addresses&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="m">114.114.114.114&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="m">114.114.115.115&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">routes&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="nt">to&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">192.168.129.0&lt;/span>&lt;span class="l">/24&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">via&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">192.168.129.1&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>需要注意的是得看下虚拟机的 Host-Only 网卡配置的是哪个网段，以及 Host-Only 的网卡名是什么（我的机器上是 &lt;code>ens37&lt;/code>）。Host-Only 网卡配 &lt;code>nameservers&lt;/code> 没啥意义我这写了也就写了。&lt;/p>
+&lt;p>改好之后 &lt;code>sudo netplan aplpy&lt;/code> 应用，再试试 &lt;code>ip addr show&lt;/code> 看看生效了，&lt;code>ping -I ens37 192.168.129.xxx&lt;/code> 试下能不能通其他 Host-Only 网卡的 IP 。最好再试下 &lt;code>curl -L https://www.baidu.com/&lt;/code> 看看正常上网有没有问题。&lt;/p></description></item><item><title>排查一个kubectl无反应的问题</title><link>https://weakptr.site/p/why-my-kubectl-not-responding/</link><pubDate>Mon, 27 Dec 2021 15:21:00 +0800</pubDate><guid>https://weakptr.site/p/why-my-kubectl-not-responding/</guid><description>&lt;p>懒得分段了，就当做是讲个故事吧。&lt;/p>
+&lt;p>背景大概是这样。&lt;/p>
+&lt;p>内网公共开发机上配置了 k3s 集群，同时后端开发工作也在这台开发机上进行（通过vscode remote-ssh）。因为公司太抠门，开发机只有117G硬盘容量，除去必要的开发工具、系统环境之类的东西，实际可用一直没超过50%，机器上又跑了很多东西，像是 gitlab-runner、docker的registry、MySQL、elasticsearch、开发集群服务等等，差不多每一两个星期都会出现 disk-pressure 的 taint，导致 pod 被 evicted。实话说能跑就很满足了，毕竟公司抠门到开发部门的上行带宽都贼小，如果把镜像推送到公网的registry去部署的话体验更差。&lt;/p>
+&lt;p>今天（周一）来公司之后调了下gitlab-ci，给一个前端项目做持续部署。因为前端对kubernetes这套不熟悉，也没有相关的服务器权限，总之就是很难让他们自己来。但是产品部门又喜欢提那种“按钮移到右上角”、“加个图片”之类的需求（对，我司还没有需求管理系统，开发就是个撸码的无情工具人），前端老是过来找我去部署下环境，就搞得摸鱼都摸不痛快。&lt;/p>
+&lt;p>所以，当当当~当~，整一个持续部署呗，反正是个纯前端项目，不用部署配套的后端代码，写个dockerfile再写个helm chart就差不多了，ci调了调构建镜像就完事，不过因为ci部署需要访问集群，所以又改了下&lt;code>.kube/config&lt;/code>，删了之前尝试&lt;code>csr&lt;/code>方式添加用户的时候加多的 user 和 context ，复制了一份挂载到 runner 容器里。&lt;/p>
+&lt;p>然后&amp;hellip;&amp;hellip;问题就来了。&lt;/p>
+&lt;p>同事忽然告诉我办公室的服务挂了，于是下意识地打出&lt;code>kgp&lt;/code>，卡住。&lt;/p>
+&lt;p>等了一会儿，还是卡住。&lt;/p>
+&lt;p>又等了一会儿，坐不住了。试了下&lt;code>kubectl cluster-info&lt;/code>，继续卡住。&lt;/p>
+&lt;p>开始慌了，想起今天的机器有点卡，先看看 &lt;code>free -h&lt;/code> 有没有内存泄漏之类的问题导致阻塞，结果发现并没有，于是继续看 &lt;code>htop&lt;/code>，cpu使用率也比较正常。再看&lt;code>df -h | grep -vE 'shm|overlay'&lt;/code>，发现硬盘使用率96%（估计硬盘主控想死的心都有了，揪着4%的可用空间想把PE数平均到各个区块恐怕不容易）。&lt;/p>
+&lt;p>找到问题后松了口气，十有八九是又出现 evicted 了。二话不说直接 &lt;code>docker system df&lt;/code>，看到30多G的 build cache 顿时惊了，肯定不是go的构建缓存（手动挂载优化了），那就是 node_modules 又立奇功了。node_modules=黑洞果然不是吹的。&lt;/p>
+&lt;p>清理完使用率恢复到63%，但依然有种不安感萦绕于心，于是再次尝试&lt;code>kgp&lt;/code>，卡住。&lt;/p>
+&lt;p>等了一会儿，喝口水，继续卡着。&lt;/p>
+&lt;p>又等了一会儿，淦。&lt;/p>
+&lt;p>想了想，&lt;code>journalctl -r -u k3s&lt;/code>看看日志，并没有什么发现，倒是注意到很多&lt;code>linkerd&lt;/code>之类的我们部门经理搞事的时候遗留下来的玩意儿在报错，service mesh 我不熟，但寻思应该不会影响 kubectl 吧，k3s 本体的 api-server 应该不归 linkerd 管。更何况 linkerd 本身就没配好。再翻了翻看到下面的内容。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl"> 6 12月 25 21:16:07 office k3s[794]: I1225 13:16:07.685149 794 container_gc.go:85] attempting to delete unused containers
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> 7 12月 25 21:16:07 office k3s[794]: I1225 13:16:07.687723 794 image_gc_manager.go:321] attempting to delete unused images
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> 8 12月 25 21:16:07 office k3s[794]: I1225 13:16:07.782390 794 eviction_manager.go:351] eviction manager: able to reduce ephemeral-storage pressure without evicting pods.
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> 9 12月 25 21:16:17 office k3s[794]: W1225 13:16:17.939242 794 eviction_manager.go:344] eviction manager: attempting to reclaim ephemeral-storage
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> 10 12月 25 21:16:17 office k3s[794]: I1225 13:16:17.939267 794 container_gc.go:85] attempting to delete unused containers
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> 11 12月 25 21:16:17 office k3s[794]: I1225 13:16:17.941771 794 image_gc_manager.go:321] attempting to delete unused images
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> 12 12月 25 21:16:18 office k3s[794]: I1225 13:16:18.033724 794 eviction_manager.go:351] eviction manager: able to reduce ephemeral-storage pressure without evicting pods.
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> 13 12月 25 21:16:28 office k3s[794]: W1225 13:16:28.214032 794 eviction_manager.go:344] eviction manager: attempting to reclaim ephemeral-storage
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>这个是老问题了，一直没去研究怎么解决。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl"> 154 12月 25 21:21:55 office k3s[794]: I1225 13:21:55.021937 794 image_gc_manager.go:304] [imageGCManager]: Disk usage on image filesystem is at 95% which is over the high threshold (85%). Trying to free 182 155 12月 25 21:21:55 office k3s[794]: E1225 13:21:55.025140 794 kubelet.go:1292] Image garbage collection failed multiple times in a row: failed to garbage collect required amount of images. Wanted to free
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>这次搜了下，应该是 &lt;code>docker system prune&lt;/code> 造成 &lt;code>kubelet&lt;/code> 找不到可回收的镜像才报错（猜测），不过依然不能解释为啥 &lt;code>kubectl&lt;/code> 没反应。于是继续翻了会儿日志，搜索错误，但始终没有什么结果。&lt;/p>
+&lt;p>但是同事还要干活，没辙了，先重启下服务器吧。群里说了一声要重启了，等了一会儿跑&lt;code>sudo reboot&lt;/code>，重启完连接，继续&lt;code>kgp&lt;/code>，卡住。&lt;/p>
+&lt;p>嗯&amp;hellip;&amp;hellip;&lt;/p>
+&lt;p>早有预料。&lt;/p>
+&lt;p>&lt;code>journalctl -r -u k3s --boot&lt;/code> 看看重启后的日志，发现还是老一套的问题，&lt;code>docker&lt;/code> 手动处理镜像和容器造成的和 kubernetes 的管理机制的冲突，各种找不到镜像或者容器的警告，还有一些错误和trace，但没有一个能解释为什么&lt;code>kubectl&lt;/code>没有反应。。。&lt;/p>
+&lt;p>直到在&lt;code>kubectl&lt;/code>的终端里按下了ctrl+c，在顺手&lt;code>clear&lt;/code>之前看到了一行请输入用户名（eng）&amp;hellip;&lt;/p>
+&lt;p>警觉。&lt;/p>
+&lt;p>忽然想起来，因为 &lt;code>kubectl&lt;/code> 这破玩意儿是没有颜色输出的，用习惯了各种彩色输出的命令行工具，&lt;code>kubectl&lt;/code>就格外不顺眼。所以在发现&lt;code>kubecolors&lt;/code>后，我就直接把&lt;code>kubectl&lt;/code>配置成了&lt;code>kubecolor&lt;/code>的别名。&lt;/p>
+&lt;p>所以&amp;hellip;&amp;hellip;难道是&lt;code>kubecolor&lt;/code>的问题？&lt;/p>
+&lt;p>&lt;code>whereis kubectl&lt;/code>找到&lt;code>kubectl&lt;/code>的绝对路径之后，尝试手动运行&lt;code>/usr/local/bin/kubectl cluster-info&lt;/code>，再次出现了那个输入用户名的提示，顿时开始怀疑起&lt;code>.kube/config&lt;/code>配置有问题，正好在出现问题之前改过了&lt;code>.kube/config&lt;/code>，这里出问题的嫌疑就很吉尔大。&lt;/p>
+&lt;p>于是打开&lt;code>.kube/config&lt;/code>，检查了一下集群的用户配置，发现果然，是我手欠把办公室集群的用户给删了。草。&lt;/p>
+&lt;p>急忙从&lt;code>/etc/rancher/k3s/k3s.yaml&lt;/code>复制下用户证书配置，贴进去，再运行&lt;code>kgp&lt;/code>果然屁事没有了。&lt;/p>
+&lt;p>所以总结如下。&lt;/p>
+&lt;ol>
+&lt;li>别被表面的问题迷惑。&lt;/li>
+&lt;li>自己犯傻的几率大于基础设施/常用工具犯傻的几率。&lt;/li>
+&lt;li>遇到问题解决步骤很重要，准确的方向可以省很多时间。
+&lt;ol>
+&lt;li>先确定故障表现和复现条件&lt;/li>
+&lt;li>确定故障点（出现在网络、网关还是应用、数据库），弄清楚是不是新问题&lt;/li>
+&lt;li>再排查相关配置是否正确，回忆是否有做过相关修改变更&lt;/li>
+&lt;li>再排查故障点日志，必要的时候参考下代码，毕竟有的时候日志没写清楚错误的上下文&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ol></description></item><item><title>在raspbian上手动编译vim8.2</title><link>https://weakptr.site/p/build-vim8.2-manually-on-raspbian/</link><pubDate>Sat, 25 Dec 2021 10:37:00 +0800</pubDate><guid>https://weakptr.site/p/build-vim8.2-manually-on-raspbian/</guid><description>&lt;h2 id="前言">前言&lt;/h2>
+&lt;p>raspbian上自带的vim版本还是低了点，像是&lt;code>coc.nvim&lt;/code>之类的插件弹警告就搞得很烦。我寻思自己编译一个吧。&lt;/p>
+&lt;h2 id="0x01-下载源码">0x01 下载源码&lt;/h2>
+&lt;p>从&lt;a class="link" href="https://www.vim.org/download.php" target="_blank" rel="noopener"
+>vim官网&lt;/a>下载源码（或者可以从GitHub下，出于网络考虑还是直接从ftp下了），下完直接&lt;code>scp&lt;/code>传到树莓派上，&lt;code>tar xf&lt;/code>解压好准备开整。&lt;/p>
+&lt;h2 id="0x02-配置">0x02 配置&lt;/h2>
+&lt;p>惯例先看看文档，&lt;code>README.md&lt;/code>里指出源码安装去看&lt;code>src/INSTALL&lt;/code>，所以跟着去看。&lt;/p>
+&lt;p>在 Unix 一节中提到直接&lt;code>make&lt;/code>+&lt;code>make install&lt;/code>就完事，但我要的不是编译个默认版本的vim，毕竟还有插件会用到&lt;code>vim&lt;/code>的 &lt;code>Pyhon&lt;/code>/&lt;code>Python3&lt;/code> 特性，比如&lt;code>ycm&lt;/code>。&lt;/p>
+&lt;p>继续往下翻会看到编译依赖。&lt;/p>
+&lt;pre>&lt;code>% sudo apt install git
+% sudo apt install make
+% sudo apt install clang
+% sudo apt install libtool-bin
+&lt;/code>&lt;/pre>
+&lt;p>跟着把依赖装好，clang估计是可选项，gcc肯定是能编译vim的。不过以防万一反正全装上。&lt;/p>
+&lt;p>后面终于看到了Python3添加支持的方式。&lt;/p>
+&lt;pre>&lt;code>Add Python 3 support:
+% sudo apt install libpython3-dev
+Uncomment this line in Makefile:
+&amp;quot;CONF_OPT_PYTHON3 = --enable-python3interp&amp;quot;
+% make reconfig
+&lt;/code>&lt;/pre>
+&lt;p>虽然说文档让取消注释，但是我不想改东西。所以记一下&lt;code>--enable-python3interp&lt;/code>，等会儿加入&lt;code>configure&lt;/code>的参数。&lt;/p>
+&lt;p>后面又有个关于gui的，因为不使用gui，所以也记一下。&lt;/p>
+&lt;blockquote>
+&lt;p>Unix: COMPILING WITH/WITHOUT GUI&lt;/p>
+&lt;p>NOTE: This is incomplete, look in Makefile for more info.&lt;/p>
+&lt;p>These configure arguments can be used to select which GUI to use:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">--enable-gui=gtk or: gtk2, motif, athena or auto
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">--disable-gtk-check
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">--disable-motif-check
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">--disable-athena-check
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>This configure argument can be used to disable the GUI, even when the necessary
+files are found:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">--disable-gui
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/blockquote>
+&lt;p>到时候&lt;code>--disable-gui&lt;/code>可以省一点编译时间，虽然本来也没多少编译时间。树莓派性能不是很好，tf卡读写寿命也有限，省一点是一点咯。&lt;/p>
+&lt;p>还有个&lt;code>--with-features=big&lt;/code>，实际参考&lt;a class="link" href="http://www.drchip.org/astronaut/vim/vimfeat.html" target="_blank" rel="noopener"
+>vim&amp;rsquo;s versions and features&lt;/a>，还是用&lt;code>huge&lt;/code>，因为看起来功能比较全。&lt;/p>
+&lt;p>再加上参数&lt;code>--enable-multibyte&lt;/code>和&lt;code>--enable-cscope&lt;/code>就差不多了。再加上必要的一些依赖库。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo apt install -y libpython-dev libpython3-dev libperl-dev libncurses-dev
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="0x03-编译">0x03 编译&lt;/h2>
+&lt;p>按照&lt;code>autoconf&lt;/code>这套编译系统的常规套路，先运行&lt;code>./configure&lt;/code>，带上之前考虑好的参数。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;span class="lnt">9
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">./configure &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> --prefix&lt;span class="o">=&lt;/span>/usr/local/ &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> --with-features&lt;span class="o">=&lt;/span>huge &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> --enable-multibyte &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> --disable-gui &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> --enable-pythoninterp &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> --enable-python3interp &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> --enable-perlinterp &lt;span class="se">\
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="se">&lt;/span> --enable-cscope
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>最后&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">make
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo make install
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>等编译完成。&lt;/p>
+&lt;h2 id="0x04-设置默认编辑器">0x04 设置默认编辑器&lt;/h2>
+&lt;p>用&lt;code>update-alternatives&lt;/code>配置默认编辑器，或者在&lt;code>.zshrc&lt;/code>里加上&lt;code>alias vim=/usr/local/bin/vim&lt;/code>也是可以的。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo update-alternatives --install /usr/bin/editor editor /usr/local/bin/vim &lt;span class="m">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo update-alternatives --set editor /usr/local/bin/vim
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo update-alternatives --install /usr/bin/vi vi /usr/local/bin/vim &lt;span class="m">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo update-alternatives --set vi /usr/local/bin/vim
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="总结">总结&lt;/h2>
+&lt;p>vim的编译这么简单应该把功劳算到良好的架构上，功能开关这种东西是要架构清晰地给组件之间划出边界的。&lt;/p>
+&lt;p>很多杂鱼公司根本不考虑系统维护，所谓的 &lt;strong>创造价值&lt;/strong> 就是以最快的速度 &lt;strong>应付需求&lt;/strong> ，想起几年前的自己还真的是天真，以为软件从业起码是有点基本的素养的，起码工程能力是有的。现在我的想法变了，软件从业不是有手就行？产品最想要的就是直接把别家的软件 &lt;em>copy&amp;amp;paste&lt;/em> 成自己的，我寻思做软件键盘上磨损最快的就是 &lt;code>ctrl&lt;/code> &lt;code>c&lt;/code> &lt;code>v&lt;/code>这三个键了。&lt;/p>
+&lt;p>产品嘛。什么工程性？什么可维护？那跟我有什么关系，反正改需求的dead line是码农的，修bug是码农修，我产品设计要与时俱进，要紧随市场，要服务客户，你就是个写代码的，这也不做那也不做雇你来干什么？&lt;/p>
+&lt;p>平常心平常心，扯远了。&lt;/p>
+&lt;p>总之，vim，好软件。顺便记得关注下乌干达儿童生存状况（不扯政治地说，vim自称慈善软件(charityware)还是有点东西的，再说下去鲁迅先生就要出来赶苍蝇了）。&lt;/p></description></item><item><title>简单的ECK部署</title><link>https://weakptr.site/p/simple-eck-cluster-deployment/</link><pubDate>Tue, 30 Nov 2021 11:13:00 +0800</pubDate><guid>https://weakptr.site/p/simple-eck-cluster-deployment/</guid><description>&lt;h2 id="前言">前言&lt;/h2>
+&lt;p>因为工作需要，得在自己搭建的集群里部署一个 Elasticsearch 。又因为是云端的集群，在 k8s 外用 docker 单独起一个 ES 明显更难维护（但部署更简单），于是选择用 ECK 。&lt;/p>
+&lt;p>ECK 就是 Elastic Cloud on Kubernetes 的缩写，可以理解成部署在 Kubernetes 上的 Elasticsearch 。当然不止 ES 。&lt;/p>
+&lt;p>部署 ES 的过程遇到几个问题记录下怎么解决的。&lt;/p>
+&lt;ol>
+&lt;li>ES 使用自签名证书，导致 HTTP 不能连接。&lt;/li>
+&lt;li>ECK 需要安装 IK 分词插件。&lt;/li>
+&lt;li>ECK 默认密码每次部署都重新生成，而且默认用户权限过大。&lt;/li>
+&lt;li>ECK 默认没配 PVC ，数据没有持久化。&lt;/li>
+&lt;/ol>
+&lt;p>接下来逐个解决。&lt;/p>
+&lt;h2 id="0x01-自签名证书">0x01 自签名证书&lt;/h2>
+&lt;p>自签名证书解决方法有几个&lt;/p>
+&lt;ol>
+&lt;li>改客户端，让客户端用自签名证书连接。很麻烦。&lt;/li>
+&lt;li>生成一个固定的证书，让ES和客户端都用这个证书，客户端和ES都要改。很麻烦。&lt;/li>
+&lt;li>禁用 ES 的自签名证书。&lt;/li>
+&lt;/ol>
+&lt;p>考虑到是私有的测试环境，不搞这些烦人的东西，直接禁用。&lt;/p>
+&lt;p>修改 YAML 如下。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;span class="lnt">9
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="line">&lt;span class="cl">&lt;span class="nt">apiVersion&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">elasticsearch.k8s.elastic.co/v1&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="nt">kind&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">Elasticsearch&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="nt">metadata&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">elasticsearch&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="nt">spec&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">http&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">tls&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">selfSignedCertificate&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">disabled&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kc">true&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>注意 &lt;code>spec.http.tls.selfSignedCertificate.disabled&lt;/code> 这个字段。&lt;/p>
+&lt;p>参考文档：&lt;a class="link" href="https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-tls-certificates.html" target="_blank" rel="noopener"
+>Orchestrating Elastic Stack applications - Access Elastic Stack services - TLS certificates&lt;/a>&lt;/p>
+&lt;h2 id="0x02-安装-ik-分词组件">0x02 安装 IK 分词组件&lt;/h2>
+&lt;p>官方文档提供的安装插件思路是利用 initContainer 。参考文档：&lt;a class="link" href="https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-init-containers-plugin-downloads.html" target="_blank" rel="noopener"
+>init containers for plugin downloads&lt;/a> 。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="line">&lt;span class="cl">&lt;span class="nt">spec&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">nodeSets&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="nt">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">default&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">count&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">3&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">podTemplate&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">spec&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">initContainers&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="nt">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">install-plugins&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">command&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="l">sh&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- -&lt;span class="l">c&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="p">|&lt;/span>&lt;span class="sd">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="sd"> bin/elasticsearch-plugin install --batch repository-gcs&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>initContainer 容器默认会继承自下面的内容：&lt;/p>
+&lt;ul>
+&lt;li>没有另外指定的情况下，继承主容器的镜像(我的例子中，就是 &lt;code>Elasticsearch:7.9.1&lt;/code>)&lt;/li>
+&lt;li>主容器的 volume 挂载，如果 initContainer 有同名同路径的 volume 则优先用 initContainer 的。&lt;/li>
+&lt;li>POD 名称和 IP 。&lt;/li>
+&lt;/ul>
+&lt;h2 id="0x03-添加自定义用户">0x03 添加自定义用户&lt;/h2>
+&lt;p>有好几种方式：&lt;/p>
+&lt;ol>
+&lt;li>官方文档中的方法：&lt;a class="link" href="https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-users-and-roles.html" target="_blank" rel="noopener"
+>k8s users and roles&lt;/a>，比较稳定，但还是挺麻烦的。&lt;/li>
+&lt;li>修改 &lt;code>[es-cluster-name]-es-elastic-user&lt;/code> 这个 &lt;code>secret&lt;/code>，好处是简单，但要求必须先创建 secret 再创建 ES ，单个 YAML 去 &lt;code>create -f&lt;/code> 的情况下不友好。&lt;/li>
+&lt;li>基于第2节中利用 initContainer 的做法和官方文档里提到的 &lt;code>elasticsearch-users&lt;/code> 命令行工具，直接在 initContainer 里创建指定用户名密码的用户。不确定这个做法会不会在多节点 ECK 里出问题，毕竟这等于是每个节点都创建了一次用户。不过我只需要单节点，所以也还过得去。&lt;/li>
+&lt;/ol>
+&lt;p>最终决定用第 3 种方法，因为做一个单节点集群简单不费事，多节点的话，目前开的服务器配置也吃不消。（其实是搞完才仔细读文档，第 1 种方法其实也不算太麻烦&amp;hellip;）&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="line">&lt;span class="cl">&lt;span class="nt">spec&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">nodeSets&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="nt">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">default&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">count&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">3&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">podTemplate&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">spec&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">initContainers&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="nt">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">donviewclass-initialize&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">command&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="l">sh&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- -&lt;span class="l">c&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="p">|&lt;/span>&lt;span class="sd">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="sd"> ./bin/elasticsearch-plugin install -batch https://ghproxy.com/https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.9.1/elasticsearch-analysis-ik-7.9.1.zip
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="sd"> ./bin/elasticsearch-users useradd tsdonviewclass -p tsdonviewclass -r superuser&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;code>./bin/elasticsearch-users useradd tsdonviewclass -p tsdonviewclass -r superuser&lt;/code> 主要就是增加这一句。同样是因为懒，权限直接给了 superuser 。&lt;/p>
+&lt;p>参考文档：&lt;a class="link" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/users-command.html" target="_blank" rel="noopener"
+>elasticsearch-users&lt;/a> 。&lt;/p>
+&lt;h2 id="0x04-配置pvc">0x04 配置PVC&lt;/h2>
+&lt;p>依然是参考官方文档来：&lt;a class="link" href="https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-volume-claim-templates.html" target="_blank" rel="noopener"
+>k8s-volume-claim-templates&lt;/a>。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="line">&lt;span class="cl">&lt;span class="nt">spec&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">nodeSets&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="nt">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">default&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">count&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">1&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">config&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">node.store.allow_mmap&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kc">false&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">volumeClaimTemplates&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="nt">metadata&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">elasticsearch-data&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="c"># Do not change this name unless you set up a volume mount for the data path.&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">spec&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">accessModes&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="l">ReadWriteOnce&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">resources&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">requests&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">storage&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">5Gi&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">storageClassName&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">local-path&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>注意 &lt;code>volumeClaimTemplates&lt;/code> 下 &lt;code>metadata.name&lt;/code> 不要变，除非你自己在 &lt;code>podTemplate&lt;/code> 里覆写挂载字段。&lt;/p>
+&lt;p>其他的 &lt;code>spec&lt;/code> 下内容和通常的 PVC 一样，可以参考 &lt;a class="link" href="https://kubernetes.io/zh/docs/concepts/storage/persistent-volumes/#persistentvolumeclaims" target="_blank" rel="noopener"
+>Kubernetes - PersistentVolumeClaims&lt;/a> 。&lt;/p>
+&lt;p>值得注意的是 ECK 默认在集群节点数量 scaled down 时删除 PVC ，对应的 PV 可能保留，具体看&lt;a class="link" href="https://kubernetes.io/docs/concepts/storage/storage-classes/#reclaim-policy" target="_blank" rel="noopener"
+>存储类的回收策略&lt;/a>。ECK 的 CRD 里也给了相关的配置项。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="line">&lt;span class="cl">&lt;span class="nt">apiVersion&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">elasticsearch.k8s.elastic.co/v1&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="nt">kind&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">Elasticsearch&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="nt">metadata&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">es&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="nt">spec&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">version&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">7.15.2&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">volumeClaimDeletePolicy&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">DeleteOnScaledownOnly&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">nodeSets&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="nt">name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">default&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">count&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">3&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>注意 &lt;code>volumeClaimDeletePolicy: DeleteOnScaledownOnly&lt;/code> 。可选的策略包括：&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>DeleteOnScaledownAndClusterDeletion&lt;/code>&lt;/li>
+&lt;li>&lt;code>DeleteOnScaledownOnly&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;p>默认策略是 &lt;code>DeleteOnScaledownAndClusterDeletion&lt;/code> ，集群删除和 scaled down 时删除 PVC。&lt;/p>
+&lt;p>如果是一次性的部署，可以直接用 &lt;code>emptyDir&lt;/code> 作为存储类，不用管数据丢不丢。&lt;/p>
+&lt;h2 id="总结">总结&lt;/h2>
+&lt;p>这几步配置下来，一个开发用的 ES 集群就算是配完了，资源给够就能开始玩了。&lt;/p>
+&lt;p>讲道理我不太会运维 ES 啊，ES 这东西实在有点重量级，现阶段的能力也就只能看文档这里那里配一下，在上面开发什么的。真要遇到大问题还得抓瞎。&lt;/p>
+&lt;p>就先这样吧。&lt;/p></description></item><item><title>运维瞎记 2021年11月11日</title><link>https://weakptr.site/p/blind-op-2021-11-11/</link><pubDate>Thu, 11 Nov 2021 10:19:00 +0800</pubDate><guid>https://weakptr.site/p/blind-op-2021-11-11/</guid><description>&lt;img src="https://weakptr.site/p/blind-op-2021-11-11/cover.png" alt="Featured image of post 运维瞎记 2021年11月11日" />&lt;h2 id="记虚拟机网络未连接">记虚拟机网络未连接&lt;/h2>
+&lt;h3 id="起因">起因&lt;/h3>
+&lt;p>因为Ubuntu server安装时更新的话需要从网络下载，慢的一批，所以安装的时候虚拟机的网络断开了，安装好启动之后才重新链接。&lt;/p>
+&lt;p>但是&amp;hellip;&lt;/p>
+&lt;p>连接后进入系统却发现并没有网络（VirtualBox），检查 &lt;code>networkctl&lt;/code> 发现 &lt;code>enp0s3&lt;/code> 是 &lt;code>off&lt;/code> 状态。&lt;/p>
+&lt;h3 id="原因">原因&lt;/h3>
+&lt;p>别问，不知道。&lt;/p>
+&lt;h3 id="处理">处理&lt;/h3>
+&lt;p>顺藤摸瓜不求甚解了。&lt;/p>
+&lt;p>看到 &lt;code>enp0s3&lt;/code> 是 &lt;code>off&lt;/code> 那就先查查怎么解决。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo ip link &lt;span class="nb">set&lt;/span> enp0s3 up
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>再检查连接状态。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">networkctl status
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>发现连接进入 &lt;code>downgrade&lt;/code> 状态，搜索得知是未分配 IP 地址。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">sudo dhclient enp0s3
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>报了一个奇怪的CMP什么的错误，不管了。再检查下网络。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">networkctl
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>发现 &lt;code>enp0s3&lt;/code> 进入 &lt;code>routable&lt;/code> 状态，大功告成。&lt;/p>
+&lt;h3 id="总结">总结&lt;/h3>
+&lt;p>我总结个蛋。&lt;/p>
+&lt;blockquote>
+&lt;p>2022年5月6日 补充&lt;/p>
+&lt;p>发现问题本源是 netplan 配置未正确生成，dhclient 是暂时性解决。彻底解决的办法是在 &lt;code>/etc/netplan&lt;/code> 添加 &lt;code>01-netcfg.yaml&lt;/code>，内容如下：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="line">&lt;span class="cl">&lt;span class="nt">network&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">version&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">2&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">renderer&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">networkd&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">ethernets&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">enp0s3&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">dhcp4&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kc">true&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>注意 &lt;code>enp0s3&lt;/code> 改成你自己的以太网连接名，用 &lt;code>networkctl&lt;/code> 或者 &lt;code>ip show addr&lt;/code> 都能列出来。&lt;/p>
+&lt;p>文件添加好之后用命令：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo netplan generate
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">sudo netplan apply
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>就好了。之后重启vm再运行&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">networkctl
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>可以看到&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-plaintext" data-lang="plaintext">&lt;span class="line">&lt;span class="cl">IDX LINK TYPE OPERATIONAL SETUP
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> 1 lo loopback carrier unmanaged
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> 2 enp0s3 ether routable configured
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> 3 docker0 bridge no-carrier unmanaged
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> 4 br-e2b0cf462af2 bridge no-carrier unmanaged
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">4 links listed.
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>注意 &lt;code>enp0s3&lt;/code> 已经变成了 &lt;code>configured&lt;/code> 状态，确认问题彻底处理完毕。&lt;/p>
+&lt;/blockquote></description></item><item><title>升级公司的 GitLab</title><link>https://weakptr.site/p/%E5%8D%87%E7%BA%A7%E5%85%AC%E5%8F%B8%E7%9A%84-gitlab/</link><pubDate>Thu, 15 Jul 2021 16:02:41 +0800</pubDate><guid>https://weakptr.site/p/%E5%8D%87%E7%BA%A7%E5%85%AC%E5%8F%B8%E7%9A%84-gitlab/</guid><description>&lt;p>公司目前跑的 gitlab 是很久以前部署的，当前版本 &lt;em>8.4.2&lt;/em> 。升级目标是 &lt;em>13.12.Z&lt;/em> 。部署方式是 docker 。&lt;/p>
+&lt;!-- more -->
+&lt;p>宿主机配置不高，系统 &lt;em>Ubuntu 15.04&lt;/em> 。眼下这个时间，这个Ubuntu版本，基本宣告没法用了。直接在线升级容易把引导搞挂，到时候还得亲自去实体机上折腾引导，麻烦。暂时不管宿主机。&lt;/p>
+&lt;h2 id="情况概述">情况概述&lt;/h2>
+&lt;p>因为 GitLab 版本实在太低了，以至于连一个能集成的 CI/CD 工具都找不到。即使 jenkins 都只能很勉强地动起来，偏偏 jenkins 还不能满足需要（也可能是我太菜，反正公司没人玩得转 jenkins）。&lt;/p>
+&lt;p>但开发需要 CI/CD 来解决持续构建和部署的问题，不得不考虑升级了。&lt;/p>
+&lt;h2 id="1-备份">1. 备份&lt;/h2>
+&lt;p>什么都别说了，开干前最重要的事情就是备份，免得把自己玩死。&lt;/p>
+&lt;p>最常用的备份手段自然是 &lt;code>tar&lt;/code> 。不过 gitlab 数据目录实在太大了，要是直接运行 &lt;code>tar -czpf gitlab.tar.gz ./gitlab&lt;/code> 不知道跑多久，也不知道有没有卡死。&lt;/p>
+&lt;p>于是上技术手段：用 &lt;code>pv&lt;/code> 显示个进度条。&lt;/p>
+&lt;p>pv 项目的首页在 &lt;a class="link" href="http://www.ivarch.com/programs/pv.shtml" target="_blank" rel="noopener"
+>ivarch.com&lt;/a>。因为服务器还在跑&lt;em>ubuntu 15.10&lt;/em>，现在连个能用的源都没啦。只好下载了源码，在 wsl 里编译好推上去。&lt;/p>
+&lt;p>最终命令如下。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo tar cf - ./gitlab -P &lt;span class="p">|&lt;/span> pv -s &lt;span class="k">$(&lt;/span>sudo du -sb ./gitlab &lt;span class="p">|&lt;/span> awk &lt;span class="s1">&amp;#39;{print $1}&amp;#39;&lt;/span>&lt;span class="k">)&lt;/span> &lt;span class="p">|&lt;/span> gzip &amp;gt; gitlab.tar.gz
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>为啥 sudo 呢，postgres 数据库和 redis 数据都没有读权限，没辙。&lt;/p>
+&lt;h2 id="2-升级总体思路">2. 升级总体思路&lt;/h2>
+&lt;p>gitlab 的手册还是比较全面的。在&lt;a class="link" href="https://docs.gitlab.com/ee/update/index.html#upgrading-to-a-new-major-version" target="_blank" rel="noopener"
+>upgrading to a new major version&lt;/a> 这篇文档提到的说法，跨大版本升级主要分三步：&lt;/p>
+&lt;ol>
+&lt;li>升级至当前大版本(&lt;em>major version&lt;/em>)的最新小版本(&lt;em>latest minor version&lt;/em>)&lt;/li>
+&lt;li>升级至目标大版本(&lt;em>target major version&lt;/em>)的首个小版本(&lt;em>first minor version&lt;/em>)&lt;/li>
+&lt;li>继续升级至更新的版本&lt;/li>
+&lt;/ol>
+&lt;p>根据 &lt;a class="link" href="https://docs.gitlab.com/ee/update/index.html#upgrades-from-versions-earlier-than-812" target="_blank" rel="noopener"
+>gitlab upgrading guide 的说法&lt;/a>，版本低于 &lt;em>8.11.Z&lt;/em> 时，先更新到 &lt;em>8.12.0&lt;/em> 是比较稳妥的方案。&lt;/p>
+&lt;p>so 开干。&lt;/p>
+&lt;h2 id="3-升级至-8120">3. 升级至 8.12.0&lt;/h2>
+&lt;p>由于部署方式是 docker（准确的说是 docker-compose），所以按照&lt;a class="link" href="https://docs.gitlab.com/ee/install/docker.html#update-gitlab-using-docker-engine" target="_blank" rel="noopener"
+>Update GitLab Using Docker Engine&lt;/a> 的说法，我们先停止容器，然后直接修改镜像标签。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">docker-compose stop
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="line">&lt;span class="cl">&lt;span class="nt">gitlab&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">restart&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">always&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">image&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">sameersbn/gitlab:8.12.0&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="c"># &amp;lt;= sameersbn/gitlab:8.4.2&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>再启动&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">docker-compose up -d
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="故障gitlab_secrets_otp_key_base-must-set">故障：GITLAB_SECRETS_OTP_KEY_BASE must set&lt;/h3>
+&lt;p>使用的镜像 &lt;code>sameersbn/docker-gitlab&lt;/code> 需要这几个环境变量，&lt;a class="link" href="https://github.com/sameersbn/docker-gitlab#quick-start" target="_blank" rel="noopener"
+>参考文档&lt;/a>完成设置。&lt;/p>
+&lt;h3 id="故障you-must-enable-the-pg_trgm-extension">故障：You must enable the pg_trgm extension&lt;/h3>
+&lt;p>这个故障就比较奇怪了，但还是可以处理。&lt;/p>
+&lt;p>先设置一下 postgres 账号密码&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">docker &lt;span class="nb">exec&lt;/span> -it gitlab_postgresql_1 psql -U postgres
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>然后&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-sql" data-lang="sql">&lt;span class="line">&lt;span class="cl">&lt;span class="err">\&lt;/span>&lt;span class="n">password&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">postgres&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>输入新密码，按 ctrl+d 退出。&lt;/p>
+&lt;p>再用随便啥连接上去，运行 &lt;code>create extension pg_trgm;&lt;/code> 就完事了。&lt;/p>
+&lt;p>最后就是重启下容器，gitlab 自动迁移完成后即可访问。&lt;/p>
+&lt;h2 id="4-升级至-v8174">4. 升级至 v8.17.4&lt;/h2>
+&lt;p>原本应该升级到 v8.17.7，但 &lt;code>sameersbn/docker-gitlab&lt;/code> 没提供这个版本的镜像，只能先升级到 v8.17.4 ，求老天保佑别折腾出问题。&lt;/p>
+&lt;p>老规矩改了 docker-compose ，然后 up 。&lt;/p>
+&lt;p>直接成功，没有错误。&lt;/p>
+&lt;h2 id="5-升级至-v955">5. 升级至 v9.5.5&lt;/h2>
+&lt;p>老规矩，还是缺少镜像，原本应该升级到 v9.5.10。&lt;/p>
+&lt;p>改了 docker-compose 再 up。&lt;/p>
+&lt;p>成功。&lt;/p>
+&lt;h2 id="6-升级至-v1084">6. 升级至 v10.8.4&lt;/h2>
+&lt;p>原本应该升级 v10.8.7 。懒得说了。改了 compose 再 up 。&lt;/p>
+&lt;h3 id="故障this-probably-isnt-the-expected-value-for-this-secret">故障：This probably isn&amp;rsquo;t the expected value for this secret&lt;/h3>
+&lt;p>错误内容&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-text" data-lang="text">&lt;span class="line">&lt;span class="cl">This probably isn&amp;#39;t the expected value for this secret. To keep using a literal Erb string in config/secrets.yml, replace &amp;amp;lt;%with&amp;amp;lt;%%.
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>不知道为什么，重启了一次容器后就恢复了。&lt;/p>
+&lt;p>可以参考下&lt;a class="link" href="https://github.com/sameersbn/docker-gitlab/issues/1625" target="_blank" rel="noopener"
+>这个&lt;/a>。&lt;/p>
+&lt;h2 id="7-升级至-v11113">7. 升级至 v11.11.3&lt;/h2>
+&lt;p>根据 v12 的升级指引，&lt;/p>
+&lt;blockquote>
+&lt;p>In 12.0.0 we made various database related changes. These changes require that users first upgrade to the latest 11.11 patch release.&lt;/p>
+&lt;/blockquote>
+&lt;p>必须先升级到 v11.11.Z 版本，再升级 v12.0.Z 才能完成数据库迁移。&lt;/p>
+&lt;p>于是先升级到 v11.11.3 (也是因为没有 v11.11.8 的镜像)。&lt;/p>
+&lt;p>成功。&lt;/p>
+&lt;h2 id="8-升级至-v1204">8. 升级至 v12.0.4&lt;/h2>
+&lt;p>根据 12.0 升级指引，先升级到 12.0.Z 版本来完成 11-&amp;gt;12 的迁移，再继续升级。&lt;/p>
+&lt;p>成功。&lt;/p>
+&lt;h2 id="9-升级至-v1216">9. 升级至 v12.1.6&lt;/h2>
+&lt;p>根据 12.1 升级指引，在升级到 12.10.Z 之前，必须先升级到 12.1.Z 。&lt;/p>
+&lt;blockquote>
+&lt;p>If you are planning to upgrade from 12.0.Z to 12.10.Z, it is necessary to perform an intermediary upgrade to 12.1.Z before upgrading to 12.10.Z to avoid issues like #215141.&lt;/p>
+&lt;/blockquote>
+&lt;p>成功。&lt;/p>
+&lt;h2 id="10-升级至-v12106-1">10. 升级至 v12.10.6-1&lt;/h2>
+&lt;p>缺少最新的 12.10.Z 镜像，先升级到能升级到的 12.10.Z 最高版本。&lt;/p>
+&lt;p>成功。&lt;/p>
+&lt;h2 id="11-升级至-v1306">11. 升级至 v13.0.6&lt;/h2>
+&lt;p>这个版本对 postgres 数据库版本有要求，故升级 postgresql 到 9.6.4 版本。镜像自动完成了数据迁移。&lt;/p>
+&lt;p>之后启动 gitlab 完成升级。&lt;/p>
+&lt;p>成功。&lt;/p>
+&lt;h2 id="12-升级至-v13124">12. 升级至 v13.12.4&lt;/h2>
+&lt;p>这个版本对 postgres 数据库版本又有要求，最低在 11 以上，故升级 postgresql 到 11-20200524 (sameersbn/postgresql)。&lt;/p>
+&lt;p>同时，需要安装插件 &lt;code>btree_gist&lt;/code>，故连接 postgresql 数据库创建。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-sql" data-lang="sql">&lt;span class="line">&lt;span class="cl">&lt;span class="k">create&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">extension&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">if&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">not&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="k">exists&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">btree_gist&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>之后启动 gitlab 完成升级。&lt;/p>
+&lt;h2 id="13-总结">13. 总结&lt;/h2>
+&lt;p>由于 gitlab 设计良好，升级基本没有太大难度。按照文档的升级路线逐个版本升级即可。&lt;/p>
+&lt;p>也是我运气好，在升级 10.8.Z 版本的时候遇到的问题重启后自己消失了，不然光是这个问题可能就要折腾很久。&lt;/p>
+&lt;p>最终 gitlab 版本停留在 13.12.Z ，14.0 虽然已经发布了，但出于稳定考虑还是先不升级。&lt;/p></description></item></channel></rss>
