@@ -1,0 +1,153 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>用 tree-sitter 写一个代码高亮</title><meta content="用 tree-sitter 写一个代码高亮" name=title><meta content=弃船！ name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2021-08-03-yong-tree-sitter-xie-yi-ge-dai-ma-gao-liang/ property=og:url><meta content="weakptr's 技术文摘" property=og:site_name><meta content="用 tree-sitter 写一个代码高亮" property=og:title><meta content=弃船！ property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2021-08-03-yong-tree-sitter-xie-yi-ge-dai-ma-gao-liang/ property=twitter:url><meta content="用 tree-sitter 写一个代码高亮" property=twitter:title><meta content=弃船！ property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2021-08-03-yong-tree-sitter-xie-yi-ge-dai-ma-gao-liang/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset-min.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS-min.css rel=stylesheet><link href=https://nnnewb.github.io/css/style.css rel=stylesheet><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded",function(){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\(',right:'\\)',display:false},{left:'\\[',right:'\\]',display:false}],throwOnError:true})})</script><script defer src=https://nnnewb.github.io/js/script.js></script><script src=https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded',function(){const a=document.getElementsByClassName('language-mermaid');for(let b=0;b<a.length;b++){const c=a.item(b);if(c.tagName==="PRE"&&!c.classList.contains('mermaid')){c.innerHTML=c.textContent;c.classList.add('mermaid')}};mermaid.initialize({startOnLoad:true,theme:'dark'})})</script><script>if(window.location.hostname.toLowerCase()!=='localhost'&&window.location.hostname!=='127.0.0.1'){var _hmt=_hmt||[];(function(){var a=document.createElement("script");a.src="https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";var b=document.getElementsByTagName("script")[0];b.parentNode.insertBefore(a,b)})()}</script><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/journal/> 日志 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>用 tree-sitter 写一个代码高亮</h1><p style=color:var(--text-light);text-align:right>作于： 2021 年 8 月 3 日，预计阅读时间 6 分钟<hr><p>这次用 tree-sitter 写一个简单的代码高亮。</p><span id=continue-reading></span><h2 id=qian-yan>前言</h2><p>我寻思代码高亮是什么应该没啥可解释的，也有叫“语法高亮”，总之都是一个意思。就是给编辑器里的代码涂上颜色，便于阅读。<p>一般来说，简单的代码高亮只需要正则表达式就能搞定（比如说关键字高亮，Camel Case 标识符高亮等），不过正则表达式来实现高亮还是有很大的局限性。<p>举例来说，当我把函数当参数传给另一个函数的时候——<pre class=language-javascript data-lang=javascript style=background:#2b303b;color:#c0c5ce><code class=language-javascript data-lang=javascript><span style=color:#b48ead>function </span><span style=color:#8fa1b3>f</span><span>() {}
+</span><span>
+</span><span style=color:#b48ead>function </span><span style=color:#8fa1b3>higher</span><span>(</span><span style=color:#bf616a>fn</span><span>) {
+</span><span>  </span><span style=color:#b48ead>return </span><span>() </span><span style=color:#b48ead>=> </span><span style=color:#8fa1b3>fn</span><span>() != </span><span style=color:#d08770>0</span><span>;
+</span><span>}
+</span><span>
+</span><span style=color:#8fa1b3>higher</span><span>(</span><span style=color:#bf616a>f</span><span>);
+</span></code></pre><p>在 <code>higher(f)</code> 这一行中的 <code>f</code> 不会以函数名的颜色标出。这就引出了一种新基于语义的代码高亮，让编辑器真正“认识”你的代码，并提供更聪明的提示。<h2 id=kai-shi>开始</h2><p>还是在 vscode 折腾。<p>先创建一个 vscode 插件项目，用 <code>yo code</code> 完成。<p>然后编辑 <code>package.json</code> ，添加你的语言和插件的激活事件。<pre class=language-json data-lang=json style=background:#2b303b;color:#c0c5ce><code class=language-json data-lang=json><span>{
+</span><span>  "</span><span style=color:#a3be8c>activationEvents</span><span>": ["</span><span style=color:#a3be8c>onLanguage:proto</span><span>"],
+</span><span>  "</span><span style=color:#a3be8c>contributes</span><span>": {
+</span><span>    "</span><span style=color:#a3be8c>languages</span><span>": [
+</span><span>      {
+</span><span>        "</span><span style=color:#a3be8c>id</span><span>": "</span><span style=color:#a3be8c>proto</span><span>",
+</span><span>        "</span><span style=color:#a3be8c>extensions</span><span>": ["</span><span style=color:#a3be8c>.proto</span><span>"]
+</span><span>      }
+</span><span>    ]
+</span><span>  }
+</span><span>}
+</span></code></pre><p>然后修改 <code>src/extension.ts</code>，去掉默认创建的 hello world 代码，留一个 <code>console.log</code>，然后 F5 启动，打开一个 <code>.proto</code> 文件，检查插件是否已经激活。<pre class=language-typescript data-lang=typescript style=background:#2b303b;color:#c0c5ce><code class=language-typescript data-lang=typescript><span style=color:#65737e>// The module 'vscode' contains the VS Code extensibility API
+</span><span style=color:#65737e>// Import the module and reference it with the alias vscode in your code below
+</span><span style=color:#b48ead>import </span><span style=color:#d08770>* </span><span style=color:#b48ead>as </span><span style=color:#bf616a>vscode </span><span style=color:#b48ead>from </span><span>"</span><span style=color:#a3be8c>vscode</span><span>";
+</span><span>
+</span><span style=color:#65737e>// this method is called when your extension is activated
+</span><span style=color:#65737e>// your extension is activated the very first time the command is executed
+</span><span style=color:#b48ead>export function </span><span style=color:#8fa1b3>activate</span><span>(</span><span style=color:#bf616a>context</span><span>: vscode.ExtensionContext) {
+</span><span>  </span><span style=color:#ebcb8b>console</span><span>.</span><span style=color:#96b5b4>log</span><span>("</span><span style=color:#a3be8c>activated!</span><span>");
+</span><span>}
+</span><span>
+</span><span style=color:#65737e>// this method is called when your extension is deactivated
+</span><span style=color:#b48ead>export function </span><span style=color:#8fa1b3>deactivate</span><span>() {}
+</span></code></pre><h2 id=chuang-jian-he-zhu-ce-documentsemantictokensprovider>创建和注册 DocumentSemanticTokensProvider</h2><p>创建文件 <code>src/providers/SemanticTokensProvider.ts</code> ，编写一个类，实现接口 <code>vscode.DocumentSemanticTokensProvider</code>。<pre class=language-typescript data-lang=typescript style=background:#2b303b;color:#c0c5ce><code class=language-typescript data-lang=typescript><span style=color:#b48ead>import </span><span style=color:#d08770>* </span><span style=color:#b48ead>as </span><span style=color:#bf616a>vscode </span><span style=color:#b48ead>from </span><span>"</span><span style=color:#a3be8c>vscode</span><span>";
+</span><span style=color:#b48ead>const </span><span style=color:#bf616a>Parser </span><span>= </span><span style=color:#96b5b4>require</span><span>("</span><span style=color:#a3be8c>web-tree-sitter</span><span>");
+</span><span>
+</span><span style=color:#b48ead>export default class </span><span style=color:#ebcb8b>SemanticTokenProvider
+</span><span style=color:#eff1f5>  </span><span style=color:#b48ead>implements </span><span style=color:#eff1f5>vscode.</span><span style=color:#a3be8c>DocumentSemanticTokensProvider
+</span><span style=color:#eff1f5>{
+</span><span style=color:#eff1f5>  </span><span style=color:#b48ead>constructor</span><span>(</span><span style=color:#b48ead>public </span><span style=color:#bf616a>legend</span><span>: </span><span style=color:#eff1f5>vscode.SemanticTokensLegend</span><span>) </span><span style=color:#eff1f5>{
+</span><span style=color:#eff1f5>    </span><span style=color:#bf616a>Parser</span><span style=color:#eff1f5>.</span><span style=color:#8fa1b3>init</span><span style=color:#eff1f5>().</span><span style=color:#96b5b4>then</span><span style=color:#eff1f5>(</span><span>() </span><span style=color:#b48ead>=> </span><span style=color:#eff1f5>{
+</span><span style=color:#eff1f5>      </span><span style=color:#bf616a>Parser</span><span style=color:#eff1f5>.</span><span style=color:#bf616a>Language</span><span style=color:#eff1f5>.</span><span style=color:#96b5b4>load</span><span style=color:#eff1f5>(
+</span><span style=color:#eff1f5>        </span><span style=color:#bf616a>path</span><span style=color:#eff1f5>.</span><span style=color:#96b5b4>resolve</span><span style=color:#eff1f5>(__dirname, </span><span>"</span><span style=color:#a3be8c>../../assets/tree-sitter-proto.wasm</span><span>"</span><span style=color:#eff1f5>)
+</span><span style=color:#eff1f5>      ).</span><span style=color:#96b5b4>then</span><span style=color:#eff1f5>(</span><span>(</span><span style=color:#bf616a>lang</span><span>) </span><span style=color:#b48ead>=> </span><span style=color:#eff1f5>{
+</span><span style=color:#eff1f5>        </span><span style=color:#bf616a>this</span><span style=color:#eff1f5>.</span><span style=color:#bf616a>parser </span><span>= new </span><span style=color:#eff1f5>Parser();
+</span><span style=color:#eff1f5>        </span><span style=color:#bf616a>this</span><span style=color:#eff1f5>.</span><span style=color:#bf616a>parser</span><span style=color:#eff1f5>.</span><span style=color:#8fa1b3>setLanguage</span><span style=color:#eff1f5>(</span><span style=color:#bf616a>lang</span><span style=color:#eff1f5>);
+</span><span style=color:#eff1f5>      });
+</span><span style=color:#eff1f5>    });
+</span><span style=color:#eff1f5>  }
+</span><span style=color:#eff1f5>
+</span><span style=color:#eff1f5>  </span><span style=color:#bf616a>onDidChangeSemanticTokens</span><span>?: </span><span style=color:#eff1f5>vscode.Event&LTvoid> </span><span>| </span><span style=color:#eff1f5>undefined;
+</span><span style=color:#eff1f5>
+</span><span style=color:#eff1f5>  </span><span style=color:#8fa1b3>provideDocumentSemanticTokens</span><span>(
+</span><span style=color:#eff1f5>    </span><span style=color:#bf616a>document</span><span>: </span><span style=color:#eff1f5>vscode.TextDocument,
+</span><span style=color:#eff1f5>    </span><span style=color:#bf616a>token</span><span>: </span><span style=color:#eff1f5>vscode.CancellationToken
+</span><span style=color:#eff1f5>  </span><span>): </span><span style=color:#eff1f5>vscode.ProviderResult&LTvscode.SemanticTokens> {
+</span><span style=color:#eff1f5>    </span><span style=color:#b48ead>throw </span><span>new </span><span style=color:#eff1f5>Error(</span><span>"</span><span style=color:#a3be8c>Not implemented</span><span>"</span><span style=color:#eff1f5>);
+</span><span style=color:#eff1f5>  }
+</span><span style=color:#eff1f5>}
+</span></code></pre><p>再到 <code>src/extension.ts</code> 里注册。<pre class=language-ts data-lang=ts style=background:#2b303b;color:#c0c5ce><code class=language-ts data-lang=ts><span style=color:#b48ead>export function </span><span style=color:#8fa1b3>activate</span><span>(</span><span style=color:#bf616a>context</span><span>: vscode.ExtensionContext) {
+</span><span>  </span><span style=color:#ebcb8b>console</span><span>.</span><span style=color:#96b5b4>log</span><span>("</span><span style=color:#a3be8c>activated!</span><span>");
+</span><span>
+</span><span>  </span><span style=color:#65737e>// register semantic tokens provider
+</span><span>  </span><span style=color:#b48ead>const </span><span style=color:#bf616a>tokenTypes </span><span>= [
+</span><span>    "</span><span style=color:#a3be8c>type</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>enum</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>class</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>function</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>comment</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>string</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>number</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>keyword</span><span>",
+</span><span>    "</span><span style=color:#a3be8c>parameter</span><span>",
+</span><span>  ];
+</span><span>  </span><span style=color:#b48ead>const </span><span style=color:#bf616a>modifiers </span><span>= ["</span><span style=color:#a3be8c>definition</span><span>", "</span><span style=color:#a3be8c>deprecated</span><span>", "</span><span style=color:#a3be8c>documentation</span><span>"];
+</span><span>  </span><span style=color:#b48ead>const </span><span style=color:#bf616a>selector</span><span>: vscode.DocumentSelector = {
+</span><span>    language: "</span><span style=color:#a3be8c>proto</span><span>",
+</span><span>    scheme: "</span><span style=color:#a3be8c>file</span><span>",
+</span><span>  };
+</span><span>  </span><span style=color:#b48ead>const </span><span style=color:#bf616a>legend </span><span>= new vscode.SemanticTokensLegend(</span><span style=color:#bf616a>tokenTypes</span><span>, </span><span style=color:#bf616a>modifiers</span><span>);
+</span><span>  </span><span style=color:#b48ead>const </span><span style=color:#bf616a>provider </span><span>= new SemanticTokenProvider(</span><span style=color:#bf616a>legend</span><span>);
+</span><span>
+</span><span>  </span><span style=color:#bf616a>context</span><span>.</span><span style=color:#bf616a>subscriptions</span><span>.</span><span style=color:#96b5b4>push</span><span>(
+</span><span>    </span><span style=color:#bf616a>vscode</span><span>.</span><span style=color:#bf616a>languages</span><span>.</span><span style=color:#8fa1b3>registerDocumentSemanticTokensProvider</span><span>(
+</span><span>      </span><span style=color:#bf616a>selector</span><span>,
+</span><span>      </span><span style=color:#bf616a>provider</span><span>,
+</span><span>      </span><span style=color:#bf616a>legend
+</span><span>    )
+</span><span>  );
+</span><span>}
+</span></code></pre><p>这个 <code>tree-sitter-proto.wasm</code> 是编译好的语法定义，参考<a href=https://nnnewb.github.io/posts/2021-08-03-yong-tree-sitter-xie-yi-ge-dai-ma-gao-liang/./play-with-tree-sitter.md>另一篇文章</a>。<p>这样一来，<code>new SemanticTokenProvider(legend)</code> 时就会初始化 parser 了。<h2 id=shi-xian>实现</h2><p>先写个简单的 <code>provideDocumentSemanticTokens</code> 实现。<pre class=language-typescript data-lang=typescript style=background:#2b303b;color:#c0c5ce><code class=language-typescript data-lang=typescript><span style=color:#b48ead>class </span><span style=color:#ebcb8b>SemanticTokenProvider </span><span style=color:#eff1f5>{
+</span><span style=color:#eff1f5>  </span><span style=color:#8fa1b3>provideDocumentSemanticTokens</span><span>(
+</span><span style=color:#eff1f5>    </span><span style=color:#bf616a>document</span><span>: </span><span style=color:#eff1f5>vscode.TextDocument,
+</span><span style=color:#eff1f5>    </span><span style=color:#bf616a>token</span><span>: </span><span style=color:#eff1f5>vscode.CancellationToken
+</span><span style=color:#eff1f5>  </span><span>): </span><span style=color:#eff1f5>vscode.ProviderResult&LTvscode.SemanticTokens> {
+</span><span style=color:#eff1f5>    </span><span style=color:#b48ead>const </span><span style=color:#bf616a>tree </span><span>= </span><span style=color:#bf616a>this</span><span style=color:#eff1f5>.</span><span style=color:#bf616a>parser</span><span style=color:#eff1f5>?.</span><span style=color:#96b5b4>parse</span><span style=color:#eff1f5>(document.</span><span style=color:#8fa1b3>getText</span><span style=color:#eff1f5>());
+</span><span style=color:#eff1f5>    </span><span style=color:#b48ead>const </span><span style=color:#bf616a>query</span><span>: </span><span style=color:#eff1f5>Parser.Query </span><span>= </span><span style=color:#bf616a>this</span><span style=color:#eff1f5>.</span><span style=color:#bf616a>parser
+</span><span style=color:#eff1f5>      ?.</span><span style=color:#8fa1b3>getLanguage</span><span style=color:#eff1f5>()
+</span><span style=color:#eff1f5>      .</span><span style=color:#8fa1b3>query</span><span style=color:#eff1f5>(</span><span>'</span><span style=color:#a3be8c>("message") @keyword</span><span>'</span><span style=color:#eff1f5>);
+</span><span style=color:#eff1f5>    </span><span style=color:#b48ead>const </span><span style=color:#bf616a>captures </span><span>= </span><span style=color:#bf616a>query</span><span style=color:#eff1f5>.</span><span style=color:#8fa1b3>captures</span><span style=color:#eff1f5>(</span><span style=color:#bf616a>tree</span><span>!</span><span style=color:#eff1f5>.</span><span style=color:#bf616a>rootNode</span><span style=color:#eff1f5>);
+</span><span style=color:#eff1f5>
+</span><span style=color:#eff1f5>    </span><span style=color:#b48ead>const </span><span style=color:#bf616a>tokenBuilder </span><span>= new </span><span style=color:#eff1f5>vscode.SemanticTokensBuilder(</span><span style=color:#bf616a>this</span><span style=color:#eff1f5>.</span><span style=color:#bf616a>legend</span><span style=color:#eff1f5>);
+</span><span style=color:#eff1f5>    </span><span style=color:#b48ead>for </span><span style=color:#eff1f5>(</span><span style=color:#b48ead>const </span><span style=color:#bf616a>capture </span><span>of </span><span style=color:#bf616a>captures</span><span style=color:#eff1f5>) {
+</span><span style=color:#eff1f5>      </span><span style=color:#bf616a>tokenBuilder</span><span style=color:#eff1f5>.</span><span style=color:#96b5b4>push</span><span style=color:#eff1f5>(
+</span><span style=color:#eff1f5>        </span><span>new </span><span style=color:#eff1f5>vscode.Range(
+</span><span style=color:#eff1f5>          </span><span>new </span><span style=color:#eff1f5>vscode.Position(
+</span><span style=color:#eff1f5>            </span><span style=color:#bf616a>capture</span><span style=color:#eff1f5>.</span><span style=color:#bf616a>node</span><span style=color:#eff1f5>.</span><span style=color:#bf616a>startPosition</span><span style=color:#eff1f5>.</span><span style=color:#bf616a>row</span><span style=color:#eff1f5>,
+</span><span style=color:#eff1f5>            </span><span style=color:#bf616a>capture</span><span style=color:#eff1f5>.</span><span style=color:#bf616a>node</span><span style=color:#eff1f5>.</span><span style=color:#bf616a>startPosition</span><span style=color:#eff1f5>.</span><span style=color:#bf616a>column
+</span><span style=color:#eff1f5>          ),
+</span><span style=color:#eff1f5>          </span><span>new </span><span style=color:#eff1f5>vscode.Position(
+</span><span style=color:#eff1f5>            </span><span style=color:#bf616a>capture</span><span style=color:#eff1f5>.</span><span style=color:#bf616a>node</span><span style=color:#eff1f5>.</span><span style=color:#bf616a>endPosition</span><span style=color:#eff1f5>.</span><span style=color:#bf616a>row</span><span style=color:#eff1f5>,
+</span><span style=color:#eff1f5>            </span><span style=color:#bf616a>capture</span><span style=color:#eff1f5>.</span><span style=color:#bf616a>node</span><span style=color:#eff1f5>.</span><span style=color:#bf616a>endPosition</span><span style=color:#eff1f5>.</span><span style=color:#bf616a>column
+</span><span style=color:#eff1f5>          )
+</span><span style=color:#eff1f5>        ),
+</span><span style=color:#eff1f5>        </span><span style=color:#bf616a>capture</span><span style=color:#eff1f5>.name
+</span><span style=color:#eff1f5>      );
+</span><span style=color:#eff1f5>    }
+</span><span style=color:#eff1f5>
+</span><span style=color:#eff1f5>    </span><span style=color:#b48ead>const </span><span style=color:#bf616a>tokens </span><span>= </span><span style=color:#bf616a>tokenBuilder</span><span style=color:#eff1f5>.</span><span style=color:#8fa1b3>build</span><span style=color:#eff1f5>();
+</span><span style=color:#eff1f5>    </span><span style=color:#b48ead>return </span><span style=color:#ebcb8b>Promise</span><span style=color:#eff1f5>.</span><span style=color:#96b5b4>resolve</span><span style=color:#eff1f5>(</span><span style=color:#bf616a>tokens</span><span style=color:#eff1f5>);
+</span><span style=color:#eff1f5>  }
+</span><span style=color:#eff1f5>}
+</span></code></pre><p>最核心的部分就是 <code>getLanguage().query()</code> 了，这里用了 tree-sitter 的查询语言 DSL 实现快速从语法树里提取对应的节点。<p>放个<a href=https://tree-sitter.github.io/tree-sitter/using-parsers#query-syntax>查询语言的文档</a>，再简要介绍下。<blockquote><p>A query consists of one or more patterns, where each pattern is an S-expression that matches a certain set of nodes in a syntax tree.</blockquote><p>本质上查询语言是个模式匹配工具，以 s-expression 作为模式语言。例如下面的查询。<pre style=background:#2b303b;color:#c0c5ce><code><span>(number)
+</span></code></pre><p>就是查询 ast 里所有的 number 节点。而 number 节点的定义在 tree-sitter 项目语法定义 <code>grammar.js</code> 中给出。<p>再看复杂一点的查询：<pre style=background:#2b303b;color:#c0c5ce><code><span>(binary_expression
+</span><span>    (number)
+</span><span>    (number)
+</span><span>)
+</span></code></pre><p>就是查询语法树中的 包含两个 number 子节点的 binary_expression 节点，不限定 number 节点的位置，只要是子节点就行。<p>语法树的结构可以参考 <code>tree-sitter parse</code> 命令的输出。<p>当然也可以以子节点的值为条件来查询。<pre style=background:#2b303b;color:#c0c5ce><code><span>(binary_expression
+</span><span>    left:(number)
+</span><span>)
+</span></code></pre><p>再看如何捕获查询结果。<pre style=background:#2b303b;color:#c0c5ce><code><span>(function
+</span><span>    name: (identifier) @function_name
+</span><span>)
+</span></code></pre><p>用 <code>@</code> 开头的标识符指定捕获的名称，通过 <code>query.captures()</code> 即可完成捕获，返回 <code>{name: string, node: Node}</code> 这样子的对象的列表。<p>这样一来，上面的代码就很容易理解了。<pre class=language-ts data-lang=ts style=background:#2b303b;color:#c0c5ce><code class=language-ts data-lang=ts><span style=color:#b48ead>const </span><span style=color:#bf616a>query</span><span>: Parser.Query = </span><span style=color:#bf616a>this</span><span>.</span><span style=color:#bf616a>parser
+</span><span>  ?.</span><span style=color:#8fa1b3>getLanguage</span><span>()
+</span><span>  .</span><span style=color:#8fa1b3>query</span><span>('</span><span style=color:#a3be8c>("message") @keyword</span><span>');
+</span><span style=color:#b48ead>const </span><span style=color:#bf616a>captures </span><span>= </span><span style=color:#bf616a>query</span><span>.</span><span style=color:#8fa1b3>captures</span><span>(</span><span style=color:#bf616a>tree</span><span>!.</span><span style=color:#bf616a>rootNode</span><span>);
+</span></code></pre><p>这两句话查询出了语法树里所有的 <code>message</code> 关键字<pre class=language-ts data-lang=ts style=background:#2b303b;color:#c0c5ce><code class=language-ts data-lang=ts><span style=color:#b48ead>const </span><span style=color:#bf616a>tokenBuilder </span><span>= new vscode.SemanticTokensBuilder(</span><span style=color:#bf616a>this</span><span>.</span><span style=color:#bf616a>legend</span><span>);
+</span><span style=color:#b48ead>for </span><span>(</span><span style=color:#b48ead>const </span><span style=color:#bf616a>capture </span><span>of </span><span style=color:#bf616a>captures</span><span>) {
+</span><span>  </span><span style=color:#bf616a>tokenBuilder</span><span>.</span><span style=color:#96b5b4>push</span><span>(
+</span><span>    new vscode.Range(
+</span><span>      new vscode.Position(
+</span><span>        </span><span style=color:#bf616a>capture</span><span>.</span><span style=color:#bf616a>node</span><span>.</span><span style=color:#bf616a>startPosition</span><span>.</span><span style=color:#bf616a>row</span><span>,
+</span><span>        </span><span style=color:#bf616a>capture</span><span>.</span><span style=color:#bf616a>node</span><span>.</span><span style=color:#bf616a>startPosition</span><span>.</span><span style=color:#bf616a>column
+</span><span>      ),
+</span><span>      new vscode.Position(
+</span><span>        </span><span style=color:#bf616a>capture</span><span>.</span><span style=color:#bf616a>node</span><span>.</span><span style=color:#bf616a>endPosition</span><span>.</span><span style=color:#bf616a>row</span><span>,
+</span><span>        </span><span style=color:#bf616a>capture</span><span>.</span><span style=color:#bf616a>node</span><span>.</span><span style=color:#bf616a>endPosition</span><span>.</span><span style=color:#bf616a>column
+</span><span>      )
+</span><span>    ),
+</span><span>    </span><span style=color:#bf616a>capture</span><span>.name
+</span><span>  );
+</span><span>}
+</span></code></pre><p>这一段循环将捕获的结果构造出高亮 token，注意这里用了 <code>capture.name</code> 作为标识符的类型，也就是上面的 query 里指定的 <code>keyword</code> 。<p>最终，将分词的结果返回出去。<pre class=language-ts data-lang=ts style=background:#2b303b;color:#c0c5ce><code class=language-ts data-lang=ts><span style=color:#b48ead>const </span><span style=color:#bf616a>tokens </span><span>= </span><span style=color:#bf616a>tokenBuilder</span><span>.</span><span style=color:#8fa1b3>build</span><span>();
+</span><span style=color:#b48ead>return </span><span style=color:#ebcb8b>Promise</span><span>.</span><span style=color:#96b5b4>resolve</span><span>(</span><span style=color:#bf616a>tokens</span><span>);
+</span></code></pre><p>F5 运行即可看到源码中所有 <code>message</code> 都被标上了关键字的颜色。<p class=tags-data><a href=/tags/javascript>/javascript/</a> <a href=/tags/bian-yi-ji-shu>/编译技术/</a> <a href=/tags/vscode>/vscode/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.<br> Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>.<br> Theme modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<br></p><a href=https://beian.miit.gov.cn/ style=display:inline-block;height:24px;line-height:24px>浙ICP备2021032371号-1</a><span style=margin-left:16px></span><a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=33032402002231" style=display:inline-block;text-decoration:none;height:24px;line-height:24px target=_blank> <img src=/image/beian.png style=float:left;border:none> 浙公网安备 33032402002231号</a></div></div></footer>
