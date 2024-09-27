@@ -1,0 +1,361 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>从零实现一个容器</title><meta content=从零实现一个容器 name=title><meta content=弃船！ name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2021-05-31-cong-ling-shi-xian-rong-qi/ property=og:url><meta content="weakptr's 技术文摘" property=og:site_name><meta content=从零实现一个容器 property=og:title><meta content=弃船！ property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2021-05-31-cong-ling-shi-xian-rong-qi/ property=twitter:url><meta content=从零实现一个容器 property=twitter:title><meta content=弃船！ property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2021-05-31-cong-ling-shi-xian-rong-qi/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/css/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded",function(){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\(',right:'\\)',display:false},{left:'\\[',right:'\\]',display:false}],throwOnError:true})})</script><script src=https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded',function(){const a=document.getElementsByClassName('language-mermaid');for(let b=0;b<a.length;b++){const c=a.item(b);if(c.tagName==="PRE"&&!c.classList.contains('mermaid')){c.innerHTML=c.textContent;c.classList.add('mermaid')}};mermaid.initialize({startOnLoad:true,theme:'dark'})})</script><script>if(window.location.hostname.toLowerCase()!=='localhost'&&window.location.hostname!=='127.0.0.1'){var _hmt=_hmt||[];(function(){var a=document.createElement("script");a.src="https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";var b=document.getElementsByTagName("script")[0];b.parentNode.insertBefore(a,b)})()}</script><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/journal/> 日志 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>从零实现一个容器</h1><p style=color:var(--text-light);text-align:right>作于： 2021 年 5 月 31 日，预计阅读时间 14 分钟<article><h2 id=qian-yan>前言</h2><p>自从看了<code>cocker</code>项目的 ppt 之后就有点念念不忘的意思了，实现一个 docker 或 docker 的类似物看起来并不是做不到的事情。<p>于是就动手试一试。<h2 id=he-xin-ji-shu>核心技术</h2><h3 id=namespace>namespace</h3><p>命名空间包装全局系统资源，让在命名空间中的进程看起来就像是有自己独立隔离的全局资源一样。命名空间中的全局资源对命名空间中的其他进程都是可见的，但对命名空间外的进程不可见。命名空间用途之一就是实现容器。<blockquote><pre style=background:#2b303b;color:#c0c5ce><code><span>Linux provides the following namespaces:
+</span><span>
+</span><span>Namespace   Constant          Isolates
+</span><span>Cgroup      CLONE_NEWCGROUP   Cgroup root directory
+</span><span>IPC         CLONE_NEWIPC      System V IPC, POSIX message queues
+</span><span>Network     CLONE_NEWNET      Network devices, stacks, ports, etc.
+</span><span>Mount       CLONE_NEWNS       Mount points
+</span><span>PID         CLONE_NEWPID      Process IDs
+</span><span>User        CLONE_NEWUSER     User and group IDs
+</span><span>UTS         CLONE_NEWUTS      Hostname and NIS domain name
+</span></code></pre></blockquote><p>几个命名空间的 API<ul><li><code>clone</code><li><code>setns</code><li><code>unshare</code></ul><p>不得不说 <code>man 7 namespaces</code> 对 <code>namespace</code> 的解释已经非常到位了。<h3 id=chroot>chroot</h3><p>这个 Linux 用户应该还是比较熟悉的，如 Arch Linux 这样的发行版在安装时就有用到。<p>使用 <code>man 2 chroot</code> 查看这个 api 的文档。<blockquote><p>chroot() changes the root directory of the calling process to that specified in path. This directory will be used for pathnames beginning with /. The root directory is inherited by all children of the calling process.<p>Only a privileged process (Linux: one with the CAP_SYS_CHROOT capability in its user namespace) may call chroot().</blockquote><p>基本作用是把调用进程的根目录 <code>/</code> 切换到指定目录，子进程会继承这个 <code>/</code> 位置；调用 API 需要特权。<p>举例说调完 <code>chroot("/home/xxx")</code>，你再用 <code>ls</code> 之类的命令看 <code>/</code> 下有什么文件，看到的就是 <code>/home/xxx</code> 下的内容了。<p><code>man 2 chroot</code> 还有一些有意思的内容，不做赘述。<h3 id=mount>mount</h3><p>也是 Linux 用户很熟悉的东西。老规矩，<code>man 2 mount</code> 看看文档。<blockquote><pre class=language-c data-lang=c style=background:#2b303b;color:#c0c5ce><code class=language-c data-lang=c><span style=color:#b48ead>#include </span><span><</span><span style=color:#a3be8c>sys/mount.h</span><span>>
+</span><span>
+</span><span style=color:#b48ead>int </span><span style=color:#8fa1b3>mount</span><span>(</span><span style=color:#b48ead>const char </span><span>*</span><span style=color:#bf616a>source</span><span>, </span><span style=color:#b48ead>const char </span><span>*</span><span style=color:#bf616a>target</span><span>,
+</span><span>    </span><span style=color:#b48ead>const char </span><span>*</span><span style=color:#bf616a>filesystemtype</span><span>, </span><span style=color:#b48ead>unsigned long </span><span style=color:#bf616a>mountflags</span><span>,
+</span><span>    </span><span style=color:#b48ead>const void </span><span>*</span><span style=color:#bf616a>data</span><span>);
+</span></code></pre><p>mount() attaches the filesystem specified by source (which is often a pathname referring to a device, but can also be the pathname of a directory or file, or a dummy string) to the location (a directory or file) specified by the pathname in target.</blockquote><p><code>mount</code> 会挂载(attaches) <code>source</code> 参数指定的文件系统（通常是设备路径，也可以是文件夹、文件的路径或虚拟字符串（如<code>proc</code>））到 <code>target</code> 指定的位置（目录或文件）。同样需要特权来执行。<p><code>source</code>/<code>target</code> 都不难理解，<code>filesystemtype</code>可以从<code>/proc/filesystems</code>里读到可用值，或者自己搜一搜；比较重要的就是 <code>mountflags</code> 了，可以指定诸如<code>MS_RDONLY</code>之类的选项来挂载只读文件系统等等。具体还是自己查手册。<h3 id=clone>clone</h3><p>最后就是系统调用 <code>clone</code> 了。还是先 <code>man 2 clone</code>。<blockquote><pre class=language-c data-lang=c style=background:#2b303b;color:#c0c5ce><code class=language-c data-lang=c><span style=color:#65737e>/* Prototype for the glibc wrapper function */
+</span><span>
+</span><span style=color:#b48ead>#define </span><span>_GNU_SOURCE
+</span><span style=color:#b48ead>#include </span><span><</span><span style=color:#a3be8c>sched.h</span><span>>
+</span><span>
+</span><span style=color:#b48ead>int </span><span style=color:#8fa1b3>clone</span><span>(</span><span style=color:#b48ead>int </span><span>(*fn)(</span><span style=color:#b48ead>void </span><span>*), </span><span style=color:#b48ead>void </span><span>*</span><span style=color:#bf616a>child_stack</span><span>,
+</span><span>          </span><span style=color:#b48ead>int </span><span style=color:#bf616a>flags</span><span>, </span><span style=color:#b48ead>void </span><span>*</span><span style=color:#bf616a>arg</span><span>, ...
+</span><span>          </span><span style=color:#65737e>/* pid_t *ptid, void *newtls, pid_t *ctid */ </span><span>);
+</span><span>
+</span><span style=color:#65737e>/* For the prototype of the raw system call, see NOTES */
+</span></code></pre><p>clone() creates a new process, in a manner similar to fork(2).</blockquote><p>总体类似于<code>fork()</code>，但可以指定一个入口函数，函数结束则子进程退出，也可以共享内存空间，所以行为也可以类似线程。看怎么用。<p><code>flags</code>依然是关注的重点，<code>CLONE_NEWUTS</code>、<code>CLONE_NEWNS</code>、<code>CLONE_NEWPID</code>这些参数允许将子进程运行在独立的命名空间里。<p><code>man 2 clone</code> 还提供了一个 C 语言编写的例子可以参考。<pre class=language-c data-lang=c style=background:#2b303b;color:#c0c5ce><code class=language-c data-lang=c><span style=color:#b48ead>#define </span><span>_GNU_SOURCE
+</span><span style=color:#b48ead>#include </span><span><</span><span style=color:#a3be8c>sys/wait.h</span><span>>
+</span><span style=color:#b48ead>#include </span><span><</span><span style=color:#a3be8c>sys/utsname.h</span><span>>
+</span><span style=color:#b48ead>#include </span><span><</span><span style=color:#a3be8c>sched.h</span><span>>
+</span><span style=color:#b48ead>#include </span><span><</span><span style=color:#a3be8c>string.h</span><span>>
+</span><span style=color:#b48ead>#include </span><span><</span><span style=color:#a3be8c>stdio.h</span><span>>
+</span><span style=color:#b48ead>#include </span><span><</span><span style=color:#a3be8c>stdlib.h</span><span>>
+</span><span style=color:#b48ead>#include </span><span><</span><span style=color:#a3be8c>unistd.h</span><span>>
+</span><span>
+</span><span style=color:#b48ead>#define </span><span style=color:#8fa1b3>errExit</span><span>(</span><span style=color:#bf616a>msg</span><span>)        \
+</span><span>    </span><span style=color:#b48ead>do                      </span><span>\
+</span><span>    {                       \
+</span><span>        </span><span style=color:#96b5b4>perror</span><span>(msg);        \
+</span><span>        </span><span style=color:#96b5b4>exit</span><span>(EXIT_FAILURE); \
+</span><span>    } </span><span style=color:#b48ead>while </span><span>(</span><span style=color:#d08770>0</span><span>)
+</span><span>
+</span><span style=color:#b48ead>static int </span><span style=color:#65737e>/* Start function for cloned child */
+</span><span style=color:#8fa1b3>childFunc</span><span>(</span><span style=color:#b48ead>void </span><span>*</span><span style=color:#bf616a>arg</span><span>)
+</span><span>{
+</span><span>    </span><span style=color:#b48ead>struct</span><span> utsname uts;
+</span><span>
+</span><span>    </span><span style=color:#65737e>/* Change hostname in UTS namespace of child */
+</span><span>
+</span><span>    </span><span style=color:#b48ead>if </span><span>(</span><span style=color:#bf616a>sethostname</span><span>(arg, </span><span style=color:#96b5b4>strlen</span><span>(arg)) == -</span><span style=color:#d08770>1</span><span>)
+</span><span>        </span><span style=color:#bf616a>errExit</span><span>("</span><span style=color:#a3be8c>sethostname</span><span>");
+</span><span>
+</span><span>    </span><span style=color:#65737e>/* Retrieve and display hostname */
+</span><span>
+</span><span>    </span><span style=color:#b48ead>if </span><span>(</span><span style=color:#bf616a>uname</span><span>(&uts) == -</span><span style=color:#d08770>1</span><span>)
+</span><span>        </span><span style=color:#bf616a>errExit</span><span>("</span><span style=color:#a3be8c>uname</span><span>");
+</span><span>    </span><span style=color:#96b5b4>printf</span><span>("</span><span style=color:#a3be8c>uts.nodename in child:  </span><span style=color:#d08770>%s</span><span style=color:#96b5b4>\n</span><span>", uts.</span><span style=color:#bf616a>nodename</span><span>);
+</span><span>
+</span><span>    </span><span style=color:#65737e>/* Keep the namespace open for a while, by sleeping.
+</span><span style=color:#65737e>        This allows some experimentation--for example, another
+</span><span style=color:#65737e>        process might join the namespace. */
+</span><span>
+</span><span>    </span><span style=color:#bf616a>sleep</span><span>(</span><span style=color:#d08770>3</span><span>);
+</span><span>
+</span><span>    </span><span style=color:#b48ead>return </span><span style=color:#d08770>0</span><span>; </span><span style=color:#65737e>/* Child terminates now */
+</span><span>}
+</span><span>
+</span><span style=color:#b48ead>#define </span><span>STACK_SIZE (</span><span style=color:#d08770>1024 </span><span>* </span><span style=color:#d08770>1024</span><span>) </span><span style=color:#65737e>/* Stack size for cloned child */
+</span><span>
+</span><span style=color:#b48ead>int </span><span style=color:#8fa1b3>main</span><span>(</span><span style=color:#b48ead>int </span><span style=color:#bf616a>argc</span><span>, </span><span style=color:#b48ead>char </span><span>*</span><span style=color:#bf616a>argv</span><span>[])
+</span><span>{
+</span><span>    </span><span style=color:#b48ead>char </span><span>*stack;    </span><span style=color:#65737e>/* Start of stack buffer */
+</span><span>    </span><span style=color:#b48ead>char </span><span>*stackTop; </span><span style=color:#65737e>/* End of stack buffer */
+</span><span>    pid_t pid;
+</span><span>    </span><span style=color:#b48ead>struct</span><span> utsname uts;
+</span><span>
+</span><span>    </span><span style=color:#b48ead>if </span><span>(argc < </span><span style=color:#d08770>2</span><span>)
+</span><span>    {
+</span><span>        </span><span style=color:#96b5b4>fprintf</span><span>(stderr, "</span><span style=color:#a3be8c>Usage: </span><span style=color:#d08770>%s</span><span style=color:#a3be8c> &LTchild-hostname></span><span style=color:#96b5b4>\n</span><span>", argv[</span><span style=color:#d08770>0</span><span>]);
+</span><span>        </span><span style=color:#96b5b4>exit</span><span>(EXIT_SUCCESS);
+</span><span>    }
+</span><span>
+</span><span>    </span><span style=color:#65737e>/* Allocate stack for child */
+</span><span>
+</span><span>    stack = </span><span style=color:#96b5b4>malloc</span><span>(STACK_SIZE);
+</span><span>    </span><span style=color:#b48ead>if </span><span>(stack == </span><span style=color:#d08770>NULL</span><span>)
+</span><span>        </span><span style=color:#bf616a>errExit</span><span>("</span><span style=color:#a3be8c>malloc</span><span>");
+</span><span>    stackTop = stack + STACK_SIZE; </span><span style=color:#65737e>/* Assume stack grows downward */
+</span><span>
+</span><span>    </span><span style=color:#65737e>/* Create child that has its own UTS namespace;
+</span><span style=color:#65737e>        child commences execution in childFunc() */
+</span><span>
+</span><span>    pid = </span><span style=color:#bf616a>clone</span><span>(childFunc, stackTop, CLONE_NEWUTS | SIGCHLD, argv[</span><span style=color:#d08770>1</span><span>]);
+</span><span>    </span><span style=color:#b48ead>if </span><span>(pid == -</span><span style=color:#d08770>1</span><span>)
+</span><span>        </span><span style=color:#bf616a>errExit</span><span>("</span><span style=color:#a3be8c>clone</span><span>");
+</span><span>    </span><span style=color:#96b5b4>printf</span><span>("</span><span style=color:#a3be8c>clone() returned </span><span style=color:#d08770>%ld</span><span style=color:#96b5b4>\n</span><span>", (</span><span style=color:#b48ead>long</span><span>)pid);
+</span><span>
+</span><span>    </span><span style=color:#65737e>/* Parent falls through to here */
+</span><span>
+</span><span>    </span><span style=color:#bf616a>sleep</span><span>(</span><span style=color:#d08770>1</span><span>); </span><span style=color:#65737e>/* Give child time to change its hostname */
+</span><span>
+</span><span>    </span><span style=color:#65737e>/* Display hostname in parent's UTS namespace. This will be
+</span><span style=color:#65737e>        different from hostname in child's UTS namespace. */
+</span><span>
+</span><span>    </span><span style=color:#b48ead>if </span><span>(</span><span style=color:#bf616a>uname</span><span>(&uts) == -</span><span style=color:#d08770>1</span><span>)
+</span><span>        </span><span style=color:#bf616a>errExit</span><span>("</span><span style=color:#a3be8c>uname</span><span>");
+</span><span>    </span><span style=color:#96b5b4>printf</span><span>("</span><span style=color:#a3be8c>uts.nodename in parent: </span><span style=color:#d08770>%s</span><span style=color:#96b5b4>\n</span><span>", uts.</span><span style=color:#bf616a>nodename</span><span>);
+</span><span>
+</span><span>    </span><span style=color:#b48ead>if </span><span>(</span><span style=color:#bf616a>waitpid</span><span>(pid, </span><span style=color:#d08770>NULL</span><span>, </span><span style=color:#d08770>0</span><span>) == -</span><span style=color:#d08770>1</span><span>) </span><span style=color:#65737e>/* Wait for child */
+</span><span>        </span><span style=color:#bf616a>errExit</span><span>("</span><span style=color:#a3be8c>waitpid</span><span>");
+</span><span>    </span><span style=color:#96b5b4>printf</span><span>("</span><span style=color:#a3be8c>child has terminated</span><span style=color:#96b5b4>\n</span><span>");
+</span><span>
+</span><span>    </span><span style=color:#96b5b4>exit</span><span>(EXIT_SUCCESS);
+</span><span>}
+</span></code></pre><p>把上面的代码保存到 <code>main.c</code> 之后，使用命令 <code>gcc main.c -o clone-demo</code> 编译。<p>编译完成后，<code>sudo ./clone-demo new-hostname</code> 执行。<p>最终结果类似这样<pre style=background:#2b303b;color:#c0c5ce><code><span>DESKTOP-HEKKTQ9 :: ~/repos/container » sudo ./clone-demo new-hostname
+</span><span>clone() returned 1515
+</span><span>uts.nodename in child:  new-hostname
+</span><span>uts.nodename in parent: DESKTOP-HEKKTQ9
+</span><span>child has terminated
+</span><span>DESKTOP-HEKKTQ9 :: ~/repos/container »
+</span></code></pre><h3 id=setns>setns</h3><p><code>setns</code> 把调用这个函数的线程加入指定 fd 的命名空间里。这个 <code>fd</code> 指的是 <code>/proc/1234/ns/uts</code> 这些特殊文件的文件描述符。<p>举例来说，我们把 <code>clone-demo</code> 的源码里，<code>sleep(3)</code> 改为 <code>sleep(200)</code>，再执行<code>sudo clone-demo new-hostname &</code> 把进程放到后台。<p>然后编译下面的代码并测试加入 clone-demo 的 uts 名称空间。<pre class=language-c data-lang=c style=background:#2b303b;color:#c0c5ce><code class=language-c data-lang=c><span style=color:#b48ead>#define </span><span>_GNU_SOURCE
+</span><span style=color:#b48ead>#include </span><span><</span><span style=color:#a3be8c>fcntl.h</span><span>>
+</span><span style=color:#b48ead>#include </span><span><</span><span style=color:#a3be8c>sched.h</span><span>>
+</span><span style=color:#b48ead>#include </span><span><</span><span style=color:#a3be8c>unistd.h</span><span>>
+</span><span style=color:#b48ead>#include </span><span><</span><span style=color:#a3be8c>stdlib.h</span><span>>
+</span><span style=color:#b48ead>#include </span><span><</span><span style=color:#a3be8c>stdio.h</span><span>>
+</span><span>
+</span><span style=color:#b48ead>#define </span><span style=color:#8fa1b3>errExit</span><span>(</span><span style=color:#bf616a>msg</span><span>)        \
+</span><span>    </span><span style=color:#b48ead>do                      </span><span>\
+</span><span>    {                       \
+</span><span>        </span><span style=color:#96b5b4>perror</span><span>(msg);        \
+</span><span>        </span><span style=color:#96b5b4>exit</span><span>(EXIT_FAILURE); \
+</span><span>    } </span><span style=color:#b48ead>while </span><span>(</span><span style=color:#d08770>0</span><span>)
+</span><span>
+</span><span style=color:#b48ead>int </span><span style=color:#8fa1b3>main</span><span>(</span><span style=color:#b48ead>int </span><span style=color:#bf616a>argc</span><span>, </span><span style=color:#b48ead>char </span><span>*</span><span style=color:#bf616a>argv</span><span>[])
+</span><span>{
+</span><span>    </span><span style=color:#b48ead>int</span><span> fd;
+</span><span>
+</span><span>    </span><span style=color:#b48ead>if </span><span>(argc < </span><span style=color:#d08770>3</span><span>)
+</span><span>    {
+</span><span>        </span><span style=color:#96b5b4>fprintf</span><span>(stderr, "</span><span style=color:#d08770>%s</span><span style=color:#a3be8c> /proc/PID/ns/FILE cmd args...</span><span style=color:#96b5b4>\n</span><span>", argv[</span><span style=color:#d08770>0</span><span>]);
+</span><span>        </span><span style=color:#96b5b4>exit</span><span>(EXIT_FAILURE);
+</span><span>    }
+</span><span>
+</span><span>    fd = </span><span style=color:#bf616a>open</span><span>(argv[</span><span style=color:#d08770>1</span><span>], O_RDONLY); </span><span style=color:#65737e>/* Get file descriptor for namespace */
+</span><span>    </span><span style=color:#b48ead>if </span><span>(fd == -</span><span style=color:#d08770>1</span><span>)
+</span><span>        </span><span style=color:#bf616a>errExit</span><span>("</span><span style=color:#a3be8c>open</span><span>");
+</span><span>
+</span><span>    </span><span style=color:#b48ead>if </span><span>(</span><span style=color:#bf616a>setns</span><span>(fd, </span><span style=color:#d08770>0</span><span>) == -</span><span style=color:#d08770>1</span><span>) </span><span style=color:#65737e>/* Join that namespace */
+</span><span>        </span><span style=color:#bf616a>errExit</span><span>("</span><span style=color:#a3be8c>setns</span><span>");
+</span><span>
+</span><span>    </span><span style=color:#bf616a>execvp</span><span>(argv[</span><span style=color:#d08770>2</span><span>], &argv[</span><span style=color:#d08770>2</span><span>]); </span><span style=color:#65737e>/* Execute a command in namespace */
+</span><span>    </span><span style=color:#bf616a>errExit</span><span>("</span><span style=color:#a3be8c>execvp</span><span>");
+</span><span>}
+</span></code></pre><p>最终结果如下<pre style=background:#2b303b;color:#c0c5ce><code><span>root@DESKTOP-HEKKTQ9:/home/weakptr/repos/container# ./clone-demo new-hostname &
+</span><span>[1] 1826
+</span><span>clone() returned 1827
+</span><span>uts.nodename in child:  new-hostname
+</span><span>uts.nodename in parent: DESKTOP-HEKKTQ9
+</span><span>
+</span><span>root@DESKTOP-HEKKTQ9:/home/weakptr/repos/container# ./setns-demo /proc/1827/ns/uts /bin/bash
+</span><span>root@new-hostname:/home/weakptr/repos/container# uname -n
+</span><span>new-hostname
+</span><span>root@new-hostname:/home/weakptr/repos/container# exit
+</span><span>root@DESKTOP-HEKKTQ9:/home/weakptr/repos/container# exit
+</span><span>DESKTOP-HEKKTQ9 :: ~/repos/container » uname -n
+</span><span>DESKTOP-HEKKTQ9
+</span></code></pre><h3 id=unshare>unshare</h3><blockquote><pre class=language-c data-lang=c style=background:#2b303b;color:#c0c5ce><code class=language-c data-lang=c><span style=color:#b48ead>#define </span><span>_GNU_SOURCE
+</span><span style=color:#b48ead>#include </span><span><</span><span style=color:#a3be8c>sched.h</span><span>>
+</span><span>
+</span><span style=color:#b48ead>int </span><span style=color:#8fa1b3>unshare</span><span>(</span><span style=color:#b48ead>int </span><span style=color:#bf616a>flags</span><span>);
+</span></code></pre></blockquote><p><code>unshare</code> 用于主动解除当前进程或线程从父进程继承的执行上下文（例如命名空间）。<p><code>unshare</code>的主要用途就是在不创建新的进程的前提下，控制自己的共享执行上下文（还是指命名空间）。<p>参数 <code>flags</code> 依然是 <code>CLONE_NEWNS</code> 这些常量。惯例还是有个 demo 。<pre class=language-c data-lang=c style=background:#2b303b;color:#c0c5ce><code class=language-c data-lang=c><span style=color:#65737e>/* unshare.c
+</span><span style=color:#65737e>
+</span><span style=color:#65737e>    A simple implementation of the unshare(1) command: unshare
+</span><span style=color:#65737e>    namespaces and execute a command.
+</span><span style=color:#65737e>*/
+</span><span style=color:#b48ead>#define </span><span>_GNU_SOURCE
+</span><span style=color:#b48ead>#include </span><span><</span><span style=color:#a3be8c>sched.h</span><span>>
+</span><span style=color:#b48ead>#include </span><span><</span><span style=color:#a3be8c>unistd.h</span><span>>
+</span><span style=color:#b48ead>#include </span><span><</span><span style=color:#a3be8c>stdlib.h</span><span>>
+</span><span style=color:#b48ead>#include </span><span><</span><span style=color:#a3be8c>stdio.h</span><span>>
+</span><span style=color:#b48ead>#include </span><span><</span><span style=color:#a3be8c>wait.h</span><span>>
+</span><span>
+</span><span style=color:#65737e>/* A simple error-handling function: print an error message based
+</span><span style=color:#65737e>    on the value in 'errno' and terminate the calling process */
+</span><span>
+</span><span style=color:#b48ead>#define </span><span style=color:#8fa1b3>errExit</span><span>(</span><span style=color:#bf616a>msg</span><span>)        \
+</span><span>    </span><span style=color:#b48ead>do                      </span><span>\
+</span><span>    {                       \
+</span><span>        </span><span style=color:#96b5b4>perror</span><span>(msg);        \
+</span><span>        </span><span style=color:#96b5b4>exit</span><span>(EXIT_FAILURE); \
+</span><span>    } </span><span style=color:#b48ead>while </span><span>(</span><span style=color:#d08770>0</span><span>)
+</span><span>
+</span><span style=color:#b48ead>static void
+</span><span style=color:#8fa1b3>usage</span><span>(</span><span style=color:#b48ead>char </span><span>*</span><span style=color:#bf616a>pname</span><span>)
+</span><span>{
+</span><span>    </span><span style=color:#96b5b4>fprintf</span><span>(stderr, "</span><span style=color:#a3be8c>Usage: </span><span style=color:#d08770>%s</span><span style=color:#a3be8c> [options] program [arg...]</span><span style=color:#96b5b4>\n</span><span>", pname);
+</span><span>    </span><span style=color:#96b5b4>fprintf</span><span>(stderr, "</span><span style=color:#a3be8c>Options can be:</span><span style=color:#96b5b4>\n</span><span>");
+</span><span>    </span><span style=color:#96b5b4>fprintf</span><span>(stderr, "</span><span style=color:#a3be8c>    -i   unshare IPC namespace</span><span style=color:#96b5b4>\n</span><span>");
+</span><span>    </span><span style=color:#96b5b4>fprintf</span><span>(stderr, "</span><span style=color:#a3be8c>    -m   unshare mount namespace</span><span style=color:#96b5b4>\n</span><span>");
+</span><span>    </span><span style=color:#96b5b4>fprintf</span><span>(stderr, "</span><span style=color:#a3be8c>    -n   unshare network namespace</span><span style=color:#96b5b4>\n</span><span>");
+</span><span>    </span><span style=color:#96b5b4>fprintf</span><span>(stderr, "</span><span style=color:#a3be8c>    -p   unshare PID namespace</span><span style=color:#96b5b4>\n</span><span>");
+</span><span>    </span><span style=color:#96b5b4>fprintf</span><span>(stderr, "</span><span style=color:#a3be8c>    -u   unshare UTS namespace</span><span style=color:#96b5b4>\n</span><span>");
+</span><span>    </span><span style=color:#96b5b4>fprintf</span><span>(stderr, "</span><span style=color:#a3be8c>    -U   unshare user namespace</span><span style=color:#96b5b4>\n</span><span>");
+</span><span>    </span><span style=color:#96b5b4>exit</span><span>(EXIT_FAILURE);
+</span><span>}
+</span><span>
+</span><span style=color:#b48ead>int </span><span style=color:#8fa1b3>main</span><span>(</span><span style=color:#b48ead>int </span><span style=color:#bf616a>argc</span><span>, </span><span style=color:#b48ead>char </span><span>*</span><span style=color:#bf616a>argv</span><span>[])
+</span><span>{
+</span><span>    </span><span style=color:#b48ead>int</span><span> flags, opt;
+</span><span>
+</span><span>    flags = </span><span style=color:#d08770>0</span><span>;
+</span><span>
+</span><span>    </span><span style=color:#b48ead>while </span><span>((opt = </span><span style=color:#bf616a>getopt</span><span>(argc, argv, "</span><span style=color:#a3be8c>imnpuU</span><span>")) != -</span><span style=color:#d08770>1</span><span>)
+</span><span>    {
+</span><span>        </span><span style=color:#b48ead>switch </span><span>(opt)
+</span><span>        {
+</span><span>        </span><span style=color:#b48ead>case </span><span>'</span><span style=color:#a3be8c>i</span><span>':
+</span><span>            flags |= CLONE_NEWIPC;
+</span><span>            </span><span style=color:#b48ead>break</span><span>;
+</span><span>        </span><span style=color:#b48ead>case </span><span>'</span><span style=color:#a3be8c>m</span><span>':
+</span><span>            flags |= CLONE_NEWNS;
+</span><span>            </span><span style=color:#b48ead>break</span><span>;
+</span><span>        </span><span style=color:#b48ead>case </span><span>'</span><span style=color:#a3be8c>n</span><span>':
+</span><span>            flags |= CLONE_NEWNET;
+</span><span>            </span><span style=color:#b48ead>break</span><span>;
+</span><span>        </span><span style=color:#b48ead>case </span><span>'</span><span style=color:#a3be8c>p</span><span>':
+</span><span>            flags |= CLONE_NEWPID;
+</span><span>            </span><span style=color:#b48ead>break</span><span>;
+</span><span>        </span><span style=color:#b48ead>case </span><span>'</span><span style=color:#a3be8c>u</span><span>':
+</span><span>            flags |= CLONE_NEWUTS;
+</span><span>            </span><span style=color:#b48ead>break</span><span>;
+</span><span>        </span><span style=color:#b48ead>case </span><span>'</span><span style=color:#a3be8c>U</span><span>':
+</span><span>            flags |= CLONE_NEWUSER;
+</span><span>            </span><span style=color:#b48ead>break</span><span>;
+</span><span>        </span><span style=color:#b48ead>default</span><span>:
+</span><span>            </span><span style=color:#bf616a>usage</span><span>(argv[</span><span style=color:#d08770>0</span><span>]);
+</span><span>        }
+</span><span>    }
+</span><span>
+</span><span>    </span><span style=color:#b48ead>if </span><span>(optind >= argc)
+</span><span>        </span><span style=color:#bf616a>usage</span><span>(argv[</span><span style=color:#d08770>0</span><span>]);
+</span><span>
+</span><span>    </span><span style=color:#b48ead>if </span><span>(</span><span style=color:#bf616a>unshare</span><span>(flags) == -</span><span style=color:#d08770>1</span><span>)
+</span><span>        </span><span style=color:#bf616a>errExit</span><span>("</span><span style=color:#a3be8c>unshare</span><span>");
+</span><span>
+</span><span>    pid_t pid = </span><span style=color:#bf616a>fork</span><span>();
+</span><span>    </span><span style=color:#b48ead>if </span><span>(pid == </span><span style=color:#d08770>0</span><span>)
+</span><span>    {
+</span><span>        </span><span style=color:#96b5b4>printf</span><span>("</span><span style=color:#a3be8c>child process</span><span>");
+</span><span>        </span><span style=color:#bf616a>execvp</span><span>(argv[optind], &argv[optind]);
+</span><span>        </span><span style=color:#bf616a>errExit</span><span>("</span><span style=color:#a3be8c>execvp</span><span>");
+</span><span>    }
+</span><span>    </span><span style=color:#b48ead>else
+</span><span>    {
+</span><span>        </span><span style=color:#96b5b4>printf</span><span>("</span><span style=color:#a3be8c>waitpid </span><span style=color:#d08770>%ld</span><span style=color:#96b5b4>\n</span><span>", pid);
+</span><span>        </span><span style=color:#bf616a>waitpid</span><span>(pid, </span><span style=color:#d08770>NULL</span><span>, </span><span style=color:#d08770>0</span><span>);
+</span><span>    }
+</span><span>}
+</span></code></pre><p>保存成 <code>unshare.c</code>，使用<code>gcc unshare.c -o unshare</code> 编译。<p>之后可以通过下面的命令来检查效果。<pre class=language-bash data-lang=bash style=background:#2b303b;color:#c0c5ce><code class=language-bash data-lang=bash><span style=color:#bf616a>sudo</span><span> ./unshare</span><span style=color:#bf616a> -pm</span><span> /bin/bash </span><span style=color:#65737e># 隔离 mount 和 pid 两个 namespace
+</span><span style=color:#bf616a>waitpid</span><span> 2178
+</span><span style=color:#bf616a>root@DESKTOP-HEKKTQ9:/home/weakptr/repos/container#</span><span> mount</span><span style=color:#bf616a> -t</span><span> proc proc /proc
+</span><span style=color:#bf616a>root@DESKTOP-HEKKTQ9:/home/weakptr/repos/container#</span><span> ps</span><span style=color:#bf616a> -ef
+</span><span style=color:#bf616a>UID</span><span>        PID  PPID  C STIME TTY          TIME CMD
+</span><span style=color:#bf616a>root</span><span>         1     0  0 15:22 pts/0    00:00:00 /bin/bash
+</span><span style=color:#bf616a>root</span><span>         3     1  0 15:22 pts/0    00:00:00 ps</span><span style=color:#bf616a> -ef
+</span><span style=color:#bf616a>root@DESKTOP-HEKKTQ9:/home/weakptr/repos/container#
+</span></code></pre><p>需要注意几个点：<ol><li><code>unshare</code> 最后必须是 <code>fork</code> 新进程再 <code>execvp</code>，否则会出现 <code>cannot allocate memory</code> 错误<li><code>unshare</code> 启动新的 <code>/bin/bash</code> 进程后，<code>/proc</code> 挂载点还没有真正隔离，此时可以手动使用 <code>mount -t proc proc /proc</code> 命令挂载当前命名空间的 <code>procfs</code>。<li>mount namespace 中挂载事件传播，可以查看文档 <code>man 7 mount_namespaces</code>。</ol><p>debian 系的 Linux 发行版在 util-linux 包里提供了一个 <code>unshare</code> 程序，比上面的 demo 更强大，甚至可以用一行命令实现一个基本的<em>容器</em>。<pre class=language-bash data-lang=bash style=background:#2b303b;color:#c0c5ce><code class=language-bash data-lang=bash><span style=color:#65737e># 我在 workspace 目录里装了 busybox，所以能直接跑起来 chroot 和 /bin/ash
+</span><span style=color:#65737e># busybox 的安装方法参考 busybox 源码目录下的 INSTALL 文件
+</span><span style=color:#65737e># vim Config.in 修改 config STATIC 下的 default 为 y
+</span><span style=color:#65737e># make defconfig && make && make install CONFIG_PREFIX=你的workspace目录
+</span><span style=color:#bf616a>sudo</span><span> unshare</span><span style=color:#bf616a> -pumf --mount-proc</span><span>=workspace/proc chroot workspace /bin/ash
+</span></code></pre><p>结果：<pre style=background:#2b303b;color:#c0c5ce><code><span>/ # ps -ef
+</span><span>PID   USER     TIME  COMMAND
+</span><span>    1 0         0:00 /bin/ash
+</span><span>    2 0         0:00 ps -ef
+</span><span>/ # ls
+</span><span>bin      linuxrc  proc     sbin     usr
+</span><span>/ # mount
+</span><span>proc on /proc type proc (rw,nosuid,nodev,noexec,relatime)
+</span><span>/ #
+</span></code></pre><h2 id=yong-go-shi-xian>用 go 实现</h2><h3 id=syscall>syscall</h3><p>go 对系统调用其实做了不少封装，基本在 <code>os</code> 和 <code>syscall</code> 下，但有很多区别。比如在 go 里找不到 <code>clone</code>、<code>setns</code> 这些接口，取而代之的是 <code>os/exec</code> 下的 <code>Cmd</code> 结构。不过 <code>syscall.Unshare</code> 倒是很忠实的还原了。诸如 <code>CLONE_NEWNS</code> 这些常量也可以找到对应的 <code>syscall.CLONE_NEWNS</code>。<p>不重复上面的代码了，写一个简短的启动 busybox 容器的 go 程序。<pre class=language-go data-lang=go style=background:#2b303b;color:#c0c5ce><code class=language-go data-lang=go><span style=color:#b48ead>package </span><span style=color:#bf616a>main
+</span><span>
+</span><span style=color:#b48ead>import </span><span>(
+</span><span>	"</span><span style=color:#a3be8c>flag</span><span>"
+</span><span>	"</span><span style=color:#a3be8c>fmt</span><span>"
+</span><span>	"</span><span style=color:#a3be8c>os</span><span>"
+</span><span>	"</span><span style=color:#a3be8c>os/exec</span><span>"
+</span><span>	"</span><span style=color:#a3be8c>syscall</span><span>"
+</span><span>)
+</span><span>
+</span><span style=color:#b48ead>var </span><span>(
+</span><span>	</span><span style=color:#bf616a>flagBootstrap </span><span style=color:#b48ead>bool
+</span><span>)
+</span><span>
+</span><span style=color:#b48ead>func </span><span style=color:#8fa1b3>init</span><span>() {
+</span><span>	</span><span style=color:#bf616a>flag</span><span>.</span><span style=color:#bf616a>BoolVar</span><span>(&</span><span style=color:#bf616a>flagBootstrap</span><span>, "</span><span style=color:#a3be8c>bootstrap</span><span>", </span><span style=color:#d08770>false</span><span>, "</span><span style=color:#a3be8c>bootstrap busybox container</span><span>")
+</span><span>}
+</span><span>
+</span><span style=color:#b48ead>func </span><span style=color:#8fa1b3>must</span><span>(</span><span style=color:#bf616a>err </span><span style=color:#b48ead>error</span><span>) {
+</span><span>	</span><span style=color:#b48ead>if </span><span style=color:#bf616a>err </span><span>!= </span><span style=color:#d08770>nil </span><span>{
+</span><span>		</span><span style=color:#96b5b4>panic</span><span>(</span><span style=color:#bf616a>err</span><span>)
+</span><span>	}
+</span><span>}
+</span><span>
+</span><span style=color:#b48ead>func </span><span style=color:#8fa1b3>runBusybox</span><span>() {
+</span><span>	</span><span style=color:#bf616a>fmt</span><span>.</span><span style=color:#bf616a>Printf</span><span>("</span><span style=color:#a3be8c>Start `busybox ash` in process </span><span style=color:#d08770>%d</span><span style=color:#96b5b4>\n</span><span>", </span><span style=color:#bf616a>os</span><span>.</span><span style=color:#bf616a>Getpid</span><span>())
+</span><span>
+</span><span>	</span><span style=color:#bf616a>cmd </span><span>:= </span><span style=color:#bf616a>exec</span><span>.</span><span style=color:#bf616a>Command</span><span>("</span><span style=color:#a3be8c>/bin/busybox</span><span>", "</span><span style=color:#a3be8c>ash</span><span>")
+</span><span>	</span><span style=color:#bf616a>cmd</span><span>.</span><span style=color:#bf616a>Stdin </span><span>= </span><span style=color:#bf616a>os</span><span>.</span><span style=color:#bf616a>Stdin
+</span><span>	</span><span style=color:#bf616a>cmd</span><span>.</span><span style=color:#bf616a>Stdout </span><span>= </span><span style=color:#bf616a>os</span><span>.</span><span style=color:#bf616a>Stdout
+</span><span>	</span><span style=color:#bf616a>cmd</span><span>.</span><span style=color:#bf616a>Stderr </span><span>= </span><span style=color:#bf616a>os</span><span>.</span><span style=color:#bf616a>Stderr
+</span><span>	</span><span style=color:#bf616a>cmd</span><span>.</span><span style=color:#bf616a>Env </span><span>= </span><span style=color:#96b5b4>append</span><span>(</span><span style=color:#bf616a>cmd</span><span>.</span><span style=color:#bf616a>Env</span><span>, "</span><span style=color:#a3be8c>PATH=/bin:/sbin:/usr/bin:/usr/sbin</span><span>")
+</span><span>
+</span><span>	</span><span style=color:#bf616a>must</span><span>(</span><span style=color:#bf616a>syscall</span><span>.</span><span style=color:#bf616a>Chroot</span><span>("</span><span style=color:#a3be8c>workspace</span><span>"))
+</span><span>	</span><span style=color:#bf616a>must</span><span>(</span><span style=color:#bf616a>os</span><span>.</span><span style=color:#bf616a>Chdir</span><span>("</span><span style=color:#a3be8c>/</span><span>"))
+</span><span>	</span><span style=color:#bf616a>must</span><span>(</span><span style=color:#bf616a>syscall</span><span>.</span><span style=color:#bf616a>Mount</span><span>("</span><span style=color:#a3be8c>proc</span><span>", "</span><span style=color:#a3be8c>/proc</span><span>", "</span><span style=color:#a3be8c>proc</span><span>", </span><span style=color:#d08770>0</span><span>, ""))
+</span><span>	</span><span style=color:#bf616a>must</span><span>(</span><span style=color:#bf616a>cmd</span><span>.</span><span style=color:#bf616a>Run</span><span>())
+</span><span>
+</span><span>	</span><span style=color:#96b5b4>println</span><span>("</span><span style=color:#a3be8c>unmount proc</span><span>")
+</span><span>	</span><span style=color:#bf616a>must</span><span>(</span><span style=color:#bf616a>syscall</span><span>.</span><span style=color:#bf616a>Unmount</span><span>("</span><span style=color:#a3be8c>proc</span><span>", </span><span style=color:#d08770>0</span><span>))
+</span><span>}
+</span><span>
+</span><span style=color:#b48ead>func </span><span style=color:#8fa1b3>runContainerizedCommand</span><span>() {
+</span><span>	</span><span style=color:#bf616a>cmd </span><span>:= </span><span style=color:#bf616a>exec</span><span>.</span><span style=color:#bf616a>Command</span><span>("</span><span style=color:#a3be8c>/proc/self/exe</span><span>")
+</span><span>	</span><span style=color:#bf616a>cmd</span><span>.</span><span style=color:#bf616a>Path </span><span>= "</span><span style=color:#a3be8c>/proc/self/exe</span><span>"
+</span><span>	</span><span style=color:#bf616a>cmd</span><span>.</span><span style=color:#bf616a>Args </span><span>= </span><span style=color:#96b5b4>append</span><span>(</span><span style=color:#bf616a>cmd</span><span>.</span><span style=color:#bf616a>Args</span><span>, "</span><span style=color:#a3be8c>-bootstrap</span><span>")
+</span><span>	</span><span style=color:#bf616a>cmd</span><span>.</span><span style=color:#bf616a>Stdin </span><span>= </span><span style=color:#bf616a>os</span><span>.</span><span style=color:#bf616a>Stdin
+</span><span>	</span><span style=color:#bf616a>cmd</span><span>.</span><span style=color:#bf616a>Stdout </span><span>= </span><span style=color:#bf616a>os</span><span>.</span><span style=color:#bf616a>Stdout
+</span><span>	</span><span style=color:#bf616a>cmd</span><span>.</span><span style=color:#bf616a>Stderr </span><span>= </span><span style=color:#bf616a>os</span><span>.</span><span style=color:#bf616a>Stderr
+</span><span>	</span><span style=color:#bf616a>cmd</span><span>.</span><span style=color:#bf616a>SysProcAttr </span><span>= &</span><span style=color:#bf616a>syscall</span><span>.</span><span style=color:#bf616a>SysProcAttr</span><span>{
+</span><span>		</span><span style=color:#bf616a>Cloneflags</span><span>:   </span><span style=color:#bf616a>syscall</span><span>.</span><span style=color:#bf616a>CLONE_NEWUTS </span><span>| </span><span style=color:#bf616a>syscall</span><span>.</span><span style=color:#bf616a>CLONE_NEWNS </span><span>| </span><span style=color:#bf616a>syscall</span><span>.</span><span style=color:#bf616a>CLONE_NEWPID</span><span>,
+</span><span>		</span><span style=color:#bf616a>Unshareflags</span><span>: </span><span style=color:#bf616a>syscall</span><span>.</span><span style=color:#bf616a>CLONE_NEWNS</span><span>,
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#bf616a>fmt</span><span>.</span><span style=color:#bf616a>Printf</span><span>("</span><span style=color:#a3be8c>starting current process </span><span style=color:#d08770>%d</span><span style=color:#96b5b4>\n</span><span>", </span><span style=color:#bf616a>os</span><span>.</span><span style=color:#bf616a>Getpid</span><span>())
+</span><span>	</span><span style=color:#bf616a>must</span><span>(</span><span style=color:#bf616a>cmd</span><span>.</span><span style=color:#bf616a>Run</span><span>())
+</span><span>}
+</span><span>
+</span><span style=color:#b48ead>func </span><span style=color:#8fa1b3>main</span><span>() {
+</span><span>	</span><span style=color:#bf616a>flag</span><span>.</span><span style=color:#bf616a>Parse</span><span>()
+</span><span>	</span><span style=color:#b48ead>if </span><span style=color:#bf616a>flagBootstrap </span><span>{
+</span><span>		</span><span style=color:#bf616a>runBusybox</span><span>()
+</span><span>		</span><span style=color:#b48ead>return
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#bf616a>runContainerizedCommand</span><span>()
+</span><span>}
+</span></code></pre><p>保存为 <code>demo.go</code> 后用 <code>go build -o demo demo.go</code> 编译，然后执行 <code>sudo ./demo</code> 。<p>结果像是这样：<pre style=background:#2b303b;color:#c0c5ce><code><span>DESKTOP-HEKKTQ9 :: ~/repos/container » sudo ./demo
+</span><span>starting current process 2954
+</span><span>Start `busybox ash` in process 1
+</span><span>/ # ps -ef
+</span><span>PID   USER     TIME  COMMAND
+</span><span>    1 0         0:00 /proc/self/exe -bootstrap
+</span><span>    6 0         0:00 /bin/busybox ash
+</span><span>    7 0         0:00 ps -ef
+</span><span>/ # mount
+</span><span>proc on /proc type proc (rw,relatime)
+</span><span>/ #
+</span><span>unmount proc
+</span><span>DESKTOP-HEKKTQ9 :: ~/repos/container »
+</span></code></pre><h2 id=zong-jie>总结</h2><p>上面的 demo 仅仅是创建了一个看起来像容器的玩具，连 cgroup 都没有，距离真正的 OCI 运行时还有不小差距。不过已经足够展示创建一个隔离的环境并不是特别困难的事情，这必须感谢 Linux 内核的开发者们让容器技术有了存在的可能，而且还能这么简单地使用。<p>可以点击[这个链接](<a href=https://github.com/opencontainers/runtime-spec/blob/master/spec.md>runtime-spec/spec.md at master · opencontainers/runtime-spec (github.com)</a>)查看 OCI 运行时的规格说明。<p>涉及概念：<ul><li>namespace</ul><p>重要系统调用<ul><li><code>clone</code><li><code>setns</code><li><code>unshare</code><li><code>mount</code><li>...</ul><p>本篇还不涉及网络，仅在文件系统和 PID、用户等层级做了隔离。网络隔离可以参考 <code>man 7 network_namespaces</code> ，不过谷歌搜了一大圈也还没找到怎么创建虚拟网卡，暂且先放着了。</article><p class=tags-data><a href=/tags/golang>/golang/</a> <a href=/tags/docker>/docker/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.<br> Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>.<br> Theme modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<br></p><a href=https://beian.miit.gov.cn/ style=display:inline-block;height:24px;line-height:24px>浙ICP备2021032371号-1</a><span style=margin-left:16px></span><a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=33032402002231" style=display:inline-block;text-decoration:none;height:24px;line-height:24px target=_blank> <img src=/image/beian.png style=float:left;border:none> 浙公网安备 33032402002231号</a></div></div></footer>
