@@ -1,0 +1,114 @@
+:root,
+::backdrop {
+  /* set sans-serif & mono fonts */
+  /* prettier-ignore */
+  --suCSS-sans-font:
+    /* for Mac*/      'Helvetica Neue', Helvetica,
+    /* fallback */    Tahoma, Arial,
+    /* for Windows */ 'Microsoft YaHei',
+    /* for Mac */     'PingFang SC', 'Hiragino Sans GB', 'Heiti SC',
+    /* for Android */ 'Droid Sans',
+    /* for Linux */   'WenQuanYi MicroHei',
+    /* fallback */    sans-serif;
+
+  /* prettier-ignore */
+  --suCSS-mono-font:
+    /* preferred */   'Cascadia Code', 'Cascadia Mono', 'CaskaydiaCove NF',
+    /* for Windows */ Consolas,
+    /* for Mac */     Menlo, Monaco, 'Andale Mono',
+    /* for Android */ 'Droid Sans Mono',
+    /* for Linux */   'Ubuntu Mono',
+    /* fallback */    monospace;
+
+  /* light theme color pallete */
+  --suCSS-pallete-light-bg: #eeeeee;
+  --suCSS-pallete-light-bg-light: #cbcdcd;
+  --suCSS-pallete-light-text: #41474e;
+  --suCSS-pallete-light-text-light: #aaaabb;
+  --suCSS-pallete-light-accent: #d26878;
+  --suCSS-pallete-light-accent-light: #e08f67;
+  --suCSS-pallete-light-accent-text: #eeeeee;
+  --suCSS-pallete-light-border: #646868;
+  --suCSS-pallete-light-link: #5690af;
+
+  /* dark theme color pallete */
+  --suCSS-pallete-dark-bg: #222529;
+  --suCSS-pallete-dark-bg-light: #464949;
+  --suCSS-pallete-dark-text: #d6d6d6;
+  --suCSS-pallete-dark-text-light: #99a;
+  --suCSS-pallete-dark-accent: #78b6ad;
+  --suCSS-pallete-dark-accent-light: #87c9e5;
+  --suCSS-pallete-dark-accent-text: #222529;
+  --suCSS-pallete-dark-border: #dbd5bc;
+  --suCSS-pallete-dark-link: #e2aea2;
+
+  --suCSS-standard-border-radius: 5px;
+}
+
+html {
+  color-scheme: dark light;
+}
+
+/* theme media queries */
+@media (prefers-color-scheme: dark) {
+  :root,
+  ::backdrop {
+    color-scheme: dark;
+    --suCSS-pallete-bg: var(--suCSS-pallete-dark-bg);
+    --suCSS-pallete-bg-light: var(--suCSS-pallete-dark-bg-light);
+    --suCSS-pallete-text: var(--suCSS-pallete-dark-text);
+    --suCSS-pallete-text-light: var(--suCSS-pallete-dark-text-light);
+    --suCSS-pallete-accent: var(--suCSS-pallete-dark-accent);
+    --suCSS-pallete-accent-light: var(--suCSS-pallete-dark-accent-light);
+    --suCSS-pallete-accent-text: var(--suCSS-pallete-dark-accent-text);
+    --suCSS-pallete-border: var(--suCSS-pallete-dark-border);
+    --suCSS-pallete-link: var(--suCSS-pallete-dark-link);
+  }
+  img,
+  video {
+    opacity: 0.8;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root,
+  ::backdrop {
+    color-scheme: light;
+    --suCSS-pallete-bg: var(--suCSS-pallete-light-bg);
+    --suCSS-pallete-bg-light: var(--suCSS-pallete-light-bg-light);
+    --suCSS-pallete-text: var(--suCSS-pallete-light-text);
+    --suCSS-pallete-text-light: var(--suCSS-pallete-light-text-light);
+    --suCSS-pallete-accent: var(--suCSS-pallete-light-accent);
+    --suCSS-pallete-accent-light: var(--suCSS-pallete-light-accent-light);
+    --suCSS-pallete-accent-text: var(--suCSS-pallete-light-accent-text);
+    --suCSS-pallete-border: var(--suCSS-pallete-light-border);
+    --suCSS-pallete-link: var(--suCSS-pallete-light-link);
+  }
+}
+
+[data-theme='light'] {
+  /* default (light) theme */
+  color-scheme: light;
+  --suCSS-pallete-bg: var(--suCSS-pallete-light-bg);
+  --suCSS-pallete-bg-light: var(--suCSS-pallete-light-bg-light);
+  --suCSS-pallete-text: var(--suCSS-pallete-light-text);
+  --suCSS-pallete-text-light: var(--suCSS-pallete-light-text-light);
+  --suCSS-pallete-accent: var(--suCSS-pallete-light-accent);
+  --suCSS-pallete-accent-light: var(--suCSS-pallete-light-accent-light);
+  --suCSS-pallete-accent-text: var(--suCSS-pallete-light-accent-text);
+  --suCSS-pallete-border: var(--suCSS-pallete-light-border);
+  --suCSS-pallete-link: var(--suCSS-pallete-light-link);
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+  --suCSS-pallete-bg: var(--suCSS-pallete-dark-bg);
+  --suCSS-pallete-bg-light: var(--suCSS-pallete-dark-bg-light);
+  --suCSS-pallete-text: var(--suCSS-pallete-dark-text);
+  --suCSS-pallete-text-light: var(--suCSS-pallete-dark-text-light);
+  --suCSS-pallete-accent: var(--suCSS-pallete-dark-accent);
+  --suCSS-pallete-accent-light: var(--suCSS-pallete-dark-accent-light);
+  --suCSS-pallete-accent-text: var(--suCSS-pallete-dark-accent-text);
+  --suCSS-pallete-border: var(--suCSS-pallete-dark-border);
+  --suCSS-pallete-link: var(--suCSS-pallete-dark-link);
+}
