@@ -1,0 +1,64 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>在raspbian上手动编译vim8.2</title><meta content=在raspbian上手动编译vim8.2 name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2021/build-vim8-2-manually-on-raspbian/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=在raspbian上手动编译vim8.2 property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2021/build-vim8-2-manually-on-raspbian/ property=twitter:url><meta content=在raspbian上手动编译vim8.2 property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2021/build-vim8-2-manually-on-raspbian/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>在raspbian上手动编译vim8.2</h1><p class=author-line>作于：2021-12-25 10:37 ，预计阅读时间 5 分钟<article><h2 id=qian-yan>前言</h2><p>raspbian上自带的vim版本还是低了点，像是<code>coc.nvim</code>之类的插件弹警告就搞得很烦。我寻思自己编译一个吧。<h2 id=0x01-xia-zai-yuan-ma>0x01 下载源码</h2><p>从<a href=https://www.vim.org/download.php>vim官网</a>下载源码（或者可以从GitHub下，出于网络考虑还是直接从ftp下了），下完直接<code>scp</code>传到树莓派上，<code>tar xf</code>解压好准备开整。<h2 id=0x02-pei-zhi>0x02 配置</h2><p>惯例先看看文档，<code>README.md</code>里指出源码安装去看<code>src/INSTALL</code>，所以跟着去看。<p>在 Unix 一节中提到直接<code>make</code>+<code>make install</code>就完事，但我要的不是编译个默认版本的vim，毕竟还有插件会用到<code>vim</code>的 <code>Pyhon</code>/<code>Python3</code> 特性，比如<code>ycm</code>。<p>继续往下翻会看到编译依赖。<pre style=color:#fdf4c1aa;background-color:#282828><code><span>% sudo apt install git
+</span><span>% sudo apt install make
+</span><span>% sudo apt install clang
+</span><span>% sudo apt install libtool-bin
+</span></code></pre><p>跟着把依赖装好，clang估计是可选项，gcc肯定是能编译vim的。不过以防万一反正全装上。<p>后面终于看到了Python3添加支持的方式。<pre style=color:#fdf4c1aa;background-color:#282828><code><span>Add Python 3 support:
+</span><span>% sudo apt install libpython3-dev
+</span><span>Uncomment this line in Makefile:
+</span><span>	"CONF_OPT_PYTHON3 = --enable-python3interp"
+</span><span>% make reconfig
+</span></code></pre><p>虽然说文档让取消注释，但是我不想改东西。所以记一下<code>--enable-python3interp</code>，等会儿加入<code>configure</code>的参数。<p>后面又有个关于gui的，因为不使用gui，所以也记一下。<blockquote><p>Unix: COMPILING WITH/WITHOUT GUI<p>NOTE: This is incomplete, look in Makefile for more info.<p>These configure arguments can be used to select which GUI to use:<pre style=color:#fdf4c1aa;background-color:#282828><code><span>--enable-gui=gtk      or: gtk2, motif, athena or auto
+</span><span>--disable-gtk-check
+</span><span>--disable-motif-check
+</span><span>--disable-athena-check
+</span></code></pre><p>This configure argument can be used to disable the GUI, even when the necessary files are found:<pre style=color:#fdf4c1aa;background-color:#282828><code><span>--disable-gui
+</span></code></pre></blockquote><p>到时候<code>--disable-gui</code>可以省一点编译时间，虽然本来也没多少编译时间。树莓派性能不是很好，tf卡读写寿命也有限，省一点是一点咯。<p>还有个<code>--with-features=big</code>，实际参考<a href=http://www.drchip.org/astronaut/vim/vimfeat.html>vim's versions and features</a>，还是用<code>huge</code>，因为看起来功能比较全。<p>再加上参数<code>--enable-multibyte</code>和<code>--enable-cscope</code>就差不多了。再加上必要的一些依赖库。<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>sudo apt install -y libpython-dev libpython3-dev libperl-dev libncurses-dev
+</span></code></pre><h2 id=0x03-bian-yi>0x03 编译</h2><p>按照<code>autoconf</code>这套编译系统的常规套路，先运行<code>./configure</code>，带上之前考虑好的参数。<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>./configure \
+</span><span style=color:#fdf4c1>	--prefix</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>/usr/local/ \
+</span><span style=color:#fdf4c1>	--with-features</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>huge \
+</span><span style=color:#fdf4c1>	--enable-multibyte \
+</span><span style=color:#fdf4c1>	--disable-gui \
+</span><span style=color:#fdf4c1>	--enable-pythoninterp \
+</span><span style=color:#fdf4c1>	--enable-python3interp \
+</span><span style=color:#fdf4c1>	--enable-perlinterp \
+</span><span style=color:#fdf4c1>	--enable-cscope
+</span></code></pre><p>最后<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>make
+</span><span style=color:#fdf4c1>sudo make install
+</span></code></pre><p>等编译完成。<h2 id=0x04-she-zhi-mo-ren-bian-ji-qi>0x04 设置默认编辑器</h2><p>用<code>update-alternatives</code>配置默认编辑器，或者在<code>.zshrc</code>里加上<code>alias vim=/usr/local/bin/vim</code>也是可以的。<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>sudo update-alternatives --install /usr/bin/editor editor /usr/local/bin/vim 1
+</span><span style=color:#fdf4c1>sudo update-alternatives --set editor /usr/local/bin/vim
+</span><span style=color:#fdf4c1>sudo update-alternatives --install /usr/bin/vi vi /usr/local/bin/vim 1
+</span><span style=color:#fdf4c1>sudo update-alternatives --set vi /usr/local/bin/vim
+</span></code></pre><h2 id=zong-jie>总结</h2><p>vim的编译这么简单应该把功劳算到良好的架构上，功能开关这种东西是要架构清晰地给组件之间划出边界的。<p>很多杂鱼公司根本不考虑系统维护，所谓的 <strong>创造价值</strong> 就是以最快的速度 <strong>应付需求</strong> ，想起几年前的自己还真的是天真，以为软件从业起码是有点基本的素养的，起码工程能力是有的。现在我的想法变了，软件从业不是有手就行？产品最想要的就是直接把别家的软件 <em>copy&paste</em> 成自己的，我寻思做软件键盘上磨损最快的就是 <code>ctrl</code> <code>c</code> <code>v</code>这三个键了。<p>产品嘛。什么工程性？什么可维护？那跟我有什么关系，反正改需求的dead line是码农的，修bug是码农修，我产品设计要与时俱进，要紧随市场，要服务客户，你就是个写代码的，这也不做那也不做雇你来干什么？<p>平常心平常心，扯远了。<p>总之，vim，好软件。顺便记得关注下乌干达儿童生存状况（不扯政治地说，vim自称慈善软件(charityware)还是有点东西的，再说下去鲁迅先生就要出来赶苍蝇了）。</article><p class=tags-data><a href=/tags/linuxyun-wei>/linux运维/</a> <a href=/tags/raspberry-pi>/raspberry-pi/</a> <a href=/tags/raspbian>/raspbian/</a> <a href=/tags/vim>/vim/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

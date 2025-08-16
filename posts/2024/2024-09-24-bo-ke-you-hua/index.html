@@ -1,0 +1,68 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>2024-09-25 博客优化</title><meta content="2024-09-25 博客优化" name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2024/2024-09-24-bo-ke-you-hua/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content="2024-09-25 博客优化" property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2024/2024-09-24-bo-ke-you-hua/ property=twitter:url><meta content="2024-09-25 博客优化" property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2024/2024-09-24-bo-ke-you-hua/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>2024-09-25 博客优化</h1><p class=author-line>作于：2024-09-25 12:58 ，预计阅读时间 2 分钟<article><p>闲下来的时候给博客样式略微做了点更新。<h2 id=zi-ti>字体</h2><p>anemone 这个主题默认使用的 suCSS 样式，suCSS 的 font-family 配置对汉字不太友好，网页显示会回退到宋体。<p>考虑到 suCSS 不大，原仓库也没怎么维护，干脆自己维护一份拷贝好了，所以拉了源码重构了 suCSS 的调色盘。<pre class=language-css data-lang=css style=color:#fdf4c1aa;background-color:#282828><code class=language-css data-lang=css><span style=color:#b8bb26>:</span><span style=color:#8ec07c>root</span><span style=color:#b8bb26>,
+</span><span style=color:#b8bb26>::</span><span style=color:#8ec07c>backdrop </span><span>{
+</span><span>  </span><span style=color:#928374;font-style:italic>/* set sans-serif & mono fonts */
+</span><span>  </span><span style=color:#928374;font-style:italic>/* prettier-ignore */
+</span><span>  </span><span style=color:#fabd2f>--suCSS-sans-font</span><span>:
+</span><span>    </span><span style=color:#928374;font-style:italic>/* for Mac*/      </span><span style=color:#b8bb26>'Helvetica Neue'</span><span>, Helvetica,
+</span><span>    </span><span style=color:#928374;font-style:italic>/* fallback */</span><span>    Tahoma, Arial,
+</span><span>    </span><span style=color:#928374;font-style:italic>/* for Windows */ </span><span style=color:#b8bb26>'Microsoft YaHei'</span><span>,
+</span><span>    </span><span style=color:#928374;font-style:italic>/* for Mac */     </span><span style=color:#b8bb26>'PingFang SC'</span><span>, </span><span style=color:#b8bb26>'Hiragino Sans GB'</span><span>, </span><span style=color:#b8bb26>'Heiti SC'</span><span>,
+</span><span>    </span><span style=color:#928374;font-style:italic>/* for Android */ </span><span style=color:#b8bb26>'Droid Sans'</span><span>,
+</span><span>    </span><span style=color:#928374;font-style:italic>/* for Linux */   </span><span style=color:#b8bb26>'WenQuanYi MicroHei'</span><span>,
+</span><span>    </span><span style=color:#928374;font-style:italic>/* fallback */    </span><span style=color:#fabd2f>sans-serif</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>/* prettier-ignore */
+</span><span>  </span><span style=color:#fabd2f>--suCSS-mono-font</span><span>:
+</span><span>    </span><span style=color:#928374;font-style:italic>/* preferred */   </span><span style=color:#b8bb26>'Cascadia Code'</span><span>, </span><span style=color:#b8bb26>'Cascadia Mono'</span><span>, </span><span style=color:#b8bb26>'CaskaydiaCove NF'</span><span>,
+</span><span>    </span><span style=color:#928374;font-style:italic>/* for Windows */</span><span> Consolas,
+</span><span>    </span><span style=color:#928374;font-style:italic>/* for Mac */</span><span>     Menlo, Monaco, </span><span style=color:#b8bb26>'Andale Mono'</span><span>,
+</span><span>    </span><span style=color:#928374;font-style:italic>/* for Android */ </span><span style=color:#b8bb26>'Droid Sans Mono'</span><span>,
+</span><span>    </span><span style=color:#928374;font-style:italic>/* for Linux */   </span><span style=color:#b8bb26>'Ubuntu Mono'</span><span>,
+</span><span>    </span><span style=color:#928374;font-style:italic>/* fallback */    </span><span style=color:#fabd2f>monospace</span><span>;
+</span><span>}
+</span></code></pre><p>等宽字体偏好的是我平时用的 Cascadia 系列字体。<h2 id=duan-luo-suo-jin>段落缩进</h2><p>suCSS 默认没有段落缩进，读起来有点费劲，所以还是加上了。<pre class=language-css data-lang=css style=color:#fdf4c1aa;background-color:#282828><code class=language-css data-lang=css><span style=color:#fa5c4b;font-weight:700>article p </span><span>{
+</span><span>  </span><span style=color:#8ec07c>text-indent</span><span>: </span><span style=color:#fabd2f>2</span><span style=color:#d3869b>em</span><span>;
+</span><span>}
+</span></code></pre><h2 id=xuan-zhong-wen-ben>选中文本</h2><p>suCSS 配置的选中文本样式在我的 edge 上莫名其妙不工作，把 <code>,</code> 分隔的选择器分别写成两条样式就没问题。<pre class=language-css data-lang=css style=color:#fdf4c1aa;background-color:#282828><code class=language-css data-lang=css><span style=color:#b8bb26>::</span><span style=color:#8ec07c>selection </span><span>{
+</span><span>  </span><span style=color:#8ec07c>color</span><span>: </span><span style=color:#fabd2f>var</span><span style=color:#fdf4c1>(</span><span style=color:#fabd2f>--suCSS-pallete-accent</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  </span><span style=color:#8ec07c>background-color</span><span>: </span><span style=color:#fabd2f>var</span><span style=color:#fdf4c1>(</span><span style=color:#fabd2f>--suCSS-pallete-bg-light</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>}
+</span><span>
+</span><span style=color:#b8bb26>::</span><span style=color:#fabd2f>-moz-</span><span style=color:#8ec07c>selection </span><span>{
+</span><span>  </span><span style=color:#8ec07c>color</span><span>: </span><span style=color:#fabd2f>var</span><span style=color:#fdf4c1>(</span><span style=color:#fabd2f>--suCSS-pallete-accent</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  </span><span style=color:#8ec07c>background-color</span><span>: </span><span style=color:#fabd2f>var</span><span style=color:#fdf4c1>(</span><span style=color:#fabd2f>--suCSS-pallete-bg-light</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>}
+</span></code></pre><h2 id=lie-biao-yang-shi-cuo-wei>列表样式错位</h2><p>之前给文章列表加了日期，把<code>&lt;li></code>内的<code>&lt;a></code>标签样式改成了 <code>inline-block</code> 导致 <code>::marker</code> 元素和 <code>&lt;li></code> 内容对不齐了。<p>所以直接撤掉了日期显示。毕竟这个日期也没做好响应式设计，移动端文章列表的标题和日期会错位。<h2 id=yi-zhi-wen-ti>已知问题</h2><ul><li>在黑暗主题打开页面会闪过白屏，很烦。<li>文章列表的响应式设计很烂。<li>导航栏的响应式设计很烂。<li>长文章应该给一个回到顶部和底部的快捷按钮。<li>没有 TOC 。</ul></article><p class=tags-data><a href=/tags/bo-ke>/博客/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

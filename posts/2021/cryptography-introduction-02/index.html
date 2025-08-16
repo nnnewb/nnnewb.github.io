@@ -1,0 +1,157 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>密码学入门02 - 古典密码#2</title><meta content="密码学入门02 - 古典密码#2" name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2021/cryptography-introduction-02/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content="密码学入门02 - 古典密码#2" property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2021/cryptography-introduction-02/ property=twitter:url><meta content="密码学入门02 - 古典密码#2" property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2021/cryptography-introduction-02/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>密码学入门02 - 古典密码#2</h1><p class=author-line>作于：2021-11-11 16:53 ，预计阅读时间 8 分钟<article><h2 id=qian-yan>前言</h2><p>从单表代替密码开始，继续学习古典密码。<h2 id=0x01-playfair-mi-ma>0x01 playfair 密码</h2><p><em>playfair</em> 这个词乍一听我甚至有点迷惑，啥意思，公平竞赛吗。之后才知道原来是人名。<h3 id=gai-shu>概述</h3><p>playfair 密码是最著名的多字母代替密码，它把明文中的字母对转换成密文的字母对，每次加密输入两个字母，输出两个字母。<p>playfair 算法基于一个由密钥词构成的 5x5 字母矩阵，将密钥词去除重复字母后，和字母表剩余的字母按左至右、上至下的顺序填充进表里。<p>举例来说，用 <code>pojie</code> 作为密钥词。<table><thead><tr><th>-<th>-<th>-<th>-<th>-<tbody><tr><td>p<td>o<td>j<td>i<td>e<tr><td>a<td>b<td>c<td>d<td>f<tr><td>g/h<td>k<td>l<td>m<td>n<tr><td>q<td>r<td>s<td>t<td>u<tr><td>v<td>w<td>x<td>y<td>z</table><p>需要注意的是字母表有26个字母，但 playfair 的字母矩阵只有 25 个空格。出现字母表不是 5 的整数倍的情况时可以选择将多出来的字母视作同一个，或者去掉不常用的字母，使其正好填满矩阵。比如图中的<code>g</code>/<code>h</code>，好孩子不要学哦。常见的情况是<code>i</code>/<code>j</code>或者去掉<code>z</code>或<code>q</code>。<h3 id=jia-mi-guo-cheng>加密过程</h3><p>加密过程如下。<p>第一步：将明文分成两个字母一组，两个字母重复的话就在中间填<code>x</code>重新分组；如果最后剩下一个字母的话，也添加<code>x</code>分成一组。举例来说，对单词<code>balloon</code>，直接分组的话就是<code>ba</code>、<code>ll</code>、<code>on</code>，填<code>x</code>重新分组就是<code>ba</code>、<code>lx</code>、<code>lo</code>、<code>on</code>。<p>分组后，对每个组进行加密，依然是 <code>balloon</code> 为例。首先第一组 <code>ba</code>。<p>第二步：找出两个字母在上面表格里的行列坐标。<ul><li><code>b</code> 是第 2 行第 2 列。<li><code>a</code> 是第 1 行第 2 列。</ul><p>第三步：按规则选择代替的字母<ul><li>如果两个字母不同行也不同列，则选择本字母所在行、分组中另一个字母所在列的字母代替。<li>如果两个字母在同一行，则选择明文右边的字母代替。明文在最右边则由最左边的字母代替。<li>如果两个字母在同一列，则选择明文下边的字母代替。明文在最底下则由最上边的字母代替。</ul><p>比如 <code>balloon</code> 加密后，就是 <code>bcsjkjek</code> 。<h3 id=te-dian>特点</h3><p>playfair 有 26x26 个字母对，因此识别出单个字母对相对简单的单表代替算法要困难得多。字母对的相对频率比字母的相对频率变化幅度小，利用频率分析字母对更困难。<p>playfair 仍然是相对容易攻破的，因为它的密文仍然完好保留了明文语言的大部分结构特征，几百个字母的密文就足够分析出规律了。<p><img alt=image-20211111144837847 src=https://nnnewb.github.io/posts/2021/cryptography-introduction-02/image-20211111144837847.webp><p>图中显示了 playfair 密码和其他一些密码加密的有效性，标有明文的曲线画出了超过从7w个字母的文章中得到的频率分布。曲线代表这样的含义：对文章中出现的每个字母计数，计数结果除以使用频率最高的字母出现次数。假设使用频率最高的字母 <code>e</code> 出现的频率为 1 ，那么 <code>t</code> 出现的频率就是 <code>0.76</code> 等等。<p>图中的横轴表示字母，纵轴表示字母出现的频率。 曲线体现了加密后字母频率分布被掩盖的程度。如果频率分布的信息完全被加密过程给隐藏了，那么密文的频率曲线应该是一条水平的线，唯密文密码分析由此下手将一无所获。<p>图中所示的频率曲线表明 playfair 密码虽然有比明文稍平坦的频率分布曲线，但仍然透露了大量信息给密码分析者。<h3 id=dai-ma-shi-xian>代码实现</h3><pre class=language-cpp data-lang=cpp style=color:#fdf4c1aa;background-color:#282828><code class=language-cpp data-lang=cpp><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;algorithm>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;array>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;cctype>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;cstddef>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;cstdlib>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;iostream>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;iterator>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;ostream>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;set>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;string>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;unordered_set>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;utility>
+</span><span>
+</span><span style=color:#fa5c4b>constexpr const char </span><span style=color:#fe8019>*</span><span>lowercase </span><span style=color:#fe8019>= </span><span style=color:#b8bb26>"abcdefghijklmnopqrstuvwxyz"</span><span>;
+</span><span>
+</span><span style=color:#928374;font-style:italic>// 保持顺序的情况下，对输入文本去重，并且从文本里把字符j替换成i
+</span><span>std::string </span><span style=color:#8ec07c>my_unique</span><span>(</span><span style=color:#fa5c4b>const</span><span> std::string </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>text</span><span>) {
+</span><span>  std::string ret </span><span style=color:#fe8019>=</span><span> text;
+</span><span>  </span><span style=color:#fdf4c1>std::replace(ret.begin(), ret.end(), </span><span style=color:#b8bb26>'j'</span><span style=color:#fdf4c1>, </span><span style=color:#b8bb26>'i'</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  std::unordered_set&lt;</span><span style=color:#fa5c4b>char</span><span>> s;
+</span><span>  </span><span style=color:#fa5c4b>auto</span><span> last </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>std::stable_partition(ret.begin(), ret.end(), [</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>s](</span><span style=color:#fa5c4b>int</span><span style=color:#fdf4c1> n) {
+</span><span style=color:#fdf4c1>    </span><span style=color:#fa5c4b>bool</span><span style=color:#fdf4c1> ret </span><span style=color:#fe8019>= !</span><span style=color:#fdf4c1>s.count(n); </span><span style=color:#928374;font-style:italic>// not exists
+</span><span style=color:#fdf4c1>    s.insert(n);
+</span><span style=color:#fdf4c1>    </span><span style=color:#fa5c4b>return</span><span style=color:#fdf4c1> ret;
+</span><span style=color:#fdf4c1>  })</span><span>;
+</span><span>  ret.</span><span style=color:#fdf4c1>erase</span><span>(last, ret.</span><span style=color:#fdf4c1>end</span><span>());
+</span><span>  </span><span style=color:#fa5c4b>return</span><span> ret;
+</span><span>}
+</span><span>
+</span><span style=color:#928374;font-style:italic>// 从密钥字符串构造出 playfair 密钥矩阵
+</span><span>std::array&lt;std::string, </span><span style=color:#d3869b>5</span><span>> </span><span style=color:#8ec07c>playfair_matrix</span><span>(</span><span style=color:#fa5c4b>const</span><span> std::string </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>key</span><span>) {
+</span><span>  </span><span style=color:#928374;font-style:italic>// 初始化密钥，构造的密钥中没有 j，加密时 j 视作 i 处理
+</span><span>  std::string fullkey </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>my_unique(key </span><span style=color:#fe8019>+</span><span style=color:#fdf4c1> lowercase)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(fullkey.</span><span style=color:#fdf4c1>length</span><span>() </span><span style=color:#fe8019>% </span><span style=color:#d3869b>5</span><span>) {
+</span><span>    std::cerr </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>"invalid key length" </span><span style=color:#fe8019>&lt;&lt;</span><span> std::endl;
+</span><span>    </span><span style=color:#fabd2f>exit</span><span style=color:#fdf4c1>(</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// 构造矩阵
+</span><span>  std::array&lt;std::string, </span><span style=color:#d3869b>5</span><span>> matrix;
+</span><span>  </span><span style=color:#fa5c4b>int</span><span> count </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>auto</span><span> c </span><span style=color:#fe8019>:</span><span> fullkey) {
+</span><span>    matrix[count </span><span style=color:#fe8019>/ </span><span style=color:#d3869b>5</span><span>].</span><span style=color:#fdf4c1>push_back</span><span>(c);
+</span><span>    </span><span style=color:#fe8019>++</span><span>count;
+</span><span>  }
+</span><span>  </span><span style=color:#fa5c4b>return</span><span> matrix;
+</span><span>}
+</span><span>
+</span><span style=color:#928374;font-style:italic>// 用迭代器读取一组两个字符（从当前位置开始，*iter 和 *(iter+1) 为一组）。
+</span><span style=color:#928374;font-style:italic>// 如果后续两个字符重复，则取一个字符加上 x 返回；
+</span><span style=color:#928374;font-style:italic>// 如果后续仅剩一个字符也加上 x 返回。
+</span><span>std::array&lt;</span><span style=color:#fa5c4b>char</span><span>, </span><span style=color:#d3869b>2</span><span>> </span><span style=color:#8ec07c>next2</span><span>(std::string::const_iterator </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>it</span><span>, std::string::const_iterator </span><span style=color:#fdf4c1>end</span><span>) {
+</span><span>  std::array&lt;</span><span style=color:#fa5c4b>char</span><span>, </span><span style=color:#d3869b>2</span><span>> ret;
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(it </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1 </span><span style=color:#fe8019>==</span><span> end </span><span style=color:#fe8019>|| *</span><span>it </span><span style=color:#fe8019>== *</span><span>(it </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span>)) {
+</span><span>    ret[</span><span style=color:#d3869b>0</span><span>] </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>tolower</span><span style=color:#fdf4c1>(</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>(it</span><span style=color:#fe8019>++</span><span style=color:#fdf4c1>))</span><span>;
+</span><span>    ret[</span><span style=color:#d3869b>1</span><span>] </span><span style=color:#fe8019>= </span><span style=color:#b8bb26>'x'</span><span>;
+</span><span>  } </span><span style=color:#fa5c4b>else </span><span>{
+</span><span>    ret[</span><span style=color:#d3869b>0</span><span>] </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>tolower</span><span style=color:#fdf4c1>(</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>(it</span><span style=color:#fe8019>++</span><span style=color:#fdf4c1>))</span><span>;
+</span><span>    ret[</span><span style=color:#d3869b>1</span><span>] </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>tolower</span><span style=color:#fdf4c1>(</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>(it</span><span style=color:#fe8019>++</span><span style=color:#fdf4c1>))</span><span>;
+</span><span>  }
+</span><span>  </span><span style=color:#fa5c4b>return</span><span> ret;
+</span><span>}
+</span><span>
+</span><span style=color:#928374;font-style:italic>// 获得字符在密钥矩阵中的坐标，返回 (行,列)
+</span><span>std::pair&lt;</span><span style=color:#fa5c4b>int</span><span>, </span><span style=color:#fa5c4b>int</span><span>> </span><span style=color:#8ec07c>get_row_col</span><span>(std::array&lt;std::string, </span><span style=color:#d3869b>5</span><span>> </span><span style=color:#fdf4c1>matrix</span><span>, </span><span style=color:#fa5c4b>char </span><span style=color:#fdf4c1>c</span><span>) {
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fabd2f>size_t</span><span> r </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; r </span><span style=color:#fe8019>&lt;</span><span> matrix.</span><span style=color:#fdf4c1>size</span><span>(); </span><span style=color:#fe8019>++</span><span>r) {
+</span><span>    </span><span style=color:#fa5c4b>const auto </span><span style=color:#fe8019>&</span><span>row </span><span style=color:#fe8019>=</span><span> matrix[r];
+</span><span>    </span><span style=color:#fa5c4b>auto</span><span> col </span><span style=color:#fe8019>=</span><span> row.</span><span style=color:#fdf4c1>find</span><span>(c);
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>(col </span><span style=color:#fe8019>!=</span><span> row.</span><span style=color:#fdf4c1>npos</span><span>) {
+</span><span>      </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>std::make_pair(r, col)</span><span>;
+</span><span>    }
+</span><span>  }
+</span><span>  </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>std::make_pair(</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, </span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>}
+</span><span>
+</span><span style=color:#928374;font-style:italic>// playfair 加密函数
+</span><span>std::string </span><span style=color:#8ec07c>playfair_cipher</span><span>(</span><span style=color:#fa5c4b>const</span><span> std::string </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>input</span><span>, </span><span style=color:#fa5c4b>const</span><span> std::string </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>key</span><span>) {
+</span><span>  std::string ciphertext;
+</span><span>  </span><span style=color:#fa5c4b>auto</span><span> matrix </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>playfair_matrix(key)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>auto</span><span> it </span><span style=color:#fe8019>=</span><span> input.</span><span style=color:#fdf4c1>cbegin</span><span>();
+</span><span>  </span><span style=color:#fa5c4b>while </span><span>(it </span><span style=color:#fe8019>!=</span><span> input.</span><span style=color:#fdf4c1>cend</span><span>()) {
+</span><span>    </span><span style=color:#fa5c4b>auto</span><span> char_pair </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>next2(it, input.cend())</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>auto</span><span> c1_pos </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>get_row_col(matrix, char_pair[</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>] </span><span style=color:#fe8019>== </span><span style=color:#b8bb26>'j' </span><span style=color:#fe8019>? </span><span style=color:#b8bb26>'i' </span><span style=color:#fe8019>:</span><span style=color:#fdf4c1> char_pair[</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>])</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>auto</span><span> c2_pos </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>get_row_col(matrix, char_pair[</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>] </span><span style=color:#fe8019>== </span><span style=color:#b8bb26>'j' </span><span style=color:#fe8019>? </span><span style=color:#b8bb26>'i' </span><span style=color:#fe8019>:</span><span style=color:#fdf4c1> char_pair[</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>])</span><span>;
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>(c1_pos.</span><span style=color:#fdf4c1>first </span><span style=color:#fe8019>==</span><span> c2_pos.</span><span style=color:#fdf4c1>first</span><span>) {
+</span><span>      </span><span style=color:#928374;font-style:italic>// 同一行，取同行下一个字符
+</span><span>      </span><span style=color:#fa5c4b>auto</span><span> row </span><span style=color:#fe8019>=</span><span> c1_pos.</span><span style=color:#fdf4c1>first</span><span>;
+</span><span>      </span><span style=color:#fa5c4b>auto</span><span> c1_col </span><span style=color:#fe8019>=</span><span> c1_pos.</span><span style=color:#fdf4c1>second </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1 </span><span style=color:#fe8019>>= </span><span style=color:#d3869b>5 </span><span style=color:#fe8019>? </span><span style=color:#d3869b>0 </span><span style=color:#fe8019>:</span><span> c1_pos.</span><span style=color:#fdf4c1>second </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span>;
+</span><span>      </span><span style=color:#fa5c4b>auto</span><span> c2_col </span><span style=color:#fe8019>=</span><span> c2_pos.</span><span style=color:#fdf4c1>second </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1 </span><span style=color:#fe8019>>= </span><span style=color:#d3869b>5 </span><span style=color:#fe8019>? </span><span style=color:#d3869b>0 </span><span style=color:#fe8019>:</span><span> c2_pos.</span><span style=color:#fdf4c1>second </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span>;
+</span><span>
+</span><span>      ciphertext.</span><span style=color:#fdf4c1>push_back</span><span>(matrix[row][c1_col]);
+</span><span>      ciphertext.</span><span style=color:#fdf4c1>push_back</span><span>(matrix[row][c2_col]);
+</span><span>    } </span><span style=color:#fa5c4b>else if </span><span>(c1_pos.</span><span style=color:#fdf4c1>second </span><span style=color:#fe8019>==</span><span> c2_pos.</span><span style=color:#fdf4c1>second</span><span>) {
+</span><span>      </span><span style=color:#928374;font-style:italic>// 同一列，取同列下一个字符
+</span><span>      </span><span style=color:#fa5c4b>auto</span><span> col </span><span style=color:#fe8019>=</span><span> c1_pos.</span><span style=color:#fdf4c1>second</span><span>;
+</span><span>      </span><span style=color:#fa5c4b>auto</span><span> c1_row </span><span style=color:#fe8019>=</span><span> c1_pos.</span><span style=color:#fdf4c1>first </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1 </span><span style=color:#fe8019>>= </span><span style=color:#d3869b>5 </span><span style=color:#fe8019>? </span><span style=color:#d3869b>0 </span><span style=color:#fe8019>:</span><span> c1_pos.</span><span style=color:#fdf4c1>first </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span>;
+</span><span>      </span><span style=color:#fa5c4b>auto</span><span> c2_row </span><span style=color:#fe8019>=</span><span> c2_pos.</span><span style=color:#fdf4c1>first </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1 </span><span style=color:#fe8019>>= </span><span style=color:#d3869b>5 </span><span style=color:#fe8019>? </span><span style=color:#d3869b>0 </span><span style=color:#fe8019>:</span><span> c2_pos.</span><span style=color:#fdf4c1>first </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span>;
+</span><span>
+</span><span>      ciphertext.</span><span style=color:#fdf4c1>push_back</span><span>(matrix[c1_row][col]);
+</span><span>      ciphertext.</span><span style=color:#fdf4c1>push_back</span><span>(matrix[c2_row][col]);
+</span><span>    } </span><span style=color:#fa5c4b>else </span><span>{
+</span><span>      </span><span style=color:#928374;font-style:italic>// 不同行也不同列，取本行，另一字符所在列的字符
+</span><span>      </span><span style=color:#fa5c4b>auto</span><span> row </span><span style=color:#fe8019>=</span><span> c1_pos.</span><span style=color:#fdf4c1>first</span><span>;
+</span><span>      </span><span style=color:#fa5c4b>auto</span><span> c1_col </span><span style=color:#fe8019>=</span><span> c2_pos.</span><span style=color:#fdf4c1>second</span><span>;
+</span><span>      </span><span style=color:#fa5c4b>auto</span><span> c2_col </span><span style=color:#fe8019>=</span><span> c1_pos.</span><span style=color:#fdf4c1>second</span><span>;
+</span><span>
+</span><span>      ciphertext.</span><span style=color:#fdf4c1>push_back</span><span>(matrix[row][c1_col]);
+</span><span>      ciphertext.</span><span style=color:#fdf4c1>push_back</span><span>(matrix[row][c2_col]);
+</span><span>    }
+</span><span>  }
+</span><span>  </span><span style=color:#fa5c4b>return</span><span> ciphertext;
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>int </span><span style=color:#8ec07c>main</span><span>(</span><span style=color:#fa5c4b>void</span><span>) {
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>const auto </span><span style=color:#fe8019>&</span><span>row </span><span style=color:#fe8019>: </span><span style=color:#fdf4c1>playfair_matrix(</span><span style=color:#b8bb26>"haoye"</span><span style=color:#fdf4c1>)</span><span>) {
+</span><span>    std::cout </span><span style=color:#fe8019>&lt;&lt;</span><span> row </span><span style=color:#fe8019>&lt;&lt;</span><span> std::endl;
+</span><span>  }
+</span><span>
+</span><span>  std::cout </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>"ciphertext:" </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#fdf4c1>playfair_cipher(</span><span style=color:#b8bb26>"helloworld"</span><span style=color:#fdf4c1>, </span><span style=color:#b8bb26>"haoye"</span><span style=color:#fdf4c1>) </span><span style=color:#fe8019>&lt;&lt;</span><span> std::endl;
+</span><span>  </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>;
+</span><span>}
+</span><span>
+</span></code></pre><p>以上是 playfair 加密的 c++ 实现。比较怪的是 playfair 网上可以找到很多变体，比如 <a href=http://www.practicalcryptography.com/ciphers/classical-era/playfair/#javascript-example-of-the-playfair-cipher>practice cryptography</a> 描述和实现的 playfair 算法是在分组阶段，把重复出现的第二个字符替换成 <code>x</code> 。<p>解密没有在这里实现，解密函数规则如下：<ul><li>如果一组两个字母在同一行，则用前一列字母替换，第一列用最后一列字母替换。<li>如果一组两个字母在同一列，则用前一行字母替换，第一行用最后一行字母替换。<li>如果一组两个字符不在同一列同一行，则取同一行，一组中另一字母所在列的字母替换。</ul><p>就是把加密规则反过来执行，唯一的区别是在分组阶段不用考虑相同字母，出现相同字母说明密文有问题，可以跳过这一组字母。最后解密结果会出现多余的<code>x</code>，如果明文包含<code>j</code>的话解密结果会变成<code>i</code>。<h2 id=jie-lun>结论</h2><p>简要描述 playfair 算法加密过程：<ul><li>从密钥构造 5x5 矩阵<li>对明文按两个字母一组分组，分组过程中处理连续重复字符（重复字母间插入<code>x</code>）和孤立字母（末尾剩余的最后一个字母也加上<code>x</code>）<li>按规则，对一组两个字母进行替换，直到所有明文都被替换完成 <ul><li>如果两个字母在矩阵同一行，取字母在本行的下一个字母替换，行末字母取行首。<li>如果两个字母在矩阵同一列，取字母在本列的下一个字母替换，列末字母取列首。<li>如果不同行不同列，取字母本行，本组另一字母所在列的字母替换。</ul></ul><p>playfair 密码的相比简单单表替换，分析难度大得多。但依然完整保留了语言的结构特征，因此分析依然比较容易。</article><p class=tags-data><a href=/tags/mi-ma-xue-ru-men>/密码学入门/</a> <a href=/tags/mi-ma-xue>/密码学/</a> <a href=/tags/c>/c++/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

@@ -1,0 +1,135 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>《深度学习入门》读书笔记01</title><meta content=《深度学习入门》读书笔记01 name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-01/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=《深度学习入门》读书笔记01 property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-01/ property=twitter:url><meta content=《深度学习入门》读书笔记01 property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-01/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>《深度学习入门》读书笔记01</h1><p class=author-line>作于：2024-01-05 16:13 ，预计阅读时间 2 分钟<article><h1 id=python-ru-men>python 入门</h1><p>因为我已经工作用 python2/3 几年了，语言部分基本没有阻碍，所以这部分只做了粗读。<h2 id=python-ban-ben-xuan-ze>python 版本选择</h2><p>考虑生态，pytorch 和 tensorflow 目前二进制 whl 包都只针对 python3 提供，python3 目前又处于快速发展中，所以选一个相对新的版本是必须的。<p>这里我准备先用 python 3.9 。完整架构是 cp39m-win-amd64 。如果书中案例在这个版本跑不起来我尽量改到可以在这个版本跑。<h2 id=yi-lai-ku>依赖库</h2><p>书中说法是从零开始，依赖仅限 <code>numpy</code> 和 <code>matplotlib</code> 。姑且听之。<p>因为没啥二进制包依赖需要走编译流程的，所以就不用 <code>anaconda</code> 了。 <code>anaconda</code> 真的很重量级，占空间。<h2 id=chu-shi-hua-huan-jing>初始化环境</h2><p>我把所有练习放在同一个 python 包下面，依赖使用 <code>pyproject.toml</code> 管理。<h3 id=linux>Linux</h3><pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>python39 -m venv .venv
+</span><span style=color:#fabd2f>source</span><span style=color:#fdf4c1> .venv/bin/activate
+</span><span style=color:#fdf4c1>python -m pip install -U pip
+</span><span style=color:#fdf4c1>pip install -r requirements.txt
+</span></code></pre><h3 id=windows>Windows</h3><pre class=language-powershell data-lang=powershell style=color:#fdf4c1aa;background-color:#282828><code class=language-powershell data-lang=powershell><span>py </span><span style=color:#d3869b>-3.9 </span><span style=color:#fe8019>-</span><span>m venv venv
+</span><span style=color:#fe8019>.</span><span> .\venv\Scripts\activate.ps1
+</span><span>pip install </span><span style=color:#fe8019>-</span><span>r requirements.txt
+</span></code></pre><h3 id=jian-cha>检查</h3><pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>sys
+</span><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span style=color:#fa5c4b>import </span><span>matplotlib </span><span style=color:#fa5c4b>as </span><span>mpl
+</span><span>
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'Python'</span><span style=color:#fdf4c1>, sys.version)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(sys.version_info)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'numpy'</span><span style=color:#fdf4c1>, np.__version__)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'matplotlib'</span><span style=color:#fdf4c1>, mpl.__version__)
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>Python 3.11.7 (tags/v3.11.7:fa7a6f2, Dec  4 2023, 19:24:49) [MSC v.1937 64 bit (AMD64)]
+</span><span>sys.version_info(major=3, minor=11, micro=7, releaselevel='final', serial=0)
+</span><span>numpy 1.26.2
+</span><span>matplotlib 3.8.2
+</span></code></pre><h2 id=numpy-ji-ben-yun-suan>numpy 基本运算</h2><h3 id=element-wise-zhu-yuan-su-yun-suan>element-wise 逐元素运算</h3><pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span>
+</span><span style=color:#928374;font-style:italic># 定义数组
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'数组定义'</span><span style=color:#fdf4c1>)
+</span><span>arr </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([</span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>2.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>3.0</span><span style=color:#fdf4c1>])
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'numpy.array'</span><span style=color:#fdf4c1>, arr)
+</span><span>
+</span><span style=color:#928374;font-style:italic># 多维数组逐元素计算
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'-'</span><span style=color:#fe8019>*</span><span style=color:#d3869b>79</span><span style=color:#fdf4c1>)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'多维数组逐元素计算'</span><span style=color:#fdf4c1>)
+</span><span>x </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([</span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>2.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>3.0</span><span style=color:#fdf4c1>])
+</span><span>y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([</span><span style=color:#d3869b>2.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>4.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>6.0</span><span style=color:#fdf4c1>])
+</span><span style=color:#928374;font-style:italic># 维度和长度必须相等才能运算
+</span><span style=color:#928374;font-style:italic># 对应元素的加减乘除 (element-wise)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'x: shape</span><span style=color:#fdf4c1>{x.shape}</span><span style=color:#b8bb26>, x = '</span><span style=color:#fdf4c1>, x)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'y: shape</span><span style=color:#fdf4c1>{y.shape}</span><span style=color:#b8bb26>, y = '</span><span style=color:#fdf4c1>, y)
+</span><span style=color:#fa5c4b>assert </span><span>x.shape </span><span style=color:#fe8019>== </span><span>y.shape
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'x + y = '</span><span style=color:#fdf4c1>, x</span><span style=color:#fe8019>+</span><span style=color:#fdf4c1>y)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'x - y = '</span><span style=color:#fdf4c1>, x</span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>y)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'x * y = '</span><span style=color:#fdf4c1>, x</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>y)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'x / y = '</span><span style=color:#fdf4c1>, x</span><span style=color:#fe8019>/</span><span style=color:#fdf4c1>y)
+</span><span style=color:#928374;font-style:italic># 广播
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'-'</span><span style=color:#fe8019>*</span><span style=color:#d3869b>79</span><span style=color:#fdf4c1>)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'广播计算'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'x * 2 = '</span><span style=color:#fdf4c1>, x</span><span style=color:#fe8019>*</span><span style=color:#d3869b>2</span><span style=color:#fdf4c1>)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'x / 2 = '</span><span style=color:#fdf4c1>, x</span><span style=color:#fe8019>/</span><span style=color:#d3869b>2</span><span style=color:#fdf4c1>)
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>数组定义
+</span><span>numpy.array [1. 2. 3.]
+</span><span>-------------------------------------------------------------------------------
+</span><span>多维数组逐元素计算
+</span><span>x: shape(3,), x =  [1. 2. 3.]
+</span><span>y: shape(3,), y =  [2. 4. 6.]
+</span><span>x + y =  [3. 6. 9.]
+</span><span>x - y =  [-1. -2. -3.]
+</span><span>x * y =  [ 2.  8. 18.]
+</span><span>x / y =  [0.5 0.5 0.5]
+</span><span>-------------------------------------------------------------------------------
+</span><span>广播计算
+</span><span>x * 2 =  [2. 4. 6.]
+</span><span>x / 2 =  [0.5 1.  1.5]
+</span></code></pre><h3 id=ju-zhen-suan-shu>矩阵算数</h3><pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#928374;font-style:italic># 多维矩阵
+</span><span>x </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>2</span><span style=color:#fdf4c1>], [</span><span style=color:#d3869b>3</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>4</span><span style=color:#fdf4c1>]])
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'x: </span><span style=color:#fdf4c1>{x.shape}</span><span style=color:#b8bb26>, dtype=</span><span style=color:#fdf4c1>{x.dtype}</span><span style=color:#b8bb26>\n'</span><span style=color:#fdf4c1>, x)
+</span><span>
+</span><span style=color:#928374;font-style:italic># 矩阵算数运算
+</span><span>y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>5</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>6</span><span style=color:#fdf4c1>], [</span><span style=color:#d3869b>7</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>8</span><span style=color:#fdf4c1>]])
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'y: </span><span style=color:#fdf4c1>{y.shape}</span><span style=color:#b8bb26>, dtype=</span><span style=color:#fdf4c1>{y.dtype}</span><span style=color:#b8bb26>\n'</span><span style=color:#fdf4c1>, y)
+</span><span>
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'x + y ='</span><span style=color:#fdf4c1>, x</span><span style=color:#fe8019>+</span><span style=color:#fdf4c1>y)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'x - y ='</span><span style=color:#fdf4c1>, x</span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>y)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'x dot y ='</span><span style=color:#fdf4c1>,x.dot(y))
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>x: (2, 2), dtype=int32
+</span><span> [[1 2]
+</span><span> [3 4]]
+</span><span>y: (2, 2), dtype=int32
+</span><span> [[5 6]
+</span><span> [7 8]]
+</span><span>x + y = [[ 6  8]
+</span><span> [10 12]]
+</span><span>x - y = [[-4 -4]
+</span><span> [-4 -4]]
+</span><span>x dot y = [[19 22]
+</span><span> [43 50]]
+</span></code></pre><h2 id=pyplot-hui-tu>pyplot 绘图</h2><pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span style=color:#fa5c4b>import </span><span>matplotlib.pyplot </span><span style=color:#fa5c4b>as </span><span>plt
+</span><span>
+</span><span>x </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.arange(</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>6</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.1</span><span style=color:#fdf4c1>)
+</span><span>y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.sin(x)
+</span><span>y2 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.cos(x)
+</span><span>
+</span><span style=color:#fdf4c1>plt.plot(x, y, label</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'sin'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>plt.plot(x, y2, linestyle</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'--'</span><span style=color:#fdf4c1>, label</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'cos'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>plt.xlabel(</span><span style=color:#b8bb26>'x'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>plt.ylabel(</span><span style=color:#b8bb26>'y'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>plt.title(</span><span style=color:#b8bb26>'Sin and Cos'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>plt.legend()
+</span><span style=color:#fdf4c1>plt.show()
+</span><span>
+</span><span>image_path </span><span style=color:#fe8019>= </span><span style=color:#b8bb26>'../dataset/lena.png'
+</span><span>lenna </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>plt.imread(image_path)
+</span><span style=color:#fdf4c1>plt.imshow(lenna)
+</span><span style=color:#fdf4c1>plt.show()
+</span></code></pre><p><img alt=png src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-01/index_files/index_7_0.webp><p><img alt=png src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-01/index_files/index_7_1.webp></article><p class=tags-data><a href=/tags/python>/python/</a> <a href=/tags/numpy>/numpy/</a> <a href=/tags/matplotlib>/matplotlib/</a> <a href=/tags/shen-du-xue-xi>/深度学习/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

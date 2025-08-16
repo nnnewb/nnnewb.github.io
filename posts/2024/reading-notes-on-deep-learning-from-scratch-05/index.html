@@ -1,0 +1,533 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>《深度学习入门》读书笔记05</title><meta content=《深度学习入门》读书笔记05 name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-05/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=《深度学习入门》读书笔记05 property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-05/ property=twitter:url><meta content=《深度学习入门》读书笔记05 property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-05/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>《深度学习入门》读书笔记05</h1><p class=author-line>作于：2024-02-26 21:33 ，最后更新于：2024-03-07 14:55 ，预计阅读时间 15 分钟<article><h1 id=fan-xiang-chuan-bo>反向传播</h1><p>本章主要是反向传播算法的学习。<h2 id=ji-suan-tu>计算图</h2><p>计算图的概念很好理解，它本身是一种有向无环图，构成基本就是按运算符优先级分割得到的语法树。<p>例如 $z=xy+b$ 这条简单的公式可以表达为下面的计算图。<pre class=language-mermaid data-lang=mermaid style=color:#fdf4c1aa;background-color:#282828><code class=language-mermaid data-lang=mermaid><span>flowchart LR
+</span><span>    </span><span style=color:#8ec07c>z</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>z</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>x</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>x</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>y</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>y</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>b</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>b</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>times</span><span style=color:#fe8019>((</span><span style=color:#b8bb26>*</span><span style=color:#fe8019>))
+</span><span>    </span><span style=color:#8ec07c>plus</span><span style=color:#fe8019>((</span><span style=color:#b8bb26>+</span><span style=color:#fe8019>))
+</span><span>
+</span><span>    x </span><span style=color:#fe8019>--></span><span> times
+</span><span>    y </span><span style=color:#fe8019>--></span><span> times
+</span><span>    times </span><span style=color:#fe8019>--></span><span> plus
+</span><span>    b </span><span style=color:#fe8019>--></span><span> plus
+</span></code></pre><p>计算图的正向传播可以看成从入度为零的节点出发，经过计算节点时递归遍历求值输入节点，得到计算节点的输入，递归执行得到输出的过程。<p>例如上图，从节点 x 出发则得到下面的遍历顺序：<code>((x y *) b +)</code><p>实质是从计算图构造出了一个后缀表达式并运算得到结果。<p>当然也可以反过来从出度为 0 的节点出发，反过来遍历输入节点，得到前缀表达式 <code>(+ (* x y) b)</code> 求值。<h2 id=fan-xiang-chuan-bo-1>反向传播</h2><p>反向传播利用<strong>链式法则</strong>将复杂的公式分解成多个简单公式求导。一方面简单函数求导可以直接数学推导出来得到分析解，更准确，另一方面就是极大减少了不必要的计算。<h3 id=lian-shi-fa-ze>链式法则</h3><p>例如求函数 $z=(x+y)^2$ 的导数。首先这条式子可以表述为两个函数的组合：$z=t^2$ 和 $t=x+y$<p>链式法则的定义是：<blockquote><p>如果某个函数由复合函数表示，则该复合函数的导数可以用构成该复合函数的各个函数的导数的乘积来表示。</blockquote><p>也就是 $z=(x+y)^2$ 的导数，可以表示为 $\frac{\partial z}{\partial t}\frac{\partial t}{\partial x}$<p>上面的式子约分一下可以得到 $\frac{\partial z}{\partial x}$ ，也就是原来的函数 $z=(x+y)^2$ 关于 $x$ 的导数了。<p>利用链式法则我们试着求原函数的解析解。<p>$\frac{\partial t}{\partial x}$ 的导数是 $1$ 。<p>$\frac{\partial z}{\partial t}$ 的导数是 $2t$ （查基本初等函数的导数公式表）<p>相乘得到原函数的导数 $\frac{\partial z}{\partial x}=2t=2(x+y)$，对照导数公式表无误。<h3 id=jie-he-ji-suan-tu>结合计算图</h3><p>依然是 $z=(x+y)^2$ 为例，构造计算图如下。<pre class=language-mermaid data-lang=mermaid style=color:#fdf4c1aa;background-color:#282828><code class=language-mermaid data-lang=mermaid><span>flowchart LR
+</span><span>    </span><span style=color:#8ec07c>x</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>x</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>y</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>y</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>plus</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>+</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>exponential</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>exponential</span><span style=color:#fe8019>]
+</span><span>
+</span><span>    x </span><span style=color:#fe8019>--></span><span> plus
+</span><span>    y </span><span style=color:#fe8019>--></span><span> plus
+</span><span>    plus </span><span style=color:#fe8019>--></span><span>|底部分，命名为t| exponential
+</span><span>    2 </span><span style=color:#fe8019>-->|</span><span style=color:#b8bb26>指数部分</span><span style=color:#fe8019>|</span><span> exponential
+</span><span>    exponential </span><span style=color:#fe8019>-->|</span><span style=color:#b8bb26>结果</span><span style=color:#fe8019>|</span><span> z
+</span></code></pre><p>接着从 $z$ 出发反向推导各个节点的导数。<pre class=language-mermaid data-lang=mermaid style=color:#fdf4c1aa;background-color:#282828><code class=language-mermaid data-lang=mermaid><span>flowchart LR
+</span><span>    </span><span style=color:#8ec07c>x</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>x</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>y</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>y</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>plus</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>+</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>exponential</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>exponential</span><span style=color:#fe8019>]
+</span><span>
+</span><span>    z </span><span style=color:#fe8019>--></span><span>|导数：1| exponential
+</span><span>    exponential </span><span style=color:#fe8019>-->|</span><span style=color:#b8bb26>指数</span><span style=color:#fe8019>|</span><span> 2
+</span><span>    exponential </span><span style=color:#fe8019>--></span><span>|导数：1×2t| plus
+</span><span>    plus </span><span style=color:#fe8019>--></span><span>|导数：1×2t×1=2x+2y| x
+</span><span>    plus </span><span style=color:#fe8019>--></span><span>|导数：1×2t×1=2x+2y| y
+</span></code></pre><p>需要注意的是，像 $t=xy$ 这样的计算节点，求导会需要输入信号。比如求 $\frac{\partial t}{\partial x}=y$，就要求保留 y 的输入才能求得导数。<p>尝试解书中例题，设消费税 $t=1.1$，苹果单价 $p_a=100$，橘子单价 $p_b=150$，计算图如下：<pre class=language-mermaid data-lang=mermaid style=color:#fdf4c1aa;background-color:#282828><code class=language-mermaid data-lang=mermaid><span>flowchart LR
+</span><span>    苹果数量 </span><span style=color:#fe8019>-->|</span><span style=color:#b8bb26>2</span><span style=color:#fe8019>|</span><span> 苹果总价((×))
+</span><span>    苹果单价 </span><span style=color:#fe8019>-->|</span><span style=color:#b8bb26>100</span><span style=color:#fe8019>|</span><span> 苹果总价
+</span><span>    苹果总价 </span><span style=color:#fe8019>-->|</span><span style=color:#b8bb26>200</span><span style=color:#fe8019>|</span><span> 商品总价((+))
+</span><span>
+</span><span>    橘子数量 </span><span style=color:#fe8019>-->|</span><span style=color:#b8bb26>3</span><span style=color:#fe8019>|</span><span> 橘子总价((×))
+</span><span>    橘子单价 </span><span style=color:#fe8019>-->|</span><span style=color:#b8bb26>150</span><span style=color:#fe8019>|</span><span> 橘子总价
+</span><span>    橘子总价 </span><span style=color:#fe8019>-->|</span><span style=color:#b8bb26>450</span><span style=color:#fe8019>|</span><span> 商品总价
+</span><span>
+</span><span>    商品总价 </span><span style=color:#fe8019>-->|</span><span style=color:#b8bb26>650</span><span style=color:#fe8019>|</span><span> 税后总价((×))
+</span><span>    消费税率 </span><span style=color:#fe8019>--></span><span>|1.1| 税后总价
+</span><span>
+</span><span>    税后总价 </span><span style=color:#fe8019>-->|</span><span style=color:#b8bb26>715</span><span style=color:#fe8019>|</span><span> 实际支付
+</span></code></pre><p>现在逆推每个节点的导数。<pre class=language-mermaid data-lang=mermaid style=color:#fdf4c1aa;background-color:#282828><code class=language-mermaid data-lang=mermaid><span>flowchart LR
+</span><span>    实际支付 </span><span style=color:#fe8019>--></span><span>|导数：1| 税后总价
+</span><span>
+</span><span>    税后总价 </span><span style=color:#fe8019>--></span><span>|导数：650| 消费税率
+</span><span>    税后总价 </span><span style=color:#fe8019>--></span><span>|导数：1.1| 商品总价((+))
+</span><span>
+</span><span>    商品总价 </span><span style=color:#fe8019>--></span><span>|导数：1.1| 苹果总价((×))
+</span><span>    商品总价 </span><span style=color:#fe8019>--></span><span>|导数：1.1| 橘子总价((×))
+</span><span>
+</span><span>    苹果总价 </span><span style=color:#fe8019>--></span><span>|导数：2.2| 苹果单价
+</span><span>    苹果总价 </span><span style=color:#fe8019>--></span><span>|导数：110| 苹果数量
+</span><span>
+</span><span>    橘子总价 </span><span style=color:#fe8019>--></span><span>|导数：3.3| 橘子单价
+</span><span>    橘子总价 </span><span style=color:#fe8019>--></span><span>|导数：165| 橘子数量
+</span></code></pre><h3 id=ji-suan-tu-de-python-shi-xian>计算图的 python 实现</h3><pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>from </span><span>typing </span><span style=color:#fa5c4b>import </span><span>Optional
+</span><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span>
+</span><span>Num </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>float </span><span style=color:#fe8019>| </span><span>np.ndarray
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>MulLayer</span><span>:
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__init__</span><span>(</span><span style=color:#fdf4c1>self</span><span>) -> </span><span style=color:#d3869b>None</span><span>:
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.x: Optional[Num] </span><span style=color:#fe8019>= </span><span style=color:#d3869b>None
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.y: Optional[Num] </span><span style=color:#fe8019>= </span><span style=color:#d3869b>None
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>forward</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>x</span><span>: Num, </span><span style=color:#fdf4c1>y</span><span>: Num) -> Num:
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.x </span><span style=color:#fe8019>= </span><span>x
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.y </span><span style=color:#fe8019>= </span><span>y
+</span><span>        </span><span style=color:#fa5c4b>return </span><span>x </span><span style=color:#fe8019>* </span><span>y
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>backward</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>dout</span><span>: Num) -> </span><span style=color:#fabd2f>tuple</span><span>[Num, Num]:
+</span><span>        </span><span style=color:#928374;font-style:italic>""" 反向传播
+</span><span style=color:#928374;font-style:italic>
+</span><span style=color:#928374;font-style:italic>        :return: 返回本层输入 x,y 的导数 (dx,dy)
+</span><span style=color:#928374;font-style:italic>        """
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>self</span><span>.y </span><span style=color:#fe8019>* </span><span>dout, </span><span style=color:#fdf4c1>self</span><span>.x </span><span style=color:#fe8019>* </span><span>dout
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>AddLayer</span><span>:
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__init__</span><span>(</span><span style=color:#fdf4c1>self</span><span>) -> </span><span style=color:#d3869b>None</span><span>:
+</span><span>        </span><span style=color:#fa5c4b>pass
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>forward</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>x</span><span>: Num, </span><span style=color:#fdf4c1>y</span><span>: Num) -> Num:
+</span><span>        </span><span style=color:#fa5c4b>return </span><span>x </span><span style=color:#fe8019>+ </span><span>y
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>backward</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>dout</span><span>: Num) -> </span><span style=color:#fabd2f>tuple</span><span>[Num, Num]:
+</span><span>        </span><span style=color:#fa5c4b>return </span><span>dout, dout
+</span><span>
+</span><span>
+</span><span>apple_price </span><span style=color:#fe8019>= </span><span style=color:#d3869b>100.
+</span><span>apple_num </span><span style=color:#fe8019>= </span><span style=color:#d3869b>2.
+</span><span>orange_price </span><span style=color:#fe8019>= </span><span style=color:#d3869b>150.
+</span><span>orange_num </span><span style=color:#fe8019>= </span><span style=color:#d3869b>3.
+</span><span>tax_ratio </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1.1
+</span><span>
+</span><span style=color:#928374;font-style:italic># 苹果总价
+</span><span>m1 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>MulLayer()
+</span><span style=color:#928374;font-style:italic># 橘子总价
+</span><span>m2 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>MulLayer()
+</span><span style=color:#928374;font-style:italic># 商品总价
+</span><span>a1 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>AddLayer()
+</span><span style=color:#928374;font-style:italic># 税后总价
+</span><span>m3 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>MulLayer()
+</span><span>
+</span><span style=color:#928374;font-style:italic># 正向传播过程
+</span><span style=color:#928374;font-style:italic># --------------
+</span><span style=color:#928374;font-style:italic># 苹果总价
+</span><span>apple_total </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>m1.forward(apple_price, apple_num)
+</span><span style=color:#928374;font-style:italic># 橘子总价
+</span><span>orange_total </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>m2.forward(orange_price, orange_num)
+</span><span style=color:#928374;font-style:italic># 商品总价
+</span><span>good_total </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>a1.forward(apple_total, orange_total)
+</span><span style=color:#928374;font-style:italic># 税后总价
+</span><span>total </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>m3.forward(good_total, tax_ratio)
+</span><span>
+</span><span style=color:#928374;font-style:italic># 反向传播过程
+</span><span style=color:#928374;font-style:italic># --------------
+</span><span style=color:#928374;font-style:italic># 税率和商品总价导数
+</span><span>good_total_diff, tax_ratio_diff </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>m3.backward(</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'商品总价导数：</span><span style=color:#fdf4c1>{good_total_diff}</span><span style=color:#b8bb26>, 税率导数：</span><span style=color:#fdf4c1>{tax_ratio_diff}</span><span style=color:#b8bb26>'</span><span style=color:#fdf4c1>)
+</span><span style=color:#928374;font-style:italic># 各项水果总价导数
+</span><span>apple_total_diff, orange_total_diff </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>a1.backward(good_total_diff)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'苹果总价导数：</span><span style=color:#fdf4c1>{good_total_diff}</span><span style=color:#b8bb26>, 橘子总价导数：</span><span style=color:#fdf4c1>{tax_ratio_diff}</span><span style=color:#b8bb26>'</span><span style=color:#fdf4c1>)
+</span><span style=color:#928374;font-style:italic># 苹果单价和数量的导数
+</span><span>apple_price_diff, apple_num_diff </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>m1.backward(apple_total_diff)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'苹果单价导数：</span><span style=color:#fdf4c1>{apple_price_diff}</span><span style=color:#b8bb26>, 苹果数量导数：</span><span style=color:#fdf4c1>{apple_num_diff}</span><span style=color:#b8bb26>'</span><span style=color:#fdf4c1>)
+</span><span>orange_price_diff, orange_num_diff </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>m2.backward(orange_total_diff)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'橘子单价导数：</span><span style=color:#fdf4c1>{orange_price_diff}</span><span style=color:#b8bb26>, 橘子数量导数：</span><span style=color:#fdf4c1>{orange_num_diff}</span><span style=color:#b8bb26>'</span><span style=color:#fdf4c1>)
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>商品总价导数：1.1, 税率导数：650.0
+</span><span>苹果总价导数：1.1, 橘子总价导数：650.0
+</span><span>苹果单价导数：2.2, 苹果数量导数：110.00000000000001
+</span><span>橘子单价导数：3.3000000000000003, 橘子数量导数：165.0
+</span></code></pre><h3 id=ji-suan-ceng-fan-xiang-chuan-bo-tui-dao-he-shi-xian>计算层反向传播推导和实现</h3><h4 id=yao-yong-dao-de-numpy-te-xing>要用到的 numpy 特性</h4><p>涉及一个 <code>numpy.ndarray</code> 的技巧。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span>
+</span><span>x </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([</span><span style=color:#fe8019>-</span><span style=color:#d3869b>2.</span><span style=color:#fdf4c1>, </span><span style=color:#fe8019>-</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>2.</span><span style=color:#fdf4c1>])
+</span><span style=color:#928374;font-style:italic># ndarray 直接参与比较运算，得到一个 bit mask 数组表示比较结果
+</span><span>mask </span><span style=color:#fe8019>= </span><span>(x </span><span style=color:#fe8019>&lt;= </span><span style=color:#d3869b>0</span><span>)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(mask)
+</span><span style=color:#928374;font-style:italic># 可以用这个 bit mask 作为索引
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(x[mask])
+</span><span>
+</span><span style=color:#928374;font-style:italic># 可以用这个 bit mask 索引修改原数组内容
+</span><span>y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>x.copy()
+</span><span>y[mask] </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0.0
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(y)
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>[ True  True  True False False]
+</span><span>[-2. -1.  0.]
+</span><span>[0. 0. 0. 1. 2.]
+</span></code></pre><h4 id=relu-fan-xiang-chuan-bo-tui-dao-he-shi-xian>ReLU 反向传播推导和实现</h4><p>ReLU 层定义和实现都很简单。定义是<p>$$ y=\begin{cases} 0 & (x&lt;=0)\\ x & (x>0) \end{cases} $$<p>可知在输入 $x&lt;=0$ 的情况下导数为 0，其他情况导数为 1。<p>注意输入是 <code>ndarray</code> ，<code>ReLU</code> 传入参数是多维向量，用到上面说的技巧。<p>下面实现 ReLU 激活函数的<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>ReLULayer</span><span>:
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__init__</span><span>(</span><span style=color:#fdf4c1>self</span><span>) -> </span><span style=color:#d3869b>None</span><span>:
+</span><span>        </span><span style=color:#928374;font-style:italic># 输入信号 &lt;= 0 的下标数组
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.mask </span><span style=color:#fe8019>= </span><span style=color:#d3869b>None
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>forward</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>x</span><span>: np.ndarray, </span><span style=color:#fe8019>**</span><span style=color:#fdf4c1>kwargs</span><span>) -> np.ndarray:
+</span><span>        out </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>x.copy()
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.mask </span><span style=color:#fe8019>= </span><span>(x </span><span style=color:#fe8019>&lt;= </span><span style=color:#d3869b>0</span><span>)
+</span><span>        out[</span><span style=color:#fdf4c1>self</span><span>.mask] </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0
+</span><span>        </span><span style=color:#fa5c4b>return </span><span>out
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>backward</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>dout</span><span>: np.ndarray) -> np.ndarray:
+</span><span>        ndout </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>dout.copy()
+</span><span>        ndout[</span><span style=color:#fdf4c1>self</span><span>.mask] </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0
+</span><span>        </span><span style=color:#fa5c4b>return </span><span>ndout
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>optimize</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>lr</span><span>):
+</span><span>        </span><span style=color:#fa5c4b>pass
+</span></code></pre><h4 id=sigmoid-fan-xiang-chuan-bo-tui-dao-he-shi-xian>sigmoid 反向传播推导和实现</h4><p>复习下 sigmoid 函数的定义。<p>$$ y = \frac{1}{1+{e}^{-x}} $$<p>手动推导下 sigmoid 函数的导数。先拆分成多个简单的基本初等函数。<p>$$ \begin{aligned} y &= \frac{1}{t}\\ t &= 1+z \\ z &= {e}^{a} \\ a &= -1 \times x \end{aligned} $$<p>然后从右往左推导各个计算节点的导数。<p><strong>y=1/t 求导</strong><p>$$ \begin{aligned} \frac{d}{dt}y&=\lim_{h \to 0} \frac{\frac{1}{t+h}-\frac{1}{t}}{h} \\ &=\lim_{h \to 0} \frac{\frac{t}{t(t+h)}-\frac{t+h}{t(t+h)}}{h} \\ &=\lim_{h \to 0} \frac{\frac{t-(t+h)}{t(t+h)}}{h} \\ &=\lim_{h \to 0} \frac{\frac{t-(t+h)}{t(t+h)} t(t+h)}{h t(t+h)} \\ &=\lim_{h \to 0} \frac{t-(t+h)}{h(t(t+h))} \\ &=\lim_{h \to 0} \frac{-h}{h(t^2+ht)} \\ &=\lim_{h \to 0} \frac{-1}{t^2+ht} \\ &=-\frac{1}{t^2} \\ &=-\frac{1}{(1+e^{-x})^2} \\ &=-y^2 \ \end{aligned} $$<p><strong>t=1+z 求导</strong><p>加法导数固定为1。<p><strong>z=e^a求导</strong><p>$e^a$ 的导数为 $e^a$ ，所以 $\frac{d}{da}z=e^a=e^{-x}$<p><strong>a=-x求导</strong><p>关于 x 的导数是 <code>-1</code> 。<p>链式法则串联起来可得原式导数分析解： $\frac{dy}{dx}=1 \times - y^2 \times e^{-x} \times -1 = y^2e^{-x}$<p>进一步化简可以展开 $y^2e^{-x}$，得到<p>$$ \begin{aligned} y^2e^{-x} &= \frac{e^{-x}}{(1+e^{-x})^2} \\ &= \frac{1}{1+e^{-x}} \frac{e^{-x}}{1+e^{-x}} \\ &= \frac{1}{1+e^{-x}} \frac{(1+e^{-x})-1}{1+e^{-x}} \\ &= \frac{1}{1+e^{-x}} (\frac{1+e^{-x}}{1+e^{-x}} - \frac{1}{1+e^{-x}}) \\ &= y(1-y) \end{aligned} $$<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>SigmoidLayer</span><span>:
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__init__</span><span>(</span><span style=color:#fdf4c1>self</span><span>) -> </span><span style=color:#d3869b>None</span><span>:
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.y </span><span style=color:#fe8019>= </span><span style=color:#d3869b>None
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>forward</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>x</span><span>, </span><span style=color:#fe8019>**</span><span style=color:#fdf4c1>kwargs</span><span>):
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.y </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1.0 </span><span style=color:#fe8019>/ </span><span>(</span><span style=color:#d3869b>1.0 </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>np.exp(</span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>x)</span><span>)
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>self</span><span>.y
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>backward</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>dout</span><span>):
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>self</span><span>.y </span><span style=color:#fe8019>* </span><span>(</span><span style=color:#d3869b>1.0 </span><span style=color:#fe8019>- </span><span style=color:#fdf4c1>self</span><span>.y) </span><span style=color:#fe8019>* </span><span>dout
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>optimize</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>lr</span><span>):
+</span><span>        </span><span style=color:#fa5c4b>pass
+</span></code></pre><h4 id=affine-ceng-fan-xiang-chuan-bo-tui-dao-he-shi-xian>affine 层反向传播推导和实现</h4><p>affine 层直译仿射层，指的是 $y=wx+b$ ，这条式子在几何领域称为仿射变换因此称仿射层。<p>affine 层正向传播的计算可以画出下面的图<pre class=language-mermaid data-lang=mermaid style=color:#fdf4c1aa;background-color:#282828><code class=language-mermaid data-lang=mermaid><span>flowchart LR
+</span><span>    </span><span style=color:#8ec07c>x1</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>x1</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>x2</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>x2</span><span style=color:#fe8019>]
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>subgraph </span><span style=color:#b8bb26>neuro1
+</span><span>    </span><span style=color:#8ec07c>w11</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>w11</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>w12</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>w12</span><span style=color:#fe8019>]
+</span><span style=color:#fa5c4b>    end
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>subgraph </span><span style=color:#b8bb26>neuro2
+</span><span>    </span><span style=color:#8ec07c>w21</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>w21</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>w22</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>w22</span><span style=color:#fe8019>]
+</span><span style=color:#fa5c4b>    end
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>subgraph </span><span style=color:#b8bb26>neuro3
+</span><span>    </span><span style=color:#8ec07c>w31</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>w31</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>w32</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>w32</span><span style=color:#fe8019>]
+</span><span style=color:#fa5c4b>    end
+</span><span>
+</span><span>    w11 </span><span style=color:#fe8019>--></span><span> x1w11((*))
+</span><span>    w12 </span><span style=color:#fe8019>--></span><span> x1w12((*))
+</span><span>    w21 </span><span style=color:#fe8019>--></span><span> x1w21((*))
+</span><span>    w22 </span><span style=color:#fe8019>--></span><span> x1w22((*))
+</span><span>    w31 </span><span style=color:#fe8019>--></span><span> x1w31((*))
+</span><span>    w32 </span><span style=color:#fe8019>--></span><span> x1w32((*))
+</span><span>
+</span><span>    x1 </span><span style=color:#fe8019>---</span><span>> x1w11((*))
+</span><span>    x2 </span><span style=color:#fe8019>---</span><span>> x1w12((*))
+</span><span>    x1 </span><span style=color:#fe8019>---</span><span>> x1w21((*))
+</span><span>    x2 </span><span style=color:#fe8019>---</span><span>> x1w22((*))
+</span><span>    x1 </span><span style=color:#fe8019>---</span><span>> x1w31((*))
+</span><span>    x2 </span><span style=color:#fe8019>---</span><span>> x1w32((*))
+</span><span>
+</span><span>    x1w11 & x1w12 --> a1((+))
+</span><span>    x1w21 & x1w22 --> a2((+))
+</span><span>    x1w31 & x1w32 --> a3((+))
+</span><span>
+</span><span>    a1 & a2 & a3 --> a
+</span></code></pre><p>已知<p>$$ \begin{aligned} a &= \begin{bmatrix} a_1 & a_2 & a_3 \end{bmatrix}\\ x &= \begin{bmatrix} x_1 & x_2 \end{bmatrix}\\ w &= \begin{bmatrix} w_{11} & w_{21} & w_{31}\\ w_{12} & w_{22} & w_{32} \end{bmatrix}\\ \frac{\partial a}{\partial w} &= \begin{bmatrix} x_1 & x_1 & x_1\\ x_2 & x_2 & x_2 \end{bmatrix} \end{aligned} $$<p>不难发现，在 $w$ 中，第 $i$ 行的元素的偏导数，就是 $x$ 的第 $i$ 列输入。<p>所以求 $w$ 的偏导数就是将 $x$ 转置（列旋转为行，第 $i$ 列转为第 $i$ 行），然后把这个矩阵改成每个行含 n 个相同的列，n为神经元个数。<p>转置很好处理，后面将每个行改成n个列的过程可以表述成 $X^T\frac{\partial a}{\partial a}$，其中 $\frac{\partial a}{\partial a}=\begin{bmatrix}1 & 1 & 1\end{bmatrix}$<p>从计算图角度看就是 a 出发分别求每个神经元输入权重的偏导数，然后排列成和权重矩阵一样的形状。<p>手动计算过程如下。<p>$$ \begin{aligned} X^T &= \begin{bmatrix} x_1 \\ x_2 \end{bmatrix}\\ \frac{\partial L}{\partial Y} &= \begin{bmatrix} 1 & 1 & 1 \end{bmatrix}\\ X^T \frac{\partial L}{\partial Y} &= \begin{bmatrix} x_1 \\ x_2 \end{bmatrix} \begin{bmatrix} 1 & 1 & 1 \end{bmatrix}\\ &= \begin{bmatrix} x_1 & x_1 & x_1 \\ x_2 & x_2 & x_2 \end{bmatrix} \end{aligned} $$<p>输入 $x$ 有多行的情况下则是：<p>$$ \begin{aligned} a &= \begin{bmatrix} a\_{11} & a\_{12} & a\_{13} \\ a\_{21} & a\_{22} & a\_{23} \end{bmatrix} \\ x &= \begin{bmatrix} x\_{11} & x\_{12} \\ x\_{21} & x\_{22} \end{bmatrix} \\ w &= \begin{bmatrix} w\_{11} & w\_{21} & w\_{31} \\ w\_{12} & w\_{22} & w\_{32} \end{bmatrix} \\ X^T &= \begin{bmatrix} x\_{11} x\_{21} \\ x\_{12} x\_{22} \end{bmatrix}\\ \frac{\partial L}{\partial Y} &= \begin{bmatrix} 1 & 1 & 1 \\ 1 & 1 & 1 \end{bmatrix} \\ X^T \frac{\partial L}{\partial Y} &= \begin{bmatrix} x\_{11} x\_{12} \\ x\_{21} x\_{22} \end{bmatrix} \begin{bmatrix} 1 & 1 & 1 \\ 1 & 1 & 1 \end{bmatrix} \\ &= \begin{bmatrix} x\_{11}+x\_{12} & x\_{11}+x\_{12} & x\_{11}+x\_{12} \\ x\_{21}+x\_{22} & x\_{21}+x\_{22} & x\_{21}+x\_{22} \\ \end{bmatrix} \\ \end{aligned} $$<p>也就是输入多个样本得到的 $w$ 的偏导数之和。<p>最后是考虑偏置 $b$ ，书中实现是 $\frac{\partial L}{\partial Y}$ 按列求和，其实和上面的多个样本的 $w$ 偏导数之和一样。 如果把偏置理解为输入始终为 1 的神经元，加入上面的式子推导，可以得到最终多出来的行其实就等于原 $\frac{\partial L}{\partial Y}$ 各列元素之和。<p>$$ \begin{aligned} a &=\begin{bmatrix} a_{11} & a_{12} & a_{13}\\ a_{21} & a_{22} & a_{23} \end{bmatrix}\\ x &=\begin{bmatrix} x_{11} & x_{12} & 1\\ x_{21} & x_{22} & 1 \end{bmatrix}\\ w &=\begin{bmatrix} w_{11} & w_{21} & w_{31}\\ w_{12} & w_{22} & w_{32}\\ b & b & b \end{bmatrix}\\ X^T &= \begin{bmatrix} x_{11} & x_{21}\\ x_{12} & x_{22}\\ 1 & 1 \end{bmatrix}\\ \frac{\partial L}{\partial Y} &=\begin{bmatrix} \frac{\partial L}{\partial Y_{11}} & \frac{\partial L}{\partial Y_{12}} & \frac{\partial L}{\partial Y_{13}}\\ \frac{\partial L}{\partial Y_{21}} & \frac{\partial L}{\partial Y_{22}} & \frac{\partial L}{\partial Y_{23}} \end{bmatrix}\\ X^T \frac{\partial L}{\partial Y} &=\begin{bmatrix} x_{11} & x_{12} \\ x_{12} & x_{22}\\ 1 & 1\\ \end{bmatrix} \begin{bmatrix} \frac{\partial L}{\partial Y_{11}} & \frac{\partial L}{\partial Y_{12}} & \frac{\partial L}{\partial Y_{13}}\\ \frac{\partial L}{\partial Y_{21}} & \frac{\partial L}{\partial Y_{22}} & \frac{\partial L}{\partial Y_{23}} \end{bmatrix}\\ &=\begin{bmatrix} \frac{\partial L}{\partial Y_{11}} x_{11}+\frac{\partial L}{\partial Y_{12}} x_{12} & \frac{\partial L}{\partial Y_{11}} x_{11}+\frac{\partial L}{\partial Y_{12}} x_{12} & \frac{\partial L}{\partial Y_{11}} x_{11}+\frac{\partial L}{\partial Y_{12}} x_{12}\\ \frac{\partial L}{\partial Y_{21}} x_{21}+\frac{\partial L}{\partial Y_{22}} x_{22} & \frac{\partial L}{\partial Y_{21}} x_{21}+\frac{\partial L}{\partial Y_{22}} x_{22} & \frac{\partial L}{\partial Y_{21}} x_{21}+\frac{\partial L}{\partial Y_{22}} x_{22}\\ \frac{\partial L}{\partial Y_{11}} + \frac{\partial L}{\partial Y_{21}} & \frac{\partial L}{\partial Y_{12}} + \frac{\partial L}{\partial Y_{22}} & \frac{\partial L}{\partial Y_{13}} + \frac{\partial L}{\partial Y_{23}}\\ \end{bmatrix}\\ \end{aligned} $$<p>下面就按上面的推导实现下，注意 affine 层前还可以连接别的层，反向传播并不是在 affine 层终止的。 书中 <code>backward</code> 返回的结果会作为上一层的 <code>dout</code>，所以 affine 层保存了 <code>dw</code> 而返回的是 <code>dx</code>。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>AffineLayer</span><span>:
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__init__</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>w</span><span>: np.ndarray, </span><span style=color:#fdf4c1>b</span><span>: np.ndarray) -> </span><span style=color:#d3869b>None</span><span>:
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.w </span><span style=color:#fe8019>= </span><span>w
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.b </span><span style=color:#fe8019>= </span><span>b
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.x: Optional[np.ndarray] </span><span style=color:#fe8019>= </span><span style=color:#d3869b>None
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.dw: Optional[np.ndarray] </span><span style=color:#fe8019>= </span><span style=color:#d3869b>None
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.db: Optional[np.ndarray] </span><span style=color:#fe8019>= </span><span style=color:#d3869b>None
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>forward</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>x</span><span>: np.ndarray, </span><span style=color:#fe8019>**</span><span style=color:#fdf4c1>kwargs</span><span>):
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.x </span><span style=color:#fe8019>= </span><span>x
+</span><span>        out </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.dot(self.x, self.w) </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>self</span><span>.b
+</span><span>        </span><span style=color:#fa5c4b>return </span><span>out
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>backward</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>dout</span><span>: np.ndarray):
+</span><span>        dx </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.dot(dout, self.w.T)
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.dw </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.dot(self.x.T, dout)
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.db </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.sum(dout, axis</span><span style=color:#fe8019>=</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span>        </span><span style=color:#fa5c4b>return </span><span>dx
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>optimize</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>lr</span><span>):
+</span><span>        </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>self</span><span>.dw </span><span style=color:#fe8019>is not </span><span style=color:#d3869b>None </span><span style=color:#fe8019>and </span><span style=color:#fdf4c1>self</span><span>.w </span><span style=color:#fe8019>is not </span><span style=color:#d3869b>None</span><span>:
+</span><span>            </span><span style=color:#fdf4c1>self</span><span>.w </span><span style=color:#fe8019>-= </span><span>lr </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>self</span><span>.dw
+</span></code></pre><h4 id=softmax-with-loss-shi-xian>softmax-with-loss 实现</h4><p>回顾 softmax 函数的定义<p>$$ y_k=\frac{exp(a_k)}{\sum_{i=1}^{n} exp(a_i)} $$<p>其中 $k$ 表示 softmax 输出下标，$i$ 表示 softmax 输入的下标，输入总数为 $n$。<p>题中的 with-loss 意指这一层还包含一个损失函数，书中是交叉熵损失函数，定义如下。<p>$$ L=-\sum_{k}t_k \log_{e}y_k $$<p>书中计算图如下<p><img alt=图5-29 src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-05/img/5-29.webp><p>计算图反向传播结果：<p><img alt=图A-5 src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-05/img/A-5.webp><p>计算过程在书中附录A，如下。<p><img alt=图A-5-1 src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-05/img/A-5-1.webp> <img alt=图A-5-2 src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-05/img/A-5-2.webp> <img alt=图A-5-3 src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-05/img/A-5-3.webp> <img alt=图A-5-4 src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-05/img/A-5-4.webp> <img alt=图A-5-5 src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-05/img/A-5-5.webp> <img alt=图A-5-6 src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-05/img/A-5-6.webp><p>公式中的 $t_1$,$t_2$,$t_3$ 是监督数据（one-hot表示），最终简化的结果非常简洁 $(y_1-t_1,y_2-t_2,y_3-t_3)$ ，即 $y-t$ 。<p>代码实现如下。注意反向传播中除以批大小，得到整批样本的平均误差。因为 Layer 的 <code>backward</code> 设计是接收的 <code>dout</code> 是一个向量，所以这里除以 <code>batch_size</code>。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>from </span><span>common.functions </span><span style=color:#fa5c4b>import </span><span>cross_entropy_error, softmax
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>SoftmaxWithLossLayer</span><span>:
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__init__</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.loss </span><span style=color:#fe8019>= </span><span style=color:#d3869b>None
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.y </span><span style=color:#fe8019>= </span><span style=color:#d3869b>None
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.t </span><span style=color:#fe8019>= </span><span style=color:#d3869b>None
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>forward</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>x</span><span>: np.ndarray, </span><span style=color:#fe8019>*</span><span>, </span><span style=color:#fdf4c1>t</span><span>: Optional[np.ndarray] </span><span style=color:#fe8019>= </span><span style=color:#d3869b>None</span><span>):
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>softmax(x)
+</span><span>        </span><span style=color:#fa5c4b>if </span><span>t </span><span style=color:#fe8019>is not </span><span style=color:#d3869b>None</span><span>:
+</span><span>            </span><span style=color:#fdf4c1>self</span><span>.t </span><span style=color:#fe8019>= </span><span>t
+</span><span>            </span><span style=color:#fdf4c1>self</span><span>.loss </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>cross_entropy_error(self.y, self.t)
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>self</span><span>.y
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>backward</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>dout</span><span style=color:#fe8019>=</span><span style=color:#d3869b>1</span><span>):
+</span><span>        batch_size </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self</span><span>.t.shape[</span><span style=color:#d3869b>0</span><span>]
+</span><span>        dx </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fdf4c1>self</span><span>.y </span><span style=color:#fe8019>- </span><span style=color:#fdf4c1>self</span><span>.t) </span><span style=color:#fe8019>/ </span><span>batch_size
+</span><span>        </span><span style=color:#fa5c4b>return </span><span>dx
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>optimize</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>lr</span><span>):
+</span><span>        </span><span style=color:#fa5c4b>pass
+</span></code></pre><h3 id=ti-du-que-ren>梯度确认</h3><p>为了验证正确性，可以使用梯度确认方法。<p>梯度确认法是比较数值微分的结果和误差反向传播法结果，以确认误差反向传播法的实现是否正确。<p>数值微分法的结果和误差反向传播法结果的差值，如果很大，则说明反向传播法的实现有误。 因为数值微分法本身结果是存在误差的，所以只要差值非常小，就可以认为反向传播法的实现是正确的。 （对菜鸡而言，大佬应该一眼就看出来对不对了）<p>那么梯度接下来用梯度确认法验证上面的 <code>ReLU</code>、<code>Sigmoid</code>、<code>Affine</code>、<code>SoftmaxWithLoss</code> 的实现是否正确。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>unittest
+</span><span style=color:#fa5c4b>from </span><span>common </span><span style=color:#fa5c4b>import </span><span>layers
+</span><span style=color:#fa5c4b>from </span><span>common.functions </span><span style=color:#fa5c4b>import </span><span>relu, sigmoid
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>TestReLU</span><span>(</span><span style=color:#8ec07c>unittest.TestCase</span><span>):
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__init__</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>args</span><span>, </span><span style=color:#fe8019>**</span><span style=color:#fdf4c1>kwargs</span><span>):
+</span><span>        </span><span style=color:#fabd2f>super</span><span style=color:#fdf4c1>().</span><span style=color:#fabd2f>__init__</span><span style=color:#fdf4c1>(</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>args, </span><span style=color:#fe8019>**</span><span style=color:#fdf4c1>kwargs)
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.layer </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>ReLULayer()
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>test_forward</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        </span><span style=color:#928374;font-style:italic># 正向传播结果
+</span><span>        x </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>2</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>                      [</span><span style=color:#d3869b>3</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>4</span><span style=color:#fdf4c1>]])
+</span><span>        expected </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>2</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>                             [</span><span style=color:#d3869b>3</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>4</span><span style=color:#fdf4c1>]])
+</span><span>        </span><span style=color:#928374;font-style:italic># 比较手算结果
+</span><span>        </span><span style=color:#fdf4c1>self.assertTrue(np.array_equal(self.layer.forward(x), expected))
+</span><span>        </span><span style=color:#928374;font-style:italic># 比较书附带源码的 relu 实现结果
+</span><span>        </span><span style=color:#fdf4c1>self.assertTrue(np.array_equal(relu(x), self.layer.forward(x)))
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>test_backward</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        x </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>2.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>                      [</span><span style=color:#d3869b>3.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>4.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>                      [</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#fe8019>-</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>]])
+</span><span>        dout </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>                         [</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>                         [</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>]])
+</span><span>        expected </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>                             [</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>                             [</span><span style=color:#d3869b>0.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.</span><span style=color:#fdf4c1>]])
+</span><span>        </span><span style=color:#928374;font-style:italic># 先做一次正向传播才能计算反向传播
+</span><span>        </span><span style=color:#fdf4c1>self.layer.forward(x)
+</span><span>        </span><span style=color:#928374;font-style:italic># 对比手算结果
+</span><span>        </span><span style=color:#fdf4c1>self.assertTrue(np.array_equal(self.layer.backward(dout), expected))
+</span><span>        </span><span style=color:#928374;font-style:italic># 对比数值微分法结果
+</span><span>        d </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1.e-5
+</span><span>        dx </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fdf4c1>relu(x </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>d) </span><span style=color:#fe8019>- </span><span style=color:#fdf4c1>relu(x </span><span style=color:#fe8019>- </span><span style=color:#fdf4c1>d)</span><span>) </span><span style=color:#fe8019>/ </span><span>(</span><span style=color:#d3869b>2 </span><span style=color:#fe8019>* </span><span>d)
+</span><span>        </span><span style=color:#fdf4c1>self.assertTrue(np.allclose(self.layer.backward(dout), dx))
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>TestSigmoid</span><span>(</span><span style=color:#8ec07c>unittest.TestCase</span><span>):
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__init__</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>args</span><span>, </span><span style=color:#fe8019>**</span><span style=color:#fdf4c1>kwargs</span><span>):
+</span><span>        </span><span style=color:#fabd2f>super</span><span style=color:#fdf4c1>().</span><span style=color:#fabd2f>__init__</span><span style=color:#fdf4c1>(</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>args, </span><span style=color:#fe8019>**</span><span style=color:#fdf4c1>kwargs)
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.layer </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>SigmoidLayer()
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>test_forward</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        x </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>2.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>                      [</span><span style=color:#d3869b>3.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>4.</span><span style=color:#fdf4c1>]])
+</span><span>        expected </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>0.73105858</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.88079708</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>                             [</span><span style=color:#d3869b>0.95257413</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.98201379</span><span style=color:#fdf4c1>]])
+</span><span>        </span><span style=color:#928374;font-style:italic># 比较手算结果
+</span><span>        </span><span style=color:#fdf4c1>self.assertTrue(np.allclose(self.layer.forward(x), expected))
+</span><span>        </span><span style=color:#928374;font-style:italic># 比较书附带源码的 sigmoid 计算结果
+</span><span>        </span><span style=color:#fdf4c1>self.assertTrue(np.allclose(self.layer.forward(x), sigmoid(x)))
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>test_backward</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        x </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>2.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>                      [</span><span style=color:#d3869b>3.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>4.</span><span style=color:#fdf4c1>]])
+</span><span>        dout </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>                         [</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>]])
+</span><span>        expected </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>0.19661193</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.10499359</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>                             [</span><span style=color:#d3869b>0.04517666</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.01766271</span><span style=color:#fdf4c1>]])
+</span><span>        </span><span style=color:#fdf4c1>self.layer.forward(x)
+</span><span>        dx </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self.layer.backward(dout)
+</span><span>        </span><span style=color:#928374;font-style:italic># 比较手算结果
+</span><span>        </span><span style=color:#fdf4c1>self.assertTrue(np.allclose(dx, expected))
+</span><span>        </span><span style=color:#928374;font-style:italic># 比较数值微分法结果
+</span><span>        d </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1.e-5
+</span><span>        ndx </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fdf4c1>sigmoid(x </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>d) </span><span style=color:#fe8019>- </span><span style=color:#fdf4c1>sigmoid(x </span><span style=color:#fe8019>- </span><span style=color:#fdf4c1>d)</span><span>) </span><span style=color:#fe8019>/ </span><span>(</span><span style=color:#d3869b>2 </span><span style=color:#fe8019>* </span><span>d)
+</span><span>        </span><span style=color:#fdf4c1>self.assertTrue(np.allclose(dx, ndx))
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>TestAffine</span><span>(</span><span style=color:#8ec07c>unittest.TestCase</span><span>):
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__init__</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>args</span><span>, </span><span style=color:#fe8019>**</span><span style=color:#fdf4c1>kwargs</span><span>):
+</span><span>        </span><span style=color:#fabd2f>super</span><span style=color:#fdf4c1>().</span><span style=color:#fabd2f>__init__</span><span style=color:#fdf4c1>(</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>args, </span><span style=color:#fe8019>**</span><span style=color:#fdf4c1>kwargs)
+</span><span>        </span><span style=color:#928374;font-style:italic># 2输入3神经元
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.layer </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>AffineLayer(np.array([[</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>                                           [</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>]]),
+</span><span style=color:#fdf4c1>                                 np.array([</span><span style=color:#d3869b>0.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.</span><span style=color:#fdf4c1>]))
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>test_forward</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        x </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>2.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>                      [</span><span style=color:#d3869b>3.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>4.</span><span style=color:#fdf4c1>]])
+</span><span>        expected </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>3.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>3.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>3.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>                             [</span><span style=color:#d3869b>7.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>7.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>7.</span><span style=color:#fdf4c1>]])
+</span><span>        y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self.layer.forward(x)
+</span><span>        </span><span style=color:#fdf4c1>self.assertTrue(np.allclose(y, expected))
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>test_backward</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        x </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>2.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>                      [</span><span style=color:#d3869b>3.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>4.</span><span style=color:#fdf4c1>]])
+</span><span>        dout </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>                         [</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>]])
+</span><span>        y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self.layer.forward(x)
+</span><span>        dx </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self.layer.backward(dout)
+</span><span>        </span><span style=color:#928374;font-style:italic># TODO: 如何数值微分法计算dx？
+</span><span>        layer </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>layers.Affine(self.layer.w, self.layer.b)
+</span><span>        </span><span style=color:#fdf4c1>layer.forward(x)
+</span><span>        expected </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>layer.backward(dout)
+</span><span>        </span><span style=color:#928374;font-style:italic># 验证
+</span><span>        </span><span style=color:#fdf4c1>self.assertTrue(np.allclose(dx, expected))
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>TestSoftmaxWithLoss</span><span>(</span><span style=color:#8ec07c>unittest.TestCase</span><span>):
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__init__</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>args</span><span>, </span><span style=color:#fe8019>**</span><span style=color:#fdf4c1>kwargs</span><span>):
+</span><span>        </span><span style=color:#fabd2f>super</span><span style=color:#fdf4c1>().</span><span style=color:#fabd2f>__init__</span><span style=color:#fdf4c1>(</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>args, </span><span style=color:#fe8019>**</span><span style=color:#fdf4c1>kwargs)
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.layer </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>SoftmaxWithLossLayer()
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>test_forward</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        x </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>2.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>3.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>                      [</span><span style=color:#d3869b>4.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>5.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>6.</span><span style=color:#fdf4c1>]])
+</span><span>        t </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>0.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>                      [</span><span style=color:#d3869b>0.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>]])
+</span><span>        expected </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0.4076058141229194
+</span><span>        </span><span style=color:#fdf4c1>self.layer.forward(x, t</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>t)
+</span><span>        </span><span style=color:#fdf4c1>self.assertAlmostEqual(self.layer.loss, expected)
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>test_backward</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        x </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>4.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>5.</span><span style=color:#fdf4c1>]])
+</span><span>        t </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>0.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>]])
+</span><span>        dout </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1.
+</span><span>        </span><span style=color:#fdf4c1>self.layer.forward(x, t</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>t)
+</span><span>        dx </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self.layer.backward(dout)
+</span><span>        </span><span style=color:#928374;font-style:italic># TODO: 如何验证 softmax-with-loss 的反向传播结果？
+</span><span>        layer </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>layers.SoftmaxWithLoss()
+</span><span>        </span><span style=color:#fdf4c1>layer.forward(x, t)
+</span><span>        expected </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>layer.backward()
+</span><span>        </span><span style=color:#928374;font-style:italic># 验证
+</span><span>        </span><span style=color:#fdf4c1>self.assertTrue(np.allclose(dx, expected))
+</span><span>
+</span><span>
+</span><span style=color:#fdf4c1>_ </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>unittest.main(argv</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>[</span><span style=color:#b8bb26>''</span><span style=color:#fdf4c1>], verbosity</span><span style=color:#fe8019>=</span><span style=color:#d3869b>2</span><span style=color:#fdf4c1>, exit</span><span style=color:#fe8019>=</span><span style=color:#d3869b>False</span><span style=color:#fdf4c1>)
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>test_backward (__main__.TestAffine) ... ok
+</span><span>test_forward (__main__.TestAffine) ... ok
+</span><span>test_backward (__main__.TestReLU) ... ok
+</span><span>test_forward (__main__.TestReLU) ... ok
+</span><span>test_backward (__main__.TestSigmoid) ... ok
+</span><span>test_forward (__main__.TestSigmoid) ... ok
+</span><span>test_backward (__main__.TestSoftmaxWithLoss) ... ok
+</span><span>test_forward (__main__.TestSoftmaxWithLoss) ... ok
+</span><span>
+</span><span>----------------------------------------------------------------------
+</span><span>Ran 8 tests in 0.005s
+</span><span>
+</span><span>OK
+</span></code></pre><h3 id=fan-xiang-chuan-bo-xue-xi-shi-li>反向传播学习实例</h3><p>不使用书中代码。模型还是采用3层神经网络，输入层、隐藏层、输出层。输入层神经元50个，隐藏层神经元100个，输出层神经元10个。输入信号 784 个。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>from </span><span>dataset.mnist </span><span style=color:#fa5c4b>import </span><span>load_mnist
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>SimpleNet</span><span>:
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__init__</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.layers </span><span style=color:#fe8019>= </span><span>[
+</span><span>            </span><span style=color:#fdf4c1>AffineLayer(np.random.randn(</span><span style=color:#d3869b>784</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>50</span><span style=color:#fdf4c1>), np.random.randn(</span><span style=color:#d3869b>50</span><span style=color:#fdf4c1>))</span><span>,
+</span><span>            </span><span style=color:#fdf4c1>ReLULayer()</span><span>,
+</span><span>            </span><span style=color:#fdf4c1>AffineLayer(np.random.randn(</span><span style=color:#d3869b>50</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>100</span><span style=color:#fdf4c1>), np.random.randn(</span><span style=color:#d3869b>100</span><span style=color:#fdf4c1>))</span><span>,
+</span><span>            </span><span style=color:#fdf4c1>ReLULayer()</span><span>,
+</span><span>            </span><span style=color:#fdf4c1>AffineLayer(np.random.randn(</span><span style=color:#d3869b>100</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>10</span><span style=color:#fdf4c1>), np.random.randn(</span><span style=color:#d3869b>10</span><span style=color:#fdf4c1>))</span><span>,
+</span><span>            </span><span style=color:#fdf4c1>SoftmaxWithLossLayer()</span><span>,
+</span><span>        ]
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>predict</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>x</span><span>, </span><span style=color:#fdf4c1>t</span><span style=color:#fe8019>=</span><span style=color:#d3869b>None</span><span>):
+</span><span>        y </span><span style=color:#fe8019>= </span><span>x
+</span><span>        </span><span style=color:#fa5c4b>for </span><span>l </span><span style=color:#fa5c4b>in </span><span style=color:#fdf4c1>self</span><span>.layers:
+</span><span>            y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>l.forward(y, t</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>t)
+</span><span>        </span><span style=color:#fa5c4b>return </span><span>y
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>backward</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        dout </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1
+</span><span>        </span><span style=color:#fa5c4b>for </span><span>l </span><span style=color:#fa5c4b>in </span><span style=color:#fabd2f>reversed</span><span style=color:#fdf4c1>(self.layers)</span><span>:
+</span><span>            dout </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>l.backward(dout)
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>optimize</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>lr</span><span>):
+</span><span>        </span><span style=color:#fa5c4b>for </span><span>l </span><span style=color:#fa5c4b>in </span><span style=color:#fdf4c1>self</span><span>.layers:
+</span><span>            </span><span style=color:#fdf4c1>l.optimize(lr)
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>loss</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        </span><span style=color:#fa5c4b>if </span><span style=color:#fabd2f>hasattr</span><span style=color:#fdf4c1>(self.layers[</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>], </span><span style=color:#b8bb26>'loss'</span><span style=color:#fdf4c1>)</span><span>:
+</span><span>            </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>self</span><span>.layers[</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>].loss
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>None
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>accuracy</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>x</span><span>, </span><span style=color:#fdf4c1>t</span><span>):
+</span><span>        y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self.predict(x)
+</span><span>        y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.argmax(y, axis</span><span style=color:#fe8019>=</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>)
+</span><span>        t </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.argmax(t, axis</span><span style=color:#fe8019>=</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>)
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>np.sum(y </span><span style=color:#fe8019>== </span><span style=color:#fdf4c1>t) </span><span style=color:#fe8019>/ </span><span style=color:#fabd2f>float</span><span style=color:#fdf4c1>(x.shape[</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>])
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>mini_batch</span><span>(</span><span style=color:#fdf4c1>training_data</span><span>, </span><span style=color:#fdf4c1>labels</span><span>, </span><span style=color:#fdf4c1>batch_size</span><span>):
+</span><span>    </span><span style=color:#928374;font-style:italic>""" 在数据集中随机抽取 mini-batch 
+</span><span style=color:#928374;font-style:italic>    """
+</span><span>    mask </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.random.choice(training_data.shape[</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>], batch_size)
+</span><span>    </span><span style=color:#fa5c4b>return </span><span>training_data[mask], labels[mask]
+</span><span>
+</span><span>
+</span><span style=color:#928374;font-style:italic># 加载数据
+</span><span>(x_train, t_train), (x_test, t_test) </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>load_mnist(one_hot_label</span><span style=color:#fe8019>=</span><span style=color:#d3869b>True</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span>n </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>SimpleNet()
+</span><span>
+</span><span style=color:#928374;font-style:italic># 训练
+</span><span style=color:#fa5c4b>for </span><span>i </span><span style=color:#fa5c4b>in </span><span style=color:#fabd2f>range</span><span style=color:#fdf4c1>(</span><span style=color:#d3869b>10000</span><span style=color:#fdf4c1>)</span><span>:
+</span><span>    x, t </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>mini_batch(x_train, t_train, </span><span style=color:#d3869b>100</span><span style=color:#fdf4c1>)
+</span><span>    </span><span style=color:#fdf4c1>n.predict(x, t)
+</span><span>    </span><span style=color:#fdf4c1>n.backward()
+</span><span>    </span><span style=color:#fdf4c1>n.optimize(</span><span style=color:#d3869b>0.01</span><span style=color:#fdf4c1>)
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>i </span><span style=color:#fe8019>% </span><span style=color:#d3869b>1000 </span><span style=color:#fe8019>== </span><span style=color:#d3869b>0</span><span>:
+</span><span>        x, t </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>mini_batch(x_test, t_test, </span><span style=color:#d3869b>100</span><span style=color:#fdf4c1>)
+</span><span>        </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'第</span><span style=color:#fdf4c1>{i}</span><span style=color:#b8bb26>次训练 损失 </span><span style=color:#fdf4c1>{n.loss()}</span><span style=color:#b8bb26> 正确率 </span><span style=color:#fdf4c1>{n.accuracy(x, t)}</span><span style=color:#b8bb26>'</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span style=color:#928374;font-style:italic># 训练后的正确率
+</span><span>x, t </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>mini_batch(x_test, t_test, </span><span style=color:#d3869b>100</span><span style=color:#fdf4c1>)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'验证正确率'</span><span style=color:#fdf4c1>, n.accuracy(x, t))
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>第0次训练 损失 14.786135330514808 正确率 0.1
+</span><span>第1000次训练 损失 3.5467239155184798 正确率 0.83
+</span><span>第2000次训练 损失 2.286845867506459 正确率 0.77
+</span><span>第3000次训练 损失 1.2440765516672603 正确率 0.87
+</span><span>第4000次训练 损失 1.9765579805296412 正确率 0.75
+</span><span>第5000次训练 损失 0.8591504698224851 正确率 0.87
+</span><span>第6000次训练 损失 1.180173605455945 正确率 0.87
+</span><span>第7000次训练 损失 0.5386356986940977 正确率 0.84
+</span><span>第8000次训练 损失 0.7360734923263227 正确率 0.82
+</span><span>第9000次训练 损失 0.9423206740379103 正确率 0.82
+</span><span>验证正确率 0.83
+</span></code></pre></article><p class=tags-data><a href=/tags/python>/python/</a> <a href=/tags/numpy>/numpy/</a> <a href=/tags/matplotlib>/matplotlib/</a> <a href=/tags/shen-du-xue-xi>/深度学习/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

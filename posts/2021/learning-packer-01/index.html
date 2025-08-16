@@ -1,0 +1,736 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>加壳原理01 - Windows 程序的加载和运行</title><meta content="加壳原理01 - Windows 程序的加载和运行" name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2021/learning-packer-01/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content="加壳原理01 - Windows 程序的加载和运行" property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2021/learning-packer-01/ property=twitter:url><meta content="加壳原理01 - Windows 程序的加载和运行" property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2021/learning-packer-01/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>加壳原理01 - Windows 程序的加载和运行</h1><p class=author-line>作于：2021-09-27 14:51 ，预计阅读时间 22 分钟<article><h2 id=qian-yan>前言</h2><p>本文由多篇相关文章翻译整合得来，参考文章和书目文末给出。<h2 id=0x01-pewen-jian-jie-gou>0x01 PE文件结构</h2><p><img alt=PE_Format src=https://nnnewb.github.io/posts/2021/learning-packer-01/PE_Format.webp><h3 id=1-1-cong-pe-coff-ge-shi-shuo-qi>1.1 从 PE-COFF 格式说起</h3><blockquote><p>... 现在PC平台流行的 <strong>可执行文件格式（Executable）</strong> 主要是 Windows 下的 PE （Portable Executable） 和 Linux 的 ELF （Executable Linkable Format），它们都是 COFF（Common Object File Format）格式的变种。目标文件就是源代码编译后但未进行链接的那些中间文件（Windows 的 .obj 和 Linux 下的 .o），它和可执行文件的内容和结构很相似，所以一般跟可执行文件一起采用一种格式存储。从广义上看，目标文件与可执行文件的格式其实几乎是一样的，所以我们可以广义地将目标文件与可执行文件看成是同一种类型的文件，在 Windows 下，我们可以统称它们为 PE-COFF 文件格式。在 Linux 下，我们可以将它们统称为 ELF 文件。<p>... 不光是 <strong>可执行文件</strong> （Windows 的 .exe 和 Linux 下的 ELF 可执行文件）按照可执行文件格式存储。<strong>动态链接库（DLL，Dynamic Linking Library）</strong> （Windows 的 DLL 和 Linux 下的 .so ）以及<strong>静态链接库 （Static Linking Library）</strong> （Windows 的 .lib 和 Linux 下的 .a）文件都按照可执行文件格式存储。它们在 Windows 下都按照 PE-COFF 格式存储，Linux 下按照 ELF 格式存储。静态链接库稍有不同，它是把很多目标文件捆绑在一起形成一个文件，再加上一些索引，可以简单理解为一个包含很多目标文件的文件包。<p>... COFF 的主要贡献是在目标文件引入了“段”的机制，不同的目标文件可以拥有不同数量及不同类型的“段”。另外，它还定义了调试数据的格式。<p>——《程序员的自我修养——链接、装载与库》</blockquote><p>这里讨论可执行文件格式，目标文件、静态库、动态库都先暂时不考虑。btw，引文中的“段”其实说的既是Section也是Segment，根据上下文自己理解。<h3 id=1-2-pe-wen-jian-tou-yi-lan>1.2 PE 文件头一览</h3><p>PE格式在 Wiki 上有张挺漂亮的图。<p><img alt=Portable_Executable_32_bit_Structure_in_SVG_fixed src=https://nnnewb.github.io/posts/2021/learning-packer-01/Portable_Executable_32_bit_Structure_in_SVG_fixed.webp><p>图中可以看到，微软的兼容包袱是真的重（不是）。<p>PE文件头已经包含了海量的信息，大部分我们不关注（或者说很少关注？），从做个简单壳的目的出发，了解了PE-COFF格式的一点通识和历史后就可以继续了。<p>读懂这图需要了解下关于PE文件中几种“地址”的概念：<ul><li><em>raw addresses</em>，或者文件偏移 <em>file offset</em>，这种地址指的是 <strong>PE 文件中的偏移</strong>。<li><em>virtual addresses</em>，虚拟地址，指在 RAM 中的地址，就是一般常说的进程地址空间里的地址。<li><em>relative virtual addresses</em>，相对镜像基址（Image Base）的虚拟地址，不考虑 ASLR 的情况下，相对地址计算就是基址+RVA。</ul><p>可以理解成，VA 就是基址+RVA，RVA就是VA-基址。<p>VA/RVA 转文件偏移就麻烦很多，要根据节表 <em>Section Table</em> 计算。<p>上述镜像基址 <em>Image Base</em> 和节表 <em>Section Table</em> 都可以在图里找到。<h3 id=1-3-dos-wen-jian-tou>1.3 DOS 文件头</h3><p>我们可以用在 Python REPL 中用 <a href=https://pypi.org/project/pefile>pefile</a> 来快速分析和查看PE文件。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>pefile
+</span><span>pe </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>pefile.PE(</span><span style=color:#b8bb26>'cm04.exe'</span><span style=color:#fdf4c1>) </span><span style=color:#928374;font-style:italic># cm04 是C++写的带界面 Hello world，你也可以用计算器，C:\Windows\System32\calc.exe
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(pe.DOS_HEADERS)
+</span></code></pre><p>结果如下<pre style=color:#fdf4c1aa;background-color:#282828><code><span>[IMAGE_DOS_HEADER]
+</span><span>0x0        0x0   e_magic:                       0x5A4D
+</span><span>0x2        0x2   e_cblp:                        0x90
+</span><span>0x4        0x4   e_cp:                          0x3
+</span><span>0x6        0x6   e_crlc:                        0x0
+</span><span>0x8        0x8   e_cparhdr:                     0x4
+</span><span>0xA        0xA   e_minalloc:                    0x0
+</span><span>0xC        0xC   e_maxalloc:                    0xFFFF
+</span><span>0xE        0xE   e_ss:                          0x0
+</span><span>0x10       0x10  e_sp:                          0xB8
+</span><span>0x12       0x12  e_csum:                        0x0
+</span><span>0x14       0x14  e_ip:                          0x0
+</span><span>0x16       0x16  e_cs:                          0x0
+</span><span>0x18       0x18  e_lfarlc:                      0x40
+</span><span>0x1A       0x1A  e_ovno:                        0x0
+</span><span>0x1C       0x1C  e_res:
+</span><span>0x24       0x24  e_oemid:                       0x0
+</span><span>0x26       0x26  e_oeminfo:                     0x0
+</span><span>0x28       0x28  e_res2:
+</span><span>0x3C       0x3C  e_lfanew:                      0x108
+</span></code></pre><p>第一列是文件偏移，第二列是结构内的相对偏移，第三列是字段名，第四列是值。<p>DOS文件头里基本都是为兼容保留的字段，没有我们需要的信息。需要关注的主要是开头的<code>e_magic</code>，固定为<code>0x5A4D</code>，也就是ASCII编码的<code>MZ</code>；还有末尾的<code>e_lfanew</code>，这个字段保存的是NT文件头的文件偏移，对照上文的图片，就是绿色 COFF Header 开头的 Signature。<h3 id=1-4-nt-file-coff-wen-jian-tou>1.4 NT/File/COFF 文件头</h3><p>这部分开始，数据结构定义和上文中的PE文件头图有点差异（主要是字段划分归类上），编程的时候按实际数据结构写，看理论的时候遵照文档说法来灵活理解吧。之后C结构定义在字段归类上也有点差别的。总之，参考字段大小顺序，别太在意结构怎么写的。<p>用 <code>print(pe.NT_HEADERS)</code> 可以看到只输出了一个 Signature。剩余的 COFF Header 可以用 <code>pe.FILE_HEADER</code> 查看（在微软 <a href=https://docs.microsoft.com/en-us/windows/win32/debug/pe-format#file-headers>PE Format 文档</a>中，Signature 不是 COFF File Header 的组成部分，和 Wiki 的图不一致）。<pre style=color:#fdf4c1aa;background-color:#282828><code><span>In [4]: print(pe.FILE_HEADER)
+</span><span>[IMAGE_FILE_HEADER]
+</span><span>0x10C      0x0   Machine:                       0x14C
+</span><span>0x10E      0x2   NumberOfSections:              0x7
+</span><span>0x110      0x4   TimeDateStamp:                 0x61501513 [Sun Sep 26 06:37:07 2021 UTC]
+</span><span>0x114      0x8   PointerToSymbolTable:          0x0
+</span><span>0x118      0xC   NumberOfSymbols:               0x0
+</span><span>0x11C      0x10  SizeOfOptionalHeader:          0xE0
+</span><span>0x11E      0x12  Characteristics:               0x102
+</span></code></pre><p>在这部分文件头中有几个重要字段：<code>NumberOfSections</code>，PE文件中节的数量；以及 <code>Characteristics</code>，16比特标志位字段，标识PE文件的一些基本属性。<a href=https://docs.microsoft.com/en-us/windows/win32/debug/pe-format#characteristics>可用的属性清单链接</a>。<h3 id=1-5-ke-xuan-wen-jian-tou>1.5 可选文件头</h3><p>虽然叫可选文件头（Optional Header），但并不可选。可以照例输出看看。<pre style=color:#fdf4c1aa;background-color:#282828><code><span>In [5]: print(pe.OPTIONAL_HEADER)
+</span><span>[IMAGE_OPTIONAL_HEADER]
+</span><span>0x120      0x0   Magic:                         0x10B
+</span><span>0x122      0x2   MajorLinkerVersion:            0xE
+</span><span>0x123      0x3   MinorLinkerVersion:            0x1D
+</span><span>0x124      0x4   SizeOfCode:                    0x6800
+</span><span>0x128      0x8   SizeOfInitializedData:         0xD000
+</span><span>0x12C      0xC   SizeOfUninitializedData:       0x0
+</span><span>0x130      0x10  AddressOfEntryPoint:           0x1005
+</span><span>0x134      0x14  BaseOfCode:                    0x1000
+</span><span>0x138      0x18  BaseOfData:                    0x8000
+</span><span>0x13C      0x1C  ImageBase:                     0x400000
+</span><span>0x140      0x20  SectionAlignment:              0x1000
+</span><span>0x144      0x24  FileAlignment:                 0x200
+</span><span>0x148      0x28  MajorOperatingSystemVersion:   0x6
+</span><span>0x14A      0x2A  MinorOperatingSystemVersion:   0x0
+</span><span>0x14C      0x2C  MajorImageVersion:             0x0
+</span><span>0x14E      0x2E  MinorImageVersion:             0x0
+</span><span>0x150      0x30  MajorSubsystemVersion:         0x6
+</span><span>0x152      0x32  MinorSubsystemVersion:         0x0
+</span><span>0x154      0x34  Reserved1:                     0x0
+</span><span>0x158      0x38  SizeOfImage:                   0x19000
+</span><span>0x15C      0x3C  SizeOfHeaders:                 0x400
+</span><span>0x160      0x40  CheckSum:                      0x0
+</span><span>0x164      0x44  Subsystem:                     0x2
+</span><span>0x166      0x46  DllCharacteristics:            0x8140
+</span><span>0x168      0x48  SizeOfStackReserve:            0x100000
+</span><span>0x16C      0x4C  SizeOfStackCommit:             0x1000
+</span><span>0x170      0x50  SizeOfHeapReserve:             0x100000
+</span><span>0x174      0x54  SizeOfHeapCommit:              0x1000
+</span><span>0x178      0x58  LoaderFlags:                   0x0
+</span><span>0x17C      0x5C  NumberOfRvaAndSizes:           0x10
+</span></code></pre><p>其中大部分字段要不然是没用到，要不然就是固定值不变。几个值得关注的字段如下。<ul><li><code>Magic</code>，区分 PE32/PE64 格式。微软文档给出的是 <code>0x10b</code> 对应 <code>PE32</code>，<code>0x20b</code> 对应 <code>PE32+</code>。<li><code>AddressOfEntryPoint</code>，二进制文件加载后要执行的第一条指令的地址，程序的入口点，<strong>注意是RVA</strong>。<li><code>ImageBase</code>，偏好的镜像基址。RVA和这个基址相加得到VA。注意因为ASLR的存在，真实基址在运行前并不确定。<li><code>SizeOfImage</code>，镜像的 <em>虚拟大小</em> ，是加载可执行文件到内存时需要申请的内存大小。<li><code>SizeOfHeaders</code>，所有文件头（DOS、NT、COFF、Optional ...）的总大小。<li><code>DLLCharacteristics</code>，各种标志位，最有用的是<code>IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE</code> ，指定镜像基址是否可移动（也就是能不能开启ASLR 基址随机化）。</ul><h2 id=0x02-jia-zai-pe>0x02 加载PE</h2><p>对PE格式有了基本了解后，就可以开始尝试加载 PE 文件到内存里了。<h3 id=2-1-jia-zai-he-nei-cun-chu-shi-hua>2.1 加载和内存初始化</h3><p>PE文件头总是加载到镜像基址处。先写一个简单的C程序，把 PE 文件读取。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;stdio.h>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;stdlib.h>
+</span><span>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;Windows.h>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;winnt.h>
+</span><span>
+</span><span style=color:#fa5c4b>int </span><span style=color:#8ec07c>main</span><span>(</span><span style=color:#fa5c4b>int </span><span style=color:#fdf4c1>argc</span><span>, </span><span style=color:#fa5c4b>char const </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>argv</span><span>[]) {
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(argc </span><span style=color:#fe8019>&lt; </span><span style=color:#d3869b>2</span><span>) {
+</span><span>    </span><span style=color:#fabd2f>printf</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"missing path argument\n"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>1</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  FILE </span><span style=color:#fe8019>*</span><span>exe_file </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>fopen</span><span style=color:#fdf4c1>(argv[</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>], </span><span style=color:#b8bb26>"rb"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(</span><span style=color:#fe8019>!</span><span>exe_file) {
+</span><span>    </span><span style=color:#fabd2f>printf</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"error opening file\n"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>1</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// Get file size : put pointer at the end
+</span><span>  </span><span style=color:#fabd2f>fseek</span><span style=color:#fdf4c1>(exe_file, </span><span style=color:#d3869b>0</span><span style=color:#fa5c4b>L</span><span style=color:#fdf4c1>, SEEK_END)</span><span>;
+</span><span>  </span><span style=color:#928374;font-style:italic>// and read its position
+</span><span>  </span><span style=color:#fa5c4b>long int</span><span> file_size </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>ftell</span><span style=color:#fdf4c1>(exe_file)</span><span>;
+</span><span>  </span><span style=color:#928374;font-style:italic>// put the pointer back at the beginning
+</span><span>  </span><span style=color:#fabd2f>fseek</span><span style=color:#fdf4c1>(exe_file, </span><span style=color:#d3869b>0</span><span style=color:#fa5c4b>L</span><span style=color:#fdf4c1>, SEEK_SET)</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// allocate memory and read the whole file
+</span><span>  </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>exe_file_data </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>malloc</span><span style=color:#fdf4c1>(file_size </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// read whole file
+</span><span>  </span><span style=color:#fabd2f>size_t</span><span> n_read </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>fread</span><span style=color:#fdf4c1>(exe_file_data, </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, file_size, exe_file)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(n_read </span><span style=color:#fe8019>!=</span><span> file_size) {
+</span><span>    </span><span style=color:#fabd2f>printf</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"reading error (</span><span style=color:#fdf4c1>%d</span><span style=color:#b8bb26>)\n"</span><span style=color:#fdf4c1>, n_read)</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>1</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// load the PE in memory
+</span><span>  </span><span style=color:#fabd2f>printf</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"[+] Loading PE file\n"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>;
+</span><span>}
+</span></code></pre><p>先写这么多，内容只有简单地文件IO，读取PE文件到内存，接下来写一个 <code>void* load_PE(char* PE_data)</code> 函数，加载PE文件内容到内存空间，返回加载后的镜像基址。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span style=color:#8ec07c>load_PE</span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>PE_data</span><span>) {
+</span><span>  IMAGE_DOS_HEADER </span><span style=color:#fe8019>*</span><span>p_DOS_header </span><span style=color:#fe8019>= </span><span>(IMAGE_DOS_HEADER </span><span style=color:#fe8019>*</span><span>)PE_data;
+</span><span>  IMAGE_NT_HEADERS </span><span style=color:#fe8019>*</span><span>p_NT_headers </span><span style=color:#fe8019>= </span><span>(IMAGE_NT_HEADERS </span><span style=color:#fe8019>*</span><span>)(PE_data </span><span style=color:#fe8019>+</span><span> p_DOS_header->e_lfanew);
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// extract information from PE header
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> size_of_image </span><span style=color:#fe8019>=</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>SizeOfImage</span><span>;
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> entry_point_RVA </span><span style=color:#fe8019>=</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>AddressOfEntryPoint</span><span>;
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> size_of_headers </span><span style=color:#fe8019>=</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>SizeOfHeaders</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// allocate memory
+</span><span>  </span><span style=color:#928374;font-style:italic>// https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualalloc
+</span><span>  </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>p_image_base </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>)</span><span style=color:#fdf4c1>VirtualAlloc(</span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>, size_of_image, MEM_RESERVE </span><span style=color:#fe8019>|</span><span style=color:#fdf4c1> MEM_COMMIT, PAGE_READWRITE)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(p_image_base </span><span style=color:#fe8019>== </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>NULL</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// copy PE headers in memory
+</span><span>  </span><span style=color:#fabd2f>memcpy</span><span style=color:#fdf4c1>(p_image_base, PE_data, size_of_headers)</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// Section headers starts right after the IMAGE_NT_HEADERS struct, so we do some pointer arithmetic-fu here.
+</span><span>  IMAGE_SECTION_HEADER </span><span style=color:#fe8019>*</span><span>sections </span><span style=color:#fe8019>= </span><span>(IMAGE_SECTION_HEADER </span><span style=color:#fe8019>*</span><span>)(p_NT_headers </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span>);
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; i </span><span style=color:#fe8019>&lt;</span><span> p_NT_headers->FileHeader.</span><span style=color:#fdf4c1>NumberOfSections</span><span>; i</span><span style=color:#fe8019>++</span><span>) {
+</span><span>    </span><span style=color:#928374;font-style:italic>// calculate the VA we need to copy the content, from the RVA
+</span><span>    </span><span style=color:#928374;font-style:italic>// section[i].VirtualAddress is a RVA, mind it
+</span><span>    </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>dest </span><span style=color:#fe8019>=</span><span> p_image_base </span><span style=color:#fe8019>+</span><span> sections[i].</span><span style=color:#fdf4c1>VirtualAddress</span><span>;
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// check if there is Raw data to copy
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>(sections[i].</span><span style=color:#fdf4c1>SizeOfRawData </span><span style=color:#fe8019>> </span><span style=color:#d3869b>0</span><span>) {
+</span><span>      </span><span style=color:#928374;font-style:italic>// We copy SizeOfRaw data bytes, from the offset PointerToRawData in the file
+</span><span>      </span><span style=color:#fabd2f>memcpy</span><span style=color:#fdf4c1>(dest, PE_data </span><span style=color:#fe8019>+</span><span style=color:#fdf4c1> sections[i].PointerToRawData, sections[i].SizeOfRawData)</span><span>;
+</span><span>    } </span><span style=color:#fa5c4b>else </span><span>{
+</span><span>      </span><span style=color:#fabd2f>memset</span><span style=color:#fdf4c1>(dest, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, sections[i].Misc.VirtualSize)</span><span>;
+</span><span>    }
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>return</span><span> p_image_base;
+</span><span>}
+</span></code></pre><p>前几句赋值都是在用指针运算取PE文件头里的字段。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span>  IMAGE_DOS_HEADER </span><span style=color:#fe8019>*</span><span>p_DOS_header </span><span style=color:#fe8019>= </span><span>(IMAGE_DOS_HEADER </span><span style=color:#fe8019>*</span><span>)PE_data;
+</span><span>  IMAGE_NT_HEADERS </span><span style=color:#fe8019>*</span><span>p_NT_headers </span><span style=color:#fe8019>= </span><span>(IMAGE_NT_HEADERS </span><span style=color:#fe8019>*</span><span>)(PE_data </span><span style=color:#fe8019>+</span><span> p_DOS_header->e_lfanew);
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// extract information from PE header
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> size_of_image </span><span style=color:#fe8019>=</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>SizeOfImage</span><span>;
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> entry_point_RVA </span><span style=color:#fe8019>=</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>AddressOfEntryPoint</span><span>;
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> size_of_headers </span><span style=color:#fe8019>=</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>SizeOfHeaders</span><span>;
+</span></code></pre><p>先提取了 DOS 文件头和 NT 文件头（注意， File Header 和 Optional Header 都嵌在 NT 文件头结构里，这就是为啥我说结构定义会和上面的 wiki 图不大一样）。接着从文件头结构里取镜像大小、入口点RVA、文件头总大小，用于后续分配内存和指针运算。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span>  </span><span style=color:#928374;font-style:italic>// allocate memory
+</span><span>  </span><span style=color:#928374;font-style:italic>// https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualalloc
+</span><span>  </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>p_image_base </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>)</span><span style=color:#fdf4c1>VirtualAlloc(</span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>, size_of_image, MEM_RESERVE </span><span style=color:#fe8019>|</span><span style=color:#fdf4c1> MEM_COMMIT, PAGE_READWRITE)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(p_image_base </span><span style=color:#fe8019>== </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>NULL</span><span>;
+</span><span>  }
+</span></code></pre><p>紧接着用 Win32 API 分配了一片内存空间，大小由 PE 文件头的镜像大小指定。用这个API的原因是之后我们需要设置这片内存为可执行。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span>  </span><span style=color:#928374;font-style:italic>// copy PE headers in memory
+</span><span>  </span><span style=color:#fdf4c1>memcpy(p_image_base, PE_data, size_of_headers)</span><span>;
+</span></code></pre><p>PE文件头总是在镜像基址开始的位置，直接复制过去。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span>  </span><span style=color:#928374;font-style:italic>// Section headers starts right after the IMAGE_NT_HEADERS struct, so we do some pointer arithmetic-fu here.
+</span><span>  IMAGE_SECTION_HEADER </span><span style=color:#fe8019>*</span><span>sections </span><span style=color:#fe8019>= </span><span>(IMAGE_SECTION_HEADER </span><span style=color:#fe8019>*</span><span>)(p_NT_headers </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span>);
+</span></code></pre><p>取巧的方式获得节表指针。这是个简单的c指针运算，<code>p_NT_headers+1</code>其实就是<code>(char*)p_NT_headers + sizeof(IMAGE_NT_HEADERS)</code>，也就是NT_HEADERS 结构紧邻的下一个字节。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span>  </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; i </span><span style=color:#fe8019>&lt;</span><span> p_NT_headers->FileHeader.</span><span style=color:#fdf4c1>NumberOfSections</span><span>; i</span><span style=color:#fe8019>++</span><span>) {
+</span><span>    </span><span style=color:#928374;font-style:italic>// calculate the VA we need to copy the content, from the RVA
+</span><span>    </span><span style=color:#928374;font-style:italic>// section[i].VirtualAddress is a RVA, mind it
+</span><span>    </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>dest </span><span style=color:#fe8019>=</span><span> p_image_base </span><span style=color:#fe8019>+</span><span> sections[i].</span><span style=color:#fdf4c1>VirtualAddress</span><span>;
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// check if there is Raw data to copy
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>(sections[i].</span><span style=color:#fdf4c1>SizeOfRawData </span><span style=color:#fe8019>> </span><span style=color:#d3869b>0</span><span>) {
+</span><span>      </span><span style=color:#928374;font-style:italic>// We copy SizeOfRaw data bytes, from the offset PointerToRawData in the file
+</span><span>      </span><span style=color:#fabd2f>memcpy</span><span style=color:#fdf4c1>(dest, PE_data </span><span style=color:#fe8019>+</span><span style=color:#fdf4c1> sections[i].PointerToRawData, sections[i].SizeOfRawData)</span><span>;
+</span><span>    } </span><span style=color:#fa5c4b>else </span><span>{
+</span><span>      </span><span style=color:#fabd2f>memset</span><span style=color:#fdf4c1>(dest, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, sections[i].Misc.VirtualSize)</span><span>;
+</span><span>    }
+</span><span>  }
+</span></code></pre><p>接着就是遍历节表，取节的基地址，PE文件中节包含数据的话，就复制节数据到内存，否则把节初始化为0。<p>接着补充可执行权限。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span>  </span><span style=color:#928374;font-style:italic>// Set permission for the PE hader to read only
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> oldProtect;
+</span><span>  </span><span style=color:#fdf4c1>VirtualProtect(p_image_base, p_NT_headers->OptionalHeader.SizeOfHeaders, PAGE_READONLY, </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>oldProtect)</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; i </span><span style=color:#fe8019>&lt;</span><span> p_NT_headers->FileHeader.</span><span style=color:#fdf4c1>NumberOfSections</span><span>; </span><span style=color:#fe8019>++</span><span>i) {
+</span><span>    </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>dest </span><span style=color:#fe8019>=</span><span> p_image_base </span><span style=color:#fe8019>+</span><span> sections[i].</span><span style=color:#fdf4c1>VirtualAddress</span><span>;
+</span><span>    </span><span style=color:#fabd2f>DWORD</span><span> s_perm </span><span style=color:#fe8019>=</span><span> sections[i].</span><span style=color:#fdf4c1>Characteristics</span><span>;
+</span><span>    </span><span style=color:#fabd2f>DWORD</span><span> v_perm </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#928374;font-style:italic>// flags are not the same between virtal protect and the section header
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>(s_perm </span><span style=color:#fe8019>&</span><span> IMAGE_SCN_MEM_EXECUTE) {
+</span><span>      v_perm </span><span style=color:#fe8019>= </span><span>(s_perm </span><span style=color:#fe8019>&</span><span> IMAGE_SCN_MEM_WRITE) </span><span style=color:#fe8019>?</span><span> PAGE_EXECUTE_READWRITE </span><span style=color:#fe8019>:</span><span> PAGE_EXECUTE_READ;
+</span><span>    } </span><span style=color:#fa5c4b>else </span><span>{
+</span><span>      v_perm </span><span style=color:#fe8019>= </span><span>(s_perm </span><span style=color:#fe8019>&</span><span> IMAGE_SCN_MEM_WRITE) </span><span style=color:#fe8019>?</span><span> PAGE_READWRITE </span><span style=color:#fe8019>:</span><span> PAGE_READONLY;
+</span><span>    }
+</span><span>    </span><span style=color:#fdf4c1>VirtualProtect(dest, sections[i].Misc.VirtualSize, v_perm, </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>oldProtect)</span><span>;
+</span><span>  }
+</span></code></pre><p>先把整个PE头设置为只读，然后遍历节表，取节基地址和标志位。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#fa5c4b>if </span><span>(s_perm </span><span style=color:#fe8019>&</span><span> IMAGE_SCN_MEM_EXECUTE) {
+</span><span>    v_perm </span><span style=color:#fe8019>= </span><span>(s_perm </span><span style=color:#fe8019>&</span><span> IMAGE_SCN_MEM_WRITE) </span><span style=color:#fe8019>?</span><span> PAGE_EXECUTE_READWRITE </span><span style=color:#fe8019>:</span><span> PAGE_EXECUTE_READ;
+</span><span>}
+</span></code></pre><p>根据PE头中节的可写、可执行标志位，设置内存空间保护方式。<p>最后返回入口点地址，在 main 函数里跳转。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span>  </span><span style=color:#fa5c4b>return </span><span>(</span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> entry_point_RVA);
+</span></code></pre><p>完整代码如下。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;stdio.h>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;stdlib.h>
+</span><span>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;Windows.h>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;winnt.h>
+</span><span>
+</span><span style=color:#fa5c4b>int </span><span style=color:#8ec07c>main</span><span>(</span><span style=color:#fa5c4b>int </span><span style=color:#fdf4c1>argc</span><span>, </span><span style=color:#fa5c4b>char const </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>argv</span><span>[]) {
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(argc </span><span style=color:#fe8019>&lt; </span><span style=color:#d3869b>2</span><span>) {
+</span><span>    </span><span style=color:#fabd2f>printf</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"missing path argument\n"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>1</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  FILE </span><span style=color:#fe8019>*</span><span>exe_file </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>fopen</span><span style=color:#fdf4c1>(argv[</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>], </span><span style=color:#b8bb26>"rb"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(</span><span style=color:#fe8019>!</span><span>exe_file) {
+</span><span>    </span><span style=color:#fabd2f>printf</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"error opening file\n"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>1</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// Get file size : put pointer at the end
+</span><span>  </span><span style=color:#fabd2f>fseek</span><span style=color:#fdf4c1>(exe_file, </span><span style=color:#d3869b>0</span><span style=color:#fa5c4b>L</span><span style=color:#fdf4c1>, SEEK_END)</span><span>;
+</span><span>  </span><span style=color:#928374;font-style:italic>// and read its position
+</span><span>  </span><span style=color:#fa5c4b>long int</span><span> file_size </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>ftell</span><span style=color:#fdf4c1>(exe_file)</span><span>;
+</span><span>  </span><span style=color:#928374;font-style:italic>// put the pointer back at the beginning
+</span><span>  </span><span style=color:#fabd2f>fseek</span><span style=color:#fdf4c1>(exe_file, </span><span style=color:#d3869b>0</span><span style=color:#fa5c4b>L</span><span style=color:#fdf4c1>, SEEK_SET)</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// allocate memory and read the whole file
+</span><span>  </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>exe_file_data </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>malloc</span><span style=color:#fdf4c1>(file_size </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// read whole file
+</span><span>  </span><span style=color:#fabd2f>size_t</span><span> n_read </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>fread</span><span style=color:#fdf4c1>(exe_file_data, </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, file_size, exe_file)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(n_read </span><span style=color:#fe8019>!=</span><span> file_size) {
+</span><span>    </span><span style=color:#fabd2f>printf</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"reading error (</span><span style=color:#fdf4c1>%d</span><span style=color:#b8bb26>)\n"</span><span style=color:#fdf4c1>, n_read)</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>1</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// load the PE in memory
+</span><span>  </span><span style=color:#fabd2f>printf</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"[+] Loading PE file\n"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>;
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span style=color:#8ec07c>load_PE</span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>PE_data</span><span>) {
+</span><span>  IMAGE_DOS_HEADER </span><span style=color:#fe8019>*</span><span>p_DOS_header </span><span style=color:#fe8019>= </span><span>(IMAGE_DOS_HEADER </span><span style=color:#fe8019>*</span><span>)PE_data;
+</span><span>  IMAGE_NT_HEADERS </span><span style=color:#fe8019>*</span><span>p_NT_headers </span><span style=color:#fe8019>= </span><span>(IMAGE_NT_HEADERS </span><span style=color:#fe8019>*</span><span>)(PE_data </span><span style=color:#fe8019>+</span><span> p_DOS_header->e_lfanew);
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// extract information from PE header
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> size_of_image </span><span style=color:#fe8019>=</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>SizeOfImage</span><span>;
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> entry_point_RVA </span><span style=color:#fe8019>=</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>AddressOfEntryPoint</span><span>;
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> size_of_headers </span><span style=color:#fe8019>=</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>SizeOfHeaders</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// allocate memory
+</span><span>  </span><span style=color:#928374;font-style:italic>// https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualalloc
+</span><span>  </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>p_image_base </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>)</span><span style=color:#fdf4c1>VirtualAlloc(</span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>, size_of_image, MEM_RESERVE </span><span style=color:#fe8019>|</span><span style=color:#fdf4c1> MEM_COMMIT, PAGE_READWRITE)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(p_image_base </span><span style=color:#fe8019>== </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>NULL</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// copy PE headers in memory
+</span><span>  </span><span style=color:#fabd2f>memcpy</span><span style=color:#fdf4c1>(p_image_base, PE_data, size_of_headers)</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// Section headers starts right after the IMAGE_NT_HEADERS struct, so we do some pointer arithmetic-fu here.
+</span><span>  IMAGE_SECTION_HEADER </span><span style=color:#fe8019>*</span><span>sections </span><span style=color:#fe8019>= </span><span>(IMAGE_SECTION_HEADER </span><span style=color:#fe8019>*</span><span>)(p_NT_headers </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span>);
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; i </span><span style=color:#fe8019>&lt;</span><span> p_NT_headers->FileHeader.</span><span style=color:#fdf4c1>NumberOfSections</span><span>; i</span><span style=color:#fe8019>++</span><span>) {
+</span><span>    </span><span style=color:#928374;font-style:italic>// calculate the VA we need to copy the content, from the RVA
+</span><span>    </span><span style=color:#928374;font-style:italic>// section[i].VirtualAddress is a RVA, mind it
+</span><span>    </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>dest </span><span style=color:#fe8019>=</span><span> p_image_base </span><span style=color:#fe8019>+</span><span> sections[i].</span><span style=color:#fdf4c1>VirtualAddress</span><span>;
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// check if there is Raw data to copy
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>(sections[i].</span><span style=color:#fdf4c1>SizeOfRawData </span><span style=color:#fe8019>> </span><span style=color:#d3869b>0</span><span>) {
+</span><span>      </span><span style=color:#928374;font-style:italic>// We copy SizeOfRaw data bytes, from the offset PointerToRawData in the file
+</span><span>      </span><span style=color:#fabd2f>memcpy</span><span style=color:#fdf4c1>(dest, PE_data </span><span style=color:#fe8019>+</span><span style=color:#fdf4c1> sections[i].PointerToRawData, sections[i].SizeOfRawData)</span><span>;
+</span><span>    } </span><span style=color:#fa5c4b>else </span><span>{
+</span><span>      </span><span style=color:#fabd2f>memset</span><span style=color:#fdf4c1>(dest, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, sections[i].Misc.VirtualSize)</span><span>;
+</span><span>    }
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// Set permission for the PE hader to read only
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> oldProtect;
+</span><span>  </span><span style=color:#fdf4c1>VirtualProtect(p_image_base, p_NT_headers->OptionalHeader.SizeOfHeaders, PAGE_READONLY, </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>oldProtect)</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; i </span><span style=color:#fe8019>&lt;</span><span> p_NT_headers->FileHeader.</span><span style=color:#fdf4c1>NumberOfSections</span><span>; </span><span style=color:#fe8019>++</span><span>i) {
+</span><span>    </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>dest </span><span style=color:#fe8019>=</span><span> p_image_base </span><span style=color:#fe8019>+</span><span> sections[i].</span><span style=color:#fdf4c1>VirtualAddress</span><span>;
+</span><span>    </span><span style=color:#fabd2f>DWORD</span><span> s_perm </span><span style=color:#fe8019>=</span><span> sections[i].</span><span style=color:#fdf4c1>Characteristics</span><span>;
+</span><span>    </span><span style=color:#fabd2f>DWORD</span><span> v_perm </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#928374;font-style:italic>// flags are not the same between virtal protect and the section header
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>(s_perm </span><span style=color:#fe8019>&</span><span> IMAGE_SCN_MEM_EXECUTE) {
+</span><span>      v_perm </span><span style=color:#fe8019>= </span><span>(s_perm </span><span style=color:#fe8019>&</span><span> IMAGE_SCN_MEM_WRITE) </span><span style=color:#fe8019>?</span><span> PAGE_EXECUTE_READWRITE </span><span style=color:#fe8019>:</span><span> PAGE_EXECUTE_READ;
+</span><span>    } </span><span style=color:#fa5c4b>else </span><span>{
+</span><span>      v_perm </span><span style=color:#fe8019>= </span><span>(s_perm </span><span style=color:#fe8019>&</span><span> IMAGE_SCN_MEM_WRITE) </span><span style=color:#fe8019>?</span><span> PAGE_READWRITE </span><span style=color:#fe8019>:</span><span> PAGE_READONLY;
+</span><span>    }
+</span><span>    </span><span style=color:#fdf4c1>VirtualProtect(dest, sections[i].Misc.VirtualSize, v_perm, </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>oldProtect)</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>return </span><span>(</span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> entry_point_RVA);
+</span><span>}
+</span><span>
+</span></code></pre><p>到此，看起来这个加载其他程序运行的程序可以运行了，但其实还不行。其主要原因之一就是缺乏必要的导入信息。下文详述。<h2 id=0x03-dao-ru-biao>0x03 导入表</h2><h3 id=3-1-dao-ru-biao-jie-shao>3.1 导入表介绍</h3><p>在Windows上，每个可执行文件（.exe）都需要一些外部函数来支持其正常运作。这些外部函数通常在我们熟悉的<code>.dll</code>文件里。举例来说，<code>calc.exe</code>（计算器程序）需要外部函数来支持打开窗口、显示按钮等。<p>以<code>ShellExecuteW</code>为例（在<code>calc.exe</code>计算器中被导入），<code>calc.exe</code>需要这个函数来支持它正常工作（当然，<code>calc.exe</code>需要不止这一个外部函数），所以<code>calc.exe</code>需要知道<code>ShellExecuteW</code>这个函数的代码（机器码）在哪儿。<p>但事实上，<code>.dll</code> 只会在运行时被加载，而且加载后在内存中的位置并不确定。这意味着编译器编译时无从得知<code>ShellExecuteW</code>的地址（开启ASLR的话就更不可能了），也就无法给调用该函数的<code>call</code>指令提供正确的立即数地址。<p>这就是为什么编译器要创建导入表，因为它期望一旦动态链接库加载完成，它就可以查找到<code>ShellExecuteW</code>的地址，并在需要的时候调用。<p>在调试器里，我们可以看到这样的汇编指令。<p><img alt="import address table" src=https://nnnewb.github.io/posts/2021/learning-packer-01/call_IAT.webp><p>第一条<code>call</code>指令是内部调用，调用对象是同一个模块内的函数。编译器知道被调用函数的地址，并使用<code>E8</code> opcode 。这表示 <em>relative call</em> 。当调用外部模块时，它调用了从IAT读取的地址，也就是图中<code>ds:[&lt;&ShellExecuteW>]</code>。<p>x86 的 call 分 4 类。<ul><li>Near, relative (opcode E8) (<code>call func</code>)<li>Far, absolute (opcode 9A) (<code>call  0x12:0x12345678</code>)<li>Near, absolute, indirect (opcode FF /2) (<code>call [edi]</code>)<li>Far, absolute, indirect (opcode FF /3) (<code>call far [edi]</code>)</ul><p>具体问搜索引擎。<p>补充，函数可以通过名字（ASCII编码的C字符串）或DLL导出表中的序号 <em>ordinal</em> 导入。<h3 id=3-2-data-directory-he-idt>3.2 Data Directory 和 IDT</h3><p>说了这么多IAT，那么IAT到底在哪儿？以什么形式保存？还是用<code>pefile</code>，先看看 PE 文件头中的 <code>OPTIONAL_HEADER .DATA_DIRECTORY</code>。<pre style=color:#fdf4c1aa;background-color:#282828><code><span>In [10]: pe.OPTIONAL_HEADER.DATA_DIRECTORY
+</span><span>Out[10]:
+</span><span>[&lt;Structure: [IMAGE_DIRECTORY_ENTRY_EXPORT] 0x180 0x0 VirtualAddress: 0x0 0x184 0x4 Size: 0x0>,
+</span><span> &lt;Structure: [IMAGE_DIRECTORY_ENTRY_IMPORT] 0x188 0x0 VirtualAddress: 0xDAA0 0x18C 0x4 Size: 0xC8>,
+</span><span> &lt;Structure: [IMAGE_DIRECTORY_ENTRY_RESOURCE] 0x190 0x0 VirtualAddress: 0x16000 0x194 0x4 Size: 0x5D0>,
+</span><span> &lt;Structure: [IMAGE_DIRECTORY_ENTRY_EXCEPTION] 0x198 0x0 VirtualAddress: 0x0 0x19C 0x4 Size: 0x0>,
+</span><span> &lt;Structure: [IMAGE_DIRECTORY_ENTRY_SECURITY] 0x1A0 0x0 VirtualAddress: 0x0 0x1A4 0x4 Size: 0x0>,
+</span><span> &lt;Structure: [IMAGE_DIRECTORY_ENTRY_BASERELOC] 0x1A8 0x0 VirtualAddress: 0x17000 0x1AC 0x4 Size: 0xE0C>,
+</span><span> &lt;Structure: [IMAGE_DIRECTORY_ENTRY_DEBUG] 0x1B0 0x0 VirtualAddress: 0x98E0 0x1B4 0x4 Size: 0x38>,
+</span><span> &lt;Structure: [IMAGE_DIRECTORY_ENTRY_COPYRIGHT] 0x1B8 0x0 VirtualAddress: 0x0 0x1BC 0x4 Size: 0x0>,
+</span><span> &lt;Structure: [IMAGE_DIRECTORY_ENTRY_GLOBALPTR] 0x1C0 0x0 VirtualAddress: 0x0 0x1C4 0x4 Size: 0x0>,
+</span><span> &lt;Structure: [IMAGE_DIRECTORY_ENTRY_TLS] 0x1C8 0x0 VirtualAddress: 0x0 0x1CC 0x4 Size: 0x0>,
+</span><span> &lt;Structure: [IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG] 0x1D0 0x0 VirtualAddress: 0x9918 0x1D4 0x4 Size: 0x40>,
+</span><span> &lt;Structure: [IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT] 0x1D8 0x0 VirtualAddress: 0x0 0x1DC 0x4 Size: 0x0>,
+</span><span> &lt;Structure: [IMAGE_DIRECTORY_ENTRY_IAT] 0x1E0 0x0 VirtualAddress: 0xD000 0x1E4 0x4 Size: 0xAA0>,
+</span><span> &lt;Structure: [IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT] 0x1E8 0x0 VirtualAddress: 0x0 0x1EC 0x4 Size: 0x0>,
+</span><span> &lt;Structure: [IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR] 0x1F0 0x0 VirtualAddress: 0x0 0x1F4 0x4 Size: 0x0>,
+</span><span> &lt;Structure: [IMAGE_DIRECTORY_ENTRY_RESERVED] 0x1F8 0x0 VirtualAddress: 0x0 0x1FC 0x4 Size: 0x0>]
+</span></code></pre><p><code>Data directory</code> 实际就是15个结构组成的数组（忽略最后一个reserved），每个结构包含对应的RVA地址和大小（RVA和大小的具体含义之后讨论）。这个结构里我们关注的有<code>IMAGE_DIRECTORY_ENTRY_IMPORT</code>和<code>IMAGE_DIRECTORY_ENTRY_IAT</code>，分别指向的是 <em>Import Directory Table</em> ，<em>IDT</em> ，和 <em>Import Address Table</em> ， <em>IAT</em> 。<p>基本是，我们可以这么说， <em>IDT</em> 指示需要导入哪些函数，这些函数导入后，地址存入 <em>IAT</em> 。 <em>IDT</em> 是我们要导入什么， <em>IAT</em> 是我们导入后把地址放在哪儿。<p><img alt=IDT-IAT src=https://nnnewb.github.io/posts/2021/learning-packer-01/IDT-IAT.drawio.webp><p><em>Import Directory</em> 指向的是一个 <code>NULL</code> 结尾的<code>IMAGE_IMPORT_DESCRIPTOR</code>结构数组。之后在代码里会用到。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#fa5c4b>typedef struct</span><span> _IMAGE_IMPORT_DESCRIPTOR
+</span><span>{ _ANONYMOUS_UNION </span><span style=color:#fa5c4b>union
+</span><span>  { </span><span style=color:#fabd2f>DWORD</span><span>         Characteristics;
+</span><span>    </span><span style=color:#fabd2f>DWORD</span><span>         OriginalFirstThunk; </span><span style=color:#928374;font-style:italic>// pointer to dword[]
+</span><span>  }         DUMMYUNIONNAME;
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span>         TimeDateStamp;
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span>         ForwarderChain;
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span>         Name; </span><span style=color:#928374;font-style:italic>// pointer to dll name
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span>         FirstThunk; </span><span style=color:#928374;font-style:italic>// pointer to dword[]
+</span><span>} IMAGE_IMPORT_DESCRIPTOR, </span><span style=color:#fe8019>*</span><span style=color:#8ec07c>PIMAGE_IMPORT_DESCRIPTOR</span><span>;
+</span></code></pre><p><code>OriginalFirstThunk</code> 和 <code>FirstThunk</code> 都是指向一个 NULL 结尾的 DWORD 数组。<code>OriginalFirstThunk</code> 是指向 <em>IDT</em> <code>DWORD</code> 数组的 RVA 指针。<p>其中数组元素：<ul><li>如果首比特是1，则这个DWORD是 <em>ordinal</em> ，函数的导出表序号。<li>否则是指向 <code>IMAGE_IMPORT_BY_NAME</code> 结构的 RVA 地址。</ul><p><code>FirstThunk</code>指向的是 <em>IAT</em> ，和 <em>IDT</em> 结构相同，当我们得到导入函数的地址后，需要把地址放进 <em>IDT</em> 对应的 <em>IAT</em> 中。<h3 id=3-3-tian-chong-dao-ru-biao>3.3 填充导入表</h3><p>下面实际编写一下填充 <em>IAT</em> 的代码。要注意填充 IAT 的代码必须在加载 PE 头和 Sections 之后，早于设置内存保护执行。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span>  IMAGE_DATA_DIRECTORY </span><span style=color:#fe8019>*</span><span>data_directory </span><span style=color:#fe8019>=</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>DataDirectory</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// load the address of the import descriptors array
+</span><span>  IMAGE_IMPORT_DESCRIPTOR </span><span style=color:#fe8019>*</span><span>import_descriptors </span><span style=color:#fe8019>=
+</span><span>      (IMAGE_IMPORT_DESCRIPTOR </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> data_directory[IMAGE_DIRECTORY_ENTRY_IMPORT].</span><span style=color:#fdf4c1>VirtualAddress</span><span>);
+</span></code></pre><p>从文件头提取到 Import Directory 的地址（RVA）后，和镜像基址相加算出实际结构地址。接下来开始遍历这个结构。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span>  </span><span style=color:#928374;font-style:italic>// this array is null terminated
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; import_descriptors[i].</span><span style=color:#fdf4c1>OriginalFirstThunk </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#fe8019>++</span><span>i) {
+</span></code></pre><p>注意此处所说的 <em>null terminated</em> 指的是最后一个数组元素填充了0，故用 <code>OriginalFirstThunk</code> 判断。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#928374;font-style:italic>// Get the name of the dll, and import it
+</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>module_name </span><span style=color:#fe8019>=</span><span> p_image_base </span><span style=color:#fe8019>+</span><span> import_descriptors[i].</span><span style=color:#fdf4c1>Name</span><span>;
+</span><span style=color:#fabd2f>HMODULE</span><span> import_module </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>LoadLibraryA(module_name)</span><span>;
+</span><span style=color:#fa5c4b>if </span><span>(import_module </span><span style=color:#fe8019>== </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>    </span><span style=color:#fabd2f>printf</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"import module is null"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>    </span><span style=color:#fabd2f>abort</span><span style=color:#fdf4c1>()</span><span>;
+</span><span>}
+</span></code></pre><p><code>import_descriptors[i].Name</code> 依然是一个 RVA，指向常量字符串。在这一步之前必须先完成 section 加载，不然取不到字符串。这里用 <code>LoadLibraryA</code> 加载了 DLL 到内存。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#928374;font-style:italic>// the lookup table points to function names or ordinals => it is the IDT
+</span><span>IMAGE_THUNK_DATA </span><span style=color:#fe8019>*</span><span>lookup_table </span><span style=color:#fe8019>= </span><span>(IMAGE_THUNK_DATA </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> import_descriptors[i].</span><span style=color:#fdf4c1>OriginalFirstThunk</span><span>);
+</span></code></pre><p>接着取 <code>OriginalFirstThunk</code> 转为 <code>IMAGE_THUNK_DATA</code> 指针，这就是 <em>IDT</em> 了。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#928374;font-style:italic>// the address table is a copy of the lookup table at first
+</span><span style=color:#928374;font-style:italic>// but we put the addresses of the loaded function inside => that's the IAT
+</span><span>IMAGE_THUNK_DATA </span><span style=color:#fe8019>*</span><span>address_table </span><span style=color:#fe8019>= </span><span>(IMAGE_THUNK_DATA </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> import_descriptors[i].</span><span style=color:#fdf4c1>FirstThunk</span><span>);
+</span></code></pre><p>再取 <code>FirstThunk</code> 转为 <code>IMAGE_THUNK_DATA</code> 指针，这是 <em>IAT</em>，之后加载的函数地址会存放到这里。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#928374;font-style:italic>// null terminated array, again
+</span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; lookup_table[i].</span><span style=color:#fdf4c1>u1</span><span>.</span><span style=color:#fdf4c1>AddressOfData </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#fe8019>++</span><span>i)
+</span></code></pre><p>然后遍历 <em>IDT</em> ，和遍历 <code>import_descriptors</code> 时一样，注意 <code>null terminated</code> 指的是最后一个元素用0填充。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span>function_handle </span><span style=color:#fe8019>= </span><span style=color:#d3869b>NULL</span><span>;
+</span><span>
+</span><span style=color:#928374;font-style:italic>// Check the lookup table for the adresse of the function name to import
+</span><span style=color:#fabd2f>DWORD</span><span> lookup_addr </span><span style=color:#fe8019>=</span><span> lookup_table[i].</span><span style=color:#fdf4c1>u1</span><span>.</span><span style=color:#fdf4c1>AddressOfData</span><span>;
+</span><span>
+</span><span style=color:#fa5c4b>if </span><span>((lookup_addr </span><span style=color:#fe8019>&</span><span> IMAGE_ORDINAL_FLAG) </span><span style=color:#fe8019>== </span><span style=color:#d3869b>0</span><span>) { </span><span style=color:#928374;font-style:italic>// if first bit is not 1
+</span><span>    </span><span style=color:#928374;font-style:italic>// import by name : get the IMAGE_IMPORT_BY_NAME struct
+</span><span>    IMAGE_IMPORT_BY_NAME </span><span style=color:#fe8019>*</span><span>image_import </span><span style=color:#fe8019>= </span><span>(IMAGE_IMPORT_BY_NAME </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> lookup_addr);
+</span><span>    </span><span style=color:#928374;font-style:italic>// this struct points to the ASCII function name
+</span><span>    </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>funct_name </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>)</span><span style=color:#fe8019>&</span><span>(image_import->Name);
+</span><span>    </span><span style=color:#928374;font-style:italic>// get that function address from it's module and name
+</span><span>    function_handle </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span>)</span><span style=color:#fdf4c1>GetProcAddress(import_module, funct_name)</span><span>;
+</span><span>} </span><span style=color:#fa5c4b>else </span><span>{
+</span><span>    </span><span style=color:#928374;font-style:italic>// import by ordinal, directly
+</span><span>    function_handle </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span>)</span><span style=color:#fdf4c1>GetProcAddress(import_module, (</span><span style=color:#fabd2f>LPSTR</span><span style=color:#fdf4c1>)lookup_addr)</span><span>;
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>if </span><span>(function_handle </span><span style=color:#fe8019>== </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>    </span><span style=color:#fabd2f>printf</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"function handle is null"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>    </span><span style=color:#fabd2f>abort</span><span style=color:#fdf4c1>()</span><span>;
+</span><span>}
+</span><span>
+</span><span style=color:#928374;font-style:italic>// change the IAT, and put the function address inside.
+</span><span>address_table[i].</span><span style=color:#fdf4c1>u1</span><span>.</span><span style=color:#fdf4c1>Function </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fabd2f>DWORD</span><span>)function_handle;
+</span></code></pre><p>对每个 <em>IDT</em> 元素，根据 <em>IDT</em> 中保存的元素确定加载方式（字符串或者 <em>ordinal</em>），调用 <code>GetProcAddress</code> 加载后的地址存入 <em>IAT</em> 。<p>至此，<em>IAT</em> 填充完成。<p>完整代码如下。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>fix_iat</span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>p_image_base</span><span>, IMAGE_NT_HEADERS </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>p_NT_headers</span><span>) {
+</span><span>  IMAGE_DATA_DIRECTORY </span><span style=color:#fe8019>*</span><span>data_directory </span><span style=color:#fe8019>=</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>DataDirectory</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// load the address of the import descriptors array
+</span><span>  IMAGE_IMPORT_DESCRIPTOR </span><span style=color:#fe8019>*</span><span>import_descriptors </span><span style=color:#fe8019>=
+</span><span>      (IMAGE_IMPORT_DESCRIPTOR </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> data_directory[IMAGE_DIRECTORY_ENTRY_IMPORT].</span><span style=color:#fdf4c1>VirtualAddress</span><span>);
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// this array is null terminated
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; import_descriptors[i].</span><span style=color:#fdf4c1>OriginalFirstThunk </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#fe8019>++</span><span>i) {
+</span><span>    </span><span style=color:#928374;font-style:italic>// Get the name of the dll, and import it
+</span><span>    </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>module_name </span><span style=color:#fe8019>=</span><span> p_image_base </span><span style=color:#fe8019>+</span><span> import_descriptors[i].</span><span style=color:#fdf4c1>Name</span><span>;
+</span><span>    </span><span style=color:#fabd2f>HMODULE</span><span> import_module </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>LoadLibraryA(module_name)</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>(import_module </span><span style=color:#fe8019>== </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>      </span><span style=color:#fabd2f>printf</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"import module is null"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>      </span><span style=color:#fabd2f>abort</span><span style=color:#fdf4c1>()</span><span>;
+</span><span>    }
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// the lookup table points to function names or ordinals => it is the IDT
+</span><span>    IMAGE_THUNK_DATA </span><span style=color:#fe8019>*</span><span>lookup_table </span><span style=color:#fe8019>= </span><span>(IMAGE_THUNK_DATA </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> import_descriptors[i].</span><span style=color:#fdf4c1>OriginalFirstThunk</span><span>);
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// the address table is a copy of the lookup table at first
+</span><span>    </span><span style=color:#928374;font-style:italic>// but we put the addresses of the loaded function inside => that's the IAT
+</span><span>    IMAGE_THUNK_DATA </span><span style=color:#fe8019>*</span><span>address_table </span><span style=color:#fe8019>= </span><span>(IMAGE_THUNK_DATA </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> import_descriptors[i].</span><span style=color:#fdf4c1>FirstThunk</span><span>);
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// null terminated array, again
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; lookup_table[i].</span><span style=color:#fdf4c1>u1</span><span>.</span><span style=color:#fdf4c1>AddressOfData </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#fe8019>++</span><span>i) {
+</span><span>      </span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span>function_handle </span><span style=color:#fe8019>= </span><span style=color:#d3869b>NULL</span><span>;
+</span><span>
+</span><span>      </span><span style=color:#928374;font-style:italic>// Check the lookup table for the adresse of the function name to import
+</span><span>      </span><span style=color:#fabd2f>DWORD</span><span> lookup_addr </span><span style=color:#fe8019>=</span><span> lookup_table[i].</span><span style=color:#fdf4c1>u1</span><span>.</span><span style=color:#fdf4c1>AddressOfData</span><span>;
+</span><span>
+</span><span>      </span><span style=color:#fa5c4b>if </span><span>((lookup_addr </span><span style=color:#fe8019>&</span><span> IMAGE_ORDINAL_FLAG) </span><span style=color:#fe8019>== </span><span style=color:#d3869b>0</span><span>) { </span><span style=color:#928374;font-style:italic>// if first bit is not 1
+</span><span>        </span><span style=color:#928374;font-style:italic>// import by name : get the IMAGE_IMPORT_BY_NAME struct
+</span><span>        IMAGE_IMPORT_BY_NAME </span><span style=color:#fe8019>*</span><span>image_import </span><span style=color:#fe8019>= </span><span>(IMAGE_IMPORT_BY_NAME </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> lookup_addr);
+</span><span>        </span><span style=color:#928374;font-style:italic>// this struct points to the ASCII function name
+</span><span>        </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>funct_name </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>)</span><span style=color:#fe8019>&</span><span>(image_import->Name);
+</span><span>        </span><span style=color:#928374;font-style:italic>// get that function address from it's module and name
+</span><span>        function_handle </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span>)</span><span style=color:#fdf4c1>GetProcAddress(import_module, funct_name)</span><span>;
+</span><span>      } </span><span style=color:#fa5c4b>else </span><span>{
+</span><span>        </span><span style=color:#928374;font-style:italic>// import by ordinal, directly
+</span><span>        function_handle </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span>)</span><span style=color:#fdf4c1>GetProcAddress(import_module, (</span><span style=color:#fabd2f>LPSTR</span><span style=color:#fdf4c1>)lookup_addr)</span><span>;
+</span><span>      }
+</span><span>
+</span><span>      </span><span style=color:#fa5c4b>if </span><span>(function_handle </span><span style=color:#fe8019>== </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>        </span><span style=color:#fabd2f>printf</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"function handle is null"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>        </span><span style=color:#fabd2f>abort</span><span style=color:#fdf4c1>()</span><span>;
+</span><span>      }
+</span><span>
+</span><span>      </span><span style=color:#928374;font-style:italic>// change the IAT, and put the function address inside.
+</span><span>      address_table[i].</span><span style=color:#fdf4c1>u1</span><span>.</span><span style=color:#fdf4c1>Function </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fabd2f>DWORD</span><span>)function_handle;
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span></code></pre><h2 id=0x04-zhong-ding-wei>0x04 重定位</h2><h3 id=4-1-zhong-ding-wei-jie-shao>4.1 重定位介绍</h3><p>回顾下前文我们做的事情：<ol><li>打开 calc.exe ，读取它的文件头。<li>calc.exe 文件头中有一个 <code>ImageBase</code> ，保存它倾向于使用的内存基址。<li>calc.exe 启用了 ASLR 技术，所以理论上我们可以把它放到内存中任意位置。<li>我们用 <code>VirtualAlloc</code> 分配了内存，以<code>NULL</code>作为首参数，让操作系统决定在哪儿分配，结果用作镜像基址。<li>我们导入了必要的函数并把地址存放在 IAT 里。</ol><p>然后现在，某时某刻，calc.exe 需要调用被导入的函数，用我们之前提过的方法。<p><img alt=call_IAT src=https://nnnewb.github.io/posts/2021/learning-packer-01/call_IAT.webp><p>仔细观察图中的 opcode：<code>FF15</code>，紧跟着的是小端序的<code>0x004b3038</code>，一个绝对地址（前文所述的VA），指向 <em>IAT</em> 中 <code>ShellExecuteW</code> 函数的地址。这对于一个预期自己会被映射到随机基址上的PE文件来说，是一个巨大的问题。<p>比如说，我们把 calc.exe 放置在 <code>0x00500000</code> 而不是文件头中”偏好“的镜像基址 <code>0x00400000</code>，这条 <code>call</code> 指令还保持不变的话，它会尝试去访问地址 <code>0x004b3038</code> ——但这不是 calc.exe 的内存空间！那儿可能有任何东西，也可能什么也没有。<p>我们这里看到的是，当我们移动了 PE 文件在内存中的基址，汇编代码也需要在运行时修补，来响应基址的变化。这就是重定位所关注的事情。<h3 id=4-2-pezhong-ding-wei-jie-gou>4.2 PE重定位结构</h3><p>重定位结构比导入表简单得多。<p>同样的，在 Data Directory 里有一个重定位表，结构和导入表类似，看图。<p><img alt=image-20210927134554770 src=https://nnnewb.github.io/posts/2021/learning-packer-01/basereloc.webp><p>实际上每个<code>IMAGE_BASE_RELOCATION</code>反应的就是一个 Windows 页（因为每个<code>fixup</code>的偏移最大取值只有 12bits，0x1000，4KB）。<p>其中每个 <code>fixup</code> 都是一个 <code>WORD</code> ，前 4bits 表示重定位类型，后 12bits 表示相对 <code>IMAGE_BASE_RELOCATION.VirtualAddress</code> 的偏移值，偏移处需要应用重定位（就是加上真实基地址和PE头中基地址的差）。<h3 id=4-3-xiu-fu-zhong-ding-wei>4.3 修复重定位</h3><p>修复重定位必须在PE头和Sections加载到内存之后，设置内存保护之前进行。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span>IMAGE_DATA_DIRECTORY </span><span style=color:#fe8019>*</span><span>data_directory </span><span style=color:#fe8019>=</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>DataDirectory</span><span>;
+</span><span>
+</span><span style=color:#928374;font-style:italic>// this is how much we shifted the ImageBase
+</span><span style=color:#fabd2f>DWORD</span><span> delta_VA_reloc </span><span style=color:#fe8019>= </span><span>((</span><span style=color:#fabd2f>DWORD</span><span>)p_image_base) </span><span style=color:#fe8019>-</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>ImageBase</span><span>;
+</span><span>
+</span><span style=color:#928374;font-style:italic>// if there is a relocation table, and we actually shitfted the ImageBase
+</span><span style=color:#fa5c4b>if </span><span>(data_directory[IMAGE_DIRECTORY_ENTRY_BASERELOC].</span><span style=color:#fdf4c1>VirtualAddress </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0 </span><span style=color:#fe8019>&&</span><span> delta_VA_reloc </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0</span><span>) {
+</span></code></pre><p>在代码的开始，需要确认是不是有必要做重定位。如果基地址和PE文件头中给出的基地址相同，那就不用考虑重定位了。判断方式是拿真实基地址减去文件头里给出的基地址，非0则说明基地址需要重定位。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#928374;font-style:italic>// calculate the relocation table address
+</span><span>IMAGE_BASE_RELOCATION </span><span style=color:#fe8019>*</span><span>p_reloc </span><span style=color:#fe8019>=
+</span><span>    (IMAGE_BASE_RELOCATION </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> data_directory[IMAGE_DIRECTORY_ENTRY_BASERELOC].</span><span style=color:#fdf4c1>VirtualAddress</span><span>);
+</span></code></pre><p>从RVA得到重定位表指针，然后就是遍历。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#928374;font-style:italic>// once again, a null terminated array
+</span><span style=color:#fa5c4b>while </span><span>(p_reloc->VirtualAddress </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0</span><span>) {
+</span><span>    </span><span style=color:#928374;font-style:italic>// ...
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// switch to the next relocation block, based on the size
+</span><span>    p_reloc </span><span style=color:#fe8019>= </span><span>(IMAGE_BASE_RELOCATION </span><span style=color:#fe8019>*</span><span>)(((</span><span style=color:#fabd2f>DWORD</span><span>)p_reloc) </span><span style=color:#fe8019>+</span><span> p_reloc->SizeOfBlock);
+</span><span>}
+</span></code></pre><p><code>SizeOfBlock</code>其实是包括<code>IMAGE_BASE_RELOCATION</code>（Header）和属于这个块的所有 <em>fixup</em> 组成的总大小，这里强制转换成 DWORD 后相加就得到了下一个 <code>IMAGE_BASE_RELOCATION</code> 结构的地址。<p>同样的，这也是前文所述的 <code>null terminated array</code> 。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#928374;font-style:italic>// how any relocation in this block
+</span><span style=color:#928374;font-style:italic>// ie the total size, minus the size of the "header", divided by 2 (those are words, so 2 bytes for each)
+</span><span style=color:#fabd2f>DWORD</span><span> size </span><span style=color:#fe8019>= </span><span>(p_reloc->SizeOfBlock </span><span style=color:#fe8019>- sizeof</span><span>(IMAGE_BASE_RELOCATION)) </span><span style=color:#fe8019>/ </span><span style=color:#d3869b>2</span><span>;
+</span><span style=color:#928374;font-style:italic>// the first relocation element in the block, right after the header (using pointer arithmetic again)
+</span><span style=color:#fabd2f>WORD </span><span style=color:#fe8019>*</span><span>fixups </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fabd2f>WORD </span><span style=color:#fe8019>*</span><span>)(p_reloc </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span>);
+</span></code></pre><p>在循环体内，先计算出了元素总数（(总大小(字节) - <code>IMAGE_BASE_RELOCATION</code> 结构大小(字节)) / 2 ），然后用指针算术取得第一个元素的地址。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; i </span><span style=color:#fe8019>&lt;</span><span> size; </span><span style=color:#fe8019>++</span><span>i) {
+</span><span>    </span><span style=color:#928374;font-style:italic>// type is the first 4 bits of the relocation word
+</span><span>    </span><span style=color:#fa5c4b>int</span><span> type </span><span style=color:#fe8019>=</span><span> fixups[i] </span><span style=color:#fe8019>>> </span><span style=color:#d3869b>12</span><span>;
+</span><span>    </span><span style=color:#928374;font-style:italic>// offset is the last 12 bits
+</span><span>    </span><span style=color:#fa5c4b>int</span><span> offset </span><span style=color:#fe8019>=</span><span> fixups[i] </span><span style=color:#fe8019>& </span><span style=color:#d3869b>0x0fff</span><span>;
+</span><span>    </span><span style=color:#928374;font-style:italic>// this is the address we are going to change
+</span><span>    </span><span style=color:#fabd2f>DWORD </span><span style=color:#fe8019>*</span><span>change_addr </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fabd2f>DWORD </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> p_reloc->VirtualAddress </span><span style=color:#fe8019>+</span><span> offset);
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// there is only one type used that needs to make a change
+</span><span>    </span><span style=color:#fa5c4b>switch </span><span>(type) {
+</span><span>        </span><span style=color:#fa5c4b>case</span><span> IMAGE_REL_BASED_HIGHLOW:
+</span><span>            </span><span style=color:#fe8019>*</span><span>change_addr </span><span style=color:#fe8019>+=</span><span> delta_VA_reloc;
+</span><span>            </span><span style=color:#fa5c4b>break</span><span>;
+</span><span>        </span><span style=color:#fa5c4b>default</span><span>:
+</span><span>            </span><span style=color:#fa5c4b>break</span><span>;
+</span><span>    }
+</span><span>}
+</span></code></pre><p>遍历所有元素。如上文所述的，把每个 <code>fixup</code> 取高位4比特和低位12比特，计算出要修补的地址。再根据修补的类型来应用。<p>参考<a href=https://docs.microsoft.com/en-us/windows/win32/debug/pe-format#base-relocation-types>微软文档的Base Relocation Types</a>。值得注意 type 就两个：<code>IMAGE_REL_BASED_HIGHLOW</code> 和 <code>IMAGE_REL_BASED_DIR64</code> ，分别是 32位和64位的重定向。其他16位重定向不多说了。<p>完整代码如下。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>fix_base_reloc</span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>p_image_base</span><span>, IMAGE_NT_HEADERS </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>p_NT_headers</span><span>) {
+</span><span>  IMAGE_DATA_DIRECTORY </span><span style=color:#fe8019>*</span><span>data_directory </span><span style=color:#fe8019>=</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>DataDirectory</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// this is how much we shifted the ImageBase
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> delta_VA_reloc </span><span style=color:#fe8019>= </span><span>((</span><span style=color:#fabd2f>DWORD</span><span>)p_image_base) </span><span style=color:#fe8019>-</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>ImageBase</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// if there is a relocation table, and we actually shitfted the ImageBase
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(data_directory[IMAGE_DIRECTORY_ENTRY_BASERELOC].</span><span style=color:#fdf4c1>VirtualAddress </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0 </span><span style=color:#fe8019>&&</span><span> delta_VA_reloc </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0</span><span>) {
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// calculate the relocation table address
+</span><span>    IMAGE_BASE_RELOCATION </span><span style=color:#fe8019>*</span><span>p_reloc </span><span style=color:#fe8019>=
+</span><span>        (IMAGE_BASE_RELOCATION </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> data_directory[IMAGE_DIRECTORY_ENTRY_BASERELOC].</span><span style=color:#fdf4c1>VirtualAddress</span><span>);
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// once again, a null terminated array
+</span><span>    </span><span style=color:#fa5c4b>while </span><span>(p_reloc->VirtualAddress </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0</span><span>) {
+</span><span>
+</span><span>      </span><span style=color:#928374;font-style:italic>// how any relocation in this block
+</span><span>      </span><span style=color:#928374;font-style:italic>// ie the total size, minus the size of the "header", divided by 2 (those are words, so 2 bytes for each)
+</span><span>      </span><span style=color:#fabd2f>DWORD</span><span> size </span><span style=color:#fe8019>= </span><span>(p_reloc->SizeOfBlock </span><span style=color:#fe8019>- sizeof</span><span>(IMAGE_BASE_RELOCATION)) </span><span style=color:#fe8019>/ </span><span style=color:#d3869b>2</span><span>;
+</span><span>      </span><span style=color:#928374;font-style:italic>// the first relocation element in the block, right after the header (using pointer arithmetic again)
+</span><span>      </span><span style=color:#fabd2f>WORD </span><span style=color:#fe8019>*</span><span>fixups </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fabd2f>WORD </span><span style=color:#fe8019>*</span><span>)(p_reloc </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span>);
+</span><span>      </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; i </span><span style=color:#fe8019>&lt;</span><span> size; </span><span style=color:#fe8019>++</span><span>i) {
+</span><span>        </span><span style=color:#928374;font-style:italic>// type is the first 4 bits of the relocation word
+</span><span>        </span><span style=color:#fa5c4b>int</span><span> type </span><span style=color:#fe8019>=</span><span> fixups[i] </span><span style=color:#fe8019>>> </span><span style=color:#d3869b>12</span><span>;
+</span><span>        </span><span style=color:#928374;font-style:italic>// offset is the last 12 bits
+</span><span>        </span><span style=color:#fa5c4b>int</span><span> offset </span><span style=color:#fe8019>=</span><span> fixups[i] </span><span style=color:#fe8019>& </span><span style=color:#d3869b>0x0fff</span><span>;
+</span><span>        </span><span style=color:#928374;font-style:italic>// this is the address we are going to change
+</span><span>        </span><span style=color:#fabd2f>DWORD </span><span style=color:#fe8019>*</span><span>change_addr </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fabd2f>DWORD </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> p_reloc->VirtualAddress </span><span style=color:#fe8019>+</span><span> offset);
+</span><span>
+</span><span>        </span><span style=color:#928374;font-style:italic>// there is only one type used that needs to make a change
+</span><span>        </span><span style=color:#fa5c4b>switch </span><span>(type) {
+</span><span>        </span><span style=color:#fa5c4b>case</span><span> IMAGE_REL_BASED_HIGHLOW:
+</span><span>          </span><span style=color:#fe8019>*</span><span>change_addr </span><span style=color:#fe8019>+=</span><span> delta_VA_reloc;
+</span><span>          </span><span style=color:#fa5c4b>break</span><span>;
+</span><span>        </span><span style=color:#fa5c4b>default</span><span>:
+</span><span>          </span><span style=color:#fa5c4b>break</span><span>;
+</span><span>        }
+</span><span>      }
+</span><span>
+</span><span>      </span><span style=color:#928374;font-style:italic>// switch to the next relocation block, based on the size
+</span><span>      p_reloc </span><span style=color:#fe8019>= </span><span>(IMAGE_BASE_RELOCATION </span><span style=color:#fe8019>*</span><span>)(((</span><span style=color:#fabd2f>DWORD</span><span>)p_reloc) </span><span style=color:#fe8019>+</span><span> p_reloc->SizeOfBlock);
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span></code></pre><h2 id=0x05-wan-zheng-loader-cheng-xu>0x05 完整 Loader 程序</h2><pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;stdio.h>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;stdlib.h>
+</span><span>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;Windows.h>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;winnt.h>
+</span><span>
+</span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span style=color:#8ec07c>load_PE</span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>PE_data</span><span>);
+</span><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>fix_iat</span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>, IMAGE_NT_HEADERS </span><span style=color:#fe8019>*</span><span>);
+</span><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>fix_base_reloc</span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>p_image_base</span><span>, IMAGE_NT_HEADERS </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>p_NT_headers</span><span>);
+</span><span>
+</span><span style=color:#fa5c4b>int </span><span style=color:#8ec07c>main</span><span>(</span><span style=color:#fa5c4b>int </span><span style=color:#fdf4c1>argc</span><span>, </span><span style=color:#fa5c4b>char const </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>argv</span><span>[]) {
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(argc </span><span style=color:#fe8019>&lt; </span><span style=color:#d3869b>2</span><span>) {
+</span><span>    </span><span style=color:#fabd2f>printf</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"missing path argument\n"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>1</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  FILE </span><span style=color:#fe8019>*</span><span>exe_file </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>fopen</span><span style=color:#fdf4c1>(argv[</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>], </span><span style=color:#b8bb26>"rb"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(</span><span style=color:#fe8019>!</span><span>exe_file) {
+</span><span>    </span><span style=color:#fabd2f>printf</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"error opening file\n"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>1</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// Get file size : put pointer at the end
+</span><span>  </span><span style=color:#fabd2f>fseek</span><span style=color:#fdf4c1>(exe_file, </span><span style=color:#d3869b>0</span><span style=color:#fa5c4b>L</span><span style=color:#fdf4c1>, SEEK_END)</span><span>;
+</span><span>  </span><span style=color:#928374;font-style:italic>// and read its position
+</span><span>  </span><span style=color:#fa5c4b>long int</span><span> file_size </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>ftell</span><span style=color:#fdf4c1>(exe_file)</span><span>;
+</span><span>  </span><span style=color:#928374;font-style:italic>// put the pointer back at the beginning
+</span><span>  </span><span style=color:#fabd2f>fseek</span><span style=color:#fdf4c1>(exe_file, </span><span style=color:#d3869b>0</span><span style=color:#fa5c4b>L</span><span style=color:#fdf4c1>, SEEK_SET)</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// allocate memory and read the whole file
+</span><span>  </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>exe_file_data </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>malloc</span><span style=color:#fdf4c1>(file_size </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// read whole file
+</span><span>  </span><span style=color:#fabd2f>size_t</span><span> n_read </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>fread</span><span style=color:#fdf4c1>(exe_file_data, </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, file_size, exe_file)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(n_read </span><span style=color:#fe8019>!=</span><span> file_size) {
+</span><span>    </span><span style=color:#fabd2f>printf</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"reading error (</span><span style=color:#fdf4c1>%d</span><span style=color:#b8bb26>)\n"</span><span style=color:#fdf4c1>, n_read)</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>1</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// load the PE in memory
+</span><span>  </span><span style=color:#fabd2f>printf</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"[+] Loading PE file\n"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span>entry </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>load_PE(exe_file_data)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(entry </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>    </span><span style=color:#928374;font-style:italic>// call its entrypoint
+</span><span>    ((</span><span style=color:#fa5c4b>void </span><span>(</span><span style=color:#fe8019>*</span><span>)(</span><span style=color:#fa5c4b>void</span><span>))entry)();
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>;
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span style=color:#8ec07c>load_PE</span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>PE_data</span><span>) {
+</span><span>  IMAGE_DOS_HEADER </span><span style=color:#fe8019>*</span><span>p_DOS_header </span><span style=color:#fe8019>= </span><span>(IMAGE_DOS_HEADER </span><span style=color:#fe8019>*</span><span>)PE_data;
+</span><span>  IMAGE_NT_HEADERS </span><span style=color:#fe8019>*</span><span>p_NT_headers </span><span style=color:#fe8019>= </span><span>(IMAGE_NT_HEADERS </span><span style=color:#fe8019>*</span><span>)(PE_data </span><span style=color:#fe8019>+</span><span> p_DOS_header->e_lfanew);
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// extract information from PE header
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> size_of_image </span><span style=color:#fe8019>=</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>SizeOfImage</span><span>;
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> entry_point_RVA </span><span style=color:#fe8019>=</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>AddressOfEntryPoint</span><span>;
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> size_of_headers </span><span style=color:#fe8019>=</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>SizeOfHeaders</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// allocate memory
+</span><span>  </span><span style=color:#928374;font-style:italic>// https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualalloc
+</span><span>  </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>p_image_base </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>)</span><span style=color:#fdf4c1>VirtualAlloc(</span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>, size_of_image, MEM_RESERVE </span><span style=color:#fe8019>|</span><span style=color:#fdf4c1> MEM_COMMIT, PAGE_READWRITE)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(p_image_base </span><span style=color:#fe8019>== </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>NULL</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// copy PE headers in memory
+</span><span>  </span><span style=color:#fabd2f>memcpy</span><span style=color:#fdf4c1>(p_image_base, PE_data, size_of_headers)</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// Section headers starts right after the IMAGE_NT_HEADERS struct, so we do some pointer arithmetic-fu here.
+</span><span>  IMAGE_SECTION_HEADER </span><span style=color:#fe8019>*</span><span>sections </span><span style=color:#fe8019>= </span><span>(IMAGE_SECTION_HEADER </span><span style=color:#fe8019>*</span><span>)(p_NT_headers </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span>);
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; i </span><span style=color:#fe8019>&lt;</span><span> p_NT_headers->FileHeader.</span><span style=color:#fdf4c1>NumberOfSections</span><span>; i</span><span style=color:#fe8019>++</span><span>) {
+</span><span>    </span><span style=color:#928374;font-style:italic>// calculate the VA we need to copy the content, from the RVA
+</span><span>    </span><span style=color:#928374;font-style:italic>// section[i].VirtualAddress is a RVA, mind it
+</span><span>    </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>dest </span><span style=color:#fe8019>=</span><span> p_image_base </span><span style=color:#fe8019>+</span><span> sections[i].</span><span style=color:#fdf4c1>VirtualAddress</span><span>;
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// check if there is Raw data to copy
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>(sections[i].</span><span style=color:#fdf4c1>SizeOfRawData </span><span style=color:#fe8019>> </span><span style=color:#d3869b>0</span><span>) {
+</span><span>      </span><span style=color:#928374;font-style:italic>// We copy SizeOfRaw data bytes, from the offset PointerToRawData in the file
+</span><span>      </span><span style=color:#fabd2f>memcpy</span><span style=color:#fdf4c1>(dest, PE_data </span><span style=color:#fe8019>+</span><span style=color:#fdf4c1> sections[i].PointerToRawData, sections[i].SizeOfRawData)</span><span>;
+</span><span>    } </span><span style=color:#fa5c4b>else </span><span>{
+</span><span>      </span><span style=color:#fabd2f>memset</span><span style=color:#fdf4c1>(dest, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, sections[i].Misc.VirtualSize)</span><span>;
+</span><span>    }
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#fdf4c1>fix_iat(p_image_base, p_NT_headers)</span><span>;
+</span><span>  </span><span style=color:#fdf4c1>fix_base_reloc(p_image_base, p_NT_headers)</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// Set permission for the PE header to read only
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> oldProtect;
+</span><span>  </span><span style=color:#fdf4c1>VirtualProtect(p_image_base, p_NT_headers->OptionalHeader.SizeOfHeaders, PAGE_READONLY, </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>oldProtect)</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; i </span><span style=color:#fe8019>&lt;</span><span> p_NT_headers->FileHeader.</span><span style=color:#fdf4c1>NumberOfSections</span><span>; </span><span style=color:#fe8019>++</span><span>i) {
+</span><span>    </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>dest </span><span style=color:#fe8019>=</span><span> p_image_base </span><span style=color:#fe8019>+</span><span> sections[i].</span><span style=color:#fdf4c1>VirtualAddress</span><span>;
+</span><span>    </span><span style=color:#fabd2f>DWORD</span><span> s_perm </span><span style=color:#fe8019>=</span><span> sections[i].</span><span style=color:#fdf4c1>Characteristics</span><span>;
+</span><span>    </span><span style=color:#fabd2f>DWORD</span><span> v_perm </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#928374;font-style:italic>// flags are not the same between virtal protect and the section header
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>(s_perm </span><span style=color:#fe8019>&</span><span> IMAGE_SCN_MEM_EXECUTE) {
+</span><span>      v_perm </span><span style=color:#fe8019>= </span><span>(s_perm </span><span style=color:#fe8019>&</span><span> IMAGE_SCN_MEM_WRITE) </span><span style=color:#fe8019>?</span><span> PAGE_EXECUTE_READWRITE </span><span style=color:#fe8019>:</span><span> PAGE_EXECUTE_READ;
+</span><span>    } </span><span style=color:#fa5c4b>else </span><span>{
+</span><span>      v_perm </span><span style=color:#fe8019>= </span><span>(s_perm </span><span style=color:#fe8019>&</span><span> IMAGE_SCN_MEM_WRITE) </span><span style=color:#fe8019>?</span><span> PAGE_READWRITE </span><span style=color:#fe8019>:</span><span> PAGE_READONLY;
+</span><span>    }
+</span><span>    </span><span style=color:#fdf4c1>VirtualProtect(dest, sections[i].Misc.VirtualSize, v_perm, </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>oldProtect)</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>return </span><span>(</span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> entry_point_RVA);
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>fix_iat</span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>p_image_base</span><span>, IMAGE_NT_HEADERS </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>p_NT_headers</span><span>) {
+</span><span>  IMAGE_DATA_DIRECTORY </span><span style=color:#fe8019>*</span><span>data_directory </span><span style=color:#fe8019>=</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>DataDirectory</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// load the address of the import descriptors array
+</span><span>  IMAGE_IMPORT_DESCRIPTOR </span><span style=color:#fe8019>*</span><span>import_descriptors </span><span style=color:#fe8019>=
+</span><span>      (IMAGE_IMPORT_DESCRIPTOR </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> data_directory[IMAGE_DIRECTORY_ENTRY_IMPORT].</span><span style=color:#fdf4c1>VirtualAddress</span><span>);
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// this array is null terminated
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; import_descriptors[i].</span><span style=color:#fdf4c1>OriginalFirstThunk </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#fe8019>++</span><span>i) {
+</span><span>    </span><span style=color:#928374;font-style:italic>// Get the name of the dll, and import it
+</span><span>    </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>module_name </span><span style=color:#fe8019>=</span><span> p_image_base </span><span style=color:#fe8019>+</span><span> import_descriptors[i].</span><span style=color:#fdf4c1>Name</span><span>;
+</span><span>    </span><span style=color:#fabd2f>HMODULE</span><span> import_module </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>LoadLibraryA(module_name)</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>(import_module </span><span style=color:#fe8019>== </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>      </span><span style=color:#fabd2f>printf</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"import module is null"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>      </span><span style=color:#fabd2f>abort</span><span style=color:#fdf4c1>()</span><span>;
+</span><span>    }
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// the lookup table points to function names or ordinals => it is the IDT
+</span><span>    IMAGE_THUNK_DATA </span><span style=color:#fe8019>*</span><span>lookup_table </span><span style=color:#fe8019>= </span><span>(IMAGE_THUNK_DATA </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> import_descriptors[i].</span><span style=color:#fdf4c1>OriginalFirstThunk</span><span>);
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// the address table is a copy of the lookup table at first
+</span><span>    </span><span style=color:#928374;font-style:italic>// but we put the addresses of the loaded function inside => that's the IAT
+</span><span>    IMAGE_THUNK_DATA </span><span style=color:#fe8019>*</span><span>address_table </span><span style=color:#fe8019>= </span><span>(IMAGE_THUNK_DATA </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> import_descriptors[i].</span><span style=color:#fdf4c1>FirstThunk</span><span>);
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// null terminated array, again
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; lookup_table[i].</span><span style=color:#fdf4c1>u1</span><span>.</span><span style=color:#fdf4c1>AddressOfData </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#fe8019>++</span><span>i) {
+</span><span>      </span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span>function_handle </span><span style=color:#fe8019>= </span><span style=color:#d3869b>NULL</span><span>;
+</span><span>
+</span><span>      </span><span style=color:#928374;font-style:italic>// Check the lookup table for the adresse of the function name to import
+</span><span>      </span><span style=color:#fabd2f>DWORD</span><span> lookup_addr </span><span style=color:#fe8019>=</span><span> lookup_table[i].</span><span style=color:#fdf4c1>u1</span><span>.</span><span style=color:#fdf4c1>AddressOfData</span><span>;
+</span><span>
+</span><span>      </span><span style=color:#fa5c4b>if </span><span>((lookup_addr </span><span style=color:#fe8019>&</span><span> IMAGE_ORDINAL_FLAG) </span><span style=color:#fe8019>== </span><span style=color:#d3869b>0</span><span>) { </span><span style=color:#928374;font-style:italic>// if first bit is not 1
+</span><span>        </span><span style=color:#928374;font-style:italic>// import by name : get the IMAGE_IMPORT_BY_NAME struct
+</span><span>        IMAGE_IMPORT_BY_NAME </span><span style=color:#fe8019>*</span><span>image_import </span><span style=color:#fe8019>= </span><span>(IMAGE_IMPORT_BY_NAME </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> lookup_addr);
+</span><span>        </span><span style=color:#928374;font-style:italic>// this struct points to the ASCII function name
+</span><span>        </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>funct_name </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>)</span><span style=color:#fe8019>&</span><span>(image_import->Name);
+</span><span>        </span><span style=color:#928374;font-style:italic>// get that function address from it's module and name
+</span><span>        function_handle </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span>)</span><span style=color:#fdf4c1>GetProcAddress(import_module, funct_name)</span><span>;
+</span><span>      } </span><span style=color:#fa5c4b>else </span><span>{
+</span><span>        </span><span style=color:#928374;font-style:italic>// import by ordinal, directly
+</span><span>        function_handle </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span>)</span><span style=color:#fdf4c1>GetProcAddress(import_module, (</span><span style=color:#fabd2f>LPSTR</span><span style=color:#fdf4c1>)lookup_addr)</span><span>;
+</span><span>      }
+</span><span>
+</span><span>      </span><span style=color:#fa5c4b>if </span><span>(function_handle </span><span style=color:#fe8019>== </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>        </span><span style=color:#fabd2f>printf</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"function handle is null"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>        </span><span style=color:#fabd2f>abort</span><span style=color:#fdf4c1>()</span><span>;
+</span><span>      }
+</span><span>
+</span><span>      </span><span style=color:#928374;font-style:italic>// change the IAT, and put the function address inside.
+</span><span>      address_table[i].</span><span style=color:#fdf4c1>u1</span><span>.</span><span style=color:#fdf4c1>Function </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fabd2f>DWORD</span><span>)function_handle;
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>fix_base_reloc</span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>p_image_base</span><span>, IMAGE_NT_HEADERS </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>p_NT_headers</span><span>) {
+</span><span>  IMAGE_DATA_DIRECTORY </span><span style=color:#fe8019>*</span><span>data_directory </span><span style=color:#fe8019>=</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>DataDirectory</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// this is how much we shifted the ImageBase
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> delta_VA_reloc </span><span style=color:#fe8019>= </span><span>((</span><span style=color:#fabd2f>DWORD</span><span>)p_image_base) </span><span style=color:#fe8019>-</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>ImageBase</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// if there is a relocation table, and we actually shitfted the ImageBase
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(data_directory[IMAGE_DIRECTORY_ENTRY_BASERELOC].</span><span style=color:#fdf4c1>VirtualAddress </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0 </span><span style=color:#fe8019>&&</span><span> delta_VA_reloc </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0</span><span>) {
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// calculate the relocation table address
+</span><span>    IMAGE_BASE_RELOCATION </span><span style=color:#fe8019>*</span><span>p_reloc </span><span style=color:#fe8019>=
+</span><span>        (IMAGE_BASE_RELOCATION </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> data_directory[IMAGE_DIRECTORY_ENTRY_BASERELOC].</span><span style=color:#fdf4c1>VirtualAddress</span><span>);
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// once again, a null terminated array
+</span><span>    </span><span style=color:#fa5c4b>while </span><span>(p_reloc->VirtualAddress </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0</span><span>) {
+</span><span>
+</span><span>      </span><span style=color:#928374;font-style:italic>// how any relocation in this block
+</span><span>      </span><span style=color:#928374;font-style:italic>// ie the total size, minus the size of the "header", divided by 2 (those are words, so 2 bytes for each)
+</span><span>      </span><span style=color:#fabd2f>DWORD</span><span> size </span><span style=color:#fe8019>= </span><span>(p_reloc->SizeOfBlock </span><span style=color:#fe8019>- sizeof</span><span>(IMAGE_BASE_RELOCATION)) </span><span style=color:#fe8019>/ </span><span style=color:#d3869b>2</span><span>;
+</span><span>      </span><span style=color:#928374;font-style:italic>// the first relocation element in the block, right after the header (using pointer arithmetic again)
+</span><span>      </span><span style=color:#fabd2f>WORD </span><span style=color:#fe8019>*</span><span>fixups </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fabd2f>WORD </span><span style=color:#fe8019>*</span><span>)(p_reloc </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span>);
+</span><span>      </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; i </span><span style=color:#fe8019>&lt;</span><span> size; </span><span style=color:#fe8019>++</span><span>i) {
+</span><span>        </span><span style=color:#928374;font-style:italic>// type is the first 4 bits of the relocation word
+</span><span>        </span><span style=color:#fa5c4b>int</span><span> type </span><span style=color:#fe8019>=</span><span> fixups[i] </span><span style=color:#fe8019>>> </span><span style=color:#d3869b>12</span><span>;
+</span><span>        </span><span style=color:#928374;font-style:italic>// offset is the last 12 bits
+</span><span>        </span><span style=color:#fa5c4b>int</span><span> offset </span><span style=color:#fe8019>=</span><span> fixups[i] </span><span style=color:#fe8019>& </span><span style=color:#d3869b>0x0fff</span><span>;
+</span><span>        </span><span style=color:#928374;font-style:italic>// this is the address we are going to change
+</span><span>        </span><span style=color:#fabd2f>DWORD </span><span style=color:#fe8019>*</span><span>change_addr </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fabd2f>DWORD </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> p_reloc->VirtualAddress </span><span style=color:#fe8019>+</span><span> offset);
+</span><span>
+</span><span>        </span><span style=color:#928374;font-style:italic>// there is only one type used that needs to make a change
+</span><span>        </span><span style=color:#fa5c4b>switch </span><span>(type) {
+</span><span>        </span><span style=color:#fa5c4b>case</span><span> IMAGE_REL_BASED_HIGHLOW:
+</span><span>          </span><span style=color:#fe8019>*</span><span>change_addr </span><span style=color:#fe8019>+=</span><span> delta_VA_reloc;
+</span><span>          </span><span style=color:#fa5c4b>break</span><span>;
+</span><span>        </span><span style=color:#fa5c4b>default</span><span>:
+</span><span>          </span><span style=color:#fa5c4b>break</span><span>;
+</span><span>        }
+</span><span>      }
+</span><span>
+</span><span>      </span><span style=color:#928374;font-style:italic>// switch to the next relocation block, based on the size
+</span><span>      p_reloc </span><span style=color:#fe8019>= </span><span>(IMAGE_BASE_RELOCATION </span><span style=color:#fe8019>*</span><span>)(((</span><span style=color:#fabd2f>DWORD</span><span>)p_reloc) </span><span style=color:#fe8019>+</span><span> p_reloc->SizeOfBlock);
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span></code></pre><h2 id=0x06-jie-lun>0x06 结论</h2><p>本文的背景知识基本是参考相关书籍，编写 Loader 的部分则来自 <a href=https://bidouillesecurity.com/>BidouilleSecurity</a> 。关于加壳脱壳原理，不乏形象直观的描述，也有很多脱壳相关文章，但适合萌新上手、能照着撸出代码的文章就很少，甚至可以说没地方找。抛开加壳脱壳这些特定领域话题不谈，程序的加载到执行本身对有好奇心的码农也是很值得一聊的内容。<p>目前讨论的范围包括了如何加载并运行一个Windows程序（32位），大致流程如下：<ul><li>读取文件到内存<li>映射文件头到基地址<li>映射Sections<li>填充IAT<li>重定位<li>跳转到入口点开始执行。</ul><p>在对这些知识有了足够了解后，已经能写出基本的壳程序了。也许下一篇文章会谈。<p>参考资料：<ul><li><p><a href=https://bidouillesecurity.com/tutorial-writing-a-pe-packer-part-1/>writing a PE packer - Part 1 : Load a PE in memory</a></p><li><p><a href=https://bidouillesecurity.com/tutorial-writing-a-pe-packer-part-2/>writing a PE packer - Part 2 : Imports and relocations</a></p><li><p><a href=https://book.douban.com/subject/3652388/>《程序员的自我修养——链接、装载与库》</a></p><li><p><a href=https://docs.microsoft.com/en-us/windows/win32/debug/pe-format>微软文档 - PE Format</a></p></ul></article><p class=tags-data><a href=/tags/ni-xiang>/逆向/</a> <a href=/tags/hui-bian>/汇编/</a> <a href=/tags/windows>/windows/</a> <a href=/tags/security>/security/</a> <a href=/tags/binary-analysis>/binary-analysis/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

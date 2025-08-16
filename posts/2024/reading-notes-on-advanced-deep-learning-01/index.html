@@ -1,0 +1,458 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>《深度学习进阶》读书笔记01</title><meta content=《深度学习进阶》读书笔记01 name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2024/reading-notes-on-advanced-deep-learning-01/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=《深度学习进阶》读书笔记01 property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2024/reading-notes-on-advanced-deep-learning-01/ property=twitter:url><meta content=《深度学习进阶》读书笔记01 property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2024/reading-notes-on-advanced-deep-learning-01/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>《深度学习进阶》读书笔记01</h1><p class=author-line>作于：2024-03-09 13:56 ，预计阅读时间 25 分钟<article><h2 id=qian-yan>前言</h2><p>人如何理解单词的含义？<p>自然语言是活着的语言，同样的词汇和句子在不同上下文情景中可能有不同的含义。同样的话，在不同场合，由不同的人说出来的，也可能是不同的意思。 现在说出的话，与过去或未来，由同一个人说出的相同的话，也可能有完全不同的含义。<p>日常生活中我们会接触到一些典型的自然语言处理问题解决方案，比如已经普及的机器翻译，office 套件的自动纠错。不久前更是出现了 ChatGPT 这种 颠覆性的产品，完全推翻了我们对传统 chat bot 的印象。<p>近些年，具有突破性、颠覆性的人工智能产品层出不穷，大模型更是已经成了潮流标配。每个互联网大厂都在跟大模型的风，就算是为了抬升股价，也得 硬着头皮声称在进行 AI 应用的研究。<p>个人对 NLP 非常、非常感兴趣，应该说是从小就对 AI 非常感兴趣，想法非常多。<p>因此读书笔记里可能出现一些未经验证的个人想法，我尽量将这些个人想法标出来，以示区别。当然，读书笔记本身是很私人的东西，我不打算也不要求 自己的每行字都必须有凭据可以依靠，或者符合某个标准、主流看法。<p>但我的确是初入此门，思而不学则殆，所以也会克制对个人想法的表达（应该也不会有什么机会，毕竟是读书为主）。<h2 id=ci-chu-li>词处理</h2><p>自然语言处理的基础是词汇处理，也就是先理解单词的含义。单词是自然语言的最小单位。<p>最直观的一个问题是，人如何理解单词的含义？我们从小就接触过新华字典，新华字典对字（词）的解释方式是字形、字音、字的含义三要素，我们对机器 的要求是理解字的含义，例如车这个词，我们会给出定义：<pre style=color:#fdf4c1aa;background-color:#282828><code><span>1.陆地上有轮子的运输工具：火～。汽～。马～。一辆～。
+</span><span>2.利用轮轴旋转的机具：纺～。滑～。水～。
+</span><span>3.指机器：开～。～间。
+</span><span>4.车削：～圆。～螺丝钉。
+</span><span>5.用水车取水：～水。
+</span><span>6.转动（多指身体）：～过身来。
+</span><span>7.姓。
+</span></code></pre><p>看的出这个词在不同上下文语境有着不同的含义，通过查询词典，我们就知道了火车、汽车、马车，都是一种有轮子的运输工具。类似于人类使用字典， NLP（自然语言处理）领域也有类似的解决方案，叫同义词词典（<em>thesaurus</em>）。<p>同义词词典的基本内容包括同义词的定义，比如 <em>car</em> 的同义词包括 <em>automobile</em>，<em>machine</em>，<em>motorcar</em> 等。有些词典还会定义词的上位-下位 关系，比如 <em>motorcar</em> 的上位词是 <em>car</em>，即 <em>motorcar</em> 是一种 <em>car</em> 。就像 <em>教科书</em> 是一种 <em>书</em>，<em>语文书</em> 又属于一种 <em>教科书</em>。<p>同义词词典有个明显的问题，即并不能很好地解决单词的语义，例如：“我要开车了。”，这个车指的是有轮子的运输工具，还是缝纫机、车床，在某些语境 下，“车”还表示折扣商品、带颜色的音像制品等。<p>以最近折磨我的几个招聘 app 为例，例如我想要找一份 <em>Golang</em> 研发工程师的工作，如果蠢蠢地认为找 <em>Java</em> 方向的工作和找 <em>Go</em> 方向的工作是一回事，就会推 一堆 <em>Java</em> 相关的岗位，非常搞笑而且浪费我时间。如果这些 App 还真就用了一些 NLP 技术，分析了简历，再给出这样的推荐，就更加离谱且搞笑了。<p>此外还有一些问题，比如维护成本极高（因为整个词典都需要人工定义），还有人力维护肯定没法跟上时代发展。<p>这时候我们就需要结合上下文，来解决这个问题。<h3 id=ji-yu-ji-shu-de-fang-fa>基于计数的方法</h3><p>更近一点的方法是基于计数（统计）的方法，基本思路是统计词出现在句子中的位置/次数，来确定词的含义。<p>比如，“我到__去”、“__的特产是......”、“我是____人...”等，经常同时在这些下划线出现的词，就比较可能是较接近的含义。 由此，可以得到一个具有丰富上下文信息的词表示，它记录了这个词在不同上下文中出现的频率，比同义词词典具有更丰富的信息量，而且仅需提供语料库 （经过筛选的文本素材），即可得到一个相对精确的词表示，维护成本要低得多。<p>关于语料库，NLP 中使用的语料库有事会给文本添加额外的标注信息，比如词性，为此将语料库组织成结构化表示。深度学习进阶这本书的语料库则没有这些 标注信息，就是纯文本。<p>下面我们看如何实现这个方法。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>re
+</span><span style=color:#fa5c4b>from </span><span>typing </span><span style=color:#fa5c4b>import </span><span>List
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>preprocess</span><span>(</span><span style=color:#fdf4c1>text</span><span>: </span><span style=color:#fabd2f>str</span><span>) -> List[</span><span style=color:#fabd2f>str</span><span>]:
+</span><span>    </span><span style=color:#928374;font-style:italic>""" 语料预处理 (注意针对的是英文语料，分词很好做。中文分词又是另一个大问题)
+</span><span style=color:#928374;font-style:italic>    """
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fabd2f>list</span><span style=color:#fdf4c1>(</span><span style=color:#fabd2f>filter</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>lambda </span><span style=color:#fdf4c1>s: </span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(s) </span><span style=color:#fe8019>> </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, re.split(</span><span style=color:#fa5c4b>r</span><span style=color:#b8bb26>'</span><span style=color:#d3869b>\W</span><span style=color:#fe8019>+</span><span style=color:#b8bb26>'</span><span style=color:#fdf4c1>, text.lower())))
+</span><span>
+</span><span>
+</span><span style=color:#fdf4c1>preprocess(</span><span style=color:#b8bb26>'I am a student. You are a teacher.'</span><span style=color:#fdf4c1>)
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>['i', 'am', 'a', 'student', 'you', 'are', 'a', 'teacher']
+</span></code></pre><blockquote><p>PS：这里的 preprocessing 写法和书里的不一样，书中分词后的例子是包含 '.' 这种符号的，我这里写的 preprocessing 不包含符号。</blockquote><p>这里我们对语料完成了分词，接下来可以进行统计，但在统计前，为了便于书后续共现矩阵相关内容讲解，我们还要将单词转换成单个整数表示的形式。 方法很简单，每个词第一次出现的时候安排一个自增 ID 即可。我们把所有词丢进一个大字典即可。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span style=color:#fa5c4b>from </span><span>typing </span><span style=color:#fa5c4b>import </span><span>Dict
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>process_word</span><span>(</span><span style=color:#fdf4c1>i2w</span><span>: Dict[</span><span style=color:#fabd2f>int</span><span>, </span><span style=color:#fabd2f>str</span><span>], </span><span style=color:#fdf4c1>w2i</span><span>: Dict[</span><span style=color:#fabd2f>str</span><span>, </span><span style=color:#fabd2f>int</span><span>], </span><span style=color:#fdf4c1>word</span><span>: </span><span style=color:#fabd2f>str</span><span>) -> </span><span style=color:#fabd2f>int</span><span>:
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>word </span><span style=color:#fe8019>not in </span><span>w2i:
+</span><span>        wid </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(w2i)
+</span><span>        i2w[wid] </span><span style=color:#fe8019>= </span><span>word
+</span><span>        w2i[word] </span><span style=color:#fe8019>= </span><span>wid
+</span><span>        </span><span style=color:#fa5c4b>return </span><span>wid
+</span><span>    </span><span style=color:#fa5c4b>else</span><span>:
+</span><span>        </span><span style=color:#fa5c4b>return </span><span>w2i[word]
+</span><span>
+</span><span>
+</span><span>word_to_id </span><span style=color:#fe8019>= </span><span>{}
+</span><span>id_to_word </span><span style=color:#fe8019>= </span><span>{}
+</span><span>words </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>preprocess(</span><span style=color:#b8bb26>'I am a student. You are a teacher.'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fa5c4b>for </span><span>w </span><span style=color:#fa5c4b>in </span><span>words:
+</span><span>    </span><span style=color:#fdf4c1>process_word(id_to_word, word_to_id, w)
+</span><span>
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(word_to_id)
+</span><span>corpus </span><span style=color:#fe8019>= </span><span>[word_to_id[w] </span><span style=color:#fa5c4b>for </span><span>w </span><span style=color:#fa5c4b>in </span><span>words]
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(np.array(corpus))
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>{'i': 0, 'am': 1, 'a': 2, 'student': 3, 'you': 4, 'are': 5, 'teacher': 6}
+</span><span>[0 1 2 3 4 5 2 6]
+</span></code></pre><p>到这里，我们将输入的语料转换成了整数表示形式。将这些功能合并到预处理函数中，得到一个将文本语料库转为整数表示、分好词的 numpy 向量。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span style=color:#fa5c4b>import </span><span>re
+</span><span style=color:#fa5c4b>from </span><span>typing </span><span style=color:#fa5c4b>import </span><span>Dict
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>preprocess</span><span>(</span><span style=color:#fdf4c1>text</span><span>: </span><span style=color:#fabd2f>str</span><span>):
+</span><span>    w2i </span><span style=color:#fe8019>= </span><span>{}
+</span><span>    i2w </span><span style=color:#fe8019>= </span><span>{}
+</span><span>    corpus </span><span style=color:#fe8019>= </span><span>[]
+</span><span>    words </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>list</span><span style=color:#fdf4c1>(</span><span style=color:#fabd2f>filter</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>lambda </span><span style=color:#fdf4c1>s: </span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(s) </span><span style=color:#fe8019>> </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, re.split(</span><span style=color:#fa5c4b>r</span><span style=color:#b8bb26>'</span><span style=color:#d3869b>\W</span><span style=color:#fe8019>+</span><span style=color:#b8bb26>'</span><span style=color:#fdf4c1>, text.lower())))
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>word </span><span style=color:#fa5c4b>in </span><span>words:
+</span><span>        </span><span style=color:#fa5c4b>if </span><span>word </span><span style=color:#fe8019>not in </span><span>w2i:
+</span><span>            wid </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(w2i)
+</span><span>            i2w[wid] </span><span style=color:#fe8019>= </span><span>word
+</span><span>            w2i[word] </span><span style=color:#fe8019>= </span><span>wid
+</span><span>        </span><span style=color:#fa5c4b>else</span><span>:
+</span><span>            wid </span><span style=color:#fe8019>= </span><span>w2i[word]
+</span><span>        </span><span style=color:#fdf4c1>corpus.append(wid)
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>np.array(corpus)</span><span>, w2i, i2w
+</span><span>
+</span><span>
+</span><span>corpus, word_to_id, id_to_word </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>preprocess(</span><span style=color:#b8bb26>'I am a student. You are a teacher.'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(corpus)
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>[0 1 2 3 4 5 2 6]
+</span></code></pre><p>现在，基于计数的方法，我们准备将单词表示为向量的形式，在 NLP 领域也叫单词的<strong>分布式表示</strong>。<p>NLP 领域有一个<strong>分布式假设</strong>，单词的含义由其上下文决定。这与我们前面说的同义词词典时提到的问题不谋而合。 而<strong>上下文</strong>，我们指的是这个单词（<strong>关注词</strong>）前后的若干个单词。 其中<strong>若干个</strong>，我们具体选择的数量，称为<strong>窗口大小</strong>。<p>选择窗口大小为1，则上下文为关注词的前一个单词和后一个单词，以此类推，称为<strong>上下文窗口</strong>。 具体实践中，也可以考虑选择仅取左侧单词，或右侧单词为上下文。<p>我们可以统计窗口内单词的出现频率，来构造单词的向量表示，然后将所有单词的向量表示汇总成一个矩阵，称为<strong>共现矩阵</strong>。<p>共现矩阵的行列均是单词 ID，一行表示一个单词向量，向量的每个元素表示这个单词出现在对应列单词上下文中的次数。比如语料库 包含 <code>you</code> <code>say</code> <code>hello</code>，ID 是 0,1,2 ，则 <code>you</code> 是第一行（下标0），内容是 <code>0,1,0</code>，即 <code>you</code> 在 <code>say</code> 的上下文出现一次。 而 <code>say</code> 就是 <code>1,0,1</code>，即 <code>say</code> 分别在 <code>you</code> 和 <code>hello</code> 的上下文各出现一次。<p>我们看书中的例子。<p><img alt=2-4 src=https://nnnewb.github.io/posts/2024/reading-notes-on-advanced-deep-learning-01/img/2-4.webp><p>最终汇总得到矩阵：<p><img alt=2-7 src=https://nnnewb.github.io/posts/2024/reading-notes-on-advanced-deep-learning-01/img/2-7.webp><p>我们尝试用 python 实现这个构造向量、汇总矩阵的过程。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>create_co_matrix</span><span>(</span><span style=color:#fdf4c1>corpus</span><span>: np.ndarray, </span><span style=color:#fdf4c1>vocab_size</span><span>: </span><span style=color:#fabd2f>int</span><span>, </span><span style=color:#fdf4c1>window_size</span><span>: </span><span style=color:#fabd2f>int </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1</span><span>) -> np.ndarray:
+</span><span>    </span><span style=color:#928374;font-style:italic>""" 构造共现矩阵
+</span><span style=color:#928374;font-style:italic>    corpus: 语料库的向量表示
+</span><span style=color:#928374;font-style:italic>    vocab_size: 词汇表大小
+</span><span style=color:#928374;font-style:italic>    window_size: 窗口大小
+</span><span style=color:#928374;font-style:italic>    """
+</span><span>    co_matrix </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.zeros((vocab_size, vocab_size), dtype</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>np.int32)
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>idx, w </span><span style=color:#fa5c4b>in </span><span style=color:#fabd2f>enumerate</span><span style=color:#fdf4c1>(corpus)</span><span>:
+</span><span>        neighbors </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.concatenate([corpus[</span><span style=color:#fabd2f>max</span><span style=color:#fdf4c1>(idx </span><span style=color:#fe8019>- </span><span style=color:#fdf4c1>window_size, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>):idx], corpus[idx </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>:idx </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>window_size </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>]])
+</span><span>        </span><span style=color:#fa5c4b>for </span><span>n </span><span style=color:#fa5c4b>in </span><span>neighbors:
+</span><span>            co_matrix[w, n] </span><span style=color:#fe8019>+= </span><span style=color:#d3869b>1  </span><span style=color:#928374;font-style:italic># 第 w 行，第 n 列，计数+1
+</span><span>    </span><span style=color:#fa5c4b>return </span><span>co_matrix
+</span><span>
+</span><span>
+</span><span>corpus, word_to_id, id_to_word </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>preprocess(</span><span style=color:#b8bb26>'You say hello and I say goodbye.'</span><span style=color:#fdf4c1>)
+</span><span>co_matrix </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>create_co_matrix(corpus, </span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(word_to_id))
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(co_matrix)
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>[[0 1 0 0 0 0]
+</span><span> [1 0 1 0 1 1]
+</span><span> [0 1 0 1 0 0]
+</span><span> [0 0 1 0 1 0]
+</span><span> [0 1 0 1 0 0]
+</span><span> [0 1 0 0 0 0]]
+</span></code></pre><p>现在，我们得到了语料库中每个单词的向量表示，以及单词向量组成的共现矩阵。 下一个问题是，我们如何从单词向量，来评估单词间的相似度呢？<p>既然单词向量是一个向量，我们自然是用测量向量相似度的方法来评估单词间的相似度。 这里使用余弦相似度算法。<p>这里给出余弦相似度的公式。<p>$$ \begin{aligned} similarity(x,y) &= \frac{x \cdot y}{\Vert x \Vert \Vert y \Vert} \\ &= \frac{\sum_{i=1}^{n} x_{i} \times y_{i}}{\sqrt{\sum_{i=1}^{n} (x_{i})^2} \times \sqrt{\sum_{i=1}^{n} (y_{i})^2}} \end{aligned} $$<p>公式中，分子是两个向量的内积，分母是两个向量的范数之积。<blockquote><p>直观地看公式，内积在这里指的就是两个向量的点积（dot product），范数就是向量的长度或者模（modulus）。 但内积和范数又不只是点积和模，作为初学者我不理解为什么书中表述余弦相似度公式时采用这个说法，但继续纠结这个说法有何深意无助于书本当前章节内容的理解。 或许以后遇到相关问题的时候才能意识到这一表述的深意。<p>因此关于“内积”和“范数”出现在这里的原因以及对应的概念解释，这里不会继续纠缠不清。 但作为零基础学习的一部分，还是需要提一下计算过程。<p>内积的计算过程： $x \cdot y = \sum_{i=1}^{n} x_{i} \times y_{i}$<p>范数的计算过程： $\Vert x \Vert = \sqrt{\sum_{i=1}^{n} (x_{i})^2}$<p>以及余弦相似度公式本身的含义：求两个向量的夹角余弦值。<p>推导过程非常简单，欧氏空间的点积公式是：$a \cdot b = \Vert a \Vert \Vert b \Vert \cos \theta$<p>很容易就能得到 $\cos \theta = \frac{a \cdot b}{\Vert a \Vert \Vert b \Vert}$<p>这里给出一些我在读这几行文字的时候，搜索到的资料：<ul><li><a href=https://zhuanlan.zhihu.com/p/348308540>知乎 - 内积的几何意义</a><li><a href=https://www.shuxuele.com/algebra/vectors-dot-product.html>数学乐 - 点积</a><li><a href=https://zh.wikipedia.org/wiki/%E4%BD%99%E5%BC%A6%E7%9B%B8%E4%BC%BC%E6%80%A7>维基百科 - 余弦相似性</a></ul><p>余弦相似度公式对向量的长度不敏感，因此语料库中两个含义相似的词（上下文相似），即使其中一者出现的频率较低，依然可以判断为相似。</blockquote><p>我们用 python 实现一下余弦相似度算法。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>cosine_similarity</span><span>(</span><span style=color:#fdf4c1>x</span><span>: np.ndarray, </span><span style=color:#fdf4c1>y</span><span>: np.ndarray, </span><span style=color:#fe8019>*</span><span>, </span><span style=color:#fdf4c1>eps</span><span style=color:#fe8019>=</span><span style=color:#d3869b>1e-8</span><span>) -> </span><span style=color:#fabd2f>float</span><span>:
+</span><span>    </span><span style=color:#928374;font-style:italic>""" 计算余弦相似度
+</span><span style=color:#928374;font-style:italic>    x, y: 向量
+</span><span style=color:#928374;font-style:italic>    """
+</span><span>    </span><span style=color:#fa5c4b>assert </span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(x) </span><span style=color:#fe8019>== </span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(y)
+</span><span>    </span><span style=color:#fa5c4b>return </span><span>(</span><span style=color:#fdf4c1>np.dot(x, y)</span><span>) </span><span style=color:#fe8019>/ </span><span>(</span><span style=color:#fdf4c1>np.linalg.norm(x) </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>np.linalg.norm(y) </span><span style=color:#fe8019>+ </span><span>eps)
+</span><span>
+</span><span>
+</span><span>you_id </span><span style=color:#fe8019>= </span><span>word_to_id[</span><span style=color:#b8bb26>'you'</span><span>]
+</span><span>i_id </span><span style=color:#fe8019>= </span><span>word_to_id[</span><span style=color:#b8bb26>'i'</span><span>]
+</span><span>y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>cosine_similarity(co_matrix[you_id], co_matrix[i_id])
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(y)
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>0.7071067761865475
+</span></code></pre><p>与书中计算结果接近，都是 0.7 左右。<p>现在有了词向量和相似度计算公式，我们可以给定一个词，查找与其最接近的词（或词列表）。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>from </span><span>typing </span><span style=color:#fa5c4b>import </span><span>Optional
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>most_similar</span><span>(</span><span style=color:#fdf4c1>query</span><span>: </span><span style=color:#fabd2f>str</span><span>, </span><span style=color:#fdf4c1>word_to_id</span><span>: </span><span style=color:#fabd2f>dict</span><span>, </span><span style=color:#fdf4c1>id_to_word</span><span>: </span><span style=color:#fabd2f>dict</span><span>, </span><span style=color:#fdf4c1>word_matrix</span><span>: np.ndarray, </span><span style=color:#fdf4c1>top</span><span>: </span><span style=color:#fabd2f>int </span><span style=color:#fe8019>= </span><span style=color:#d3869b>5</span><span>) -> Optional[
+</span><span>    List[</span><span style=color:#fabd2f>str</span><span>]]:
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>query </span><span style=color:#fe8019>not in </span><span>word_to_id:
+</span><span>        </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'没有 </span><span style=color:#fdf4c1>{query}</span><span style=color:#b8bb26> 这个单词'</span><span style=color:#fdf4c1>)
+</span><span>        </span><span style=color:#fa5c4b>return
+</span><span>
+</span><span>    query_id </span><span style=color:#fe8019>= </span><span>word_to_id[query]
+</span><span>    vocab_size </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(word_to_id)
+</span><span>    similarity </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.zeros(vocab_size)
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>i </span><span style=color:#fa5c4b>in </span><span style=color:#fabd2f>range</span><span style=color:#fdf4c1>(vocab_size)</span><span>:
+</span><span>        similarity[i] </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>cosine_similarity(word_matrix[query_id], word_matrix[i])
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>idx, i </span><span style=color:#fa5c4b>in </span><span style=color:#fabd2f>enumerate</span><span style=color:#fdf4c1>((</span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>similarity).argsort())</span><span>:
+</span><span>        word </span><span style=color:#fe8019>= </span><span>id_to_word[i]
+</span><span>        </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(idx, word, similarity[i])
+</span><span>
+</span><span>
+</span><span style=color:#fdf4c1>most_similar(</span><span style=color:#b8bb26>'you'</span><span style=color:#fdf4c1>, word_to_id, id_to_word, co_matrix)
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>0 you 0.9999999900000002
+</span><span>1 goodbye 0.9999999900000002
+</span><span>2 hello 0.7071067761865475
+</span><span>3 i 0.7071067761865475
+</span><span>4 say 0.0
+</span><span>5 and 0.0
+</span></code></pre><p>注意到输出和书中不同，因为书中的 <code>preprocess</code> 结果包含一个 <code>.</code> ，而我们这里的 preprocess 结果不包含。 因此在 <code>goodbye</code> 这个单词上，上下文和 <code>you</code> 一样只包含 <code>say</code>，向量表示也一样，因此相似度是最高的。 书中的 <code>goodbye</code> 有个额外的上下文 <code>.</code> ，相似度就低了。<p>相信有人已经注意到了，这里统计单词出现频次的方法有很多问题。上下文中单词出现的位置和顺序，和单词的含义是有很大关系的。 举个粗俗的例子来说，飞机打我和我打飞机是完全的两码事！<p>有经验的程序员应该在读到创建共现矩阵这一步的时候就立刻注意到，共现矩阵的空间复杂度是多项式级别的 $O(n^2)$，而查询 同义词的时间复杂度是 $O(n)$，这在语料库非常大的情况下，会带来非常严重的性能问题。<p>此外，就连单词向量表示方法也存在很大问题。对于一些常用冠词、介词，它们的含义和上下文没有关系，但因为经常出现而被认为 和上下文存在强相关。<p>对于向量表示方法的问题，书中引入了 <strong>点互信息</strong> （PMI，Pointwise Mutual Information）来处理。<p>PMI 函数定义为：$PMI(x,y) = \log_2 \frac{P(x,y)}{P(x)P(y)}$<p>其中，$P(x)$ 表示 x 发生的概率，$P(y)$ 表示 y 发生的概率，$P(x,y)$ 表示 x 和 y 同时发生概率。PMI的值越高，两个词的相关性越强。<p>为了计算 $P(x)$ 我们定义 $C$ 为共现矩阵， $C(x)$ 为 x 在共现矩阵中出现的次数，$C(x,y)$ 则是 x 和 y 同时发生的次数（x上下文中出现y的次数加上y的上下文中出现x的次数）。 定义 N 为所有单词出现的次数之和（同样是共现矩阵中的）。<p>得到公式：$PMI(x,y) = \log_2 \frac{C(x,y) \cdot N}{C(x) \cdot C(y)}$<blockquote><p>这里有个迷惑的问题，就是为什么要计算共现矩阵中 x 和 y 以及 x,y 出现的次数，而不是语料库中出现的次数？ 另外 PMI 本身，是一个源自概率论/信息学的概念，和余弦相似度里范数、内积这些数学领域的内容一样暂不讨论。</blockquote><p>再进一步，当共现次数为0时（即 $C(x,y)=0$），PMI会得到 $-\infty$，这不好。对于负的 PMI 我们做一个 ReLU 式的处理，得到新的函数 $PPMI(x,y) = \max(0, PMI(x,y))$<p>当 $PMI(x,y)&lt;0$ ，$PPMI(x,y)$ 得到 0。<p>接着还是用 python 实现一下求 ppmi 的函数。<blockquote><p>PS: 为了方便验证实现，我接下来会用书中的 preprocess 函数，而不是我自己定义的。</blockquote><pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>from </span><span>common.util </span><span style=color:#fa5c4b>import </span><span>preprocess, create_co_matrix
+</span><span style=color:#fa5c4b>from </span><span>rich.console </span><span style=color:#fa5c4b>import </span><span>Console
+</span><span style=color:#fa5c4b>from </span><span>rich.table </span><span style=color:#fa5c4b>import </span><span>Table
+</span><span>
+</span><span>corpus, word_to_id, id_to_word </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>preprocess(</span><span style=color:#b8bb26>'You say hello and I say goodbye.'</span><span style=color:#fdf4c1>)
+</span><span>co_matrix </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>create_co_matrix(corpus, </span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(word_to_id))
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>_pretty_print_covariance_table</span><span>(</span><span style=color:#fdf4c1>C</span><span>: np.ndarray, </span><span style=color:#fe8019>*</span><span>, </span><span style=color:#fdf4c1>title</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'covariance table'</span><span>) -> </span><span style=color:#d3869b>None</span><span>:
+</span><span>    console </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>Console()
+</span><span>    covariance_table </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>Table(title</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>title)
+</span><span>
+</span><span>    </span><span style=color:#fdf4c1>covariance_table.add_column(</span><span style=color:#b8bb26>'/'</span><span style=color:#fdf4c1>)
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>i </span><span style=color:#fa5c4b>in </span><span style=color:#fabd2f>range</span><span style=color:#fdf4c1>(C.shape[</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>])</span><span>:
+</span><span>        </span><span style=color:#fdf4c1>covariance_table.add_column(id_to_word[i])
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>i </span><span style=color:#fa5c4b>in </span><span style=color:#fabd2f>range</span><span style=color:#fdf4c1>(C.shape[</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>])</span><span>:
+</span><span>        </span><span style=color:#fdf4c1>covariance_table.add_row(id_to_word[i], </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>[</span><span style=color:#fabd2f>str</span><span style=color:#fdf4c1>(C[i, j]) </span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>j </span><span style=color:#fa5c4b>in </span><span style=color:#fabd2f>range</span><span style=color:#fdf4c1>(C.shape[</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>])])
+</span><span>
+</span><span>    </span><span style=color:#fdf4c1>console.print(covariance_table)
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>ppmi</span><span>(</span><span style=color:#fdf4c1>C</span><span>: np.ndarray, </span><span style=color:#fdf4c1>verbose</span><span>: </span><span style=color:#fabd2f>bool </span><span style=color:#fe8019>= </span><span style=color:#d3869b>False</span><span>, </span><span style=color:#fdf4c1>eps</span><span>: </span><span style=color:#fabd2f>float </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1e-8</span><span>) -> np.ndarray:
+</span><span>    </span><span style=color:#fdf4c1>_pretty_print_covariance_table(C)
+</span><span>    M </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.zeros_like(C, dtype</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>np.float32)  </span><span style=color:#928374;font-style:italic># 新的 PPMI 矩阵
+</span><span>    N </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.sum(C)  </span><span style=color:#928374;font-style:italic># 所有单词出现的总次数
+</span><span>    S </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.sum(C, axis</span><span style=color:#fe8019>=</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>)  </span><span style=color:#928374;font-style:italic># 单独计算某个单词出现的次数
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic># 查看每个单词在共现矩阵出现的次数
+</span><span>    </span><span style=color:#928374;font-style:italic># 这个计数实际算的是单词出现在其他单词上下文中的次数。比如 you say hello
+</span><span>    </span><span style=color:#928374;font-style:italic># say 这个词在语料库里只出现一次，但在共现矩阵里计数是 2 次，分别在 you 的上下文和 hello 的上下文里出现 1 次。
+</span><span>    console </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>Console()
+</span><span>    table </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>Table(title</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'word count'</span><span style=color:#fdf4c1>)
+</span><span>    </span><span style=color:#fdf4c1>table.add_column(</span><span style=color:#b8bb26>'word'</span><span style=color:#fdf4c1>)
+</span><span>    </span><span style=color:#fdf4c1>table.add_column(</span><span style=color:#b8bb26>'count'</span><span style=color:#fdf4c1>)
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>i </span><span style=color:#fa5c4b>in </span><span style=color:#fabd2f>range</span><span style=color:#fdf4c1>(</span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(S))</span><span>:
+</span><span>        </span><span style=color:#fdf4c1>table.add_row(id_to_word[i], </span><span style=color:#fabd2f>str</span><span style=color:#fdf4c1>(S[i]))
+</span><span>    </span><span style=color:#fdf4c1>console.print(table)
+</span><span>
+</span><span>    total </span><span style=color:#fe8019>= </span><span>C.shape[</span><span style=color:#d3869b>0</span><span>] </span><span style=color:#fe8019>* </span><span>C.shape[</span><span style=color:#d3869b>1</span><span>]  </span><span style=color:#928374;font-style:italic># 矩阵大小，方便在大语料库处理时计算和观察进度用
+</span><span>    cnt </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0  </span><span style=color:#928374;font-style:italic># 当前处理到的位置
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic># 遍历共现矩阵的行
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>i </span><span style=color:#fa5c4b>in </span><span style=color:#fabd2f>range</span><span style=color:#fdf4c1>(C.shape[</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>])</span><span>:
+</span><span>        </span><span style=color:#928374;font-style:italic># 遍历共现矩阵的列
+</span><span>        </span><span style=color:#fa5c4b>for </span><span>j </span><span style=color:#fa5c4b>in </span><span style=color:#fabd2f>range</span><span style=color:#fdf4c1>(C.shape[</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>])</span><span>:
+</span><span>            </span><span style=color:#928374;font-style:italic># C[i,j] 取单词 i 上下文中 j 出现的次数，即 C(i,j)
+</span><span>            </span><span style=color:#928374;font-style:italic># S[i],S[j] 取单词 i,j 分别在共现矩阵出现的总次数，即 C(i) 和 C(j)
+</span><span>            </span><span style=color:#928374;font-style:italic># eps 微小值避免 C(i,j) 为 0 的情况下，求 log2(0) 得到 -inf 的结果。
+</span><span>            </span><span style=color:#928374;font-style:italic># 至少在 C(i,j) 为 0 的时候可以得到 log2(eps)
+</span><span>            pmi </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.log2(C[i, j] </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>N </span><span style=color:#fe8019>/ </span><span style=color:#fdf4c1>(S[i] </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>S[j]) </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>eps)
+</span><span>            M[i, j] </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>max</span><span style=color:#fdf4c1>(</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, pmi)
+</span><span>
+</span><span>            </span><span style=color:#928374;font-style:italic># 观察进度
+</span><span>            cnt </span><span style=color:#fe8019>+= </span><span style=color:#d3869b>1
+</span><span>            </span><span style=color:#fa5c4b>if </span><span>cnt </span><span style=color:#fe8019>% </span><span style=color:#d3869b>10000 </span><span style=color:#fe8019>== </span><span style=color:#d3869b>0</span><span>:
+</span><span>                </span><span style=color:#fa5c4b>if </span><span>verbose:
+</span><span>                    </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'已完成 </span><span style=color:#fdf4c1>{cnt </span><span style=color:#fe8019>/ </span><span style=color:#fdf4c1>total </span><span style=color:#fe8019>* </span><span style=color:#d3869b>100</span><span style=color:#fdf4c1>:.1f}</span><span style=color:#b8bb26>%'</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>return </span><span>M
+</span><span>
+</span><span>
+</span><span>ppmi_co_matrix </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>ppmi(co_matrix)
+</span><span style=color:#fdf4c1>_pretty_print_covariance_table(ppmi_co_matrix, title</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'ppmi covariance table'</span><span style=color:#fdf4c1>)
+</span></code></pre><pre style="white-space:pre;font-family:Menlo,DejaVu Sans Mono,consolas,Courier New,monospace;line-height:normal;overflow-x:auto"><span style=font-style:italic>                   covariance table                    </span>
+┏━━━━━━━━━┳━━━━━┳━━━━━┳━━━━━━━┳━━━━━┳━━━┳━━━━━━━━━┳━━━┓
+┃<span style=font-weight:700> /       </span>┃<span style=font-weight:700> you </span>┃<span style=font-weight:700> say </span>┃<span style=font-weight:700> hello </span>┃<span style=font-weight:700> and </span>┃<span style=font-weight:700> i </span>┃<span style=font-weight:700> goodbye </span>┃<span style=font-weight:700> . </span>┃
+┡━━━━━━━━━╇━━━━━╇━━━━━╇━━━━━━━╇━━━━━╇━━━╇━━━━━━━━━╇━━━┩
+│ you     │ 0   │ 1   │ 0     │ 0   │ 0 │ 0       │ 0 │
+│ say     │ 1   │ 0   │ 1     │ 0   │ 1 │ 1       │ 0 │
+│ hello   │ 0   │ 1   │ 0     │ 1   │ 0 │ 0       │ 0 │
+│ and     │ 0   │ 0   │ 1     │ 0   │ 1 │ 0       │ 0 │
+│ i       │ 0   │ 1   │ 0     │ 1   │ 0 │ 0       │ 0 │
+│ goodbye │ 0   │ 1   │ 0     │ 0   │ 0 │ 0       │ 1 │
+│ .       │ 0   │ 0   │ 0     │ 0   │ 0 │ 1       │ 0 │
+└─────────┴─────┴─────┴───────┴─────┴───┴─────────┴───┘
+</pre><pre style="white-space:pre;font-family:Menlo,DejaVu Sans Mono,consolas,Courier New,monospace;line-height:normal;overflow-x:auto"><span style=font-style:italic>    word count     </span>
+┏━━━━━━━━━┳━━━━━━━┓
+┃<span style=font-weight:700> word    </span>┃<span style=font-weight:700> count </span>┃
+┡━━━━━━━━━╇━━━━━━━┩
+│ you     │ 1     │
+│ say     │ 4     │
+│ hello   │ 2     │
+│ and     │ 2     │
+│ i       │ 2     │
+│ goodbye │ 2     │
+│ .       │ 1     │
+└─────────┴───────┘
+</pre><pre style="white-space:pre;font-family:Menlo,DejaVu Sans Mono,consolas,Courier New,monospace;line-height:normal;overflow-x:auto"><span style=font-style:italic>                                    ppmi covariance table                                     </span>
+┏━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━┓
+┃<span style=font-weight:700> /       </span>┃<span style=font-weight:700> you       </span>┃<span style=font-weight:700> say       </span>┃<span style=font-weight:700> hello     </span>┃<span style=font-weight:700> and       </span>┃<span style=font-weight:700> i         </span>┃<span style=font-weight:700> goodbye   </span>┃<span style=font-weight:700> .        </span>┃
+┡━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━┩
+│ you     │ 0.0       │ 1.8073549 │ 0.0       │ 0.0       │ 0.0       │ 0.0       │ 0.0      │
+│ say     │ 1.8073549 │ 0.0       │ 0.8073549 │ 0.0       │ 0.8073549 │ 0.8073549 │ 0.0      │
+│ hello   │ 0.0       │ 0.8073549 │ 0.0       │ 1.8073549 │ 0.0       │ 0.0       │ 0.0      │
+│ and     │ 0.0       │ 0.0       │ 1.8073549 │ 0.0       │ 1.8073549 │ 0.0       │ 0.0      │
+│ i       │ 0.0       │ 0.8073549 │ 0.0       │ 1.8073549 │ 0.0       │ 0.0       │ 0.0      │
+│ goodbye │ 0.0       │ 0.8073549 │ 0.0       │ 0.0       │ 0.0       │ 0.0       │ 2.807355 │
+│ .       │ 0.0       │ 0.0       │ 0.0       │ 0.0       │ 0.0       │ 2.807355  │ 0.0      │
+└─────────┴───────────┴───────────┴───────────┴───────────┴───────────┴───────────┴──────────┘
+</pre><p>PPMI 矩阵依然存在一个问题，计算 PPMI 的过程时间复杂度是多项式级别的 $O(n^2)$，存储空间复杂度也是 $O(n^2)$。 语料库非常大的时候，PPMI 计算量和存储空间需求会急剧膨胀。而进一步观察矩阵，会发现这个矩阵的大部分元素都是 0。<blockquote><p>PS: 立刻想到了稀疏矩阵的压缩存储。但压缩存储后参与计算就很麻烦了，归根结底这是个计算密集的场景。</blockquote><p>书中引入的方法是降维，将矩阵 $C$ 降维到 $k$ 维，得到矩阵 $U$，$U$ 的每一列表示 $C$ 的一个特征向量。在这个场景是 将二维的共现矩阵降维到 1 维，得到一个特征向量，这个特征向量表示了矩阵 $C$ 的一个特征值。<p><img alt=2-8 src=https://nnnewb.github.io/posts/2024/reading-notes-on-advanced-deep-learning-01/img/2-8.webp><p>降维的方法是 <strong>SVD</strong> （奇异值分解，Singular Value Decomposition），将任意矩阵 $X$ 分解成3个矩阵的乘积，定义为 $X=USV^T$<blockquote><p>PS: SVD 是什么以及出现在这里的意义又是一个数学领域的问题，我没能力讨论就不废话了。</blockquote><p>书中将$USV^T$概括为：<ul><li>$U$ 矩阵视作单词空间<li>$S$ 视作重要性矩阵，我们裁剪 $S$ 来实现对原矩阵的有损压缩，裁剪 $S$ 的同时要跟着裁剪 $V^T$ 和 $U$</ul><p>书中的用法是，对例如 1000 个单词的原矩阵 $C_{1000 \times 1000}$，SVD 后截取 $U$ 矩阵的前 N 列，得到降维表示的单词向量。<p>简单实现一下。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>from </span><span>common.util </span><span style=color:#fa5c4b>import </span><span>preprocess, create_co_matrix, ppmi
+</span><span>
+</span><span>text </span><span style=color:#fe8019>= </span><span style=color:#b8bb26>'You say hello and i say goodbye.'
+</span><span>corpus, word_to_id, id_to_word </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>preprocess(text)
+</span><span>C </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>create_co_matrix(corpus, </span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(word_to_id))
+</span><span>W </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>ppmi(C)
+</span><span>U, S, V </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.linalg.svd(ppmi_co_matrix)
+</span><span>
+</span><span style=color:#fdf4c1>np.set_printoptions(precision</span><span style=color:#fe8019>=</span><span style=color:#d3869b>3</span><span style=color:#fdf4c1>)  </span><span style=color:#928374;font-style:italic># 有效位数为3位
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(C[</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>])
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(W[</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>])
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(U[</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>])
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>[0 1 0 0 0 0 0]
+</span><span>[0.    1.807 0.    0.    0.    0.    0.   ]
+</span><span>[-1.110e-16  3.409e-01 -1.205e-01 -4.163e-16 -1.110e-16 -9.323e-01
+</span><span> -2.426e-17]
+</span></code></pre><blockquote><p>PS: 书中的输出是这样的<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(U[</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>]) </span><span style=color:#928374;font-style:italic># SVD
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>[ 3.409e-01 -1.110e-16 -1.205e-01 -4.441e-16 0.000e+00 -9.323e-01
+</span><span>2.226e-16]
+</span></code></pre><p>但实际附带的案例代码，跑出来的结果是上图所示的。不是我写的不对，是书里写的输出有问题。</blockquote><pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>matplotlib.pyplot </span><span style=color:#fa5c4b>as </span><span>plt
+</span><span>
+</span><span style=color:#fa5c4b>for </span><span>word, word_id </span><span style=color:#fa5c4b>in </span><span style=color:#fdf4c1>word_to_id.items()</span><span>:
+</span><span>    </span><span style=color:#fdf4c1>plt.annotate(word, (U[word_id, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>], U[word_id, </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>]))
+</span><span>    </span><span style=color:#fdf4c1>plt.scatter(U[:, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>], U[:, </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>], alpha</span><span style=color:#fe8019>=</span><span style=color:#d3869b>0.5</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>plt.show()
+</span></code></pre><p><img alt=png src=https://nnnewb.github.io/posts/2024/reading-notes-on-advanced-deep-learning-01/ch02_files/ch02_20_0.webp><blockquote><p>PS: 眼尖的兄弟应该又看出来了，和书里的还是不一样。</blockquote><p>SVD 算法的时间复杂度是 $O(n^3)$，书中提到可以用 sklearn 的 TruncatedSVD 算法加速。TruncatedSVD 会丢弃一些较小的奇异值。<blockquote><p>PS: 奇异值是什么，还得再回头翻书。</blockquote><p>总之，书到这里，我们可以开始在真正的语料库上创建单词向量了。书中使用 Penn Treebank 语料库，这里就跟着做一下实验。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>from </span><span>dataset.ptb </span><span style=color:#fa5c4b>import </span><span>load_data
+</span><span style=color:#fa5c4b>from </span><span>common.util </span><span style=color:#fa5c4b>import </span><span>create_co_matrix, ppmi, most_similar
+</span><span>
+</span><span style=color:#928374;font-style:italic># 结构和我们的 preprocess 一样
+</span><span>corpus, word_to_id, id_to_word </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>load_data(</span><span style=color:#b8bb26>'train'</span><span style=color:#fdf4c1>)
+</span><span>vocab_size </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(word_to_id)
+</span><span>window_size </span><span style=color:#fe8019>= </span><span style=color:#d3869b>2
+</span><span>wordvec_size </span><span style=color:#fe8019>= </span><span style=color:#d3869b>100
+</span><span>
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'[+] 正在创建共现矩阵...'</span><span style=color:#fdf4c1>)
+</span><span>C </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>create_co_matrix(corpus, vocab_size, window_size</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>window_size)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'[+] 正在计算 PPMI...'</span><span style=color:#fdf4c1>)
+</span><span>W </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>ppmi(C, verbose</span><span style=color:#fe8019>=</span><span style=color:#d3869b>True</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'[+] 正在计算 SVD...'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fa5c4b>try</span><span>:
+</span><span>    </span><span style=color:#928374;font-style:italic># truncated SVD (fast!)
+</span><span>    </span><span style=color:#fa5c4b>from </span><span>sklearn.utils.extmath </span><span style=color:#fa5c4b>import </span><span>randomized_svd
+</span><span>
+</span><span>    U, S, V </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>randomized_svd(W, n_components</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>wordvec_size, n_iter</span><span style=color:#fe8019>=</span><span style=color:#d3869b>5</span><span style=color:#fdf4c1>, random_state</span><span style=color:#fe8019>=</span><span style=color:#d3869b>None</span><span style=color:#fdf4c1>)
+</span><span style=color:#fa5c4b>except </span><span style=color:#fabd2f>ImportError</span><span>:
+</span><span>    U, S, V </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.linalg.svd(W)
+</span><span>
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'[+] 词向量计算完成'</span><span style=color:#fdf4c1>)
+</span><span>word_vecs </span><span style=color:#fe8019>= </span><span>U[:, :wordvec_size]
+</span><span>queries </span><span style=color:#fe8019>= </span><span>[</span><span style=color:#b8bb26>'you'</span><span>, </span><span style=color:#b8bb26>'year'</span><span>, </span><span style=color:#b8bb26>'car'</span><span>, </span><span style=color:#b8bb26>'toyota'</span><span>]
+</span><span style=color:#fa5c4b>for </span><span>query </span><span style=color:#fa5c4b>in </span><span>queries:
+</span><span>    </span><span style=color:#fdf4c1>most_similar(query, word_to_id, id_to_word, word_vecs)
+</span><span>
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>[+] 正在创建共现矩阵...
+</span><span>[+] 正在计算 PPMI...
+</span><span>
+</span><span>
+</span><span>F:\repos\DL-NLP\common\util.py:139: RuntimeWarning: overflow encountered in scalar multiply
+</span><span>  pmi = np.log2(C[i, j] * N / (S[j]*S[i]) + eps)
+</span><span>F:\repos\DL-NLP\common\util.py:139: RuntimeWarning: invalid value encountered in log2
+</span><span>  pmi = np.log2(C[i, j] * N / (S[j]*S[i]) + eps)
+</span><span>
+</span><span>
+</span><span>1.0% done
+</span><span>2.0% done
+</span><span>3.0% done
+</span><span>4.0% done
+</span><span>5.0% done
+</span><span>6.0% done
+</span><span>7.0% done
+</span><span>8.0% done
+</span><span>9.0% done
+</span><span>10.0% done
+</span><span>11.0% done
+</span><span>12.0% done
+</span><span>13.0% done
+</span><span>14.0% done
+</span><span>15.0% done
+</span><span>16.0% done
+</span><span>17.0% done
+</span><span>18.0% done
+</span><span>19.0% done
+</span><span>20.0% done
+</span><span>21.0% done
+</span><span>22.0% done
+</span><span>23.0% done
+</span><span>24.0% done
+</span><span>25.0% done
+</span><span>26.0% done
+</span><span>27.0% done
+</span><span>28.0% done
+</span><span>29.0% done
+</span><span>30.0% done
+</span><span>31.0% done
+</span><span>32.0% done
+</span><span>33.0% done
+</span><span>34.0% done
+</span><span>35.0% done
+</span><span>36.0% done
+</span><span>37.0% done
+</span><span>38.0% done
+</span><span>39.0% done
+</span><span>40.0% done
+</span><span>41.0% done
+</span><span>42.0% done
+</span><span>43.0% done
+</span><span>44.0% done
+</span><span>45.0% done
+</span><span>46.0% done
+</span><span>47.0% done
+</span><span>48.0% done
+</span><span>49.0% done
+</span><span>50.0% done
+</span><span>51.0% done
+</span><span>52.0% done
+</span><span>53.0% done
+</span><span>54.0% done
+</span><span>55.0% done
+</span><span>56.0% done
+</span><span>57.0% done
+</span><span>58.0% done
+</span><span>59.0% done
+</span><span>60.0% done
+</span><span>61.0% done
+</span><span>62.0% done
+</span><span>63.0% done
+</span><span>64.0% done
+</span><span>65.0% done
+</span><span>66.0% done
+</span><span>67.0% done
+</span><span>68.0% done
+</span><span>69.0% done
+</span><span>70.0% done
+</span><span>71.0% done
+</span><span>72.0% done
+</span><span>73.0% done
+</span><span>74.0% done
+</span><span>75.0% done
+</span><span>76.0% done
+</span><span>77.0% done
+</span><span>78.0% done
+</span><span>79.0% done
+</span><span>80.0% done
+</span><span>81.0% done
+</span><span>82.0% done
+</span><span>83.0% done
+</span><span>84.0% done
+</span><span>85.0% done
+</span><span>86.0% done
+</span><span>87.0% done
+</span><span>88.0% done
+</span><span>89.0% done
+</span><span>90.0% done
+</span><span>91.0% done
+</span><span>92.0% done
+</span><span>93.0% done
+</span><span>94.0% done
+</span><span>95.0% done
+</span><span>96.0% done
+</span><span>97.0% done
+</span><span>98.0% done
+</span><span>99.0% done
+</span><span>[+] 正在计算 SVD...
+</span><span>[+] 词向量计算完成
+</span><span>
+</span><span>[query] you
+</span><span> i: 0.6721723079681396
+</span><span> we: 0.6572807431221008
+</span><span> do: 0.5788654685020447
+</span><span> 'd: 0.5358506441116333
+</span><span> 've: 0.5161784291267395
+</span><span>
+</span><span>[query] year
+</span><span> last: 0.6547753810882568
+</span><span> month: 0.6300122141838074
+</span><span> next: 0.6260495781898499
+</span><span> quarter: 0.5872719287872314
+</span><span> february: 0.5810660123825073
+</span><span>
+</span><span>[query] car
+</span><span> luxury: 0.6643019914627075
+</span><span> auto: 0.6334719061851501
+</span><span> corsica: 0.5723612308502197
+</span><span> truck: 0.5713587403297424
+</span><span> domestic: 0.5277842283248901
+</span><span>
+</span><span>[query] toyota
+</span><span> motor: 0.7351067066192627
+</span><span> nissan: 0.6682652831077576
+</span><span> motors: 0.643950343132019
+</span><span> honda: 0.6137979626655579
+</span><span> lexus: 0.6087179183959961
+</span></code></pre><p>需注意几个点，上述代码中我们没有用前面解释 pmi 和 共现矩阵时的窗口大小和向量大小，词向量取 100 维，而窗口是 2 不是 1。<p>这几个参数取值会影响结果，书上代码抄下来结果不一致可以注意下这些细节参数。<h2 id=zong-jie>总结</h2><p>这一章涉及很多交叉领域的概念，所以读起来是有点吃力的。本来想直接写 markdown 但发现不用 jupyter 嵌几个示例会很难 说清楚。<p>遗留的几个问题包括：<ul><li>关于 PPMI/PMI/MI 互信息是个什么鬼，为何可以表示关联性。<li>SVD 奇异值分解原理，主要是理解 U 矩阵为什么能表示词空间，矩阵相关的东西很难在学 DL 的时候避开了。<li>内积和范数，这个还好。至少不影响对余弦相似度公式的理解。</ul><p>再次体会到搞 AI 的话我的基础确实薄弱。</article><p class=tags-data><a href=/tags/zi-ran-yu-yan-chu-li>/自然语言处理/</a> <a href=/tags/shen-du-xue-xi>/深度学习/</a> <a href=/tags/du-shu-bi-ji>/读书笔记/</a> <a href=/tags/nlp>/NLP/</a> <a href=/tags/python>/Python/</a> <a href=/tags/numpy>/numpy/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

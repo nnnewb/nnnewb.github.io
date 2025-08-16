@@ -1,0 +1,60 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>我的 Ubuntu Server 虚拟机配置</title><meta content="我的 Ubuntu Server 虚拟机配置" name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2022/2022-12-32-you-hua-ubuntu-server-xu-ni-ji-qi-dong/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content="我的 Ubuntu Server 虚拟机配置" property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2022/2022-12-32-you-hua-ubuntu-server-xu-ni-ji-qi-dong/ property=twitter:url><meta content="我的 Ubuntu Server 虚拟机配置" property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2022/2022-12-32-you-hua-ubuntu-server-xu-ni-ji-qi-dong/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>我的 Ubuntu Server 虚拟机配置</h1><p class=author-line>作于：2022-12-31 17:15 ，预计阅读时间 4 分钟<article><p>Ubuntu Server 是我目前比较习惯用的开发用 Linux 虚拟机系统，选择 Ubuntu Server 的原因也很简单：问答资源什么的比较丰富，安装过程足够快捷可控，以及日常开发使用中相对没那么折腾。<p>但 Ubuntu Server 默认配置也有些比较恶心人的东西，比如那个 <code>snapd</code> ，平时基本用不到，但系统用了一段时间后经常看到 <code>snapd</code> 关机的时候等待 120s 或者启动报错之类。同样比较烦人的是 <code>systemd-networkd-wait-online</code> ，会拖慢开机时间，而且经常能看到失败。<p>且不说这个检查机制到底是怎么实现的，虚拟机环境基本不配什么开机启动依赖网络的服务，等网络确实没什么意义。<p>最后还有一个比较迷惑的问题，默认装完 Ubuntu Server 设置的 systemd target 是 graphical ，但安装选项是不含桌面的。所以为了不加载没啥用还可能导致问题的服务，默认 target 也得改成 multi-user 。<p>具体流程：<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#928374;font-style:italic># 卸载和禁用 snapd
+</span><span style=color:#fdf4c1>sudo apt autoremove --purge snapd
+</span><span style=color:#fdf4c1>sudo apt-mark hold snapd
+</span><span>
+</span><span style=color:#928374;font-style:italic># 修改 systemd-networkd-wait-online 的等待时间
+</span><span style=color:#928374;font-style:italic># ExecStart=/lib/systemd/systemd-networkd-wait-online --timeout 1
+</span><span style=color:#928374;font-style:italic># 加上 --timeout 1
+</span><span style=color:#fdf4c1>sudo systemctl edit systemd-networkd-wait-online.service --full
+</span><span>
+</span><span style=color:#928374;font-style:italic># 修改目标 multi-user
+</span><span style=color:#fdf4c1>sudo systemctl set-default multi-user
+</span><span>
+</span><span style=color:#928374;font-style:italic># 重启生效
+</span><span style=color:#fdf4c1>sudo reboot
+</span></code></pre><p>这是一方面。<p>另外还有个比较讨厌的问题是网络配置，公司内网不允许虚拟机桥接，而 NAT 模式宿主机是不能直接通过 IP 访问虚拟机的，所以还得加一张 Host-Only 网卡。此外，因为工作需要，还得准备两台用来给公司代码编译打包的虚拟机（也是历史遗留的大坑），以及一台测试用的虚拟机。这些虚拟机之间需要互通，然而 NAT 模式网卡也是不支持虚拟机之间互通的，所以还是要加 Host-Only 网卡。<p>然后就是 Host-Only 网卡的问题了，默认是 DHCP 分配 IP ，会偶发的出现虚拟机 IP 改变，导致一些写好的脚本不得不改下才能跑。所以还得顺便改下静态 IP 。嗯，虚拟机有部分是 CentOS 的，配置静态 IP 方法和 Ubuntu Server 不一样，但这篇只聊下 Ubuntu Server 的配置静态 IP 方法。<p>简而言之，参考 <a href=https://netplan.io/examples>Canonical Netplan</a> 这篇文档。在 <code>/etc/netplan/</code> 下面新建一个 <code>01-host-only.yaml</code> 配置如下。<pre class=language-yaml data-lang=yaml style=color:#fdf4c1aa;background-color:#282828><code class=language-yaml data-lang=yaml><span style=color:#8ec07c;font-weight:700>network</span><span>:
+</span><span>  </span><span style=color:#8ec07c;font-weight:700>version</span><span>: </span><span style=color:#d3869b>2
+</span><span>  </span><span style=color:#8ec07c;font-weight:700>renderer</span><span>: </span><span style=color:#b8bb26>networkd
+</span><span>  </span><span style=color:#8ec07c;font-weight:700>ethernets</span><span>:
+</span><span>    </span><span style=color:#8ec07c;font-weight:700>ens37</span><span>:
+</span><span>      </span><span style=color:#8ec07c;font-weight:700>dhcp4</span><span>: </span><span style=color:#d3869b>no
+</span><span>      </span><span style=color:#8ec07c;font-weight:700>addresses</span><span>: [</span><span style=color:#b8bb26>192.168.129.101/24</span><span>]
+</span><span>      </span><span style=color:#8ec07c;font-weight:700>nameservers</span><span>:
+</span><span>        </span><span style=color:#8ec07c;font-weight:700>addresses</span><span>: [</span><span style=color:#d3869b>114.114.114.114</span><span>,</span><span style=color:#d3869b>114.114.115.115</span><span>]
+</span><span>      </span><span style=color:#8ec07c;font-weight:700>routes</span><span>:
+</span><span>        - </span><span style=color:#8ec07c;font-weight:700>to</span><span>: </span><span style=color:#b8bb26>192.168.129.0/24
+</span><span>          </span><span style=color:#8ec07c;font-weight:700>via</span><span>: </span><span style=color:#d3869b>192.168.129.1
+</span></code></pre><p>需要注意的是得看下虚拟机的 Host-Only 网卡配置的是哪个网段，以及 Host-Only 的网卡名是什么（我的机器上是 <code>ens37</code>）。Host-Only 网卡配 <code>nameservers</code> 没啥意义我这写了也就写了。<p>改好之后 <code>sudo netplan aplpy</code> 应用，再试试 <code>ip addr show</code> 看看生效了，<code>ping -I ens37 192.168.129.xxx</code> 试下能不能通其他 Host-Only 网卡的 IP 。最好再试下 <code>curl -L https://www.baidu.com/</code> 看看正常上网有没有问题。</article><p class=tags-data><a href=/tags/linuxyun-wei>/linux运维/</a> <a href=/tags/ubuntu>/ubuntu/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>
