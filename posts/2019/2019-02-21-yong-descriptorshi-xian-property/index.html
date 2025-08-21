@@ -1,0 +1,103 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>利用 descriptor 实现自己的 property</title><meta content="利用 descriptor 实现自己的 property" name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2019/2019-02-21-yong-descriptorshi-xian-property/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content="利用 descriptor 实现自己的 property" property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2019/2019-02-21-yong-descriptorshi-xian-property/ property=twitter:url><meta content="利用 descriptor 实现自己的 property" property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2019/2019-02-21-yong-descriptorshi-xian-property/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>利用 descriptor 实现自己的 property</h1><p class=author-line>作于：2019-02-21 17:53 ，预计阅读时间 2 分钟<article><h2 id=1-gai-nian-jian-jie>1.概念简介</h2><h3 id=1-1-property>1.1 property</h3><p>在 python 代码中，property 是非常常见的一个内置函数。property 可以为一个 python 类的 attribute 设置 getter/setter，可以类比之 C# 的 <a href=https://docs.microsoft.com/zh-cn/dotnet/csharp/language-reference/language-specification/classes#properties>properties</a>。<p>见下面的例子。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>A</span><span>:
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__init__</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.a </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1
+</span><span>
+</span><span>    @</span><span style=color:#fabd2f>property</span><span>()
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>hello</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>self</span><span>.a
+</span><span>
+</span><span>    @hello.</span><span style=color:#fdf4c1>setter</span><span>()
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>hell</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>value</span><span>):
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.a </span><span style=color:#fe8019>= </span><span>value
+</span><span>
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(A().hello)
+</span><span style=color:#928374;font-style:italic># output:
+</span><span style=color:#928374;font-style:italic># 1
+</span><span>obj </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>A()
+</span><span>obj.hello </span><span style=color:#fe8019>= </span><span style=color:#b8bb26>"hello world"
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(obj.hello)
+</span><span style=color:#928374;font-style:italic># output:
+</span><span style=color:#928374;font-style:italic># hello world
+</span></code></pre><h3 id=1-2-descriptor>1.2 descriptor</h3><p>python 中的 descriptor 指的是实现了<code>__get__</code>、<code>__set__</code>、<code>__delete__</code>三个方法之一的类。<p>当一个 descriptor 类的实例作为其他类的成员时，通过<code>obj.attr</code>语法访问该实例将会调用 descriptor 实例的<code>__get__</code>方法。同理，<code>__set__</code>和<code>__delete__</code>也是相似的逻辑。<p>先看个例子。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>DescriptorClass</span><span>:
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__get__</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>instance</span><span>, </span><span style=color:#fdf4c1>owner</span><span>):
+</span><span>        </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(self)
+</span><span>        </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(instance)
+</span><span>        </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(owner)
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#b8bb26>'some value'
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>SomeClass</span><span>:
+</span><span>    some_attr </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>DescriptorClass()
+</span><span>
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(SomeClass().some_attr)
+</span><span>
+</span><span style=color:#928374;font-style:italic># output:
+</span><span style=color:#928374;font-style:italic># &lt;__main__.DescriptorClass object at 0x0000027AAE777160>
+</span><span style=color:#928374;font-style:italic># &lt;__main__.SomeClass object at 0x0000027AAE777198>
+</span><span style=color:#928374;font-style:italic># &lt;class '__main__.SomeClass'>
+</span><span style=color:#928374;font-style:italic># some value
+</span></code></pre><h2 id=2-shi-xian>2. 实现</h2><p>property 的逻辑在于，<strong>当实例访问这个属性时，调用方法</strong>。descriptor 刚好处在那个正确的位置上。<p>看代码。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>PropertyDescriptor</span><span>:
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__init__</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>fn</span><span>):
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.getter </span><span style=color:#fe8019>= </span><span>fn
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__get__</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>instance</span><span>, </span><span style=color:#fdf4c1>owner</span><span>):
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>self.getter(instance)
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__set__</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>instance</span><span>, </span><span style=color:#fdf4c1>value</span><span>):
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>self.setter(instance, value)
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>setter</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>func</span><span>):
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.setter </span><span style=color:#fe8019>= </span><span>func
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>self
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>my_property</span><span>(</span><span style=color:#fdf4c1>func</span><span>):
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>PropertyDescriptor(func)
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>SimpleClass</span><span>:
+</span><span>    @</span><span style=color:#fdf4c1>my_property
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>simple_attr</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#b8bb26>'a simple property'
+</span><span>
+</span><span>    @simple_attr.</span><span style=color:#fdf4c1>setter
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>simple_attr</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>value</span><span>):
+</span><span>        </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'simple attr setter'</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(SimpleClass().simple_attr)
+</span><span style=color:#fdf4c1>SimpleClass()</span><span>.simple_attr </span><span style=color:#fe8019>= </span><span style=color:#b8bb26>'something'
+</span><span>
+</span><span style=color:#928374;font-style:italic># output:
+</span><span style=color:#928374;font-style:italic># a simple property
+</span><span style=color:#928374;font-style:italic># simple attr setter
+</span></code></pre><h2 id=3-zong-jie>3. 总结</h2><blockquote><p>个人看法，谨慎参考</blockquote><p>descriptor 避免了重复编写<code>getter</code>和<code>setter</code>方法，非常直觉的一种用途就是类似于<code>SQLAlchemy</code>这样的 ORM 框架的的字段映射。不需要为每一个特定类型的字段在基类或元类里编写大量样板代码。<p>但这种设计是侵入式的（需要修改目标类的代码），而且非常不直观。在合适的地方使用相信可以有其发光发热的空间。<p>对可读性来讲，结合元类，这俩被一起滥用的话对维护者而言完全是地狱吧...</article><p class=tags-data><a href=/tags/python>/python/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

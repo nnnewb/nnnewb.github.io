@@ -1,0 +1,251 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>玩玩 tree-sitter</title><meta content="玩玩 tree-sitter" name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2021/2021-07-29-wan-wan-tree-sitter/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content="玩玩 tree-sitter" property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2021/2021-07-29-wan-wan-tree-sitter/ property=twitter:url><meta content="玩玩 tree-sitter" property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2021/2021-07-29-wan-wan-tree-sitter/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>玩玩 tree-sitter</h1><p class=author-line>作于：2021-07-29 10:14 ，预计阅读时间 4 分钟<article><p>tree-sitter 是一个 parser-generator，也是一个增量解析库（incremental parsing library）。</p><span id=continue-reading></span><p>它可以为源文件构建完整的语法树，并在源文件被编辑时高效地更新。<h2 id=kuai-su-kai-shi>快速开始</h2><p>tree-sitter 本身是一个 parser generator ，使用 javascript 来作为描述语法规则的语言（不像其他，如 yacc 一类的工具，以类似 EBNF 的 DSL 来描述语法规则）。<p>我们写 tree-sitter 语法规则本质上是类似于写一个 tree-sitter 的语法支持包，可以参考下 <a href=https://github.com/tree-sitter/tree-sitter-go>tree-sitter/tree-sitter-go: Go grammar for tree-sitter (github.com)</a> 的项目结构。<p>废话不多说，先写个简单的 demo 跑起来。<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>mkdir tree-sitter-hello </span><span style=color:#fe8019>&& </span><span style=color:#fabd2f>cd</span><span style=color:#fdf4c1> tree-sitter-hello
+</span><span style=color:#fdf4c1>npm init
+</span><span style=color:#fdf4c1>npm i --save nan
+</span><span style=color:#fdf4c1>npm i --save-dev tree-sitter-cli
+</span></code></pre><p>初始化好项目目录，在 package.json 里写个简单的命令，方便之后用。<pre class=language-json data-lang=json style=color:#fdf4c1aa;background-color:#282828><code class=language-json data-lang=json><span>{
+</span><span>    </span><span style=color:#b8bb26>"scripts"</span><span>:{
+</span><span>        </span><span style=color:#b8bb26>"test"</span><span>: </span><span style=color:#b8bb26>"tree-sitter generate && tree-sitter parse test.txt"
+</span><span>    }
+</span><span>}
+</span></code></pre><p>现在开始干正事儿，创建一个 grammar.js<pre class=language-js data-lang=js style=color:#fdf4c1aa;background-color:#282828><code class=language-js data-lang=js><span style=color:#fabd2f>module</span><span>.</span><span style=color:#fabd2f>exports </span><span style=color:#fe8019>= </span><span style=color:#8ec07c>grammar</span><span>({
+</span><span>    name: </span><span style=color:#b8bb26>'hello'</span><span>,
+</span><span>    rules: {
+</span><span>        </span><span style=color:#8ec07c>source_file</span><span>: </span><span style=color:#fdf4c1>$ </span><span style=color:#fa5c4b>=> </span><span style=color:#8ec07c>repeat</span><span>(</span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>word</span><span>), </span><span style=color:#928374;font-style:italic>// 非终结符，0或更多的 word
+</span><span>        </span><span style=color:#8ec07c>word</span><span>: </span><span style=color:#fdf4c1>$ </span><span style=color:#fa5c4b>=> </span><span style=color:#b8bb26>/</span><span style=color:#fdf4c1>\w</span><span style=color:#fe8019>+</span><span style=color:#b8bb26>/ </span><span style=color:#928374;font-style:italic>// 非常简单的终结符，表示一个词，可以是数字字母下划线组成
+</span><span>    }
+</span><span>})
+</span></code></pre><p>再写一个 test.txt 作为输入<pre style=color:#fdf4c1aa;background-color:#282828><code><span>amazing tree sitter
+</span></code></pre><p>最后运行。<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>npm run test
+</span></code></pre><p>输出结果<pre style=color:#fdf4c1aa;background-color:#282828><code><span>
+</span><span>> tree-sitter-hello@0.1.0 test
+</span><span>> tree-sitter generate && tree-sitter parse test.txt
+</span><span>
+</span><span>(source_file [0, 0] - [1, 0]
+</span><span>  (word [0, 0] - [0, 7])
+</span><span>  (word [0, 8] - [0, 12])
+</span><span>  (word [0, 13] - [0, 19]))
+</span></code></pre><p>就是这样！<h2 id=gui-ze-dsl>规则 DSL</h2><p>所有规则都用这种格式编写<pre class=language-js data-lang=js style=color:#fdf4c1aa;background-color:#282828><code class=language-js data-lang=js><span style=color:#8ec07c>rule_name1</span><span>: </span><span style=color:#fdf4c1>$ </span><span style=color:#fa5c4b>=> </span><span style=color:#b8bb26>/terminal-symbol/</span><span>,
+</span><span style=color:#8ec07c>rule_name2</span><span>: </span><span style=color:#fdf4c1>$ </span><span style=color:#fa5c4b>=> </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>'non'</span><span>, </span><span style=color:#b8bb26>'terminal'</span><span>, </span><span style=color:#b8bb26>'symbol'</span><span>)
+</span></code></pre><p>正则表达式或字符串表示终结符，规则函数表示非终结符（token函数是例外）<p>一些函数来标识 ENBF 里出现的规则：<ul><li><code>repeat</code> 就是重复0或多次，类似 EBNF 的 <code>{ }</code> 含义<li><code>repeat1</code> 至少出现一次，可以重复多次，类似 EBNF 的 <code> SYM { SYM }</code> 这样的形式<li><code>optional</code> 可选，类似 EBNF 的 <code>[ ]</code> 含义<li><code>choice</code> 多选一，类似 EBNF 的 <code>|</code> 含义<li><code>seq</code> 序列，表示前后顺序，在 EBNF 里就是符号出现的顺序<li><code>token</code> ，把一个复杂规则合并成一个 token，一般是难以用一个正则表达式解决的终结符会用 <code>token(choice(/hex/,/octal/,/decimals/))</code> 这种形式编写。</ul><p>还有其他的，用于设置左右联结性优先级什么的，就不多介绍了。可以自己看tree-sitter的文档。<h2 id=geng-fu-za-yi-dian-de-li-zi>更复杂一点的例子</h2><p>贴一个参考 protocol buffer 3 的 spec 写出来的 grammar.js<pre class=language-js data-lang=js style=color:#fdf4c1aa;background-color:#282828><code class=language-js data-lang=js><span style=color:#fabd2f>module</span><span>.</span><span style=color:#fabd2f>exports </span><span style=color:#fe8019>= </span><span style=color:#8ec07c>grammar</span><span>({
+</span><span>  name: </span><span style=color:#b8bb26>'protobuf'</span><span>,
+</span><span>  </span><span style=color:#8ec07c>extras</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span>[</span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>comment</span><span>, </span><span style=color:#b8bb26>/</span><span style=color:#fdf4c1>\s</span><span style=color:#b8bb26>/</span><span>],
+</span><span>  rules: {
+</span><span>    </span><span style=color:#928374;font-style:italic>// top
+</span><span>    </span><span style=color:#8ec07c>source_file</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=>
+</span><span>      </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>syntax</span><span>, </span><span style=color:#8ec07c>repeat</span><span>(</span><span style=color:#8ec07c>choice</span><span>(</span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>import</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>package</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>option</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>emptyStatement</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>enum</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>message</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>service</span><span>))),
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// comment
+</span><span>    </span><span style=color:#8ec07c>comment</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#8ec07c>token</span><span>(</span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>'//'</span><span>, </span><span style=color:#b8bb26>/</span><span style=color:#fdf4c1>.</span><span style=color:#fe8019>*</span><span style=color:#b8bb26>/</span><span>)),
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// syntax
+</span><span>    </span><span style=color:#8ec07c>syntax</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>'syntax'</span><span>, </span><span style=color:#b8bb26>'='</span><span>, </span><span style=color:#b8bb26>/"proto3"/</span><span>, </span><span style=color:#b8bb26>';'</span><span>),
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// package
+</span><span>    </span><span style=color:#8ec07c>package</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>'package'</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>fullIdent</span><span>, </span><span style=color:#b8bb26>';'</span><span>),
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// imports
+</span><span>    </span><span style=color:#8ec07c>import</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>'import'</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>strLit</span><span>, </span><span style=color:#b8bb26>';'</span><span>),
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// option
+</span><span>    </span><span style=color:#8ec07c>option</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>'option'</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>optionName</span><span>, </span><span style=color:#b8bb26>'='</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>constant</span><span>, </span><span style=color:#b8bb26>';'</span><span>),
+</span><span>    </span><span style=color:#8ec07c>optionName</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#8ec07c>choice</span><span>(</span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>'('</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>fullIdent</span><span>, </span><span style=color:#b8bb26>')'</span><span>), </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>fullIdent</span><span>),
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// enum
+</span><span>    </span><span style=color:#8ec07c>enum</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>'enum'</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>enumName</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>enumBody</span><span>),
+</span><span>    </span><span style=color:#8ec07c>enumBody</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>'{'</span><span>, </span><span style=color:#8ec07c>repeat</span><span>(</span><span style=color:#8ec07c>choice</span><span>(</span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>option</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>enumField</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>emptyStatement</span><span>)), </span><span style=color:#b8bb26>'}'</span><span>),
+</span><span>    </span><span style=color:#8ec07c>enumField</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=>
+</span><span>      </span><span style=color:#8ec07c>seq</span><span>(
+</span><span>        </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>ident</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'='</span><span>,
+</span><span>        </span><span style=color:#8ec07c>optional</span><span>(</span><span style=color:#b8bb26>'-'</span><span>),
+</span><span>        </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>intLit</span><span>,
+</span><span>        </span><span style=color:#8ec07c>optional</span><span>(</span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>'['</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>enumValueOption</span><span>, </span><span style=color:#8ec07c>repeat</span><span>(</span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>','</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>enumValueOption</span><span>)), </span><span style=color:#b8bb26>']'</span><span>)),
+</span><span>        </span><span style=color:#b8bb26>';'
+</span><span>      ),
+</span><span>    </span><span style=color:#8ec07c>enumValueOption</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>optionName</span><span>, </span><span style=color:#b8bb26>'='</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>constant</span><span>),
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// message
+</span><span>    </span><span style=color:#8ec07c>message</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>'message'</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>messageName</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>messageBody</span><span>),
+</span><span>    </span><span style=color:#8ec07c>messageBody</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=>
+</span><span>      </span><span style=color:#8ec07c>seq</span><span>(
+</span><span>        </span><span style=color:#b8bb26>'{'</span><span>,
+</span><span>        </span><span style=color:#8ec07c>repeat</span><span>(</span><span style=color:#8ec07c>choice</span><span>(</span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>field</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>enum</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>message</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>option</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>oneof</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>mapField</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>reserved</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>emptyStatement</span><span>)),
+</span><span>        </span><span style=color:#b8bb26>'}'
+</span><span>      ),
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// service
+</span><span>    </span><span style=color:#8ec07c>service</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>'service'</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>serviceName</span><span>, </span><span style=color:#b8bb26>'{'</span><span>, </span><span style=color:#8ec07c>repeat</span><span>(</span><span style=color:#8ec07c>choice</span><span>(</span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>option</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>rpc</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>emptyStatement</span><span>)), </span><span style=color:#b8bb26>'}'</span><span>),
+</span><span>    </span><span style=color:#8ec07c>rpc</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=>
+</span><span>      </span><span style=color:#8ec07c>seq</span><span>(
+</span><span>        </span><span style=color:#b8bb26>'rpc'</span><span>,
+</span><span>        </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>rpcName</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'('</span><span>,
+</span><span>        </span><span style=color:#8ec07c>optional</span><span>(</span><span style=color:#b8bb26>'stream'</span><span>),
+</span><span>        </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>enumMessageType</span><span>,
+</span><span>        </span><span style=color:#b8bb26>')'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'returns'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'('</span><span>,
+</span><span>        </span><span style=color:#8ec07c>optional</span><span>(</span><span style=color:#b8bb26>'stream'</span><span>),
+</span><span>        </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>enumMessageType</span><span>,
+</span><span>        </span><span style=color:#b8bb26>')'</span><span>,
+</span><span>        </span><span style=color:#8ec07c>choice</span><span>(</span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>'{'</span><span>, </span><span style=color:#8ec07c>repeat</span><span>(</span><span style=color:#8ec07c>choice</span><span>(</span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>option</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>emptyStatement</span><span>)), </span><span style=color:#b8bb26>'}'</span><span>), </span><span style=color:#b8bb26>';'</span><span>)
+</span><span>      ),
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// field and inline option
+</span><span>    </span><span style=color:#8ec07c>field</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=>
+</span><span>      </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#8ec07c>optional</span><span>(</span><span style=color:#b8bb26>'repeated'</span><span>), </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fabd2f>type</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>fieldName</span><span>, </span><span style=color:#b8bb26>'='</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>fieldNumber</span><span>, </span><span style=color:#8ec07c>optional</span><span>(</span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>'['</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>fieldOptions</span><span>, </span><span style=color:#b8bb26>']'</span><span>)), </span><span style=color:#b8bb26>';'</span><span>),
+</span><span>    </span><span style=color:#8ec07c>fieldOptions</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>fieldOption</span><span>, </span><span style=color:#8ec07c>repeat</span><span>(</span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>','</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>fieldOption</span><span>))),
+</span><span>    </span><span style=color:#8ec07c>fieldOption</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>optionName</span><span>, </span><span style=color:#b8bb26>'='</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>constant</span><span>),
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// oneof
+</span><span>    </span><span style=color:#8ec07c>oneof</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>'oneof'</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>oneofName</span><span>, </span><span style=color:#b8bb26>'{'</span><span>, </span><span style=color:#8ec07c>repeat</span><span>(</span><span style=color:#8ec07c>choice</span><span>(</span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>option</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>oneofField</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>emptyStatement</span><span>)), </span><span style=color:#b8bb26>'}'</span><span>),
+</span><span>    </span><span style=color:#8ec07c>oneofField</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fabd2f>type</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>fieldName</span><span>, </span><span style=color:#b8bb26>'='</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>fieldNumber</span><span>, </span><span style=color:#8ec07c>optional</span><span>(</span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>'['</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>fieldOptions</span><span>, </span><span style=color:#b8bb26>']'</span><span>)), </span><span style=color:#b8bb26>';'</span><span>),
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// map
+</span><span>    </span><span style=color:#8ec07c>mapField</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=>
+</span><span>      </span><span style=color:#8ec07c>seq</span><span>(
+</span><span>        </span><span style=color:#b8bb26>'map'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'&lt;'</span><span>,
+</span><span>        </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>keyType</span><span>,
+</span><span>        </span><span style=color:#b8bb26>','</span><span>,
+</span><span>        </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fabd2f>type</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'>'</span><span>,
+</span><span>        </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>mapName</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'='</span><span>,
+</span><span>        </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>fieldNumber</span><span>,
+</span><span>        </span><span style=color:#8ec07c>optional</span><span>(</span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>'['</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>fieldOptions</span><span>, </span><span style=color:#b8bb26>']'</span><span>)),
+</span><span>        </span><span style=color:#b8bb26>';'
+</span><span>      ),
+</span><span>    </span><span style=color:#8ec07c>keyType</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=>
+</span><span>      </span><span style=color:#8ec07c>choice</span><span>(
+</span><span>        </span><span style=color:#b8bb26>'int32'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'int64'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'uint32'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'uint64'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'sint32'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'sint64'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'fixed32'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'fixed64'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'sfixed32'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'sfixed64'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'bool'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'string'
+</span><span>      ),
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// reserved
+</span><span>    </span><span style=color:#8ec07c>reserved</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>'reserved'</span><span>, </span><span style=color:#8ec07c>choice</span><span>(</span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>ranges</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>fieldNames</span><span>)),
+</span><span>    </span><span style=color:#8ec07c>ranges</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>range</span><span>, </span><span style=color:#8ec07c>repeat</span><span>(</span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>','</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>range</span><span>))),
+</span><span>    </span><span style=color:#8ec07c>range</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>intLit</span><span>, </span><span style=color:#8ec07c>optional</span><span>(</span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>'to'</span><span>, </span><span style=color:#8ec07c>choice</span><span>(</span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>intLit</span><span>, </span><span style=color:#b8bb26>'max'</span><span>)))),
+</span><span>    </span><span style=color:#8ec07c>fieldNames</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>fieldName</span><span>, </span><span style=color:#8ec07c>repeat</span><span>(</span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>','</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>fieldName</span><span>))),
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// integer literals
+</span><span>    </span><span style=color:#8ec07c>intLit</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#b8bb26>/(</span><span style=color:#fdf4c1>\d\d</span><span style=color:#fe8019>*|</span><span style=color:#b8bb26>0</span><span style=color:#fdf4c1>[0-7]</span><span style=color:#fe8019>*|</span><span style=color:#b8bb26>0</span><span style=color:#fdf4c1>[xX][\da-fA-F]</span><span style=color:#fe8019>*</span><span style=color:#b8bb26>)/</span><span>,
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// floating-point literals
+</span><span>    </span><span style=color:#8ec07c>floatLit</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#8ec07c>choice</span><span>(</span><span style=color:#b8bb26>/</span><span style=color:#fdf4c1>\d</span><span style=color:#b8bb26>\.</span><span style=color:#fdf4c1>\d</span><span style=color:#fe8019>*</span><span style=color:#b8bb26>(</span><span style=color:#fdf4c1>[eE][+-]\d</span><span style=color:#fe8019>*</span><span style=color:#b8bb26>)</span><span style=color:#fe8019>?</span><span style=color:#b8bb26>/</span><span>, </span><span style=color:#b8bb26>/</span><span style=color:#fdf4c1>\d</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>[eE][+-]\d</span><span style=color:#fe8019>*</span><span style=color:#b8bb26>/</span><span>, </span><span style=color:#b8bb26>/\.</span><span style=color:#fdf4c1>\d</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>[eE][+-]\d</span><span style=color:#fe8019>*</span><span style=color:#b8bb26>/</span><span>, </span><span style=color:#b8bb26>'inf'</span><span>, </span><span style=color:#b8bb26>'nan'</span><span>),
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// boolean literals
+</span><span>    </span><span style=color:#8ec07c>boolLit</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#b8bb26>/(true</span><span style=color:#fe8019>|</span><span style=color:#b8bb26>false)/</span><span>,
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// string literals
+</span><span>    </span><span style=color:#8ec07c>strLit</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=>
+</span><span>      </span><span style=color:#8ec07c>choice</span><span>(
+</span><span>        </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>'"'</span><span>, </span><span style=color:#b8bb26>/(</span><span style=color:#fdf4c1>[</span><span style=color:#fe8019>^</span><span style=color:#fdf4c1>"\n</span><span style=color:#b8bb26>\\</span><span style=color:#fdf4c1>]</span><span style=color:#fe8019>|</span><span style=color:#b8bb26>\\</span><span style=color:#fdf4c1>[xX][\da-fA-F]</span><span style=color:#fe8019>{2}|</span><span style=color:#b8bb26>\\</span><span style=color:#fdf4c1>[0-7]</span><span style=color:#fe8019>{3}|</span><span style=color:#b8bb26>\\</span><span style=color:#fdf4c1>[abfnrtv</span><span style=color:#b8bb26>\\</span><span style=color:#fdf4c1>'"]</span><span style=color:#b8bb26>)</span><span style=color:#fe8019>*</span><span style=color:#b8bb26>/</span><span>, </span><span style=color:#b8bb26>'"'</span><span>),
+</span><span>        </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>"'"</span><span>, </span><span style=color:#b8bb26>/(</span><span style=color:#fdf4c1>[</span><span style=color:#fe8019>^</span><span style=color:#fdf4c1>'\n</span><span style=color:#b8bb26>\\</span><span style=color:#fdf4c1>]</span><span style=color:#fe8019>|</span><span style=color:#b8bb26>\\</span><span style=color:#fdf4c1>[xX][\da-fA-F]</span><span style=color:#fe8019>{2}|</span><span style=color:#b8bb26>\\</span><span style=color:#fdf4c1>[0-7]</span><span style=color:#fe8019>{3}|</span><span style=color:#b8bb26>\\</span><span style=color:#fdf4c1>[abfnrtv</span><span style=color:#b8bb26>\\</span><span style=color:#fdf4c1>'"]</span><span style=color:#b8bb26>)</span><span style=color:#fe8019>*</span><span style=color:#b8bb26>/</span><span>, </span><span style=color:#b8bb26>"'"</span><span>)
+</span><span>      ),
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// built-in field type
+</span><span>    </span><span style=color:#8ec07c>type</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=>
+</span><span>      </span><span style=color:#8ec07c>choice</span><span>(
+</span><span>        </span><span style=color:#b8bb26>'double'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'float'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'int32'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'int64'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'uint32'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'uint64'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'sint32'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'sint64'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'fixed32'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'fixed64'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'sfixed32'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'sfixed64'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'bool'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'string'</span><span>,
+</span><span>        </span><span style=color:#b8bb26>'bytes'</span><span>,
+</span><span>        </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>enumMessageType
+</span><span>      ),
+</span><span>    </span><span style=color:#8ec07c>fieldNumber</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>intLit</span><span>,
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// empty statement
+</span><span>    </span><span style=color:#8ec07c>emptyStatement</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#b8bb26>';'</span><span>,
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// constant
+</span><span>    </span><span style=color:#8ec07c>constant</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=>
+</span><span>      </span><span style=color:#8ec07c>choice</span><span>(
+</span><span>        </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>fullIdent</span><span>,
+</span><span>        </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#8ec07c>optional</span><span>(</span><span style=color:#b8bb26>/</span><span style=color:#fdf4c1>[+-]</span><span style=color:#b8bb26>/</span><span>), </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>intLit</span><span>),
+</span><span>        </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#8ec07c>optional</span><span>(</span><span style=color:#b8bb26>/</span><span style=color:#fdf4c1>[+-]</span><span style=color:#b8bb26>/</span><span>), </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>floatLit</span><span>),
+</span><span>        </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>strLit</span><span>,
+</span><span>        </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>boolLit</span><span>,
+</span><span>        </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>msgLit
+</span><span>      ),
+</span><span>    </span><span style=color:#8ec07c>msgLit</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>'{'</span><span>, </span><span style=color:#8ec07c>repeat</span><span>(</span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>fieldName</span><span>, </span><span style=color:#b8bb26>':'</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>constant</span><span>)), </span><span style=color:#b8bb26>'}'</span><span>),
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// identifier
+</span><span>    </span><span style=color:#8ec07c>ident</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#b8bb26>/</span><span style=color:#fdf4c1>[a-zA-Z_]\w</span><span style=color:#fe8019>*</span><span style=color:#b8bb26>/</span><span>,
+</span><span>    </span><span style=color:#8ec07c>fullIdent</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>ident</span><span>, </span><span style=color:#8ec07c>repeat</span><span>(</span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#b8bb26>'.'</span><span>, </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>ident</span><span>))),
+</span><span>    </span><span style=color:#8ec07c>messageName</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>ident</span><span>,
+</span><span>    </span><span style=color:#8ec07c>mapName</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>ident</span><span>,
+</span><span>    </span><span style=color:#8ec07c>enumName</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>ident</span><span>,
+</span><span>    </span><span style=color:#8ec07c>fieldName</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>ident</span><span>,
+</span><span>    </span><span style=color:#8ec07c>oneofName</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>ident</span><span>,
+</span><span>    </span><span style=color:#8ec07c>serviceName</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>ident</span><span>,
+</span><span>    </span><span style=color:#8ec07c>rpcName</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>ident</span><span>,
+</span><span>    </span><span style=color:#8ec07c>enumMessageType</span><span>: (</span><span style=color:#fdf4c1>$</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#8ec07c>optional</span><span>(</span><span style=color:#b8bb26>'.'</span><span>), </span><span style=color:#8ec07c>repeat</span><span>(</span><span style=color:#8ec07c>seq</span><span>(</span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>ident</span><span>, </span><span style=color:#b8bb26>'.'</span><span>)), </span><span style=color:#fdf4c1>$</span><span>.</span><span style=color:#fdf4c1>messageName</span><span>),
+</span><span>  },
+</span><span>});
+</span></code></pre><h2 id=bian-yi-he-shi-yong>编译和使用</h2><p>生成的是c代码，默认是编译成机器码，和cpu指令集架构强相关。有很多语言提供了基于 C 接口的绑定。<p>不过现在也支持编译成 wasm，只需要用下面的命令<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>tree-sitter build-wasm
+</span></code></pre><p>加载方式也是用 <code>Language.load</code> ，不过只有 web-tree-sitter 能加载。web-tree-sitter 可以用 <code>npm i --save tree-sitter</code> 来安装。<p>于是写个 main.js ，加载代码如下<pre class=language-js data-lang=js style=color:#fdf4c1aa;background-color:#282828><code class=language-js data-lang=js><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>Parser </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>require</span><span>(</span><span style=color:#b8bb26>"web-tree-sitter"</span><span>);
+</span><span style=color:#fdf4c1>Parser.</span><span style=color:#8ec07c>init</span><span>()</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>then</span><span>(() </span><span style=color:#fa5c4b>=> </span><span>{
+</span><span>  </span><span style=color:#fdf4c1>Parser.Language.</span><span style=color:#fabd2f>load</span><span>(</span><span style=color:#b8bb26>"tree-sitter-hello.wasm"</span><span>)</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>then</span><span>((</span><span style=color:#fdf4c1>lang</span><span>) </span><span style=color:#fa5c4b>=> </span><span>{
+</span><span>    </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>parser </span><span style=color:#fe8019>= </span><span style=color:#fa5c4b>new </span><span style=color:#8ec07c>Parser</span><span>();
+</span><span>    </span><span style=color:#fdf4c1>parser.</span><span style=color:#8ec07c>setLanguage</span><span>(</span><span style=color:#fdf4c1>lang</span><span>);
+</span><span>    </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>ast </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>parser.</span><span style=color:#fabd2f>parse</span><span>(</span><span style=color:#b8bb26>"amazing tree parser"</span><span>);
+</span><span>    </span><span style=color:#8ec07c>console</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>log</span><span>(</span><span style=color:#fdf4c1>ast.rootNode.</span><span style=color:#fabd2f>toString</span><span>());
+</span><span>  });
+</span><span>});
+</span></code></pre><p>最终输出是<pre style=color:#fdf4c1aa;background-color:#282828><code><span>(source_file (word) (word) (word))
+</span></code></pre><h2 id=bian-ji-he-geng-xin>编辑和更新</h2><p>这个还没搞明白。<p>回头参考下别的 repo 的代码，看看别人是怎么做语法树更新的。</article><p class=tags-data><a href=/tags/bian-yi-ji-shu>/编译技术/</a> <a href=/tags/javascript>/javascript/</a> <a href=/tags/vscode>/vscode/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

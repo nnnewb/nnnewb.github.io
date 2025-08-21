@@ -1,0 +1,109 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>go 的 defer 语句</title><meta content="go 的 defer 语句" name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2021/2021-01-05-gode-deferyu-ju/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content="go 的 defer 语句" property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2021/2021-01-05-gode-deferyu-ju/ property=twitter:url><meta content="go 的 defer 语句" property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2021/2021-01-05-gode-deferyu-ju/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>go 的 defer 语句</h1><p class=author-line>作于：2021-01-05 10:01 ，预计阅读时间 4 分钟<article><p>昨天对项目做了个小重构，主要是对以前手写的 stmt.Close 没处理返回值的问题、还有各种该记录日志的地方没记日志等等，做了下处理。</p><span id=continue-reading></span><p>老实说这事儿做着做着还有种奇妙的快感，类似于看高压水枪清污视频的感觉。哈哈，也亏领导不管事，代码也不 Review ，测试=摆设。<p>这不一上班就发现好多问题，幸好只推送到内网。<p>笑中带泪.gif<h2 id=0x01-wen-ti-miao-shu>0x01 问题描述</h2><p>问题倒是挺简单的，看下面的代码。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fdf4c1>stmt </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>db</span><span>.</span><span style=color:#fdf4c1>Prepare</span><span>(</span><span style=color:#fdf4c1>query</span><span>)
+</span><span style=color:#fa5c4b>defer </span><span style=color:#fdf4c1>SilentLogError</span><span>(</span><span style=color:#fdf4c1>stmt</span><span>.</span><span style=color:#fdf4c1>Close</span><span>(), </span><span style=color:#b8bb26>"stmt close failed"</span><span>)
+</span><span>
+</span><span style=color:#fdf4c1>row </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>stmt</span><span>.</span><span style=color:#fdf4c1>QueryRow</span><span>(</span><span style=color:#fdf4c1>params</span><span style=color:#fe8019>...</span><span>)
+</span><span style=color:#fa5c4b>defer </span><span style=color:#fdf4c1>row</span><span>.</span><span style=color:#fdf4c1>Close</span><span>()
+</span><span>
+</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>row</span><span>.</span><span style=color:#fdf4c1>Scan</span><span>(</span><span style=color:#fdf4c1>vars</span><span style=color:#fe8019>...</span><span>); </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>nil</span><span>, </span><span style=color:#fdf4c1>err
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>vars</span><span>, </span><span style=color:#d3869b>nil
+</span></code></pre><p>那么，请问上面的代码有什么问题呢？<p>标题都说了 defer 了，那问题肯定是出在 defer 这一行上。<h2 id=0x02-defer-de-qiu-zhi>0x02 defer 的求值</h2><p>简单的结论就是: <em>defer f() 的参数在 defer 这一行求值</em><p>具体到上面的例子，<code>defer f(i())</code> 这样的形式，可以先分成三个部分。<ol><li><code>defer</code> 本身的执行时机<li><code>i()</code> 的求值时机<li><code>f()</code> 的求值时机</ol><p>把这三部分排一下序:<ol><li><code>i()</code><li><code>defer</code> <blockquote><p>defer 把参数求值后包装成一个新函数延迟执行</blockquote><li><code>f()</code></ol><h2 id=0x03-xun-huan-nei-defer>0x03 循环内 defer</h2><p>循环内 defer 主要有两个问题<ol><li>可能产生造成巨量的 defer 函数，耗尽内存或拖垮执行速度<li>在一些情况下会造成意料外的结果</ol><p>看例子<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>package </span><span style=color:#fdf4c1>main
+</span><span>
+</span><span style=color:#fa5c4b>import </span><span style=color:#b8bb26>"fmt"
+</span><span>
+</span><span style=color:#fa5c4b>type </span><span style=color:#8ec07c>Conn </span><span style=color:#fa5c4b>struct </span><span>{
+</span><span>	</span><span style=color:#fdf4c1>ID </span><span style=color:#fabd2f>int
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>NewConn</span><span>(</span><span style=color:#fdf4c1>id </span><span style=color:#fabd2f>int</span><span>) </span><span style=color:#fe8019>*</span><span style=color:#fa5c4b>Conn </span><span>{
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>Conn</span><span>{</span><span style=color:#fdf4c1>ID</span><span>: </span><span style=color:#fdf4c1>id</span><span>}
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span>(</span><span style=color:#fdf4c1>c </span><span style=color:#fe8019>*</span><span style=color:#fa5c4b>Conn</span><span>) </span><span style=color:#8ec07c>Close</span><span>() </span><span style=color:#fabd2f>error </span><span>{
+</span><span>	</span><span style=color:#fdf4c1>fmt</span><span>.</span><span style=color:#fdf4c1>Printf</span><span>(</span><span style=color:#b8bb26>"close </span><span style=color:#fdf4c1>%d</span><span style=color:#b8bb26>!\n"</span><span>, </span><span style=color:#fdf4c1>c</span><span>.</span><span style=color:#fdf4c1>ID</span><span>)
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>nil
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>main</span><span>() {
+</span><span>	</span><span style=color:#fdf4c1>arr </span><span style=color:#fe8019>:= </span><span style=color:#fabd2f>make</span><span>([]</span><span style=color:#fa5c4b>Conn</span><span>, </span><span style=color:#d3869b>5</span><span>)
+</span><span>	</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>:= </span><span style=color:#fa5c4b>range </span><span style=color:#fdf4c1>arr </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>arr</span><span>[</span><span style=color:#fdf4c1>i</span><span>].</span><span style=color:#fdf4c1>ID </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>i
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>_</span><span>, </span><span style=color:#fdf4c1>conn </span><span style=color:#fe8019>:= </span><span style=color:#fa5c4b>range </span><span style=color:#fdf4c1>arr </span><span>{
+</span><span>		</span><span style=color:#fa5c4b>defer </span><span style=color:#fdf4c1>conn</span><span>.</span><span style=color:#fdf4c1>Close</span><span>()
+</span><span>	}
+</span><span>}
+</span></code></pre><p>最终输出是<pre style=color:#fdf4c1aa;background-color:#282828><code><span>close 4!
+</span><span>close 4!
+</span><span>close 4!
+</span><span>close 4!
+</span><span>close 4!
+</span></code></pre><p>造成这一结果的原因是接收器(receiver)也作为函数参数的一部分在 defer 时被求值。<p><code>for _, conn := range arr</code> 这一行代码中，<code>conn</code> 本质是一个局部变量，其内存在循环期间可以视作固定的，而<code>func (c *Conn) Close() error</code> 接收器取了这个局部变量的地址：每一次循环，调用 Close 时，取得的都是同一个地址。最终导致 Close 的全部都是 conn 在函数结束时最后得到的值。<p>类似的，如果把接收器从指针改成值呢？接收器变成了值传递，将<code>conn</code>复制一次后保留作为 defer 函数执行时的参数，就会有正常的结果。<p>但并不是说循环内 defer <strong>一定是</strong> 不好的。<p>比如一个常见的场景，在循环里使用 SQL 查询。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>query </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>queries </span><span>{
+</span><span>    </span><span style=color:#fdf4c1>rows </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>db</span><span>.</span><span style=color:#fdf4c1>Query</span><span>(</span><span style=color:#fdf4c1>query</span><span>)
+</span><span>    </span><span style=color:#fa5c4b>defer </span><span style=color:#fdf4c1>rows</span><span>.</span><span style=color:#fdf4c1>Close</span><span>()
+</span><span>}
+</span></code></pre><p>可以明确知道 <code>rows</code> 是指针，而且 <code>rows.Close</code> 有指针接收器，就可以确定不会有问题。<h2 id=0x04-defer-he-bi-bao>0x04 defer 和闭包</h2><pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>package </span><span style=color:#fdf4c1>main
+</span><span>
+</span><span style=color:#fa5c4b>import </span><span style=color:#b8bb26>"fmt"
+</span><span>
+</span><span style=color:#fa5c4b>type </span><span style=color:#8ec07c>Conn </span><span style=color:#fa5c4b>struct </span><span>{
+</span><span>	</span><span style=color:#fdf4c1>ID </span><span style=color:#fabd2f>int
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>NewConn</span><span>(</span><span style=color:#fdf4c1>id </span><span style=color:#fabd2f>int</span><span>) </span><span style=color:#fe8019>*</span><span style=color:#fa5c4b>Conn </span><span>{
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>Conn</span><span>{</span><span style=color:#fdf4c1>ID</span><span>: </span><span style=color:#fdf4c1>id</span><span>}
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span>(</span><span style=color:#fdf4c1>c </span><span style=color:#fe8019>*</span><span style=color:#fa5c4b>Conn</span><span>) </span><span style=color:#8ec07c>Close</span><span>() </span><span style=color:#fabd2f>error </span><span>{
+</span><span>	</span><span style=color:#fdf4c1>fmt</span><span>.</span><span style=color:#fdf4c1>Printf</span><span>(</span><span style=color:#b8bb26>"close </span><span style=color:#fdf4c1>%d</span><span style=color:#b8bb26>!\n"</span><span>, </span><span style=color:#fdf4c1>c</span><span>.</span><span style=color:#fdf4c1>ID</span><span>)
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>nil
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>main</span><span>() {
+</span><span>	</span><span style=color:#fdf4c1>conn </span><span style=color:#fe8019>:= &</span><span style=color:#fdf4c1>Conn</span><span>{</span><span style=color:#d3869b>1</span><span>}
+</span><span>	</span><span style=color:#fa5c4b>defer func</span><span>() { </span><span style=color:#fdf4c1>conn</span><span>.</span><span style=color:#fdf4c1>Close</span><span>() }()
+</span><span>	</span><span style=color:#fdf4c1>conn </span><span style=color:#fe8019>= &</span><span style=color:#fdf4c1>Conn</span><span>{</span><span style=color:#d3869b>2</span><span>}
+</span><span>	</span><span style=color:#fa5c4b>defer func</span><span>() { </span><span style=color:#fdf4c1>conn</span><span>.</span><span style=color:#fdf4c1>Close</span><span>() }()
+</span><span>}
+</span></code></pre><p>和上面类似，这次输出是:<pre style=color:#fdf4c1aa;background-color:#282828><code><span>close 2!
+</span><span>close 2!
+</span></code></pre><p>问题出现在 defer 后面这个画蛇添足的 <code>func(){}()</code> 上。众所周知 defer 会对参数求值，但闭包捕获的变量并不会。<p>因此，即使 <code>defer conn.Close()</code> 工作正常，但 defer <code>defer func() {conn.Close()}()</code> 就不一定了。两者在部分情况下并不能等价代换，除非你确信了解自己做了什么。<p>如果一定要用 <code>func(){}()</code> 的形式，那么 conn 只能通过参数形式传递给这个匿名函数。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>defer func</span><span>(</span><span style=color:#fdf4c1>conn </span><span style=color:#fe8019>*</span><span style=color:#fa5c4b>Conn</span><span>){
+</span><span>    </span><span style=color:#fdf4c1>_ </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>conn</span><span>.</span><span style=color:#fdf4c1>Close</span><span>()
+</span><span>}(</span><span style=color:#fdf4c1>conn</span><span>)
+</span></code></pre><p>对，说的就是烦人的<em>未处理的错误</em>警告。<h2 id=0x05-happy-hacking>0x05 Happy Hacking!</h2><p>惯例，完。</article><p class=tags-data><a href=/tags/golang>/golang/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

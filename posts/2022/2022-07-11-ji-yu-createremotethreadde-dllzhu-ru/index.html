@@ -1,0 +1,162 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>基于CreateRemoteThread的DLL注入</title><meta content=基于CreateRemoteThread的DLL注入 name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2022/2022-07-11-ji-yu-createremotethreadde-dllzhu-ru/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=基于CreateRemoteThread的DLL注入 property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2022/2022-07-11-ji-yu-createremotethreadde-dllzhu-ru/ property=twitter:url><meta content=基于CreateRemoteThread的DLL注入 property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2022/2022-07-11-ji-yu-createremotethreadde-dllzhu-ru/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>基于CreateRemoteThread的DLL注入</h1><p class=author-line>作于：2022-07-11 15:10 ，预计阅读时间 4 分钟<article><h2 id=qian-yan>前言</h2><p>翻到一本Windows编程书上介绍 DLL 注入，简单验证了一下并做个记录。<p>同时书上还介绍了另一种代码注入方法，APC 注入，有时间验证了再另写一篇。<h2 id=yuan-li>原理</h2><p><code>CreateRemoteThread</code> 注入 DLL 的大体流程如下。<ol><li><code>OpenProcess</code> 打开目标进程，受害进程权限高的话可能要特权。<li><code>VirtualAllocEx</code> 在目标进程的地址空间里分配足够存放待注入 DLL 路径的空间。<li><code>WriteProcessMemory</code> 在目标进程写 DLL 路径，位置是上一步分配好的地址。<li><code>GetProcAddress(GetModuleHandle("kernel32.dll"), "LoadLibraryA")</code> 待调用函数地址。<li><code>CreateRemoteThread</code> 在目标进程里启动线程，线程入口就是 <code>LoadLibraryA</code>。</ol><p>整个流程就是在目标进程的地址空间里写好参数（1~3步），然后调一个已经存在于目标进程地址空间中的函数（<code>kernel32.dll</code>里的<code>LoadLibraryA</code>）加载我们的 DLL（4~5步）。<p>其中有个坑值得注意下：<blockquote><p><a href=https://stackoverflow.com/questions/22750112/dll-injection-with-createremotethread>DLL injection with CreateRemoteThread - stackoverflow</a><p>The thing confuses me is that <code>GetProcAddress</code> returns the <code>LoadLibraryA</code> fucntion address of <strong>the current process</strong>, how can you pass it as a parameter to <code>CreateRemoteThread</code> and expect <strong>the target process</strong> to run it?<p>accepted answer:<blockquote><p>It works by accident. It is a <em>very</em> common accident, Microsoft makes a great deal of effort to ensure that the operating system DLLs, like kernel32.dll, have a base address that doesn't conflict with any other DLLs. Further enhanced by kernel32.dll getting loaded very early at process initialization so low odds that it has to fight to get its preferred base address.<p>You'll get away with easily. It is notable that this <strong>has</strong> gone wrong in the past, there was an XP security update oops that caused gdi32.dll to get relocated and made lots of machines fall over at boot. The correct way is fairly painful, CreateToolhelp32Snapshot() + Module32First/Next() to find the relocation offset isn't great joy. Frankly, you probably ought to not do this at all if the operating system is "weird" like that.</blockquote></blockquote><p>在第四步使用 <code>GetProcAddress</code> 拿到的显然是当前进程地址空间里 <code>LoadLibraryA</code> 的地址，但另一个进程的地址空间里，<code>LoadLibraryA</code> 也是在同样的地址上吗？说好的地址空间随机化呢？<p>从上面贴出的 stackoverflow 链接里，可以看到相关的讨论。主要就是两个观点：<ul><li>works by accident (very common accident).<li>Microsoft intentionally implemented it.</ul><p>没有查找到更权威的说法的情况下暂且按下不谈。<h2 id=an-li>案例</h2><p>案例分三个部分：<ol><li><code>injector</code>，注入者，负责执行 DLL 注入。<li><code>payload</code>，待注入的 DLL，里面仅输出一行文字标识注入成功。<li><code>victim</code>，一个简单的猜数字游戏，在案例中扮演受害者。</ol><p>使用 cmake 编译。所有源码如下。<pre class=language-cpp data-lang=cpp style=color:#fdf4c1aa;background-color:#282828><code class=language-cpp data-lang=cpp><span style=color:#928374;font-style:italic>// injector.cpp
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;iostream>
+</span><span>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;Windows.h>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;Psapi.h>
+</span><span>
+</span><span style=color:#fabd2f>LPCSTR</span><span> libPath </span><span style=color:#fe8019>= </span><span style=color:#b8bb26>"D:\\repos\\windows-codeinjection\\build\\Debug\\payload.dll"</span><span>;
+</span><span>
+</span><span style=color:#fa5c4b>int </span><span style=color:#8ec07c>main</span><span>()
+</span><span>{
+</span><span>  </span><span style=color:#928374;font-style:italic>// 从命令行读被注入进程的ID
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> pid </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>;
+</span><span>  std::cin </span><span style=color:#fe8019>>></span><span> pid;
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(pid </span><span style=color:#fe8019>== </span><span style=color:#d3869b>0</span><span>)
+</span><span>  {
+</span><span>    std::cout </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>"invalid pid input" </span><span style=color:#fe8019>&lt;&lt;</span><span> std::endl;
+</span><span>  }
+</span><span>  </span><span style=color:#928374;font-style:italic>// 打开被注入进程
+</span><span>  </span><span style=color:#fabd2f>HANDLE</span><span> hProcess </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>OpenProcess(PROCESS_ALL_ACCESS, </span><span style=color:#d3869b>FALSE</span><span style=color:#fdf4c1>, pid)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(</span><span style=color:#d3869b>NULL </span><span style=color:#fe8019>==</span><span> hProcess)
+</span><span>  {
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>1</span><span>;
+</span><span>  }
+</span><span>  </span><span style=color:#928374;font-style:italic>// 在目标进程里分配存放 DLL 路径的空间
+</span><span>  </span><span style=color:#fabd2f>LPVOID</span><span> lpRemoteDllName </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>VirtualAllocEx(hProcess, </span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>, </span><span style=color:#fabd2f>strlen</span><span style=color:#fdf4c1>(libPath) </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, MEM_COMMIT, PAGE_READWRITE)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(lpRemoteDllName </span><span style=color:#fe8019>== </span><span style=color:#d3869b>NULL</span><span>)
+</span><span>  {
+</span><span>    std::cout </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>"[ERROR] VirtualAllocEx failed, last error " </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#fdf4c1>GetLastError() </span><span style=color:#fe8019>&lt;&lt;</span><span> std::endl;
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>;
+</span><span>  }
+</span><span>  </span><span style=color:#928374;font-style:italic>// 写入 DLL 路径
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(</span><span style=color:#fdf4c1>WriteProcessMemory(hProcess, lpRemoteDllName, libPath, </span><span style=color:#fabd2f>strlen</span><span style=color:#fdf4c1>(libPath) </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>) </span><span style=color:#fe8019>== </span><span style=color:#d3869b>FALSE</span><span>)
+</span><span>  {
+</span><span>    std::cout </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>"[ERROR] WriteProcessMemory failed, last error " </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#fdf4c1>GetLastError() </span><span style=color:#fe8019>&lt;&lt;</span><span> std::endl;
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>;
+</span><span>  }
+</span><span>  </span><span style=color:#928374;font-style:italic>// 从本进程地址空间读取 LoadLibraryA 函数的地址
+</span><span>  </span><span style=color:#fabd2f>LPVOID</span><span> lpProcAddr </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fabd2f>LPVOID</span><span>)</span><span style=color:#fdf4c1>GetProcAddress(GetModuleHandle(</span><span style=color:#b8bb26>"kernel32.dll"</span><span style=color:#fdf4c1>), </span><span style=color:#b8bb26>"LoadLibraryA"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  </span><span style=color:#928374;font-style:italic>// 在目标进程创建线程，执行 LoadLibraryA(我们的DLL路径)
+</span><span>  </span><span style=color:#fabd2f>HANDLE</span><span> hThread </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>CreateRemoteThread(hProcess, </span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>, (LPTHREAD_START_ROUTINE)lpProcAddr, (</span><span style=color:#fabd2f>LPVOID</span><span style=color:#fdf4c1>)lpRemoteDllName, </span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  </span><span style=color:#928374;font-style:italic>// 收尾
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(</span><span style=color:#fdf4c1>WaitForSingleObject(hThread, INFINITE) </span><span style=color:#fe8019>!=</span><span> WAIT_OBJECT_0)
+</span><span>  {
+</span><span>    </span><span style=color:#fdf4c1>CloseHandle(hProcess)</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> exitCode </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>;
+</span><span>  </span><span style=color:#fdf4c1>GetExitCodeThread(hThread, </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>exitCode)</span><span>;
+</span><span>  std::cout </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>"thread exit with code " </span><span style=color:#fe8019>&lt;&lt;</span><span> exitCode </span><span style=color:#fe8019>&lt;&lt;</span><span> std::endl;
+</span><span>  </span><span style=color:#fdf4c1>CloseHandle(hProcess)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>return </span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>;
+</span><span>}
+</span></code></pre><pre class=language-cpp data-lang=cpp style=color:#fdf4c1aa;background-color:#282828><code class=language-cpp data-lang=cpp><span style=color:#928374;font-style:italic>// victim.cpp
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;cmath>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;iostream>
+</span><span>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;Windows.h>
+</span><span>
+</span><span style=color:#fa5c4b>int </span><span style=color:#8ec07c>main</span><span>()
+</span><span>{
+</span><span>  </span><span style=color:#fa5c4b>int</span><span> guess;
+</span><span>  </span><span style=color:#fa5c4b>int</span><span> result </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>std::</span><span style=color:#fabd2f>rand</span><span style=color:#fdf4c1>()</span><span>;
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> pid </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>GetCurrentProcessId()</span><span>;
+</span><span>  std::cout </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>"current process id: " </span><span style=color:#fe8019>&lt;&lt;</span><span> pid </span><span style=color:#fe8019>&lt;&lt;</span><span> std::endl;
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>(;;)
+</span><span>  {
+</span><span>    std::cin </span><span style=color:#fe8019>>></span><span> guess;
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>(guess </span><span style=color:#fe8019>></span><span> result)
+</span><span>    {
+</span><span>      std::cout </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>"too big" </span><span style=color:#fe8019>&lt;&lt;</span><span> std::endl;
+</span><span>    }
+</span><span>    </span><span style=color:#fa5c4b>else if </span><span>(guess </span><span style=color:#fe8019>&lt;</span><span> result)
+</span><span>    {
+</span><span>      std::cout </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>"too small" </span><span style=color:#fe8019>&lt;&lt;</span><span> std::endl;
+</span><span>    }
+</span><span>    </span><span style=color:#fa5c4b>else
+</span><span>    {
+</span><span>      std::cout </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>"correct!" </span><span style=color:#fe8019>&lt;&lt;</span><span> std::endl;
+</span><span>      </span><span style=color:#fa5c4b>break</span><span>;
+</span><span>    }
+</span><span>  }
+</span><span>  </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>;
+</span><span>}
+</span></code></pre><pre class=language-cpp data-lang=cpp style=color:#fdf4c1aa;background-color:#282828><code class=language-cpp data-lang=cpp><span style=color:#928374;font-style:italic>// payload.cpp
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;Windows.h>
+</span><span>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;iostream>
+</span><span>
+</span><span style=color:#fabd2f>BOOL WINAPI </span><span style=color:#8ec07c>DllMain</span><span>(
+</span><span>    </span><span style=color:#fabd2f>HINSTANCE </span><span style=color:#fdf4c1>hinstDLL</span><span>, </span><span style=color:#928374;font-style:italic>// handle to DLL module
+</span><span>    </span><span style=color:#fabd2f>DWORD </span><span style=color:#fdf4c1>fdwReason</span><span>,    </span><span style=color:#928374;font-style:italic>// reason for calling function
+</span><span>    </span><span style=color:#fabd2f>LPVOID </span><span style=color:#fdf4c1>lpReserved</span><span>)  </span><span style=color:#928374;font-style:italic>// reserved
+</span><span>{
+</span><span>    </span><span style=color:#928374;font-style:italic>// Perform actions based on the reason for calling.
+</span><span>    </span><span style=color:#fa5c4b>switch </span><span>(fdwReason)
+</span><span>    {
+</span><span>    </span><span style=color:#fa5c4b>case</span><span> DLL_PROCESS_ATTACH:
+</span><span>        </span><span style=color:#928374;font-style:italic>// Initialize once for each new process.
+</span><span>        </span><span style=color:#928374;font-style:italic>// Return FALSE to fail DLL load.
+</span><span>        std::cout </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>"dll injected!" </span><span style=color:#fe8019>&lt;&lt;</span><span> std::endl;
+</span><span>        </span><span style=color:#fa5c4b>break</span><span>;
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>case</span><span> DLL_THREAD_ATTACH:
+</span><span>        </span><span style=color:#928374;font-style:italic>// Do thread-specific initialization.
+</span><span>        </span><span style=color:#fa5c4b>break</span><span>;
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>case</span><span> DLL_THREAD_DETACH:
+</span><span>        </span><span style=color:#928374;font-style:italic>// Do thread-specific cleanup.
+</span><span>        </span><span style=color:#fa5c4b>break</span><span>;
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>case</span><span> DLL_PROCESS_DETACH:
+</span><span>        </span><span style=color:#928374;font-style:italic>// Perform any necessary cleanup.
+</span><span>        </span><span style=color:#fa5c4b>break</span><span>;
+</span><span>    }
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>TRUE</span><span>; </span><span style=color:#928374;font-style:italic>// Successful DLL_PROCESS_ATTACH.
+</span><span>}
+</span></code></pre><pre class=language-cmake data-lang=cmake style=color:#fdf4c1aa;background-color:#282828><code class=language-cmake data-lang=cmake><span style=color:#928374;font-style:italic># CMakeLists.txt
+</span><span style=color:#fabd2f>cmake_minimum_required</span><span style=color:#fdf4c1>(VERSION 3.20)
+</span><span style=color:#fabd2f>project</span><span style=color:#fdf4c1>(
+</span><span style=color:#fdf4c1>    windows-codeinjection
+</span><span style=color:#fdf4c1>    VERSION 0.1.0
+</span><span style=color:#fdf4c1>    LANGUAGES CXX
+</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span style=color:#fabd2f>add_executable</span><span style=color:#fdf4c1>(injector injector/main.cpp)
+</span><span style=color:#fabd2f>add_executable</span><span style=color:#fdf4c1>(victim victim/main.cpp)
+</span><span style=color:#fabd2f>add_library</span><span style=color:#fdf4c1>(payload SHARED payload/main.cpp)
+</span></code></pre><p>最终验证结果<p><img alt=验证结果 src=https://nnnewb.github.io/posts/2022/2022-07-11-ji-yu-createremotethreadde-dllzhu-ru/image-20220711153811971.webp><h2 id=zong-jie>总结</h2><p>哈，魔术师的秘密。</article><p class=tags-data><a href=/tags/security>/security/</a> <a href=/tags/windows>/windows/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

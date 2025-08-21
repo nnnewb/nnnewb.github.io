@@ -1,0 +1,332 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>加壳原理03 - 支持没有重定位的程序</title><meta content="加壳原理03 - 支持没有重定位的程序" name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2021/learning-packer-03/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content="加壳原理03 - 支持没有重定位的程序" property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2021/learning-packer-03/ property=twitter:url><meta content="加壳原理03 - 支持没有重定位的程序" property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2021/learning-packer-03/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>加壳原理03 - 支持没有重定位的程序</h1><p class=author-line>作于：2021-10-20 10:25 ，预计阅读时间 13 分钟<article><h2 id=qian-yan>前言</h2><p>距离上一篇加壳原理已经过去挺久了，这段时间稍微折腾了一下 nasm，尝试手工制作了 PE32 文件，积累了一些基本的知识吧。<p>所以现在继续学习加壳——如何对不支持 ASLR 的 PE32 程序进行加壳？<h2 id=0x01-guan-yu-aslr>0x01 关于ASLR</h2><p>ASLR是一项内存保护技术，用于防范内存损坏漏洞，比如缓冲区溢出。需要注意的是 ASLR 并不是 <em>解决</em> 了相关威胁，而是让利用相关的漏洞变得更加困难和具有挑战性。<p>ASLR 的全名是 <em>Address Space Layout Randomization</em> ，地址空间布局随机化技术。一个典型的 PE32 程序在没有 ASLR 支持的情况下， 地址空间布局是确定的：程序镜像总会加载到固定的地址。这个地址会在文件头里指定。攻击者可以利用这一特点来构造恶意数据，让存在内存损坏漏洞的程序按攻击者意图跳过或执行特定逻辑，造成安全威胁。<p>对应 ASLR 的地址空间布局随机化，程序需要再次编译来支持重定位 <em>Relocation</em> ，别无他法（大概）。<h2 id=0x02-si-lu>0x02 思路</h2><p>对于加壳一个没有重定位，不支持 ASLR 的 PE32 程序，假设这个程序的基址是 <code>0x04000000</code>，原先的 <code>VirtualAlloc</code> 方式分配内存是行不通的。加壳后程序若开启 ASLR，则 <code>0x04000000</code> 可能已经存在其他模块，并不能保证这个基址可用。<strong>所以加壳后的程序必须也使用 <code>0x04000000</code> 这个基址，而且标记为不支持 ASLR</strong>，避免基址已经被其他模块使用造成加载器无法工作。<p>将加壳后程序的基址设置为固定的 <code>0x04000000</code> 又会产生新的问题：加载器的代码段不能放在 <code>0x04000000</code> ，否则加载器运行时就会出现被被加载的代码覆盖的情况，导致程序跑飞。所以<strong>编译后的加载器所有 Section 都必须有一定的偏移，这个偏移值就是被加载程序的 Section 大小之和（对齐后）</strong>。而因此多出来的空间单独分成一个 Section ，正好用来放要加载的程序。<p>另外，还必须确认文件头大小是否一致，因为<strong>我们需要将被加载程序的文件头覆盖加载器的文件头</strong>。而<strong>最开始预留的空间必须分配为一个 Section</strong>，让 Windows 的加载器能顺利加载程序而不报“不是有效的Win32程序”错误。<p>内存布局示意图如下：<p><img alt=内存布局 src=https://nnnewb.github.io/posts/2021/learning-packer-03/%E5%86%85%E5%AD%98%E5%B8%83%E5%B1%80.webp><p>所以加载器的加载步骤如下：<ol><li>寻找被加载的 Section 。<li>复制文件头覆盖自己的文件头。<li>以自己的基址为被加载程序的基址，完成加载。</ol><p>加壳机的加壳步骤如下：<ol><li>解析被加壳程序，获取 Section 大小、文件头大小、对齐大小等信息。<li>生成加载器程序，根据上一步取得的数据计算出加载器 Section 的偏移和对齐。<li>合并被加壳程序和加载器，生成被加壳程序。</ol><p>案例程序如下：<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;Windows.h>
+</span><span>
+</span><span style=color:#fa5c4b>int </span><span style=color:#8ec07c>main</span><span>(</span><span style=color:#fa5c4b>void</span><span>) {
+</span><span>  </span><span style=color:#fdf4c1>MessageBoxA(</span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>, </span><span style=color:#b8bb26>"Hello world!"</span><span style=color:#fdf4c1>, </span><span style=color:#b8bb26>"MSGBOX"</span><span style=color:#fdf4c1>, MB_OK)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>;
+</span><span>}
+</span></code></pre><h2 id=0x03-jia-zai-qi-xiu-gai>0x03 加载器修改</h2><p>加载器需要把 <code>VirtualAlloc</code> 改成 <code>GetModuleHandleA</code>，并解除当前程序文件头的写保护，并在随后的复制 Section 阶段同样用 <code>VirtualProtect</code> 解除写保护，添加执行权限。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span style=color:#8ec07c>load_PE</span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>PE_data</span><span>) {
+</span><span>  IMAGE_DOS_HEADER </span><span style=color:#fe8019>*</span><span>p_DOS_header </span><span style=color:#fe8019>= </span><span>(IMAGE_DOS_HEADER </span><span style=color:#fe8019>*</span><span>)PE_data;
+</span><span>  IMAGE_NT_HEADERS </span><span style=color:#fe8019>*</span><span>p_NT_headers </span><span style=color:#fe8019>= </span><span>(IMAGE_NT_HEADERS </span><span style=color:#fe8019>*</span><span>)(PE_data </span><span style=color:#fe8019>+</span><span> p_DOS_header->e_lfanew);
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// extract information from PE header
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> size_of_image </span><span style=color:#fe8019>=</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>SizeOfImage</span><span>;
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> entry_point_RVA </span><span style=color:#fe8019>=</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>AddressOfEntryPoint</span><span>;
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> size_of_headers </span><span style=color:#fe8019>=</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>SizeOfHeaders</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// base address
+</span><span>  </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>p_image_base </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>)</span><span style=color:#fdf4c1>GetModuleHandleA(</span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(p_image_base </span><span style=color:#fe8019>== </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>NULL</span><span>;
+</span><span>  }
+</span><span>    
+</span><span>  </span><span style=color:#928374;font-style:italic>// make sure we can write in allocated memory
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> oldProtect;
+</span><span>  </span><span style=color:#fdf4c1>VirtualProtect(p_image_base, p_NT_headers->OptionalHeader.SizeOfHeaders, PAGE_READWRITE, </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>oldProtect)</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// copy PE headers in memory
+</span><span>  </span><span style=color:#fdf4c1>mymemcpy(p_image_base, PE_data, size_of_headers)</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// Section headers starts right after the IMAGE_NT_HEADERS struct, so we do some pointer arithmetic-fu here.
+</span><span>  IMAGE_SECTION_HEADER </span><span style=color:#fe8019>*</span><span>sections </span><span style=color:#fe8019>= </span><span>(IMAGE_SECTION_HEADER </span><span style=color:#fe8019>*</span><span>)(p_NT_headers </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span>);
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; i </span><span style=color:#fe8019>&lt;</span><span> p_NT_headers->FileHeader.</span><span style=color:#fdf4c1>NumberOfSections</span><span>; i</span><span style=color:#fe8019>++</span><span>) {
+</span><span>    </span><span style=color:#928374;font-style:italic>// calculate the VA we need to copy the content, from the RVA
+</span><span>    </span><span style=color:#928374;font-style:italic>// section[i].VirtualAddress is a RVA, mind it
+</span><span>    </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>dest </span><span style=color:#fe8019>=</span><span> p_image_base </span><span style=color:#fe8019>+</span><span> sections[i].</span><span style=color:#fdf4c1>VirtualAddress</span><span>;
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// check if there is Raw data to copy
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>(sections[i].</span><span style=color:#fdf4c1>SizeOfRawData </span><span style=color:#fe8019>> </span><span style=color:#d3869b>0</span><span>) {
+</span><span>      </span><span style=color:#928374;font-style:italic>// make sure we can write in allocated sections
+</span><span>      </span><span style=color:#fdf4c1>VirtualProtect(dest, sections[i].SizeOfRawData, PAGE_READWRITE, </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>old_protect)</span><span>;
+</span><span>      </span><span style=color:#928374;font-style:italic>// We copy SizeOfRaw data bytes, from the offset PointerToRawData in the file
+</span><span>      </span><span style=color:#fdf4c1>mymemcpy(dest, PE_data </span><span style=color:#fe8019>+</span><span style=color:#fdf4c1> sections[i].PointerToRawData, sections[i].SizeOfRawData)</span><span>;
+</span><span>    } </span><span style=color:#fa5c4b>else </span><span>{
+</span><span>      </span><span style=color:#fdf4c1>VirtualProtect(dest, sections[i].Misc.VirtualSize, PAGE_READWRITE, </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>old_protect)</span><span>;
+</span><span>      </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fabd2f>size_t</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; i </span><span style=color:#fe8019>&lt;</span><span> sections[i].</span><span style=color:#fdf4c1>Misc</span><span>.</span><span style=color:#fdf4c1>VirtualSize</span><span>; i</span><span style=color:#fe8019>++</span><span>) {
+</span><span>        dest[i] </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>;
+</span><span>      }
+</span><span>    }
+</span><span>  }
+</span><span>    
+</span><span>    </span><span style=color:#928374;font-style:italic>// ...
+</span><span>}
+</span></code></pre><p>此外还有一个坑：不知道为啥，我用 lief python 生成的 DataDirectories 实际只有15个元素（包括最后一个 null 元素），但 <code>winnt.h</code> 里定义的 DataDirectories 是固定长度 16 个元素，所以直接算 <code>p_NT_header + 1</code> 得到的偏移值会比预期的大 8 个字节，导致报找不到 <code>.packed</code> 。<p>改成这样。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#fa5c4b>int </span><span style=color:#8ec07c>_start</span><span>(</span><span style=color:#fa5c4b>void</span><span>) {
+</span><span>  </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>unpacker_VA </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>)</span><span style=color:#fdf4c1>GetModuleHandleA(</span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>
+</span><span>  IMAGE_DOS_HEADER </span><span style=color:#fe8019>*</span><span>p_DOS_header </span><span style=color:#fe8019>= </span><span>(PIMAGE_DOS_HEADER)unpacker_VA;
+</span><span>  IMAGE_NT_HEADERS </span><span style=color:#fe8019>*</span><span>p_NT_headers </span><span style=color:#fe8019>= </span><span>(PIMAGE_NT_HEADERS)(unpacker_VA </span><span style=color:#fe8019>+</span><span> p_DOS_header->e_lfanew);
+</span><span>  IMAGE_SECTION_HEADER </span><span style=color:#fe8019>*</span><span>sections </span><span style=color:#fe8019>= </span><span>(PIMAGE_SECTION_HEADER)(p_NT_headers </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span>);
+</span><span>  </span><span style=color:#928374;font-style:italic>// 注意看这里再计算了一次偏移
+</span><span>  sections </span><span style=color:#fe8019>= </span><span>(PIMAGE_SECTION_HEADER)((</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>)sections </span><span style=color:#fe8019>- </span><span>(IMAGE_NUMBEROF_DIRECTORY_ENTRIES </span><span style=color:#fe8019>-
+</span><span>                                                         p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>NumberOfRvaAndSizes</span><span>) </span><span style=color:#fe8019>*
+</span><span>                                                            </span><span style=color:#fe8019>sizeof</span><span>(IMAGE_DATA_DIRECTORY));
+</span></code></pre><h2 id=0x04-jia-ke-qi>0x04 加壳器</h2><p>加壳器这次用 python 写，MinGW 下又要重新编译 LIEF 太折磨人了。<h3 id=4-1-gong-ju-han-shu>4.1 工具函数</h3><p>先是导入和定义必要的工具。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>lief
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>align</span><span>(</span><span style=color:#fdf4c1>x</span><span>, </span><span style=color:#fdf4c1>al</span><span>):
+</span><span>    </span><span style=color:#928374;font-style:italic>""" return &lt;x> aligned to &lt;al> """
+</span><span>    </span><span style=color:#fa5c4b>return </span><span>((x</span><span style=color:#fe8019>+</span><span>(al</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>))</span><span style=color:#fe8019>//</span><span>al)</span><span style=color:#fe8019>*</span><span>al
+</span></code></pre><h3 id=4-2-jie-xi>4.2 解析</h3><p>先分析案例程序，获得必要的数据。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span>binary </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>lief.PE.parse(</span><span style=color:#b8bb26>'example.exe'</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span style=color:#928374;font-style:italic># calculate shift offset and reserved section size
+</span><span>image_base </span><span style=color:#fe8019>= </span><span>binary.optional_header.imagebase
+</span><span>lowest_rva </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>min</span><span style=color:#fdf4c1>([s.virtual_address </span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>s </span><span style=color:#fa5c4b>in </span><span style=color:#fdf4c1>binary.sections])
+</span><span>highest_rva </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>max</span><span style=color:#fdf4c1>([s.virtual_address </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>s.size </span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>s </span><span style=color:#fa5c4b>in </span><span style=color:#fdf4c1>binary.sections])
+</span><span>sect_alignment </span><span style=color:#fe8019>= </span><span>binary.optional_header.section_alignment
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'[+] analyze origin demo program binary success.'</span><span style=color:#fdf4c1>)
+</span></code></pre><p>取得基址、所有 section 中最低的起始 rva 和最高的结束 rva，得到整个 PE 镜像的 Sections 覆盖的内存范围。<h3 id=4-3-gou-zao-jia-zai-qi>4.3 构造加载器</h3><p>使用 MinGW 来完成加载器构造——当然有其他更好的做法，加壳还要装一个 MinGW 未免太麻烦，但我也不知道该怎么做就是了（我猜的话，大概拿 nasm 应该就刑。）<p>编译命令在 Python 脚本里生成并执行。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#928374;font-style:italic># compile shifted loader program
+</span><span>compile_args </span><span style=color:#fe8019>= </span><span>[
+</span><span>    </span><span style=color:#b8bb26>'loader.c'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-m32'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-O2'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-Wall'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-Wl,--entry=__start'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-nodefaultlibs'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-nostartfiles'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-lkernel32'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-luser32'</span><span>,
+</span><span>    </span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'-Wl,--image-base=</span><span>{</span><span style=color:#fabd2f>hex</span><span style=color:#fdf4c1>(image_base)</span><span>}</span><span style=color:#b8bb26>'</span><span>,
+</span><span>    </span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'-Wl,--section-start=.text=</span><span>{</span><span style=color:#fabd2f>hex</span><span style=color:#fdf4c1>(align(image_base</span><span style=color:#fe8019>+</span><span style=color:#fdf4c1>highest_rva,sect_alignment))</span><span>}</span><span style=color:#b8bb26>'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-o'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'shifted-loader.exe'
+</span><span>]
+</span><span>
+</span><span style=color:#fa5c4b>try</span><span>:
+</span><span>    </span><span style=color:#fdf4c1>check_output(</span><span style=color:#b8bb26>' '</span><span style=color:#fdf4c1>.join([</span><span style=color:#b8bb26>'gcc'</span><span style=color:#fdf4c1>, </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>compile_args]), shell</span><span style=color:#fe8019>=</span><span style=color:#d3869b>True</span><span style=color:#fdf4c1>, stderr</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>STDOUT)
+</span><span>    </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'[+] compile shifted loader program success.'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fa5c4b>except </span><span>CalledProcessError </span><span style=color:#fa5c4b>as </span><span>e:
+</span><span>    </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'[!] loader compilation failed, </span><span style=color:#fdf4c1>{e.stdout.decode()}</span><span style=color:#b8bb26>'</span><span style=color:#fdf4c1>)
+</span><span>    </span><span style=color:#fa5c4b>raise
+</span><span>
+</span><span>shifted_loader </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>lief.PE.parse(</span><span style=color:#b8bb26>'shifted-loader.exe'</span><span style=color:#fdf4c1>)
+</span><span>sect_alignment </span><span style=color:#fe8019>= </span><span>shifted_loader.optional_header.section_alignment
+</span><span>file_alignment </span><span style=color:#fe8019>= </span><span>shifted_loader.optional_header.file_alignment
+</span></code></pre><p><code>-luser32</code> 是因为我添加了一个 <code>MessageBoxA</code> 的调用。<p><code>-Wl,--image-base=...</code> 设置了加载器的基址，确保加载器和被加壳的程序落在同一个基址上。<p><code>-Wl,--section-start=...</code> 因为知道第一个 section 一定是 <code>.text</code> 所以只设置了第一个 section 的地址，之后的 section 会自动往后挪。<p>其他参数不多解释了。<p>编译完成后，再解析出加载器的对齐信息，准备用于构造完整的被加壳程序。<h3 id=4-4-gou-zao-jia-ke-cheng-xu>4.4 构造加壳程序</h3><p>加载器和被加载的程序都已经就绪，接下来就是把加载器和程序合并成加壳后的程序了。这一步还是先在创建 lief 的PE32 对象，然后填充基址、Section 对齐、文件对齐，并且把 DLL Characteristics 重置到 0，目的是声明不支持 ASLR。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#928374;font-style:italic># create new binary from scratch
+</span><span>output </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>lief.PE.Binary(</span><span style=color:#b8bb26>'packed'</span><span style=color:#fdf4c1>, lief.PE.PE_TYPE.PE32)
+</span><span>
+</span><span style=color:#928374;font-style:italic># copy essential fields from shifted_loader
+</span><span>output.optional_header.imagebase </span><span style=color:#fe8019>= </span><span>shifted_loader.optional_header.imagebase
+</span><span>output.optional_header.section_alignment </span><span style=color:#fe8019>= </span><span>shifted_loader.optional_header.section_alignment
+</span><span>output.optional_header.file_alignment </span><span style=color:#fe8019>= </span><span>shifted_loader.optional_header.file_alignment
+</span><span>
+</span><span style=color:#928374;font-style:italic># disable ASLR
+</span><span>output.optional_header.dll_characteristics </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0
+</span></code></pre><p>先准备这些文件头字段，接下来开始填充 Section ，最先填充的就是准备用作被加载程序内存空间的 <code>.alloc</code> 节。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#928374;font-style:italic># add .alloc section
+</span><span>allocate_size </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>align(highest_rva</span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>lowest_rva, sect_alignment)
+</span><span>allocate_section </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>lief.PE.Section(</span><span style=color:#b8bb26>".alloc"</span><span style=color:#fdf4c1>)
+</span><span>allocate_section.virtual_address </span><span style=color:#fe8019>= </span><span>lowest_rva
+</span><span>allocate_section.virtual_size </span><span style=color:#fe8019>= </span><span>allocate_size
+</span><span>allocate_section.characteristics </span><span style=color:#fe8019>= </span><span>(lief.</span><span style=color:#fdf4c1>PE</span><span>.</span><span style=color:#fdf4c1>SECTION_CHARACTERISTICS</span><span>.</span><span style=color:#fdf4c1>MEM_READ
+</span><span>                                    </span><span style=color:#fe8019>| </span><span>lief.</span><span style=color:#fdf4c1>PE</span><span>.</span><span style=color:#fdf4c1>SECTION_CHARACTERISTICS</span><span>.</span><span style=color:#fdf4c1>MEM_WRITE
+</span><span>                                    </span><span style=color:#fe8019>| </span><span>lief.</span><span style=color:#fdf4c1>PE</span><span>.</span><span style=color:#fdf4c1>SECTION_CHARACTERISTICS</span><span>.</span><span style=color:#fdf4c1>CNT_UNINITIALIZED_DATA</span><span>)
+</span><span style=color:#fdf4c1>output.add_section(allocate_section)
+</span></code></pre><p>将 <code>.alloc</code> 节起始点放置在低位，长度为被加载程序的节大小之和对齐。<p>之后开始复制加载器的节。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#928374;font-style:italic># copy sections
+</span><span style=color:#fa5c4b>for </span><span>s </span><span style=color:#fa5c4b>in </span><span>shifted_loader.sections:
+</span><span>    </span><span style=color:#928374;font-style:italic># let lief recalculate section offset and sizeof raw data
+</span><span>    s.offset </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0
+</span><span>    s.sizeof_raw_data </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0
+</span><span>    </span><span style=color:#fdf4c1>output.add_section(s)
+</span></code></pre><p><strong>需要注意</strong> 把 <code>offset</code> 和 <code>sizeof_raw_data</code> 置零，让 <code>lief</code> 去计算偏移和大小，后面添加的一应节都按这样操作。新创建的 Section 还好，对于从加载器里复制的 Section，保留 <code>offset</code> 和 <code>sizeof_raw_data</code> 会导致最终成品的 Section 数据不正确，造成 <code>ntdll</code> 里加载PE文件时，读取PE数据结构时出错。可以自行用 x32dbg 验证。<p>最后把被加载的文件打包进去。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#928374;font-style:italic># add packed section
+</span><span style=color:#fa5c4b>with </span><span style=color:#fabd2f>open</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'example.exe'</span><span style=color:#fdf4c1>, </span><span style=color:#b8bb26>'rb'</span><span style=color:#fdf4c1>) </span><span style=color:#fa5c4b>as </span><span>f:
+</span><span>    packed_section </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>lief.PE.Section(</span><span style=color:#b8bb26>'.packed'</span><span style=color:#fdf4c1>)
+</span><span>    packed_section.content </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>list</span><span style=color:#fdf4c1>(f.read())
+</span><span>    packed_section.characteristics </span><span style=color:#fe8019>= </span><span>(lief.</span><span style=color:#fdf4c1>PE</span><span>.</span><span style=color:#fdf4c1>SECTION_CHARACTERISTICS</span><span>.</span><span style=color:#fdf4c1>MEM_READ </span><span style=color:#fe8019>|
+</span><span>                                      lief.</span><span style=color:#fdf4c1>PE</span><span>.</span><span style=color:#fdf4c1>SECTION_CHARACTERISTICS</span><span>.</span><span style=color:#fdf4c1>CNT_INITIALIZED_DATA</span><span>)
+</span><span>    </span><span style=color:#fdf4c1>output.add_section(packed_section)
+</span></code></pre><p>同样，让 lief 去计算偏移和大小。复制好节，继续复制 Data Directories，这又有一个坑。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#928374;font-style:italic># copy data directories
+</span><span style=color:#fa5c4b>for </span><span>i </span><span style=color:#fa5c4b>in </span><span style=color:#fabd2f>range</span><span style=color:#fdf4c1>(</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>15</span><span style=color:#fdf4c1>)</span><span>:
+</span><span>    src </span><span style=color:#fe8019>= </span><span>shifted_loader.data_directories[i]
+</span><span>    output.data_directories[i].rva </span><span style=color:#fe8019>= </span><span>src.rva
+</span><span>    output.data_directories[i].size </span><span style=color:#fe8019>= </span><span>src.size
+</span><span>    
+</span><span style=color:#928374;font-style:italic># correct number of data directories
+</span><span style=color:#928374;font-style:italic># warning: size of data directories may disagree with IMAGE_NT_HEADERS.DataDirectory in winnt.h
+</span><span>output.optional_header.numberof_rva_and_size </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(output.data_directories)
+</span></code></pre><p>需要注意到，<strong>lief 的数据结构里，允许的 data_directories 只有 15 个</strong>！<strong>但 <code>winnt.h</code> 里定义的 DATA_DIRECTORIES 数组，是固定16个元素</strong>！<p>如果直接 <code>range(16)</code> 去遍历，会出现 <code>IndexError</code> ，如果忽视这个长度问题，直接在加载器里采用 Windows SDK 的头文件定义的结构，会导致取节表指针的时候比预期的多偏移 8 个字节，造成问题。调试起来简直太折磨人了。<p>之后再复制入口点和镜像大小。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#928374;font-style:italic># copy original address of entrypoint
+</span><span>output.optional_header.addressof_entrypoint </span><span style=color:#fe8019>= </span><span>shifted_loader.optional_header.addressof_entrypoint
+</span><span style=color:#928374;font-style:italic># let lief recalculate size of image
+</span><span>output.optional_header.sizeof_image </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0
+</span></code></pre><p>注意，入口点和镜像大小的字段必须在复制完 Section 之后再复制，不然 lief 会犯傻，原因不明，有兴趣可以自己改一改顺序看看结果。<p>到这里，基本准备就绪，就可以把构造好的可执行文件写入硬盘了。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#928374;font-style:italic># build output binary
+</span><span>builder </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>lief.PE.Builder(output)
+</span><span style=color:#fdf4c1>builder.build()
+</span><span style=color:#fdf4c1>builder.write(</span><span style=color:#b8bb26>'packed.exe'</span><span style=color:#fdf4c1>)
+</span></code></pre><h3 id=4-5-wan-zheng-dai-ma>4.5 完整代码</h3><pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#928374;font-style:italic># %%
+</span><span style=color:#fa5c4b>import </span><span>lief
+</span><span style=color:#fa5c4b>from </span><span>subprocess </span><span style=color:#fa5c4b>import </span><span style=color:#fdf4c1>STDOUT</span><span>, CalledProcessError, check_output
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>align</span><span>(</span><span style=color:#fdf4c1>x</span><span>, </span><span style=color:#fdf4c1>al</span><span>):
+</span><span>    </span><span style=color:#928374;font-style:italic>""" return &lt;x> aligned to &lt;al> """
+</span><span>    </span><span style=color:#fa5c4b>return </span><span>((x</span><span style=color:#fe8019>+</span><span>(al</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>))</span><span style=color:#fe8019>//</span><span>al)</span><span style=color:#fe8019>*</span><span>al
+</span><span>
+</span><span>
+</span><span style=color:#928374;font-style:italic># %%
+</span><span style=color:#928374;font-style:italic># compile origin demo program
+</span><span style=color:#fa5c4b>try</span><span>:
+</span><span>    </span><span style=color:#fdf4c1>check_output(</span><span style=color:#b8bb26>'gcc example.c -m32 -O2 -o example.exe'</span><span style=color:#fdf4c1>, shell</span><span style=color:#fe8019>=</span><span style=color:#d3869b>True</span><span style=color:#fdf4c1>, stderr</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>STDOUT)
+</span><span style=color:#fa5c4b>except </span><span>CalledProcessError </span><span style=color:#fa5c4b>as </span><span>e:
+</span><span>    </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'[!] demo program compilation failed, </span><span style=color:#fdf4c1>{e.stdout.decode()}</span><span style=color:#b8bb26>'</span><span style=color:#fdf4c1>)
+</span><span>    </span><span style=color:#fa5c4b>raise
+</span><span>
+</span><span>binary </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>lief.PE.parse(</span><span style=color:#b8bb26>'example.exe'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'[+] compile origin demo program success.'</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span style=color:#928374;font-style:italic># %%
+</span><span style=color:#928374;font-style:italic># calculate shift offset and reserved section size
+</span><span>image_base </span><span style=color:#fe8019>= </span><span>binary.optional_header.imagebase
+</span><span>lowest_rva </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>min</span><span style=color:#fdf4c1>([s.virtual_address </span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>s </span><span style=color:#fa5c4b>in </span><span style=color:#fdf4c1>binary.sections])
+</span><span>highest_rva </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>max</span><span style=color:#fdf4c1>([s.virtual_address </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>s.size </span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>s </span><span style=color:#fa5c4b>in </span><span style=color:#fdf4c1>binary.sections])
+</span><span>sect_alignment </span><span style=color:#fe8019>= </span><span>binary.optional_header.section_alignment
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'[+] analyze origin demo program binary success.'</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span style=color:#928374;font-style:italic># %%
+</span><span style=color:#928374;font-style:italic># compile shifted loader program
+</span><span>compile_args </span><span style=color:#fe8019>= </span><span>[
+</span><span>    </span><span style=color:#b8bb26>'loader.c'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-m32'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-O2'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-Wall'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-Wl,--entry=__start'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-nodefaultlibs'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-nostartfiles'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-lkernel32'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-luser32'</span><span>,
+</span><span>    </span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'-Wl,--image-base=</span><span>{</span><span style=color:#fabd2f>hex</span><span style=color:#fdf4c1>(image_base)</span><span>}</span><span style=color:#b8bb26>'</span><span>,
+</span><span>    </span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'-Wl,--section-start=.text=</span><span>{</span><span style=color:#fabd2f>hex</span><span style=color:#fdf4c1>(align(image_base</span><span style=color:#fe8019>+</span><span style=color:#fdf4c1>highest_rva,sect_alignment))</span><span>}</span><span style=color:#b8bb26>'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-o'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'shifted-loader.exe'
+</span><span>]
+</span><span>
+</span><span style=color:#fa5c4b>try</span><span>:
+</span><span>    </span><span style=color:#fdf4c1>check_output(</span><span style=color:#b8bb26>' '</span><span style=color:#fdf4c1>.join([</span><span style=color:#b8bb26>'gcc'</span><span style=color:#fdf4c1>, </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>compile_args]), shell</span><span style=color:#fe8019>=</span><span style=color:#d3869b>True</span><span style=color:#fdf4c1>, stderr</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>STDOUT)
+</span><span>    </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'[+] compile shifted loader program success.'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fa5c4b>except </span><span>CalledProcessError </span><span style=color:#fa5c4b>as </span><span>e:
+</span><span>    </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'[!] loader compilation failed, </span><span style=color:#fdf4c1>{e.stdout.decode()}</span><span style=color:#b8bb26>'</span><span style=color:#fdf4c1>)
+</span><span>    </span><span style=color:#fa5c4b>raise
+</span><span>
+</span><span>shifted_loader </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>lief.PE.parse(</span><span style=color:#b8bb26>'shifted-loader.exe'</span><span style=color:#fdf4c1>)
+</span><span>sect_alignment </span><span style=color:#fe8019>= </span><span>shifted_loader.optional_header.section_alignment
+</span><span>file_alignment </span><span style=color:#fe8019>= </span><span>shifted_loader.optional_header.file_alignment
+</span><span>
+</span><span style=color:#928374;font-style:italic># %%
+</span><span style=color:#928374;font-style:italic># create new binary from scratch
+</span><span>output </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>lief.PE.Binary(</span><span style=color:#b8bb26>'packed'</span><span style=color:#fdf4c1>, lief.PE.PE_TYPE.PE32)
+</span><span>
+</span><span style=color:#928374;font-style:italic># copy essential fields from shifted_loader
+</span><span>output.optional_header.imagebase </span><span style=color:#fe8019>= </span><span>shifted_loader.optional_header.imagebase
+</span><span>output.optional_header.section_alignment </span><span style=color:#fe8019>= </span><span>shifted_loader.optional_header.section_alignment
+</span><span>output.optional_header.file_alignment </span><span style=color:#fe8019>= </span><span>shifted_loader.optional_header.file_alignment
+</span><span>
+</span><span style=color:#928374;font-style:italic># disable ASLR
+</span><span>output.optional_header.dll_characteristics </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0
+</span><span>
+</span><span style=color:#928374;font-style:italic># add .alloc section
+</span><span>allocate_size </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>align(highest_rva</span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>lowest_rva, sect_alignment)
+</span><span>allocate_section </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>lief.PE.Section(</span><span style=color:#b8bb26>".alloc"</span><span style=color:#fdf4c1>)
+</span><span>allocate_section.virtual_address </span><span style=color:#fe8019>= </span><span>lowest_rva
+</span><span>allocate_section.virtual_size </span><span style=color:#fe8019>= </span><span>allocate_size
+</span><span>allocate_section.characteristics </span><span style=color:#fe8019>= </span><span>(lief.</span><span style=color:#fdf4c1>PE</span><span>.</span><span style=color:#fdf4c1>SECTION_CHARACTERISTICS</span><span>.</span><span style=color:#fdf4c1>MEM_READ
+</span><span>                                    </span><span style=color:#fe8019>| </span><span>lief.</span><span style=color:#fdf4c1>PE</span><span>.</span><span style=color:#fdf4c1>SECTION_CHARACTERISTICS</span><span>.</span><span style=color:#fdf4c1>MEM_WRITE
+</span><span>                                    </span><span style=color:#fe8019>| </span><span>lief.</span><span style=color:#fdf4c1>PE</span><span>.</span><span style=color:#fdf4c1>SECTION_CHARACTERISTICS</span><span>.</span><span style=color:#fdf4c1>CNT_UNINITIALIZED_DATA</span><span>)
+</span><span style=color:#fdf4c1>output.add_section(allocate_section)
+</span><span>
+</span><span style=color:#928374;font-style:italic># copy sections
+</span><span style=color:#fa5c4b>for </span><span>s </span><span style=color:#fa5c4b>in </span><span>shifted_loader.sections:
+</span><span>    </span><span style=color:#928374;font-style:italic># let lief recalculate section offset and sizeof raw data
+</span><span>    s.offset </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0
+</span><span>    s.sizeof_raw_data </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0
+</span><span>    </span><span style=color:#fdf4c1>output.add_section(s)
+</span><span>
+</span><span style=color:#928374;font-style:italic># add packed section
+</span><span style=color:#fa5c4b>with </span><span style=color:#fabd2f>open</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'example.exe'</span><span style=color:#fdf4c1>, </span><span style=color:#b8bb26>'rb'</span><span style=color:#fdf4c1>) </span><span style=color:#fa5c4b>as </span><span>f:
+</span><span>    packed_section </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>lief.PE.Section(</span><span style=color:#b8bb26>'.packed'</span><span style=color:#fdf4c1>)
+</span><span>    packed_section.content </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>list</span><span style=color:#fdf4c1>(f.read())
+</span><span>    packed_section.characteristics </span><span style=color:#fe8019>= </span><span>(lief.</span><span style=color:#fdf4c1>PE</span><span>.</span><span style=color:#fdf4c1>SECTION_CHARACTERISTICS</span><span>.</span><span style=color:#fdf4c1>MEM_READ </span><span style=color:#fe8019>|
+</span><span>                                      lief.</span><span style=color:#fdf4c1>PE</span><span>.</span><span style=color:#fdf4c1>SECTION_CHARACTERISTICS</span><span>.</span><span style=color:#fdf4c1>CNT_INITIALIZED_DATA</span><span>)
+</span><span>    </span><span style=color:#fdf4c1>output.add_section(packed_section)
+</span><span>
+</span><span style=color:#928374;font-style:italic># copy data directories
+</span><span style=color:#fa5c4b>for </span><span>i </span><span style=color:#fa5c4b>in </span><span style=color:#fabd2f>range</span><span style=color:#fdf4c1>(</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>15</span><span style=color:#fdf4c1>)</span><span>:
+</span><span>    src </span><span style=color:#fe8019>= </span><span>shifted_loader.data_directories[i]
+</span><span>    output.data_directories[i].rva </span><span style=color:#fe8019>= </span><span>src.rva
+</span><span>    output.data_directories[i].size </span><span style=color:#fe8019>= </span><span>src.size
+</span><span>
+</span><span style=color:#928374;font-style:italic># correct number of data directories
+</span><span style=color:#928374;font-style:italic># warning: size of data directories may disagree with IMAGE_NT_HEADERS.DataDirectory in winnt.h
+</span><span>output.optional_header.numberof_rva_and_size </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(output.data_directories)
+</span><span style=color:#928374;font-style:italic># copy original address of entrypoint
+</span><span>output.optional_header.addressof_entrypoint </span><span style=color:#fe8019>= </span><span>shifted_loader.optional_header.addressof_entrypoint
+</span><span style=color:#928374;font-style:italic># let lief recalculate size of image
+</span><span>output.optional_header.sizeof_image </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0
+</span><span>
+</span><span style=color:#928374;font-style:italic># build output binary
+</span><span>builder </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>lief.PE.Builder(output)
+</span><span style=color:#fdf4c1>builder.build()
+</span><span style=color:#fdf4c1>builder.write(</span><span style=color:#b8bb26>'packed.exe'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'[+] create packed binary success.'</span><span style=color:#fdf4c1>)
+</span><span>
+</span></code></pre><p>只放一下加载器代码，一共三个代码文件托管在 Gist 上，需要安装 MinGW 和 LIEF，配置方式不赘述。还不会 C 和 Python 的话建议学一下先呢。<p><a href=https://gist.github.com/nnnewb/28ca24ed4ee53f446120d64570c7ad01>完整代码的 GIST</a><h2 id=0x05-cheng-guo>0x05 成果</h2><p>加壳机运行效果。<p><img alt=加壳机 src=https://nnnewb.github.io/posts/2021/learning-packer-03/%E5%8A%A0%E5%A3%B3%E6%9C%BA.gif><p><code>packed.exe</code> 的节表信息如下。<p><img alt=image-20211020095008599 src=https://nnnewb.github.io/posts/2021/learning-packer-03/image-20211020095008599.webp><h2 id=jie-lun>结论</h2><p>整个过程里踩了不少坑，几乎都要靠 x32dbg 调试和 CFF Explorer 挨个文件头字段检查。有个比较实用的做法是拿 LIEF 解析好加壳后的文件，把输出结果和原始加载器对比。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>lief
+</span><span>
+</span><span>packed </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>lief.PE.parse(</span><span style=color:#b8bb26>'packed.exe'</span><span style=color:#fdf4c1>)
+</span><span>loader </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>lief.PE.parse(</span><span style=color:#b8bb26>'shifted-loader.exe'</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span style=color:#fa5c4b>with </span><span style=color:#fabd2f>open</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'packed-analysis.txt'</span><span style=color:#fdf4c1>, </span><span style=color:#b8bb26>'w+'</span><span style=color:#fdf4c1>, encoding</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'utf-8'</span><span style=color:#fdf4c1>) </span><span style=color:#fa5c4b>as </span><span>out:
+</span><span>    </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'-----'</span><span style=color:#fe8019>*</span><span style=color:#d3869b>20</span><span style=color:#fdf4c1>, file</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>out)
+</span><span>    </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'packed.exe'</span><span style=color:#fdf4c1>, file</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>out)
+</span><span>    </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'-----'</span><span style=color:#fe8019>*</span><span style=color:#d3869b>20</span><span style=color:#fdf4c1>, file</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>out)
+</span><span>    </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(packed.header, file</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>out)
+</span><span>    </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(packed.optional_header, file</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>out)
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>entry </span><span style=color:#fa5c4b>in </span><span>packed.data_directories:
+</span><span>        </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(entry, file</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>out)
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>s </span><span style=color:#fa5c4b>in </span><span>packed.sections:
+</span><span>        </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(s, file</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>out)
+</span><span>
+</span><span style=color:#fa5c4b>with </span><span style=color:#fabd2f>open</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'loader-analysis.txt'</span><span style=color:#fdf4c1>, </span><span style=color:#b8bb26>'w+'</span><span style=color:#fdf4c1>, encoding</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'utf-8'</span><span style=color:#fdf4c1>) </span><span style=color:#fa5c4b>as </span><span>out:
+</span><span>    </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'-----'</span><span style=color:#fe8019>*</span><span style=color:#d3869b>20</span><span style=color:#fdf4c1>, file</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>out)
+</span><span>    </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'shifted-loader.exe'</span><span style=color:#fdf4c1>, file</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>out)
+</span><span>    </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'-----'</span><span style=color:#fe8019>*</span><span style=color:#d3869b>20</span><span style=color:#fdf4c1>, file</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>out)
+</span><span>    </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(loader.header, file</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>out)
+</span><span>    </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(loader.optional_header, file</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>out)
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>entry </span><span style=color:#fa5c4b>in </span><span>loader.data_directories:
+</span><span>        </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(entry, file</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>out)
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>s </span><span style=color:#fa5c4b>in </span><span>loader.sections:
+</span><span>        </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(s, file</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>out)
+</span><span>
+</span></code></pre><p>分析好之后就可以拿 vscode 去比较了。<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>code -n -d packed-analysis.txt loader-analysis.txt
+</span></code></pre><p>比起直接拿 CFF Explorer 硬看字段哪儿不对，和编译器产生的正常文件比较能排除掉一些无关的字段。但也不是万能，比如说之前没有写 <code>section.offset=0</code>，结果生成的 PE32 文件导入表内容坏了，一直没意识到。直到 x32dbg 调试中发现 ntdll 里加载导入表时碰到了一个无效地址（我怎么知道是加载导入表时呢，胆大心细加上99%的运气...），然后看 CFF Explorer 才发现导入表完全挂了，再回头看节表才发现 <code>.idata</code> 的偏移和大小都是坏的...<p>还有 data directories 的坑，也是靠 x32dbg，跳转到内存，才发现 <code>(IMAGE_SECTION_HEADER*)(PIMAGE_NT_HEADERS+1)</code> 算出来的偏移值多了8字节，冥思苦想这8字节怎么回事，胡乱分析，然后突然意识到 data directory 正好 8 字节，加壳机里又有个很迷惑的 <code>range(0,15)</code>，反复确认了几次才发现真的是 LIEF 就给了 15 个 Data directory —— 但 Windows SDK 里 <code>winnt.h</code> 定义的是 <strong>固定 16 个元素</strong> ，之后去翻 PE Format 文档才发现微软早就挖好了这个坑等你翻文档：<blockquote><p>Note that the number of directories is not fixed. Before looking for a specific directory, check the NumberOfRvaAndSizes field in the optional header.</blockquote><p>原先的文章预计是要做一个压缩壳，简单试验了一下没啥难度，代码都不用几行（VS+CMake+VCPKG 同时用 LIEF 和 ZLIB/LZO 什么的有点费劲，所以用 Windows Compression API），就这样水一篇文章有点不好意思。所以就先去看怎么对付不能重定位的PE32了，结果搞 LIEF 的各种环境编译、折腾VC++的Pragma、翻 Linker Script 手册看能不能改节表偏移、学NASM、从国庆坑到现在。<p>本篇的参考文章是：https://bidouillesecurity.com/tutorial-writing-a-pe-packer-part-4/<p>文中有些地方比较怪，比如说先编译了正常 loader 再编译 shifted_loader 就让人不是很理解，照抄抄出一堆bug。所以本文的脚本和参考的脚本已经有点对不上了。<p>受制于不知道怎么编译出没有重定位的程序，我拿一个有重定位的做了实验（理论上来说，应该是一样的吧？），所以到头也不确定是不是真的能把没有重定位的程序跑起来。<p>就这样吧，这个结论有点长。到这就差不多了。</article><p class=tags-data><a href=/tags/ni-xiang>/逆向/</a> <a href=/tags/c>/c++/</a> <a href=/tags/python>/python/</a> <a href=/tags/hui-bian>/汇编/</a> <a href=/tags/windows>/windows/</a> <a href=/tags/security>/security/</a> <a href=/tags/binary-analysis>/binary-analysis/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

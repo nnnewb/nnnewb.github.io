@@ -1,0 +1,91 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>可重入和异步安全</title><meta content=可重入和异步安全 name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2018/2018-06-24-ke-zhong-ru-he-yi-bu-an-quan/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=可重入和异步安全 property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2018/2018-06-24-ke-zhong-ru-he-yi-bu-an-quan/ property=twitter:url><meta content=可重入和异步安全 property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2018/2018-06-24-ke-zhong-ru-he-yi-bu-an-quan/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>可重入和异步安全</h1><p class=author-line>作于：2018-06-24 22:48 ，预计阅读时间 11 分钟<article><p>这篇博客主要记录的是关于可重入性的相关定义，以及关于并发安全的思考。<h2 id=ke-zhong-ru-xing>可重入性</h2><p>在不同语言中，由于语言标准以及运行期环境规定的不同，可重入性的具体定义可能有所不同。这里聊的是 C++语言中的可重入性。<p>所谓可重入性（<code>reetrant</code>），指的是同时具备<strong>并发安全</strong>和<strong>中断安全</strong>的特征，这是目前为止我对可重入性的认识，也是这篇博客在写下时给可重入性下的定义。<p>这个认知可能并不准确，因为在<a href=https://zh.wikipedia.org/wiki/%E5%8F%AF%E9%87%8D%E5%85%A5>wiki</a>上的定义是这样的。<blockquote><p>若一个程序或子程序可以「在任意时刻被中断然后操作系统调度执行另外一段代码，这段代码又调用了该子程序不会出错」，则称其为可重入（reentrant 或 re-entrant）的。即当该子程序正在运行时，执行线程可以再次进入并执行它，仍然获得符合設計時預期的结果。与多线程并发执行的线程安全不同，可重入强调对单个线程执行时重新进入同一个子程序仍然是安全的。</blockquote><p>但是在很多中文博客里，聊到可重入性的时候往往也会把并发安全混为一谈。实际上来说的话......一个可重入的函数，常常也是并发安全的。<p>那么先从并发安全讲起吧。<h2 id=bing-fa-an-quan-xing-he-ke-zhong-ru-xing>并发安全性和可重入性</h2><p>所谓并发安全已经是老生常谈了。<p>以一段非常简单的代码为例，我们打算初始化一个对象，这个对象被两个线程共享。<pre class=language-C++ data-lang=C++ style=color:#fdf4c1aa;background-color:#282828><code class=language-C++ data-lang=C++><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>initialize</span><span>(Something</span><span style=color:#fe8019>** </span><span style=color:#fdf4c1>someshit</span><span>) {
+</span><span>  </span><span style=color:#fa5c4b>if</span><span>(</span><span style=color:#fe8019>!*</span><span>someshit) {
+</span><span>    </span><span style=color:#fe8019>*</span><span>someshit </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>createSomeShit()</span><span>;
+</span><span>  }
+</span><span>}
+</span></code></pre><p>显而易见，如果线程在执行到特定环节时发生了切换<pre class=language-C++ data-lang=C++ style=color:#fdf4c1aa;background-color:#282828><code class=language-C++ data-lang=C++><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>initialize</span><span>(Something</span><span style=color:#fe8019>** </span><span style=color:#fdf4c1>someshit</span><span>) {
+</span><span>  </span><span style=color:#fa5c4b>if</span><span>(</span><span style=color:#fe8019>!*</span><span>someshit) {
+</span><span>    </span><span style=color:#928374;font-style:italic>// &lt;-------- 线程切换
+</span><span>    </span><span style=color:#928374;font-style:italic>// 线程2() {
+</span><span>    </span><span style=color:#928374;font-style:italic>// initialize(something);
+</span><span>    </span><span style=color:#928374;font-style:italic>// }
+</span><span>    </span><span style=color:#928374;font-style:italic>// 线程切换 --------->
+</span><span>    </span><span style=color:#fe8019>*</span><span>someshit </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>createSomeShit()</span><span>;
+</span><span>  }
+</span><span>}
+</span></code></pre><p>那么 <code>createSomeShit</code>这段代码就会被执行两次。<p>显然这和我们预期的行为不符。<p>这里要聊的不是并发，而是......可重入性。所以我们再看看这个函数能否被重入。<p>按照 wiki 提供的定义，函数可重入指的是<blockquote><p>在任意时刻被中断然后操作系统调度执行另外一段代码，这段代码又调用了该子程序不会出错。</blockquote><p>符合吗？不。为什么？因为同样在那个线程切换的位置上中断，然后再另一段代码里再次执行这个函数，也会触发同样的问题，导致<code>createSomeShit</code>被执行两次。<pre class=language-C++ data-lang=C++ style=color:#fdf4c1aa;background-color:#282828><code class=language-C++ data-lang=C++><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>initialize</span><span>(Something</span><span style=color:#fe8019>** </span><span style=color:#fdf4c1>someshit</span><span>) {
+</span><span>  </span><span style=color:#fa5c4b>if</span><span>(</span><span style=color:#fe8019>!*</span><span>someshit) {
+</span><span>    </span><span style=color:#928374;font-style:italic>// &lt;-------- 被中断
+</span><span>    </span><span style=color:#928374;font-style:italic>// 中断处理函数() {
+</span><span>    </span><span style=color:#928374;font-style:italic>//   initialize(something);
+</span><span>    </span><span style=color:#928374;font-style:italic>// }
+</span><span>    </span><span style=color:#928374;font-style:italic>// 中断结束 --------
+</span><span>    </span><span style=color:#fe8019>*</span><span>someshit </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>createSomeShit()</span><span>;
+</span><span>  }
+</span><span>}
+</span></code></pre><p>可以看出，那些线程不安全的代码，都是不可重入的。<p>那么，线程安全的代码，就一定是可重入的吗？<h2 id=zhong-duan-an-quan-xing-huo-zhe-jiao-xin-hao-an-quan-xing>中断安全性，或者叫信号安全性</h2><p>中断这个东西对其他编程语言的用户来说可能会少见一些，在 C/C++语言里，中断并不是什么新鲜话题。<p>在 C 标准库中，规定了一系列的信号和信号处理方法。关于信号的定义可以参考<a href=https://zh.cppreference.com/w/c/program/signal>这个</a>。<p>当进程接收到信号的时候，当前正在执行的代码就会被中断——注意了，这回，锁救不了你。<p>在 C/C++中，中断处理是由一个函数进行。在函数里可能会调用到中断时正在执行的函数。那么问题来了——一个线程安全的函数，是中断安全的函数吗？<pre class=language-C++ data-lang=C++ style=color:#fdf4c1aa;background-color:#282828><code class=language-C++ data-lang=C++><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>initialize</span><span>(Something</span><span style=color:#fe8019>** </span><span style=color:#fdf4c1>someshit</span><span>, std::mutex</span><span style=color:#fe8019>& </span><span style=color:#fdf4c1>realshit</span><span>) {
+</span><span>  </span><span style=color:#fdf4c1>std::lock_guard&lt;std::mutex>(realshit)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>if</span><span>(</span><span style=color:#fe8019>!*</span><span>someshit) {
+</span><span>    </span><span style=color:#fe8019>*</span><span>someshit </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>createSomeShit()</span><span>;
+</span><span>  }
+</span><span>}
+</span></code></pre><p>看上去岁月静好~一切线程切换的问题，都被那句<code>std::lock_guard&lt;std::mutex>(realshit)</code>给挡在了墙的另一边。<p>但是......<pre class=language-C++ data-lang=C++ style=color:#fdf4c1aa;background-color:#282828><code class=language-C++ data-lang=C++><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>initialize</span><span>(Something</span><span style=color:#fe8019>** </span><span style=color:#fdf4c1>someshit</span><span>, std::mutex</span><span style=color:#fe8019>& </span><span style=color:#fdf4c1>realshit</span><span>) {
+</span><span>  </span><span style=color:#fdf4c1>std::lock_guard&lt;std::mutex>(realshit)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>if</span><span>(</span><span style=color:#fe8019>!*</span><span>someshit) {
+</span><span>    </span><span style=color:#928374;font-style:italic>// &lt;----- 调皮的用户按下了 Ctrl-C
+</span><span>    </span><span style=color:#928374;font-style:italic>// 中断处理函数() {
+</span><span>    </span><span style=color:#928374;font-style:italic>//   initialize(someshit, realshit);
+</span><span>    </span><span style=color:#928374;font-style:italic>//   // inside initialize {
+</span><span>    </span><span style=color:#928374;font-style:italic>//   //   std::lock_guard&lt;std::mutex>(realshit); // DEAD LOCK
+</span><span>    </span><span style=color:#928374;font-style:italic>//   // }
+</span><span>    </span><span style=color:#928374;font-style:italic>// }
+</span><span>    </span><span style=color:#fe8019>*</span><span>someshit </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>createSomeShit()</span><span>;
+</span><span>  }
+</span><span>}
+</span></code></pre><p>看这里~<pre class=language-C++ data-lang=C++ style=color:#fdf4c1aa;background-color:#282828><code class=language-C++ data-lang=C++><span>std::lock_guard&lt;std::mutex>(realshit);
+</span><span style=color:#928374;font-style:italic>// 进入信号处理
+</span><span>std::lock_guard&lt;std::mutex>(realshit);
+</span></code></pre><p>好了，GG。死锁在这个时候发生了。<p>经验丰富的大佬可能注意到了，咱还可以用<code>std::recursive_mutex</code>啊！<p>这里就要提到一个很遗憾的问题了：C/C++的语言标准给了哪些保证。<p>C 对信号处理函数的定义很粗暴，除了<code>abort</code>、<code>_Exit</code>、<code>quick_exit</code>、<code>signal</code>、<code>stdatomic.h的免锁原子函数</code>、<code>atomic_is_lock_free与任何类型的原子参数</code>这些函数以外，任何标准库函数的调用，行为都是未定义的。<p>C++对信号处理函数的定义则更加复杂，限制比之 C 更加严格。毕竟标准库要庞大得多......也不是不能理解。<p>标准中有个一个地方的描述很微妙：<strong>......免锁的</strong>。<p>换言之，谁又保证了信号处理函数必然和你希望的那个线程是同一个线程呢？<p><code>std::recursive_mutex</code>的实现依赖于平台提供的系统 API，反正我没有找到语言标准中相关的规定要求信号处理函数必须和<code>main</code>函数在同一个线程，所以我认为这是平台相关的问题：这样的代码是<strong>不可移植的</strong>。<p>按照设计模式原则，我们是面向接口——也就是标准文档编程，而不是面对实现——Visual C++、GCC、MinGW 或者哪个中东土豪在未来某天突发奇想送我一台 MIPS 的超算的话。<p>到业务层面的话会更灵活一些——反正我只在某环境下跑，等公司什么时候全面换平台了，咱再能改则改，改不了就跑路。<h2 id=di-gui-han-shu-he-ke-zhong-ru>递归函数和可重入</h2><p>递归和重入有一定的相似性，但又有所不同。<p>一个递归函数，直觉上来讲，好像应该是可重入的：因为它要调用自己。<p>那么......事实上呢？<p>写个比较骚的递归删除链表节点的例子。<pre class=language-C++ data-lang=C++ style=color:#fdf4c1aa;background-color:#282828><code class=language-C++ data-lang=C++><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>removeNode</span><span>(Node</span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>node</span><span>, </span><span style=color:#fa5c4b>int </span><span style=color:#fdf4c1>length</span><span>) {
+</span><span>  Node</span><span style=color:#fe8019>*</span><span> tmp </span><span style=color:#fe8019>=</span><span> node.</span><span style=color:#fdf4c1>prev</span><span>;
+</span><span>  node.</span><span style=color:#fdf4c1>next</span><span>.</span><span style=color:#fdf4c1>prev </span><span style=color:#fe8019>=</span><span> tmp;
+</span><span>  </span><span style=color:#928374;font-style:italic>// &lt;------ 出现了！中断兽！
+</span><span>  </span><span style=color:#928374;font-style:italic>// 不用看了，Node之间的联结已经被破坏了
+</span><span>  </span><span style=color:#928374;font-style:italic>// 离开了！中断兽！-------->
+</span><span>  tmp.</span><span style=color:#fdf4c1>next </span><span style=color:#fe8019>=</span><span> node.</span><span style=color:#fdf4c1>next</span><span>;
+</span><span>  </span><span style=color:#fdf4c1>freeNode(node)</span><span>;
+</span><span>  </span><span style=color:#fdf4c1>removeNode(tmp.next, length</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>}
+</span></code></pre><p>轻易地否定了递归函数=可重入函数的直觉想法。<p>深究下去，又到了线程安全——然后是死锁——然后提出了<code>std::recursive_mutex</code>或者其他类似的操作——最后走到平台相关的 API 和保证——失去可移植性。<p>为什么我一直在提可移植性？<p>emmmm，大概是装逼如风，常伴吾身吧。<h2 id=biao-zhun-ku-hao-fan-ren-a>标准库好烦人啊</h2><p>C/C++语言的标准库是出了名的——但不是好的方面，而是他们总在修修补补又一年。<p>C 标准库还好说——毕竟语言本身没啥特性，全靠各种平台提供 API 撑着。标准库改来改去也只是割个双眼皮的程度。<p>C++要更骚气一些，每隔几年就整个容，简直不给人活路。<p>就中断安全来说，虽然不知道内部怎么实现的，但是......printf 这样的函数在信号处理函数里调用的话，也算是未定义行为。<p>认输吧，你是斗不过标准的。该依赖平台行为的时候，就去依赖平台行为吧。<h2 id=wen-dang-yin-yong>文档引用</h2><p>懒得找原文，直接看 cppreference 对 signal 的说法就好。有兴趣的话可以找又臭又长的<a href=http://www.open-std.org/JTC1/SC22/WG14/www/docs/n1570.pdf>WG14 - N1570 - C11</a>，还有<a href=http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/n4659.pdf>WG21 - N4659 - C++17</a>这两本标准文档。<h2 id=wei-sheng>尾声</h2><p>于是这会儿就到了其他各种语言的用户惯例吐槽的时候：<blockquote><p>...大佬是公司里唯一用 C++写代码的人。他对人说话，总是满口“目标平台”、“标准”、“可移植性”之类的话，叫人半懂不懂的。因为他总是说“C++天下第一！”，别人便从他说的那些半懂不懂的话里，替他取下个绰号，叫 C++大神。<p>C++大神一到公司里，程序员们便看着他笑，有的叫道：“C++大神，你的代码又编译出错了！”<p>他不回答，对前台说：“倒上特浓的咖啡，今天也要加班到夜里。”便拿出员工卡。程序员们又高声叫嚷道：“你一定又用上新标准了吧？”<p>C++大神睁大眼睛说，“你怎么凭空污人清白！”<p>“什么清白？我前天亲眼看见你的代码编译报了错，整整十几 MB 的日志！”<p>C++大神便涨红了脸，额上的青筋条条绽出，争辩道，“编译器报错怎么能叫错......C++......编译器不支持，那能算错么？”<p>接连便是难懂的话，什么“CONCEPT 还不加入标准”、“未定义行为就该是编译错误”、“SFINAE 就是给编译器开洞”、“boost 大法好，天灭 std::experimental”，引得众人都哄笑起来：店内外充满了快活的空气。</blockquote></article><p class=tags-data><a href=/tags/c>/c++/</a> <a href=/tags/bing-fa>/并发/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

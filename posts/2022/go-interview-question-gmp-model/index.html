@@ -1,0 +1,277 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>Go面试八股之GMP模型</title><meta content=Go面试八股之GMP模型 name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2022/go-interview-question-gmp-model/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=Go面试八股之GMP模型 property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2022/go-interview-question-gmp-model/ property=twitter:url><meta content=Go面试八股之GMP模型 property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2022/go-interview-question-gmp-model/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>Go面试八股之GMP模型</h1><p class=author-line>作于：2022-05-31 16:14 ，预计阅读时间 10 分钟<article><h2 id=qian-yan>前言</h2><p>应付面试做的准备吧。当然单纯背书也没意思，所以还是结合源码尝试去理解。<h2 id=gmp-mo-xing>GMP 模型</h2><h3 id=yi-tu-gai-shu>一图概述</h3><p><img alt=GMP模型 src=https://nnnewb.github.io/posts/2022/go-interview-question-gmp-model/image-20220530110613376.webp><h3 id=g-m-pzhi-jian-de-guan-xi>G、M、P之间的关系</h3><p><code>G</code>=<code>goroutine</code>，毫无疑问。<code>G</code>本身维护了一个跟踪它自己执行状态的结构。<p><code>P</code>=<code>Logical Processors</code>，可以被视作一种抽象的资源或上下文，需要被OS线程<code>M</code>获取后，<code>M</code>才能执行<code>G</code>。<p><code>M</code>=<code>OS Thread</code>，取得<code>P</code>后，弹出<code>P</code>队列中的<code>G</code>并执行。<p>这是一个很简化的说法，实际<code>G</code>、<code>M</code>、<code>P</code>之间的交互有很多复杂的细节。<h3 id=gocheng-xu-de-qi-dong>Go程序的启动</h3><h4 id=ba-gu>八股</h4><p><code>M0</code>是编号0的主线程，在全局变量<code>runtime.m0</code>中，不需要在堆上分配。<code>M0</code>负责初始化和启动第一个<code>G</code>，之后<code>M0</code>就和其他<code>M</code>一样了。<p><code>G0</code>是每次启动<code>M</code>第一个创建的<code>goroutine</code>。<code>G0</code>仅负责调度，不指向任何可执行的函数，每个<code>M</code>都有自己的<code>G0</code>。可以这样看：<code>G0</code>=调度器循环。<p>启动<code>G0</code>后开始正常调度，运行<code>main.main</code>。<h4 id=shi-jian>实践</h4><p>网上有很多 go 程序分析的文章，一个基本的点是 go 程序入口点在 <code>rt0_&lt;os>_&lt;arch>.s</code> 里，我们对照 go 编译器吐出来的汇编和 x64dbg 读。先准备一个最简单的程序。<pre class=language-asm data-lang=asm style=color:#fdf4c1aa;background-color:#282828><code class=language-asm data-lang=asm><span style=color:#8ec07c>package main
+</span><span>
+</span><span style=color:#8ec07c>func main() {
+</span><span style=color:#8ec07c>	println(</span><span style=color:#b8bb26>"Hello world!"</span><span style=color:#8ec07c>)
+</span><span style=color:#8ec07c>}
+</span><span>
+</span><span style=color:#8ec07c>// </span><span style=color:#fabd2f>$</span><span style=color:#8ec07c>env:GOARCH=</span><span style=color:#d3869b>386
+</span><span style=color:#8ec07c>// go build main.go
+</span></code></pre><p>386架构的入口汇编如下。<pre class=language-asm data-lang=asm style=color:#fdf4c1aa;background-color:#282828><code class=language-asm data-lang=asm><span style=color:#8ec07c>// rt0_windows_386.s
+</span><span style=color:#8ec07c>TEXT _rt0_386_windows(SB)</span><span style=color:#fdf4c1>,</span><span style=color:#8ec07c>NOSPLIT</span><span style=color:#fdf4c1>,</span><span style=color:#fabd2f>$</span><span style=color:#d3869b>0
+</span><span style=color:#8ec07c>	</span><span style=color:#fa5c4b>JMP	</span><span style=color:#8ec07c>_rt0_386(SB)
+</span></code></pre><p>对应的汇编<p><img alt=image-20220531101726696 src=https://nnnewb.github.io/posts/2022/go-interview-question-gmp-model/image-20220531101726696.webp><p>跳转到 <code>_rt0_386</code><pre class=language-asm data-lang=asm style=color:#fdf4c1aa;background-color:#282828><code class=language-asm data-lang=asm><span style=color:#8ec07c>// asm_386.s
+</span><span style=color:#8ec07c>// _rt0_386 is </span><span style=color:#fabd2f>common </span><span style=color:#8ec07c>startup code for most </span><span style=color:#d3869b>386 </span><span style=color:#8ec07c>systems when using
+</span><span style=color:#8ec07c>// internal linking. This is the entry point for the program from the
+</span><span style=color:#8ec07c>// kernel for an ordinary </span><span style=color:#fdf4c1>-</span><span style=color:#8ec07c>buildmode=exe program. The stack holds the
+</span><span style=color:#8ec07c>// number of arguments </span><span style=color:#fa5c4b>and </span><span style=color:#8ec07c>the C</span><span style=color:#fdf4c1>-</span><span style=color:#8ec07c>style argv.
+</span><span style=color:#8ec07c>TEXT _rt0_386(SB)</span><span style=color:#fdf4c1>,</span><span style=color:#8ec07c>NOSPLIT</span><span style=color:#fdf4c1>,</span><span style=color:#fabd2f>$</span><span style=color:#d3869b>8
+</span><span style=color:#8ec07c>	MOVL	</span><span style=color:#d3869b>8</span><span style=color:#8ec07c>(</span><span style=color:#fdf4c1>SP</span><span style=color:#8ec07c>)</span><span style=color:#fdf4c1>, AX	</span><span style=color:#8ec07c>// argc
+</span><span style=color:#8ec07c>	LEAL	</span><span style=color:#d3869b>12</span><span style=color:#8ec07c>(</span><span style=color:#fdf4c1>SP</span><span style=color:#8ec07c>)</span><span style=color:#fdf4c1>, BX	</span><span style=color:#8ec07c>// argv
+</span><span style=color:#8ec07c>	MOVL	</span><span style=color:#fdf4c1>AX, </span><span style=color:#d3869b>0</span><span style=color:#8ec07c>(</span><span style=color:#fdf4c1>SP</span><span style=color:#8ec07c>)
+</span><span style=color:#8ec07c>	MOVL	</span><span style=color:#fdf4c1>BX, </span><span style=color:#d3869b>4</span><span style=color:#8ec07c>(</span><span style=color:#fdf4c1>SP</span><span style=color:#8ec07c>)
+</span><span style=color:#8ec07c>	</span><span style=color:#fa5c4b>JMP	</span><span style=color:#8ec07c>runtime·rt0_go(SB)
+</span></code></pre><p>在调试器跟到汇编如下。<p><img alt=image-20220531101420890 src=https://nnnewb.github.io/posts/2022/go-interview-question-gmp-model/image-20220531101420890.webp><p>接着我们看 <code>runtime.rt0_go</code><pre class=language-asm data-lang=asm style=color:#fdf4c1aa;background-color:#282828><code class=language-asm data-lang=asm><span style=color:#8ec07c>TEXT runtime·rt0_go(SB)</span><span style=color:#fdf4c1>,</span><span style=color:#8ec07c>NOSPLIT|NOFRAME|TOPFRAME</span><span style=color:#fdf4c1>,</span><span style=color:#fabd2f>$</span><span style=color:#d3869b>0
+</span><span style=color:#8ec07c>	// 一大堆初始化和检查代码，略
+</span><span style=color:#8ec07c>ok:
+</span><span style=color:#8ec07c>	// set up m </span><span style=color:#fa5c4b>and </span><span style=color:#8ec07c>g </span><span style=color:#b8bb26>"registers"
+</span><span style=color:#8ec07c>	get_tls(</span><span style=color:#fdf4c1>BX</span><span style=color:#8ec07c>)
+</span><span style=color:#8ec07c>	LEAL	runtime·g0(SB)</span><span style=color:#fdf4c1>, DX
+</span><span style=color:#8ec07c>	MOVL	</span><span style=color:#fdf4c1>DX, </span><span style=color:#8ec07c>g(</span><span style=color:#fdf4c1>BX</span><span style=color:#8ec07c>)
+</span><span style=color:#8ec07c>	LEAL	runtime·m0(SB)</span><span style=color:#fdf4c1>, AX
+</span><span>
+</span><span style=color:#8ec07c>	// save m</span><span style=color:#fdf4c1>-</span><span style=color:#8ec07c>>g0 = g0
+</span><span style=color:#8ec07c>	MOVL	</span><span style=color:#fdf4c1>DX, </span><span style=color:#8ec07c>m_g0(</span><span style=color:#fdf4c1>AX</span><span style=color:#8ec07c>)
+</span><span style=color:#8ec07c>	// save g0</span><span style=color:#fdf4c1>-</span><span style=color:#8ec07c>>m = m0
+</span><span style=color:#8ec07c>	MOVL	</span><span style=color:#fdf4c1>AX, </span><span style=color:#8ec07c>g_m(</span><span style=color:#fdf4c1>DX</span><span style=color:#8ec07c>)
+</span><span>
+</span><span style=color:#8ec07c>	</span><span style=color:#fa5c4b>CALL	</span><span style=color:#8ec07c>runtime·emptyfunc(SB)	// fault if stack check is wrong
+</span><span>
+</span><span style=color:#8ec07c>	// convention is D is always cleared
+</span><span style=color:#8ec07c>	</span><span style=color:#fa5c4b>CLD
+</span><span>
+</span><span style=color:#8ec07c>	</span><span style=color:#fa5c4b>CALL	</span><span style=color:#8ec07c>runtime·check(SB)
+</span><span>
+</span><span style=color:#8ec07c>	// saved argc</span><span style=color:#fdf4c1>, </span><span style=color:#8ec07c>argv
+</span><span style=color:#8ec07c>	MOVL	</span><span style=color:#d3869b>120</span><span style=color:#8ec07c>(</span><span style=color:#fdf4c1>SP</span><span style=color:#8ec07c>)</span><span style=color:#fdf4c1>, AX
+</span><span style=color:#8ec07c>	MOVL	</span><span style=color:#fdf4c1>AX, </span><span style=color:#d3869b>0</span><span style=color:#8ec07c>(</span><span style=color:#fdf4c1>SP</span><span style=color:#8ec07c>)
+</span><span style=color:#8ec07c>	MOVL	</span><span style=color:#d3869b>124</span><span style=color:#8ec07c>(</span><span style=color:#fdf4c1>SP</span><span style=color:#8ec07c>)</span><span style=color:#fdf4c1>, AX
+</span><span style=color:#8ec07c>	MOVL	</span><span style=color:#fdf4c1>AX, </span><span style=color:#d3869b>4</span><span style=color:#8ec07c>(</span><span style=color:#fdf4c1>SP</span><span style=color:#8ec07c>)
+</span><span style=color:#8ec07c>	</span><span style=color:#fa5c4b>CALL	</span><span style=color:#8ec07c>runtime·args(SB)
+</span><span style=color:#8ec07c>	</span><span style=color:#fa5c4b>CALL	</span><span style=color:#8ec07c>runtime·osinit(SB)
+</span><span style=color:#8ec07c>	</span><span style=color:#fa5c4b>CALL	</span><span style=color:#8ec07c>runtime·schedinit(SB)
+</span><span style=color:#8ec07c>	// create a new goroutine to start program
+</span><span style=color:#8ec07c>	PUSHL	</span><span style=color:#fabd2f>$</span><span style=color:#8ec07c>runtime·mainPC(SB)	// entry
+</span><span style=color:#8ec07c>	</span><span style=color:#fa5c4b>CALL	</span><span style=color:#8ec07c>runtime·newproc(SB)
+</span><span style=color:#8ec07c>	POPL	</span><span style=color:#fdf4c1>AX
+</span><span>
+</span><span style=color:#8ec07c>	// start this M
+</span><span style=color:#8ec07c>	</span><span style=color:#fa5c4b>CALL	</span><span style=color:#8ec07c>runtime·mstart(SB)
+</span><span>
+</span><span style=color:#8ec07c>	</span><span style=color:#fa5c4b>CALL	</span><span style=color:#8ec07c>runtime·abort(SB)
+</span><span style=color:#8ec07c>	</span><span style=color:#fa5c4b>RET
+</span></code></pre><p>几个关键节点大概谈一下。<p>第一个是关于<code>m</code>和<code>g</code>，看过<code>proc.go</code>会发现很多地方调了一个迷之函数<code>getg</code>，注释里写道由编译器插入实现，从寄存器或者Thread Local Storage 取当前 <code>G</code> 指针。看代码：<pre class=language-asm data-lang=asm style=color:#fdf4c1aa;background-color:#282828><code class=language-asm data-lang=asm><span style=color:#8ec07c>// set up m </span><span style=color:#fa5c4b>and </span><span style=color:#8ec07c>g </span><span style=color:#b8bb26>"registers"
+</span><span style=color:#8ec07c>get_tls(</span><span style=color:#fdf4c1>BX</span><span style=color:#8ec07c>)
+</span><span style=color:#8ec07c>LEAL	runtime·g0(SB)</span><span style=color:#fdf4c1>, DX
+</span><span style=color:#8ec07c>MOVL	</span><span style=color:#fdf4c1>DX, </span><span style=color:#8ec07c>g(</span><span style=color:#fdf4c1>BX</span><span style=color:#8ec07c>)
+</span><span style=color:#8ec07c>LEAL	runtime·m0(SB)</span><span style=color:#fdf4c1>, AX
+</span><span>
+</span><span style=color:#8ec07c>// save m</span><span style=color:#fdf4c1>-</span><span style=color:#8ec07c>>g0 = g0
+</span><span style=color:#8ec07c>MOVL	</span><span style=color:#fdf4c1>DX, </span><span style=color:#8ec07c>m_g0(</span><span style=color:#fdf4c1>AX</span><span style=color:#8ec07c>)
+</span><span style=color:#8ec07c>// save g0</span><span style=color:#fdf4c1>-</span><span style=color:#8ec07c>>m = m0
+</span><span style=color:#8ec07c>MOVL	</span><span style=color:#fdf4c1>AX, </span><span style=color:#8ec07c>g_m(</span><span style=color:#fdf4c1>DX</span><span style=color:#8ec07c>)
+</span></code></pre><p>这里把当前的<code>g</code>设置为了<code>g0</code>，并且关联到<code>m0</code>。<p>第二是 <code>schedinit</code>，里面调用了 <code>procresize</code> ，从 <code>allp</code> 获取到 <code>p</code> 绑定到了 <code>m0</code> 上。<p>再然后是在初始化之后看到一个 <code>newproc</code> 的调用，传入参数 <code>mainPC</code>，也就是 <code>runtime·main</code> 函数的地址。<code>newproc</code> 把 <code>runtime.main</code> 函数包装成 <code>G</code> 放进可运行的队列中，具体的请读源码<code>newproc</code>和<code>newproc1</code>。<p>这里插一嘴，<code>runtime.main</code> 函数里启动了我们的 <code>main.main</code> 函数，也就是我们平时代码的入口点就在这了。<p><img alt=image-20220531104338694 src=https://nnnewb.github.io/posts/2022/go-interview-question-gmp-model/image-20220531104338694.webp><p>但到底为止还没有出现调度代码，我们继续看接下来调用的<code>mstart</code><pre class=language-asm data-lang=asm style=color:#fdf4c1aa;background-color:#282828><code class=language-asm data-lang=asm><span style=color:#8ec07c>	// start this M
+</span><span style=color:#8ec07c>	</span><span style=color:#fa5c4b>CALL	</span><span style=color:#8ec07c>runtime·mstart(SB)
+</span><span>
+</span><span style=color:#8ec07c>TEXT runtime·mstart(SB)</span><span style=color:#fdf4c1>,</span><span style=color:#8ec07c>NOSPLIT|TOPFRAME</span><span style=color:#fdf4c1>,</span><span style=color:#fabd2f>$</span><span style=color:#d3869b>0
+</span><span style=color:#8ec07c>	</span><span style=color:#fa5c4b>CALL	</span><span style=color:#8ec07c>runtime·mstart0(SB)
+</span><span style=color:#8ec07c>	</span><span style=color:#fa5c4b>RET </span><span style=color:#8ec07c>// </span><span style=color:#fa5c4b>not </span><span style=color:#8ec07c>reached
+</span></code></pre><p><code>mstart</code>是<code>mstart0</code>的别名，<code>mstart0</code>是一个 go 函数，里面除了初始化 g 的栈之外就是调用了 <code>mstart1</code>，<code>mstart1</code>依然是一个<code>go</code>函数。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#928374;font-style:italic>// The go:noinline is to guarantee the getcallerpc/getcallersp below are safe,
+</span><span style=color:#928374;font-style:italic>// so that we can set up g0.sched to return to the call of mstart1 above.
+</span><span style=color:#928374;font-style:italic>//
+</span><span style=color:#928374;font-style:italic>//go:noinline
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>mstart1</span><span>() {
+</span><span>	</span><span style=color:#fdf4c1>_g_ </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>getg</span><span>()
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>_g_ </span><span style=color:#fe8019>!= </span><span style=color:#fdf4c1>_g_</span><span>.</span><span style=color:#fdf4c1>m</span><span>.</span><span style=color:#fdf4c1>g0 </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>throw</span><span>(</span><span style=color:#b8bb26>"bad runtime·mstart"</span><span>)
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#928374;font-style:italic>// Set up m.g0.sched as a label returning to just
+</span><span>	</span><span style=color:#928374;font-style:italic>// after the mstart1 call in mstart0 above, for use by goexit0 and mcall.
+</span><span>	</span><span style=color:#928374;font-style:italic>// We're never coming back to mstart1 after we call schedule,
+</span><span>	</span><span style=color:#928374;font-style:italic>// so other calls can reuse the current frame.
+</span><span>	</span><span style=color:#928374;font-style:italic>// And goexit0 does a gogo that needs to return from mstart1
+</span><span>	</span><span style=color:#928374;font-style:italic>// and let mstart0 exit the thread.
+</span><span>	</span><span style=color:#fdf4c1>_g_</span><span>.</span><span style=color:#fdf4c1>sched</span><span>.</span><span style=color:#fdf4c1>g </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>guintptr</span><span>(</span><span style=color:#fdf4c1>unsafe</span><span>.</span><span style=color:#fdf4c1>Pointer</span><span>(</span><span style=color:#fdf4c1>_g_</span><span>))
+</span><span>	</span><span style=color:#fdf4c1>_g_</span><span>.</span><span style=color:#fdf4c1>sched</span><span>.</span><span style=color:#fdf4c1>pc </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>getcallerpc</span><span>()
+</span><span>	</span><span style=color:#fdf4c1>_g_</span><span>.</span><span style=color:#fdf4c1>sched</span><span>.</span><span style=color:#fdf4c1>sp </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>getcallersp</span><span>()
+</span><span>
+</span><span>	</span><span style=color:#fdf4c1>asminit</span><span>()
+</span><span>	</span><span style=color:#fdf4c1>minit</span><span>()
+</span><span>
+</span><span>	</span><span style=color:#928374;font-style:italic>// Install signal handlers; after minit so that minit can
+</span><span>	</span><span style=color:#928374;font-style:italic>// prepare the thread to be able to handle the signals.
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>_g_</span><span>.</span><span style=color:#fdf4c1>m </span><span style=color:#fe8019>== &</span><span style=color:#fdf4c1>m0 </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>mstartm0</span><span>()
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>fn </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>_g_</span><span>.</span><span style=color:#fdf4c1>m</span><span>.</span><span style=color:#fdf4c1>mstartfn</span><span>; </span><span style=color:#fdf4c1>fn </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>fn</span><span>()
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>_g_</span><span>.</span><span style=color:#fdf4c1>m </span><span style=color:#fe8019>!= &</span><span style=color:#fdf4c1>m0 </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>acquirep</span><span>(</span><span style=color:#fdf4c1>_g_</span><span>.</span><span style=color:#fdf4c1>m</span><span>.</span><span style=color:#fdf4c1>nextp</span><span>.</span><span style=color:#fdf4c1>ptr</span><span>())
+</span><span>		</span><span style=color:#fdf4c1>_g_</span><span>.</span><span style=color:#fdf4c1>m</span><span>.</span><span style=color:#fdf4c1>nextp </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0
+</span><span>	}
+</span><span>	</span><span style=color:#fdf4c1>schedule</span><span>()
+</span><span>}
+</span></code></pre><p>而<code>mstart1</code>中我们看到最后一句就是最重要的<code>schedule()</code>，这个函数会从可运行队列里取一个<code>g</code>并开始执行。在这个场景下，我们只有另一个<code>g</code>，<code>runtime.main</code>。经过<code>schedule</code>后，主线程就从<code>g0</code>，也就是刚才的调度代码，切换到了<code>runtime.main</code>，我们的用户代码中。<h3 id=diao-du-ce-lue>调度策略</h3><h4 id=ba-gu-1>八股</h4><ul><li><code>G</code>运行超过一定时间则换其他任务运行<li><code>G</code>同步系统调用阻塞则<code>M</code>和<code>G</code>继续挂起等待，<code>P</code>绑定新的<code>M</code>继续运行<li><code>G</code>网络调用则挂到<code>netpoller</code>队列里等待，<code>M</code>继续调度其他<code>G</code>运行。<li><code>P</code>没有任务的时候会尝试从全局队列和其他<code>P</code>的本地队列偷取<code>G</code>来运行。</ul><h4 id=sysmon-qiang-zhan-handoff>sysmon、抢占、handoff</h4><p>在<code>runtime.main</code>里，go 在启动<code>main.main</code>之前，除了<code>wasm</code>之外都会先启动一个叫<code>sysmon</code>的<code>M</code>，这个<code>M</code>只负责运行调度。<p>在<code>sysmon</code>函数里可以看到一个<code>retake</code>调用和注释<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#928374;font-style:italic>// retake P's blocked in syscalls
+</span><span style=color:#928374;font-style:italic>// and preempt long running G's
+</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>retake</span><span>(</span><span style=color:#fdf4c1>now</span><span>) </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0 </span><span>{
+</span><span>    </span><span style=color:#fdf4c1>idle </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0
+</span><span>} </span><span style=color:#fa5c4b>else </span><span>{
+</span><span>    </span><span style=color:#fdf4c1>idle</span><span style=color:#fe8019>++
+</span><span>}
+</span></code></pre><p><code>retake</code>函数里检查调用时间，处理两种场景：<ol><li>在同步系统调用状态，而且运行了很长时间<li><code>G</code>已经运行了很长时间</ol><pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>s </span><span style=color:#fe8019>== </span><span style=color:#fdf4c1>_Prunning </span><span style=color:#fe8019>|| </span><span style=color:#fdf4c1>s </span><span style=color:#fe8019>== </span><span style=color:#fdf4c1>_Psyscall </span><span>{
+</span><span>    </span><span style=color:#928374;font-style:italic>// Preempt G if it's running for too long.
+</span><span>    </span><span style=color:#fdf4c1>t </span><span style=color:#fe8019>:= </span><span style=color:#fabd2f>int64</span><span>(</span><span style=color:#fdf4c1>_p_</span><span>.</span><span style=color:#fdf4c1>schedtick</span><span>)
+</span><span>    </span><span style=color:#fa5c4b>if </span><span style=color:#fabd2f>int64</span><span>(</span><span style=color:#fdf4c1>pd</span><span>.</span><span style=color:#fdf4c1>schedtick</span><span>) </span><span style=color:#fe8019>!= </span><span style=color:#fdf4c1>t </span><span>{
+</span><span>        </span><span style=color:#fdf4c1>pd</span><span>.</span><span style=color:#fdf4c1>schedtick </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>uint32</span><span>(</span><span style=color:#fdf4c1>t</span><span>)
+</span><span>        </span><span style=color:#fdf4c1>pd</span><span>.</span><span style=color:#fdf4c1>schedwhen </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>now
+</span><span>    } </span><span style=color:#fa5c4b>else if </span><span style=color:#fdf4c1>pd</span><span>.</span><span style=color:#fdf4c1>schedwhen</span><span style=color:#fe8019>+</span><span style=color:#fdf4c1>forcePreemptNS </span><span style=color:#fe8019>&lt;= </span><span style=color:#fdf4c1>now </span><span>{
+</span><span>        </span><span style=color:#fdf4c1>preemptone</span><span>(</span><span style=color:#fdf4c1>_p_</span><span>)
+</span><span>        </span><span style=color:#928374;font-style:italic>// In case of syscall, preemptone() doesn't
+</span><span>        </span><span style=color:#928374;font-style:italic>// work, because there is no M wired to P.
+</span><span>        </span><span style=color:#fdf4c1>sysretake </span><span style=color:#fe8019>= </span><span style=color:#d3869b>true
+</span><span>    }
+</span><span>}
+</span></code></pre><p>观察到，当<code>pd.schedwhen+forcePreemptNS &lt;= now</code>，也就是这个<code>G</code>已经运行了超过<code>forcePreemptNS</code>（常量，10毫秒）这么久时，使用<code>preemptone</code>来通知<code>M</code>换一个<code>G</code>运行。<p>但是在同步系统调用的状态下，<code>preemptone</code>不起效，这里做了个简单的标记，在之后的代码中我们会看到如何处理。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>s </span><span style=color:#fe8019>== </span><span style=color:#fdf4c1>_Psyscall </span><span>{
+</span><span>    </span><span style=color:#928374;font-style:italic>// Retake P from syscall if it's there for more than 1 sysmon tick (at least 20us).
+</span><span>    </span><span style=color:#fdf4c1>t </span><span style=color:#fe8019>:= </span><span style=color:#fabd2f>int64</span><span>(</span><span style=color:#fdf4c1>_p_</span><span>.</span><span style=color:#fdf4c1>syscalltick</span><span>)
+</span><span>    </span><span style=color:#fa5c4b>if </span><span style=color:#fe8019>!</span><span style=color:#fdf4c1>sysretake </span><span style=color:#fe8019>&& </span><span style=color:#fabd2f>int64</span><span>(</span><span style=color:#fdf4c1>pd</span><span>.</span><span style=color:#fdf4c1>syscalltick</span><span>) </span><span style=color:#fe8019>!= </span><span style=color:#fdf4c1>t </span><span>{
+</span><span>        </span><span style=color:#fdf4c1>pd</span><span>.</span><span style=color:#fdf4c1>syscalltick </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>uint32</span><span>(</span><span style=color:#fdf4c1>t</span><span>)
+</span><span>        </span><span style=color:#fdf4c1>pd</span><span>.</span><span style=color:#fdf4c1>syscallwhen </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>now
+</span><span>        </span><span style=color:#fa5c4b>continue
+</span><span>    }
+</span><span>    </span><span style=color:#928374;font-style:italic>// On the one hand we don't want to retake Ps if there is no other work to do,
+</span><span>    </span><span style=color:#928374;font-style:italic>// but on the other hand we want to retake them eventually
+</span><span>    </span><span style=color:#928374;font-style:italic>// because they can prevent the sysmon thread from deep sleep.
+</span><span>    </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>runqempty</span><span>(</span><span style=color:#fdf4c1>_p_</span><span>) </span><span style=color:#fe8019>&& </span><span style=color:#fdf4c1>atomic</span><span>.</span><span style=color:#fdf4c1>Load</span><span>(</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>sched</span><span>.</span><span style=color:#fdf4c1>nmspinning</span><span>)</span><span style=color:#fe8019>+</span><span style=color:#fdf4c1>atomic</span><span>.</span><span style=color:#fdf4c1>Load</span><span>(</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>sched</span><span>.</span><span style=color:#fdf4c1>npidle</span><span>) </span><span style=color:#fe8019>> </span><span style=color:#d3869b>0 </span><span style=color:#fe8019>&& </span><span style=color:#fdf4c1>pd</span><span>.</span><span style=color:#fdf4c1>syscallwhen</span><span style=color:#fe8019>+</span><span style=color:#d3869b>10</span><span style=color:#fe8019>*</span><span style=color:#d3869b>1000</span><span style=color:#fe8019>*</span><span style=color:#d3869b>1000 </span><span style=color:#fe8019>> </span><span style=color:#fdf4c1>now </span><span>{
+</span><span>        </span><span style=color:#fa5c4b>continue
+</span><span>    }
+</span><span>    </span><span style=color:#928374;font-style:italic>// Drop allpLock so we can take sched.lock.
+</span><span>    </span><span style=color:#fdf4c1>unlock</span><span>(</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>allpLock</span><span>)
+</span><span>    </span><span style=color:#928374;font-style:italic>// Need to decrement number of idle locked M's
+</span><span>    </span><span style=color:#928374;font-style:italic>// (pretending that one more is running) before the CAS.
+</span><span>    </span><span style=color:#928374;font-style:italic>// Otherwise the M from which we retake can exit the syscall,
+</span><span>    </span><span style=color:#928374;font-style:italic>// increment nmidle and report deadlock.
+</span><span>    </span><span style=color:#fdf4c1>incidlelocked</span><span>(</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>)
+</span><span>    </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>atomic</span><span>.</span><span style=color:#fdf4c1>Cas</span><span>(</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>_p_</span><span>.</span><span style=color:#fdf4c1>status</span><span>, </span><span style=color:#fdf4c1>s</span><span>, </span><span style=color:#fdf4c1>_Pidle</span><span>) {
+</span><span>        </span><span style=color:#fdf4c1>n</span><span style=color:#fe8019>++
+</span><span>        </span><span style=color:#fdf4c1>_p_</span><span>.</span><span style=color:#fdf4c1>syscalltick</span><span style=color:#fe8019>++
+</span><span>        </span><span style=color:#fdf4c1>handoffp</span><span>(</span><span style=color:#fdf4c1>_p_</span><span>)
+</span><span>    }
+</span><span>    </span><span style=color:#fdf4c1>incidlelocked</span><span>(</span><span style=color:#d3869b>1</span><span>)
+</span><span>    </span><span style=color:#fdf4c1>lock</span><span>(</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>allpLock</span><span>)
+</span><span>}
+</span></code></pre><p>首先是，没有标记<code>sysretake</code>，也就是没有超时，那就随它去。如果<code>p</code>队列为空，而且没超过一定时长（<code>pd.syscallwhen+10*1000*1000</code>），那也暂时不管。中间的<code>spinning</code>状态和<code>idle</code>不提。<p>确定是同步系统调用中，而且无法被抢占，这里就要提到Go的调度策略之 <code>handoff</code>，注意倒数第五行的<code>handoffp(_p_)</code>。<p><code>handoffp</code> 在 <code>P</code> 队列里还有任务的时候，会调度一个空闲的 <code>M</code>（或者创建一个）绑定 <code>P</code>，继续执行。<h4 id=sysmonhe-netpoll>sysmon和netpoll</h4><p>在 <code>sysmon</code> 中还有一段关于网络<code>netpoll</code>的代码。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>netpollinited</span><span>() </span><span style=color:#fe8019>&& </span><span style=color:#fdf4c1>lastpoll </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0 </span><span style=color:#fe8019>&& </span><span style=color:#fdf4c1>lastpoll</span><span style=color:#fe8019>+</span><span style=color:#d3869b>10</span><span style=color:#fe8019>*</span><span style=color:#d3869b>1000</span><span style=color:#fe8019>*</span><span style=color:#d3869b>1000 </span><span style=color:#fe8019>&lt; </span><span style=color:#fdf4c1>now </span><span>{
+</span><span>    </span><span style=color:#fdf4c1>atomic</span><span>.</span><span style=color:#fdf4c1>Cas64</span><span>(</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>sched</span><span>.</span><span style=color:#fdf4c1>lastpoll</span><span>, </span><span style=color:#fabd2f>uint64</span><span>(</span><span style=color:#fdf4c1>lastpoll</span><span>), </span><span style=color:#fabd2f>uint64</span><span>(</span><span style=color:#fdf4c1>now</span><span>))
+</span><span>    </span><span style=color:#fdf4c1>list </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>netpoll</span><span>(</span><span style=color:#d3869b>0</span><span>) </span><span style=color:#928374;font-style:italic>// non-blocking - returns list of goroutines
+</span><span>    </span><span style=color:#fa5c4b>if </span><span style=color:#fe8019>!</span><span style=color:#fdf4c1>list</span><span>.</span><span style=color:#fdf4c1>empty</span><span>() {
+</span><span>        </span><span style=color:#928374;font-style:italic>// Need to decrement number of idle locked M's
+</span><span>        </span><span style=color:#928374;font-style:italic>// (pretending that one more is running) before injectglist.
+</span><span>        </span><span style=color:#928374;font-style:italic>// Otherwise it can lead to the following situation:
+</span><span>        </span><span style=color:#928374;font-style:italic>// injectglist grabs all P's but before it starts M's to run the P's,
+</span><span>        </span><span style=color:#928374;font-style:italic>// another M returns from syscall, finishes running its G,
+</span><span>        </span><span style=color:#928374;font-style:italic>// observes that there is no work to do and no other running M's
+</span><span>        </span><span style=color:#928374;font-style:italic>// and reports deadlock.
+</span><span>        </span><span style=color:#fdf4c1>incidlelocked</span><span>(</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>)
+</span><span>        </span><span style=color:#fdf4c1>injectglist</span><span>(</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>list</span><span>)
+</span><span>        </span><span style=color:#fdf4c1>incidlelocked</span><span>(</span><span style=color:#d3869b>1</span><span>)
+</span><span>    }
+</span><span>}
+</span></code></pre><p><code>sysmon</code>检查到有可用的连接后（<code>netpoll</code>返回的<code>list</code>），将可用的<code>G</code>加入可运行的队列（这里是<code>sysmon</code>这个特殊<code>M</code>，没有<code>P</code>，所以是加入全局队列）。<h4 id=work-stealing>work stealing</h4><p>回到Go程序启动时我们看到的<code>schedule</code>函数，里面调用了<code>findRunnable</code>这个工具函数来获取可用的任务。注释里写的很清楚。<blockquote><pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#928374;font-style:italic>// Finds a runnable goroutine to execute.
+</span><span style=color:#928374;font-style:italic>// Tries to steal from other P's, get g from local or global queue, poll network.
+</span><span style=color:#928374;font-style:italic>// tryWakeP indicates that the returned goroutine is not normal (GC worker, trace
+</span><span style=color:#928374;font-style:italic>// reader) so the caller should try to wake a P.
+</span></code></pre></blockquote><p>我们看下内部怎么工作的。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#928374;font-style:italic>// Check the global runnable queue once in a while to ensure fairness.
+</span><span style=color:#928374;font-style:italic>// Otherwise two goroutines can completely occupy the local runqueue
+</span><span style=color:#928374;font-style:italic>// by constantly respawning each other.
+</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>_p_</span><span>.</span><span style=color:#fdf4c1>schedtick</span><span style=color:#fe8019>%</span><span style=color:#d3869b>61 </span><span style=color:#fe8019>== </span><span style=color:#d3869b>0 </span><span style=color:#fe8019>&& </span><span style=color:#fdf4c1>sched</span><span>.</span><span style=color:#fdf4c1>runqsize </span><span style=color:#fe8019>> </span><span style=color:#d3869b>0 </span><span>{
+</span><span>    </span><span style=color:#fdf4c1>lock</span><span>(</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>sched</span><span>.</span><span style=color:#fdf4c1>lock</span><span>)
+</span><span>    </span><span style=color:#fdf4c1>gp </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>globrunqget</span><span>(</span><span style=color:#fdf4c1>_p_</span><span>, </span><span style=color:#d3869b>1</span><span>)
+</span><span>    </span><span style=color:#fdf4c1>unlock</span><span>(</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>sched</span><span>.</span><span style=color:#fdf4c1>lock</span><span>)
+</span><span>    </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>gp </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>gp</span><span>, </span><span style=color:#d3869b>false</span><span>, </span><span style=color:#d3869b>false
+</span><span>    }
+</span><span>}
+</span></code></pre><p>首先，如果队列非空而且已经跑本地队列一段时间了（<code>schedtick%61==0</code>），会尝试从全局队列取一半的<code>G</code>到本地队列运行（<code>globrunqget</code>），保证公平调度，防止全局队列的<code>G</code>饿死。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#928374;font-style:italic>// local runq
+</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>gp</span><span>, </span><span style=color:#fdf4c1>inheritTime </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>runqget</span><span>(</span><span style=color:#fdf4c1>_p_</span><span>); </span><span style=color:#fdf4c1>gp </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>gp</span><span>, </span><span style=color:#fdf4c1>inheritTime</span><span>, </span><span style=color:#d3869b>false
+</span><span>}
+</span><span>
+</span><span style=color:#928374;font-style:italic>// global runq
+</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>sched</span><span>.</span><span style=color:#fdf4c1>runqsize </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0 </span><span>{
+</span><span>    </span><span style=color:#fdf4c1>lock</span><span>(</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>sched</span><span>.</span><span style=color:#fdf4c1>lock</span><span>)
+</span><span>    </span><span style=color:#fdf4c1>gp </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>globrunqget</span><span>(</span><span style=color:#fdf4c1>_p_</span><span>, </span><span style=color:#d3869b>0</span><span>)
+</span><span>    </span><span style=color:#fdf4c1>unlock</span><span>(</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>sched</span><span>.</span><span style=color:#fdf4c1>lock</span><span>)
+</span><span>    </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>gp </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>gp</span><span>, </span><span style=color:#d3869b>false</span><span>, </span><span style=color:#d3869b>false
+</span><span>    }
+</span><span>}
+</span></code></pre><p>接着先后尝试从本地队列和全局队列取<code>G</code>，如果本地队列没有任务，全局队列也没有了，再从其他地方找。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#928374;font-style:italic>// Poll network.
+</span><span style=color:#928374;font-style:italic>// This netpoll is only an optimization before we resort to stealing.
+</span><span style=color:#928374;font-style:italic>// We can safely skip it if there are no waiters or a thread is blocked
+</span><span style=color:#928374;font-style:italic>// in netpoll already. If there is any kind of logical race with that
+</span><span style=color:#928374;font-style:italic>// blocked thread (e.g. it has already returned from netpoll, but does
+</span><span style=color:#928374;font-style:italic>// not set lastpoll yet), this thread will do blocking netpoll below
+</span><span style=color:#928374;font-style:italic>// anyway.
+</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>netpollinited</span><span>() </span><span style=color:#fe8019>&& </span><span style=color:#fdf4c1>atomic</span><span>.</span><span style=color:#fdf4c1>Load</span><span>(</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>netpollWaiters</span><span>) </span><span style=color:#fe8019>> </span><span style=color:#d3869b>0 </span><span style=color:#fe8019>&& </span><span style=color:#fdf4c1>atomic</span><span>.</span><span style=color:#fdf4c1>Load64</span><span>(</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>sched</span><span>.</span><span style=color:#fdf4c1>lastpoll</span><span>) </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0 </span><span>{
+</span><span>    </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>list </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>netpoll</span><span>(</span><span style=color:#d3869b>0</span><span>); </span><span style=color:#fe8019>!</span><span style=color:#fdf4c1>list</span><span>.</span><span style=color:#fdf4c1>empty</span><span>() { </span><span style=color:#928374;font-style:italic>// non-blocking
+</span><span>        </span><span style=color:#fdf4c1>gp </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>list</span><span>.</span><span style=color:#fdf4c1>pop</span><span>()
+</span><span>        </span><span style=color:#fdf4c1>injectglist</span><span>(</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>list</span><span>)
+</span><span>        </span><span style=color:#fdf4c1>casgstatus</span><span>(</span><span style=color:#fdf4c1>gp</span><span>, </span><span style=color:#fdf4c1>_Gwaiting</span><span>, </span><span style=color:#fdf4c1>_Grunnable</span><span>)
+</span><span>        </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>trace</span><span>.</span><span style=color:#fdf4c1>enabled </span><span>{
+</span><span>            </span><span style=color:#fdf4c1>traceGoUnpark</span><span>(</span><span style=color:#fdf4c1>gp</span><span>, </span><span style=color:#d3869b>0</span><span>)
+</span><span>        }
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>gp</span><span>, </span><span style=color:#d3869b>false</span><span>, </span><span style=color:#d3869b>false
+</span><span>    }
+</span><span>}
+</span></code></pre><p>尝试过一次<code>netpoll</code>找出就绪的<code>G</code>。还是没有，尝试从其他<code>P</code> <em>偷</em> <code>G</code>来执行。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#928374;font-style:italic>// Spinning Ms: steal work from other Ps.
+</span><span style=color:#928374;font-style:italic>//
+</span><span style=color:#928374;font-style:italic>// Limit the number of spinning Ms to half the number of busy Ps.
+</span><span style=color:#928374;font-style:italic>// This is necessary to prevent excessive CPU consumption when
+</span><span style=color:#928374;font-style:italic>// GOMAXPROCS>>1 but the program parallelism is low.
+</span><span style=color:#fdf4c1>procs </span><span style=color:#fe8019>:= </span><span style=color:#fabd2f>uint32</span><span>(</span><span style=color:#fdf4c1>gomaxprocs</span><span>)
+</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>_g_</span><span>.</span><span style=color:#fdf4c1>m</span><span>.</span><span style=color:#fdf4c1>spinning </span><span style=color:#fe8019>|| </span><span style=color:#d3869b>2</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>atomic</span><span>.</span><span style=color:#fdf4c1>Load</span><span>(</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>sched</span><span>.</span><span style=color:#fdf4c1>nmspinning</span><span>) </span><span style=color:#fe8019>&lt; </span><span style=color:#fdf4c1>procs</span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>atomic</span><span>.</span><span style=color:#fdf4c1>Load</span><span>(</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>sched</span><span>.</span><span style=color:#fdf4c1>npidle</span><span>) {
+</span><span>    </span><span style=color:#fdf4c1>gp</span><span>, </span><span style=color:#fdf4c1>inheritTime</span><span>, </span><span style=color:#fdf4c1>tnow</span><span>, </span><span style=color:#fdf4c1>w</span><span>, </span><span style=color:#fdf4c1>newWork </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>stealWork</span><span>(</span><span style=color:#fdf4c1>now</span><span>)
+</span><span>    </span><span style=color:#fdf4c1>now </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>tnow
+</span><span>    </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>gp </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>        </span><span style=color:#928374;font-style:italic>// Successfully stole.
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>gp</span><span>, </span><span style=color:#fdf4c1>inheritTime</span><span>, </span><span style=color:#d3869b>false
+</span><span>    }
+</span><span>}
+</span></code></pre><p><code>stealWork</code>会尝试从其他<code>P</code>偷一半<code>G</code>到自己的<code>P</code>的本地队列里。<h3 id=goroutinede-qi-dong>goroutine的启动</h3><p>简而言之，<code>go f()</code>其实就是<code>runtime.newproc(f)</code>，<code>newproc</code>的实现逻辑就是把函数包装成<code>G</code>结构，加入当前<code>P</code>的本地队列，仅此而已。之后就是正常调度。<h3 id=pu-tong-mde-qi-dong>普通M的启动</h3><p><code>runtime.newm</code>函数。<code>m</code>会分配到堆上（<code>allocm</code>），加入<code>allm</code>全局<code>M</code>池，在<code>newm</code>里调用了<code>newm1</code>，<code>newm1</code>里使用<code>newosproc</code>启动了一个操作系统线程来运行创建的<code>M</code>。看注释还有一种做法是 <code>template thread</code>，用于处理 <code>locked M</code>或者被 C 代码启动的情况。<h2 id=zong-jie>总结</h2><p>又是有些突兀的结束。<p>关于<code>runtime</code>其实还是有不少好玩的东西的，但问题就是不太好拿调试器去跟，现在也没看到什么特别好的go源码解读的文章或者书本吧。<p>Go 官方自己在 release note 里说过，不要依赖调度器的行为。GMP 学一学，看看 runtime 里怎么实现的，都挺好的。我是说，出于兴趣，那都挺好的。学到就是赚到，就算写代码的时候用不上也可以当谈资。<p>但应付面试的话=。=我感觉对照着八股文知识点去翻一下 runtime 对应的代码其实也就差不多了，甚至翻都不用翻，背呗。就是没乐趣了。<p>这篇博客主要是加强八股，所以GMP的知识点浅尝辄止吧。时间有限，八股说每个 <code>M</code> 创建都有个 <code>g0</code> ，但还没在代码里找到哪儿给新 <code>M</code> 设置的 <code>g0</code>；<code>scavenger</code> 也没看，记得第一次翻 go 源码就是为了找出 scavenger 到底怎么向 os 返还内存，现在也没结论。剩下的问题太多了。<p>就这样吧，结束，辛苦自己了。</article><p class=tags-data><a href=/tags/golang>/golang/</a> <a href=/tags/mian-shi-ba-gu>/面试八股/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>
