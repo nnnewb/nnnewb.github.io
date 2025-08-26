@@ -1,0 +1,76 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>定点数三角函数：CORDIC 算法（3）</title><meta content="定点数三角函数：CORDIC 算法（3）" name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2025/fixed-point-trig-cordic-algorithm-3/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content="定点数三角函数：CORDIC 算法（3）" property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2025/fixed-point-trig-cordic-algorithm-3/ property=twitter:url><meta content="定点数三角函数：CORDIC 算法（3）" property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2025/fixed-point-trig-cordic-algorithm-3/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>定点数三角函数：CORDIC 算法（3）</h1><p class=author-line>作于：2025-08-25 14:30 ，预计阅读时间 4 分钟<article><h2 id=qian-yan>前言</h2><p>本文探讨学习 CORDIC 算法的向量模式与向量模式下的 $\arctan$ 实现。<p>关于 CORDIC 算法的原理和旋转模式可以参考前两篇文章，下文不再重复推导：<ul><li><a href=/posts/2025/fixed-point-trig-cordic-algorithm-1>定点数三角函数：CORDIC 算法理论推导</a><li><a href=/posts/2025/fixed-point-trig-cordic-algorithm-2>定点数三角函数：CORDIC 算法旋转模式实现</a></ul><h3 id=tui-dao-guo-cheng>推导过程</h3><p>对于平面向量 $\vec{V}=(x,y)$ 和 $x$ 轴的夹角 $\theta$ 有 $\tan(\theta) = y/x$<p>反过来就是 $\arctan(y/x) = \theta$<p>我们可以把 $\arctan(y)$ 看作 $\arctan(y/1)$，构造出向量 $V=(1,y)$<p>然后不断以微小角度旋转向量，直到 $V$ 接近对齐 $x$ 轴正方向，也就是 $y \approx 0$，此时累积的旋转角度 $z$ 就是向量 $V$ 和 $x$ 轴的夹角 $\theta$ 的近似了。<h3 id=xuan-zhuan-guo-cheng>旋转过程</h3><p>我们可以复用前文推导出的 CORDIC 旋转模式的迭代公式（无缩放）：<p>$$ \begin{cases} x_{i+1} = x_i - y_i \cdot d_i \cdot 2^{-i} \\ y_{i+1} = y_i + x_i \cdot d_i \cdot 2^{-i} \end{cases} $$<p>其中，$d_i$ 的选择取决于 $y_i$。当 $y_i>0$ 时，向量在第一象限，旋转方向顺时针。<p>反之，$y_i&lt;0$ 则说明向量在第四象限，旋转方向为逆时针。<p>$$ d_i = \begin{cases} -1 &\text{if } y_i \gt 0 \\ 1 &\text{if } y_i \lt 0 \end{cases} $$<p>角度累加器 $z$ 和旋转模式一样，采用查表法和 $d_i$ 确定符号。<blockquote><p>值得注意的是，缩放因子 K 并未出现在上述公式里，因为我们不关心 x,y 的取值，只关心累加器 z 的结果。在几何意义上来说，K 其实是影响了向量的长度（因为乘上K实际是应用了一个向量的标量乘法），而不影响向量的角度。</blockquote><h3 id=bian-jie-qing-kuang>边界情况</h3><p>前文旋转模式实现中提到，CORDIC 算法旋转的极限大约是 99°。<p>由于我们构造的向量中，$x$ 分量固定为 1，所以向量一定会落在第一象限或第四象限内。<p>$\arctan$ 的值域也是 $[-\frac{pi}{2},\frac{pi}{2}]$，在 CORDIC 算法可以处理的范围内。<p>$\arctan$ 的定义域是实数 $\arctan(x), x \in \mathbb{R}$，实际实现中则受制于精度，可以近似地看作所有 Q16 类型取值都是合法的输入。<h3 id=shi-xian>实现</h3><p>实现中一个值得关注的点在于 $z$ 的符号。我们的旋转累积是向 $x$ 轴方向的，和旋转模式正好相反。所以 $z$ 累积的值应该做一个取反操作。<p>举例来说，旋转模式从0度转到45度，那么向量模式就是从45度转到零度。他们记录的旋转累积一个是45一个是-45，正好相反。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>ATan</span><span>(</span><span style=color:#fdf4c1>v </span><span style=color:#fa5c4b>Q16</span><span>) (</span><span style=color:#fa5c4b>Q16</span><span>, </span><span style=color:#fabd2f>error</span><span>) {
+</span><span>	</span><span style=color:#fa5c4b>var </span><span>(
+</span><span>		</span><span style=color:#fdf4c1>x   </span><span style=color:#fa5c4b>Q16 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>MustFromInt</span><span>(</span><span style=color:#d3869b>1</span><span>)
+</span><span>		</span><span style=color:#fdf4c1>y   </span><span style=color:#fa5c4b>Q16 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>v
+</span><span>		</span><span style=color:#fdf4c1>d   </span><span style=color:#fa5c4b>Q16
+</span><span>		</span><span style=color:#fdf4c1>z   </span><span style=color:#fa5c4b>Q16
+</span><span>		</span><span style=color:#fdf4c1>err </span><span style=color:#fabd2f>error
+</span><span>	)
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>:= </span><span style=color:#fa5c4b>range </span><span style=color:#fdf4c1>atanLookupTable </span><span>{
+</span><span>		</span><span style=color:#fa5c4b>var </span><span>(
+</span><span>			</span><span style=color:#fdf4c1>nx </span><span style=color:#fa5c4b>Q16
+</span><span>			</span><span style=color:#fdf4c1>ny </span><span style=color:#fa5c4b>Q16
+</span><span>		)
+</span><span>
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>y </span><span style=color:#fe8019>> </span><span style=color:#d3869b>0 </span><span>{
+</span><span>			</span><span style=color:#fdf4c1>d </span><span style=color:#fe8019>= -</span><span style=color:#d3869b>1
+</span><span>		} </span><span style=color:#fa5c4b>else if </span><span style=color:#fdf4c1>y </span><span style=color:#fe8019>&lt; </span><span style=color:#d3869b>0 </span><span>{
+</span><span>			</span><span style=color:#fdf4c1>d </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1
+</span><span>		} </span><span style=color:#fa5c4b>else </span><span>{
+</span><span>			</span><span style=color:#fa5c4b>break
+</span><span>		}
+</span><span>
+</span><span>		</span><span style=color:#fdf4c1>intermediate </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>y </span><span style=color:#fe8019>>> </span><span style=color:#fdf4c1>i
+</span><span>		</span><span style=color:#fdf4c1>nx</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>Sub</span><span>(</span><span style=color:#fdf4c1>x</span><span>, </span><span style=color:#fdf4c1>d</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>intermediate</span><span>)
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>			</span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#fdf4c1>err
+</span><span>		}
+</span><span>
+</span><span>		</span><span style=color:#fdf4c1>intermediate </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>x </span><span style=color:#fe8019>>> </span><span style=color:#fdf4c1>i
+</span><span>		</span><span style=color:#fdf4c1>ny</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>Add</span><span>(</span><span style=color:#fdf4c1>y</span><span>, </span><span style=color:#fdf4c1>d</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>intermediate</span><span>)
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>			</span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#fdf4c1>err
+</span><span>		}
+</span><span>
+</span><span>		</span><span style=color:#fdf4c1>x </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>nx
+</span><span>		</span><span style=color:#fdf4c1>y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>ny
+</span><span>		</span><span style=color:#fdf4c1>z </span><span style=color:#fe8019>+= </span><span style=color:#fdf4c1>d </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>atanLookupTable</span><span>[</span><span style=color:#fdf4c1>i</span><span>]
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>z</span><span>, </span><span style=color:#d3869b>nil
+</span><span>}
+</span></code></pre></article><p class=tags-data><a href=/tags/ding-dian-shu>/定点数/</a> <a href=/tags/suan-fa>/算法/</a> <a href=/tags/shu-xue>/数学/</a> <a href=/tags/shu-zhi-ji-suan>/数值计算/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

@@ -1,0 +1,283 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>AudioContext 技术和音乐可视化（2）</title><meta content="AudioContext 技术和音乐可视化（2）" name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2018/2018-11-08-audiocontexthe-yin-le-ke-shi-hua-2/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content="AudioContext 技术和音乐可视化（2）" property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2018/2018-11-08-audiocontexthe-yin-le-ke-shi-hua-2/ property=twitter:url><meta content="AudioContext 技术和音乐可视化（2）" property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2018/2018-11-08-audiocontexthe-yin-le-ke-shi-hua-2/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>AudioContext 技术和音乐可视化（2）</h1><p class=author-line>作于：2018-11-08 21:41 ，预计阅读时间 5 分钟<article><h2 id=intro>Intro</h2><p>转载请注明来源，可以在<a href=https://th-zxj.club>测试博客</a>查看完成效果。<p>本篇讲述如何从频域数据绘制动态的星空。<h2 id=yi-shi-yong-canvas-hui-tu>一、使用 Canvas 绘图</h2><h3 id=1-1-wei-zhi-he-da-xiao>1.1 位置和大小</h3><p>绘制背景的第一要务便是把 canvas 元素放置在背景这一层次上，避免遮盖其他元素。<p>对我而言，个人习惯用 css 来设置大小和位置，用 html 来确定渲染顺序而不是 z-index。<p>下面是 html 代码。<pre class=language-html data-lang=html style=color:#fdf4c1aa;background-color:#282828><code class=language-html data-lang=html><span style=color:#83a598>&lt;</span><span style=color:#8ec07c;font-weight:700>html</span><span style=color:#83a598>>
+</span><span>  </span><span style=color:#83a598>&lt;</span><span style=color:#8ec07c;font-weight:700>body</span><span style=color:#83a598>>
+</span><span>    </span><span style=color:#83a598>&lt;</span><span style=color:#8ec07c;font-weight:700>canvas </span><span style=color:#b8bb26>id</span><span style=color:#8ec07c>=</span><span style=color:#b8bb26>"background-canvas"</span><span style=color:#83a598>>&lt;/</span><span style=color:#8ec07c;font-weight:700>canvas</span><span style=color:#83a598>>
+</span><span>    </span><span style=color:#928374;font-style:italic>&lt;!-- other elements -->
+</span><span>  </span><span style=color:#83a598>&lt;/</span><span style=color:#8ec07c;font-weight:700>body</span><span style=color:#83a598>>
+</span><span style=color:#83a598>&lt;/</span><span style=color:#8ec07c;font-weight:700>html</span><span style=color:#83a598>>
+</span></code></pre><p>下面是 css 代码。<pre class=language-css data-lang=css style=color:#fdf4c1aa;background-color:#282828><code class=language-css data-lang=css><span style=color:#b8bb26>#background-canvas </span><span>{
+</span><span>  </span><span style=color:#8ec07c>position</span><span>: </span><span style=color:#fabd2f>fixed</span><span>;
+</span><span>  </span><span style=color:#8ec07c>left</span><span>: </span><span style=color:#fabd2f>0</span><span>;
+</span><span>  </span><span style=color:#8ec07c>top</span><span>: </span><span style=color:#fabd2f>0</span><span>;
+</span><span>  </span><span style=color:#8ec07c>width</span><span>: </span><span style=color:#fabd2f>100</span><span style=color:#d3869b>vw</span><span>;
+</span><span>  </span><span style=color:#8ec07c>height</span><span>: </span><span style=color:#fabd2f>100</span><span style=color:#d3869b>vh</span><span>;
+</span><span>  </span><span style=color:#8ec07c>background-color</span><span>: </span><span style=color:#fabd2f>black</span><span>;
+</span><span>}
+</span></code></pre><p><code>fixed</code>确保拖动页面不会令背景也跟随移动。<p>其余部分我想应该没什么有疑问的地方。<h3 id=1-2-canvascontext2d>1.2 CanvasContext2D</h3><p>对于 canvas 元素的绘图操作我想很多人应该接触过。<p>以绘制圆形为例，使用如下代码。<pre class=language-js data-lang=js style=color:#fdf4c1aa;background-color:#282828><code class=language-js data-lang=js><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>canvas </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>document</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>getElementById</span><span>(</span><span style=color:#b8bb26>"background-canvas"</span><span>);
+</span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>ctx </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>canvas.</span><span style=color:#fabd2f>getContext</span><span>(</span><span style=color:#b8bb26>"2d"</span><span>);
+</span><span>
+</span><span style=color:#fdf4c1>ctx</span><span>.</span><span style=color:#fdf4c1>fillStyle </span><span style=color:#fe8019>= </span><span style=color:#b8bb26>"#fff"</span><span>;
+</span><span style=color:#fdf4c1>ctx.</span><span style=color:#8ec07c>beginPath</span><span>();
+</span><span style=color:#fdf4c1>ctx.</span><span style=color:#8ec07c>arc</span><span>(</span><span style=color:#d3869b>100</span><span>, </span><span style=color:#d3869b>100</span><span>, </span><span style=color:#d3869b>50</span><span>, </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#fabd2f>Math</span><span>.</span><span style=color:#fabd2f>PI </span><span style=color:#fe8019>* </span><span style=color:#d3869b>2</span><span>); </span><span style=color:#928374;font-style:italic>// 参数分别为坐标x,y,半径，起始弧度，结束弧度
+</span><span style=color:#fdf4c1>ctx.</span><span style=color:#8ec07c>fill</span><span>();
+</span></code></pre><p>这样就画完了一个实心圆。<p>需要注意，canvas 的大小通过 css 设置可能导致画面被拉伸变形模糊，所以最好的办法是绘制前确定一下 canvas 的大小。<p>此外需要注意的是，重置大小会导致画面清空，用这种方式可以替代<code>fillRect</code>或者<code>clearRect</code>，有的浏览器平台更快但也有浏览器更慢。可以查阅这篇<a href="https://www.html5rocks.com/en/tutorials/canvas/performance/#toc-pre-render?tdsourcetag=s_pctim_aiomsg">博文</a>来参考如何提升 canvas 绘图性能。<p><code>fillStyle</code>可以使用 css 的颜色代码，也就是说我们可以写下诸如<code>rgba</code>、<code>hsla</code>之类的颜色，这给我们编写代码提供了很多方便。<h3 id=1-3-hui-zhi-xing-xing>1.3 绘制星星</h3><p>星空是由星星组成的这显然不用多说了，先来看如何绘制单个星星。<p>星星的绘制方法很多，贴图虽然便利但显然不够灵活，我们的星星是要随节奏改变亮度和大小的，利用贴图的话就只能在<code>alpha</code>值和<code>drawImage</code>缩放来处理了。虽然是一种不错的办法，不过这里我使用了<code>RadialGradient</code>来控制绘图。<blockquote><p>PS：<code>RadialGradient</code> 的性能比较差，大量使用会导致明显的性能下降，这是一个显著降低绘制效率的地方。</blockquote><p>那么，我们先画一个圆（加点细节预警）。<pre class=language-js data-lang=js style=color:#fdf4c1aa;background-color:#282828><code class=language-js data-lang=js><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>canvas </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>document</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>getElementById</span><span>(</span><span style=color:#b8bb26>"background-canvas"</span><span>);
+</span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>ctx </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>canvas.</span><span style=color:#fabd2f>getContext</span><span>(</span><span style=color:#b8bb26>"2d"</span><span>);
+</span><span>
+</span><span style=color:#928374;font-style:italic>// 确保不会变形
+</span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fabd2f>width </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fdf4c1>offsetWidth</span><span>;
+</span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fabd2f>height </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fdf4c1>offsetHeight</span><span>;
+</span><span>
+</span><span style=color:#928374;font-style:italic>// 参数分别为起始坐标x,y,半径，结束坐标x,y,半径
+</span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>gradient </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>ctx.</span><span style=color:#8ec07c>createRadialGradient</span><span>(</span><span style=color:#d3869b>100</span><span>, </span><span style=color:#d3869b>100</span><span>, </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#d3869b>100</span><span>, </span><span style=color:#d3869b>100</span><span>, </span><span style=color:#d3869b>50</span><span>);
+</span><span style=color:#fdf4c1>gradient.</span><span style=color:#8ec07c>addColorStop</span><span>(</span><span style=color:#d3869b>0.025</span><span>, </span><span style=color:#b8bb26>"#fff"</span><span>); </span><span style=color:#928374;font-style:italic>// 中心的亮白色
+</span><span style=color:#fdf4c1>gradient.</span><span style=color:#8ec07c>addColorStop</span><span>(</span><span style=color:#d3869b>0.1</span><span>, </span><span style=color:#b8bb26>"rgba(255, 255, 255, 0.9)"</span><span>); </span><span style=color:#928374;font-style:italic>// 核心光点和四周的分界线
+</span><span style=color:#fdf4c1>gradient.</span><span style=color:#8ec07c>addColorStop</span><span>(</span><span style=color:#d3869b>0.25</span><span>, </span><span style=color:#b8bb26>"hsla(198, 66%, 75%, 0.9)"</span><span>); </span><span style=color:#928374;font-style:italic>// 核心亮点往四周发散的蓝光
+</span><span style=color:#fdf4c1>gradient.</span><span style=color:#8ec07c>addColorStop</span><span>(</span><span style=color:#d3869b>0.75</span><span>, </span><span style=color:#b8bb26>"hsla(198, 64%, 33%, 0.4)"</span><span>); </span><span style=color:#928374;font-style:italic>// 蓝光边缘
+</span><span style=color:#fdf4c1>gradient.</span><span style=color:#8ec07c>addColorStop</span><span>(</span><span style=color:#d3869b>1</span><span>, </span><span style=color:#b8bb26>"hsla(198, 64%, 33%, 0)"</span><span>); </span><span style=color:#928374;font-style:italic>// 淡化直至透明
+</span><span style=color:#fdf4c1>ctx</span><span>.</span><span style=color:#fdf4c1>fillStyle </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>gradient</span><span>;
+</span><span style=color:#fdf4c1>ctx.</span><span style=color:#8ec07c>beginPath</span><span>();
+</span><span style=color:#fdf4c1>ctx.</span><span style=color:#8ec07c>arc</span><span>(</span><span style=color:#d3869b>100</span><span>, </span><span style=color:#d3869b>100</span><span>, </span><span style=color:#d3869b>50</span><span>, </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#fabd2f>Math</span><span>.</span><span style=color:#fabd2f>PI </span><span style=color:#fe8019>* </span><span style=color:#d3869b>2</span><span>);
+</span><span style=color:#fdf4c1>ctx.</span><span style=color:#8ec07c>fill</span><span>();
+</span></code></pre><p>可以在<a href=https://codepen.io/weak_ptr/pen/KrzwPV>codepen</a>查看效果或直接编辑你的星（圈）星（圈）。<p>看上去还不错？<p>让我们用代码控制它的亮度和大小。<pre class=language-js data-lang=js style=color:#fdf4c1aa;background-color:#282828><code class=language-js data-lang=js><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>canvas </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>document</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>getElementById</span><span>(</span><span style=color:#b8bb26>"background-canvas"</span><span>);
+</span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>ctx </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>canvas.</span><span style=color:#fabd2f>getContext</span><span>(</span><span style=color:#b8bb26>"2d"</span><span>);
+</span><span>
+</span><span style=color:#928374;font-style:italic>// 确保不会变形
+</span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fabd2f>width </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fdf4c1>offsetWidth</span><span>;
+</span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fabd2f>height </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fdf4c1>offsetHeight</span><span>;
+</span><span>
+</span><span style=color:#928374;font-style:italic>// 通过energy控制亮度和大小
+</span><span style=color:#fa5c4b>let </span><span style=color:#fdf4c1>energy </span><span style=color:#fe8019>= </span><span style=color:#d3869b>255</span><span>;
+</span><span style=color:#fa5c4b>let </span><span style=color:#fdf4c1>radius </span><span style=color:#fe8019>= </span><span style=color:#d3869b>50</span><span>;
+</span><span style=color:#fa5c4b>let </span><span style=color:#fdf4c1>energyChangeRate </span><span style=color:#fe8019>= -</span><span style=color:#d3869b>1</span><span>;
+</span><span>
+</span><span style=color:#fa5c4b>function </span><span style=color:#8ec07c>draw</span><span>() {
+</span><span>  </span><span style=color:#8ec07c>requestAnimationFrame</span><span>(</span><span style=color:#fdf4c1>draw</span><span>); </span><span style=color:#928374;font-style:italic>// 定时绘制，requestAnimationFrame比setTimeout更好。
+</span><span>  </span><span style=color:#fdf4c1>energy </span><span style=color:#fe8019>+= </span><span style=color:#fdf4c1>energyChangeRate</span><span>; </span><span style=color:#928374;font-style:italic>// 见过呼吸灯吧？我们让它变亮~再变暗~反复循环~
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(</span><span style=color:#fdf4c1>energy </span><span style=color:#fe8019>&lt;= </span><span style=color:#d3869b>0 </span><span style=color:#fe8019>|| </span><span style=color:#fdf4c1>energy </span><span style=color:#fe8019>>= </span><span style=color:#d3869b>255</span><span>) </span><span style=color:#fdf4c1>energyChangeRate </span><span style=color:#fe8019>= -</span><span style=color:#fdf4c1>energyChangeRate</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// 计算出当前的大小
+</span><span>  </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>r </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>radius </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>energy </span><span style=color:#fe8019>* </span><span style=color:#d3869b>0.1</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// 清空屏幕
+</span><span>  </span><span style=color:#fdf4c1>ctx</span><span>.</span><span style=color:#fdf4c1>fillStyle </span><span style=color:#fe8019>= </span><span style=color:#b8bb26>"black"</span><span>;
+</span><span>  </span><span style=color:#fdf4c1>ctx.</span><span style=color:#8ec07c>fillRect</span><span>(</span><span style=color:#d3869b>0</span><span>, </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fabd2f>width</span><span>, </span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fabd2f>height</span><span>);
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// 参数分别为起始坐标x,y,半径，结束坐标x,y,半径
+</span><span>  </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>gradient </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>ctx.</span><span style=color:#8ec07c>createRadialGradient</span><span>(</span><span style=color:#d3869b>100</span><span>, </span><span style=color:#d3869b>100</span><span>, </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#d3869b>100</span><span>, </span><span style=color:#d3869b>100</span><span>, </span><span style=color:#fdf4c1>r</span><span>);
+</span><span>  </span><span style=color:#fdf4c1>gradient.</span><span style=color:#8ec07c>addColorStop</span><span>(</span><span style=color:#d3869b>0.025</span><span>, </span><span style=color:#b8bb26>"#fff"</span><span>); </span><span style=color:#928374;font-style:italic>// 中心的亮白色
+</span><span>  </span><span style=color:#fdf4c1>gradient.</span><span style=color:#8ec07c>addColorStop</span><span>(</span><span style=color:#d3869b>0.1</span><span>, </span><span style=color:#b8bb26>"rgba(255, 255, 255, 0.9)"</span><span>); </span><span style=color:#928374;font-style:italic>// 核心光点和四周的分界线
+</span><span>  </span><span style=color:#fdf4c1>gradient.</span><span style=color:#8ec07c>addColorStop</span><span>(
+</span><span>    </span><span style=color:#d3869b>0.25</span><span>,
+</span><span>    </span><span style=color:#b8bb26>`hsla(198, 66%, ${</span><span style=color:#fabd2f>Math</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>min</span><span style=color:#b8bb26>(</span><span style=color:#d3869b>75 </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>energy </span><span style=color:#fe8019>* </span><span style=color:#d3869b>0.01</span><span style=color:#b8bb26>, </span><span style=color:#d3869b>100</span><span style=color:#b8bb26>)}%, 0.9)`
+</span><span>  ); </span><span style=color:#928374;font-style:italic>// 核心亮点往四周发散的蓝光
+</span><span>  </span><span style=color:#fdf4c1>gradient.</span><span style=color:#8ec07c>addColorStop</span><span>(
+</span><span>    </span><span style=color:#d3869b>0.75</span><span>,
+</span><span>    </span><span style=color:#b8bb26>`hsla(198, 64%, ${</span><span style=color:#fabd2f>Math</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>min</span><span style=color:#b8bb26>(</span><span style=color:#d3869b>33 </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>energy </span><span style=color:#fe8019>* </span><span style=color:#d3869b>0.01</span><span style=color:#b8bb26>, </span><span style=color:#d3869b>100</span><span style=color:#b8bb26>)}%, 0.4)`
+</span><span>  ); </span><span style=color:#928374;font-style:italic>// 蓝光边缘
+</span><span>  </span><span style=color:#fdf4c1>gradient.</span><span style=color:#8ec07c>addColorStop</span><span>(</span><span style=color:#d3869b>1</span><span>, </span><span style=color:#b8bb26>"hsla(198, 64%, 33%, 0)"</span><span>); </span><span style=color:#928374;font-style:italic>// 淡化直至透明
+</span><span>  </span><span style=color:#fdf4c1>ctx</span><span>.</span><span style=color:#fdf4c1>fillStyle </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>gradient</span><span>;
+</span><span>  </span><span style=color:#fdf4c1>ctx.</span><span style=color:#8ec07c>beginPath</span><span>();
+</span><span>  </span><span style=color:#fdf4c1>ctx.</span><span style=color:#8ec07c>arc</span><span>(</span><span style=color:#d3869b>100</span><span>, </span><span style=color:#d3869b>100</span><span>, </span><span style=color:#fdf4c1>r</span><span>, </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#fabd2f>Math</span><span>.</span><span style=color:#fabd2f>PI </span><span style=color:#fe8019>* </span><span style=color:#d3869b>2</span><span>);
+</span><span>  </span><span style=color:#fdf4c1>ctx.</span><span style=color:#8ec07c>fill</span><span>();
+</span><span>}
+</span><span style=color:#8ec07c>draw</span><span>();
+</span></code></pre><p>可以在<a href=https://codepen.io/weak_ptr/pen/LXNEaa>codepen</a>查看并编辑效果。<h3 id=1-4-feng-zhuang-xing-xing>1.4 封装星星</h3><p>通常来说粒子系统不大会把单个粒子封装成类，因为函数调用的开销还是蛮大的。。。<p>不过在这里我们这里就先这样了，方便理解和阅读。渲染的瓶颈解决之前，粒子函数调用这点开销根本不是回事儿。<pre class=language-js data-lang=js style=color:#fdf4c1aa;background-color:#282828><code class=language-js data-lang=js><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>canvas </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>document</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>getElementById</span><span>(</span><span style=color:#b8bb26>"background-canvas"</span><span>);
+</span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>ctx </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>canvas.</span><span style=color:#fabd2f>getContext</span><span>(</span><span style=color:#b8bb26>"2d"</span><span>);
+</span><span>
+</span><span style=color:#928374;font-style:italic>// 确保不会变形
+</span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fabd2f>width </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fdf4c1>offsetWidth</span><span>;
+</span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fabd2f>height </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fdf4c1>offsetHeight</span><span>;
+</span><span>
+</span><span style=color:#928374;font-style:italic>// 用javascript原生的class而不是prototype
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>Star </span><span>{
+</span><span>  </span><span style=color:#fa5c4b>constructor</span><span>(</span><span style=color:#fdf4c1>x</span><span>, </span><span style=color:#fdf4c1>y</span><span>, </span><span style=color:#fdf4c1>radius</span><span>, </span><span style=color:#fdf4c1>lightness</span><span>) {
+</span><span>    </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>radius </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>radius</span><span>;
+</span><span>    </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fabd2f>x </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>x</span><span>;
+</span><span>    </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fabd2f>y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>y</span><span>;
+</span><span>    </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>lightness</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#8ec07c>draw</span><span>(</span><span style=color:#fdf4c1>ctx</span><span>, </span><span style=color:#fdf4c1>energy</span><span>) {
+</span><span>    </span><span style=color:#928374;font-style:italic>// 计算出当前的大小
+</span><span>    </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>r </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>radius </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>energy </span><span style=color:#fe8019>* </span><span style=color:#d3869b>0.1</span><span>;
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// 参数分别为起始坐标x,y,半径，结束坐标x,y,半径
+</span><span>    </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>gradient </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>ctx.</span><span style=color:#8ec07c>createRadialGradient</span><span>(
+</span><span>      </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fabd2f>x</span><span>,
+</span><span>      </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fabd2f>y</span><span>,
+</span><span>      </span><span style=color:#d3869b>0</span><span>,
+</span><span>      </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fabd2f>x</span><span>,
+</span><span>      </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fabd2f>y</span><span>,
+</span><span>      </span><span style=color:#fdf4c1>r
+</span><span>    );
+</span><span>    </span><span style=color:#fdf4c1>gradient.</span><span style=color:#8ec07c>addColorStop</span><span>(</span><span style=color:#d3869b>0.025</span><span>, </span><span style=color:#b8bb26>"#fff"</span><span>); </span><span style=color:#928374;font-style:italic>// 中心的亮白色
+</span><span>    </span><span style=color:#fdf4c1>gradient.</span><span style=color:#8ec07c>addColorStop</span><span>(</span><span style=color:#d3869b>0.1</span><span>, </span><span style=color:#b8bb26>"rgba(255, 255, 255, 0.9)"</span><span>); </span><span style=color:#928374;font-style:italic>// 核心光点和四周的分界线
+</span><span>    </span><span style=color:#fdf4c1>gradient.</span><span style=color:#8ec07c>addColorStop</span><span>(
+</span><span>      </span><span style=color:#d3869b>0.25</span><span>,
+</span><span>      </span><span style=color:#b8bb26>`hsla(198, 66%, ${</span><span style=color:#fabd2f>Math</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>min</span><span style=color:#b8bb26>(</span><span style=color:#d3869b>75 </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>energy </span><span style=color:#fe8019>* </span><span style=color:#d3869b>0.01</span><span style=color:#b8bb26>, </span><span style=color:#d3869b>100</span><span style=color:#b8bb26>)}%, 0.9)`
+</span><span>    ); </span><span style=color:#928374;font-style:italic>// 核心亮点往四周发散的蓝光
+</span><span>    </span><span style=color:#fdf4c1>gradient.</span><span style=color:#8ec07c>addColorStop</span><span>(
+</span><span>      </span><span style=color:#d3869b>0.75</span><span>,
+</span><span>      </span><span style=color:#b8bb26>`hsla(198, 64%, ${</span><span style=color:#fabd2f>Math</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>min</span><span style=color:#b8bb26>(</span><span style=color:#d3869b>33 </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>energy </span><span style=color:#fe8019>* </span><span style=color:#d3869b>0.01</span><span style=color:#b8bb26>, </span><span style=color:#d3869b>100</span><span style=color:#b8bb26>)}%, 0.4)`
+</span><span>    ); </span><span style=color:#928374;font-style:italic>// 蓝光边缘
+</span><span>    </span><span style=color:#fdf4c1>gradient.</span><span style=color:#8ec07c>addColorStop</span><span>(</span><span style=color:#d3869b>1</span><span>, </span><span style=color:#b8bb26>"hsla(198, 64%, 33%, 0)"</span><span>); </span><span style=color:#928374;font-style:italic>// 淡化直至透明
+</span><span>    </span><span style=color:#fdf4c1>ctx</span><span>.</span><span style=color:#fdf4c1>fillStyle </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>gradient</span><span>;
+</span><span>    </span><span style=color:#fdf4c1>ctx.</span><span style=color:#8ec07c>beginPath</span><span>();
+</span><span>    </span><span style=color:#fdf4c1>ctx.</span><span style=color:#8ec07c>arc</span><span>(</span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fabd2f>x</span><span>, </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fabd2f>y</span><span>, </span><span style=color:#fdf4c1>r</span><span>, </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#fabd2f>Math</span><span>.</span><span style=color:#fabd2f>PI </span><span style=color:#fe8019>* </span><span style=color:#d3869b>2</span><span>);
+</span><span>    </span><span style=color:#fdf4c1>ctx.</span><span style=color:#8ec07c>fill</span><span>();
+</span><span>  }
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>star </span><span style=color:#fe8019>= </span><span style=color:#fa5c4b>new </span><span style=color:#8ec07c>Star</span><span>(</span><span style=color:#d3869b>100</span><span>, </span><span style=color:#d3869b>100</span><span>, </span><span style=color:#d3869b>50</span><span>);
+</span><span>
+</span><span style=color:#fa5c4b>let </span><span style=color:#fdf4c1>energy </span><span style=color:#fe8019>= </span><span style=color:#d3869b>255</span><span>;
+</span><span style=color:#fa5c4b>let </span><span style=color:#fdf4c1>energyChangeRate </span><span style=color:#fe8019>= -</span><span style=color:#d3869b>1</span><span>;
+</span><span>
+</span><span style=color:#928374;font-style:italic>// 渲染函数来循环渲染！
+</span><span style=color:#fa5c4b>function </span><span style=color:#8ec07c>render</span><span>() {
+</span><span>  </span><span style=color:#8ec07c>requestAnimationFrame</span><span>(</span><span style=color:#fdf4c1>render</span><span>);
+</span><span>  </span><span style=color:#fdf4c1>energy </span><span style=color:#fe8019>+= </span><span style=color:#fdf4c1>energyChangeRate</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(</span><span style=color:#fdf4c1>energy </span><span style=color:#fe8019>&lt;= </span><span style=color:#d3869b>0 </span><span style=color:#fe8019>|| </span><span style=color:#fdf4c1>energy </span><span style=color:#fe8019>>= </span><span style=color:#d3869b>255</span><span>) </span><span style=color:#fdf4c1>energyChangeRate </span><span style=color:#fe8019>= -</span><span style=color:#fdf4c1>energyChangeRate</span><span>;
+</span><span>  </span><span style=color:#928374;font-style:italic>// 清空屏幕
+</span><span>  </span><span style=color:#fdf4c1>ctx</span><span>.</span><span style=color:#fdf4c1>fillStyle </span><span style=color:#fe8019>= </span><span style=color:#b8bb26>"black"</span><span>;
+</span><span>  </span><span style=color:#fdf4c1>ctx.</span><span style=color:#8ec07c>fillRect</span><span>(</span><span style=color:#d3869b>0</span><span>, </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fabd2f>width</span><span>, </span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fabd2f>height</span><span>);
+</span><span>
+</span><span>  </span><span style=color:#fdf4c1>star.</span><span style=color:#8ec07c>draw</span><span>(</span><span style=color:#fdf4c1>ctx</span><span>, </span><span style=color:#fdf4c1>energy</span><span>);
+</span><span>}
+</span><span>
+</span><span style=color:#928374;font-style:italic>// 开始渲染动画！
+</span><span style=color:#8ec07c>render</span><span>();
+</span></code></pre><p>可以在<a href=https://codepen.io/weak_ptr/pen/pQyJQQ>codepen</a>查看代码效果。<p>完成！<h3 id=1-5-yin-he>1.5 银河</h3><p>绘制银河的核心在于随机分布的星星绕着同一中心点旋转，分为两步来讲，第一步是随机分布，这很简单，用<code>Math.random</code>就好了。<pre class=language-js data-lang=js style=color:#fdf4c1aa;background-color:#282828><code class=language-js data-lang=js><span style=color:#928374;font-style:italic>// star 部分略
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>Galaxy </span><span>{
+</span><span>  </span><span style=color:#fa5c4b>constructor</span><span>(</span><span style=color:#fdf4c1>canvas</span><span>) {
+</span><span>    </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>stars </span><span style=color:#fe8019>= </span><span>[];
+</span><span>    </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>canvas </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>canvas</span><span>;
+</span><span>    </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>ctx </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>canvas.</span><span style=color:#fabd2f>getContext</span><span>(</span><span style=color:#b8bb26>"2d"</span><span>);
+</span><span>
+</span><span>    </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>energy </span><span style=color:#fe8019>= </span><span style=color:#d3869b>255</span><span>;
+</span><span>    </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>energyChangeRate </span><span style=color:#fe8019>= -</span><span style=color:#d3869b>2</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#8ec07c>init</span><span>(</span><span style=color:#fdf4c1>num</span><span>) {
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>let </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>&lt; </span><span style=color:#fdf4c1>num</span><span>; </span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>++</span><span>) {
+</span><span>      </span><span style=color:#fdf4c1>this.stars.</span><span style=color:#fabd2f>push</span><span>(
+</span><span>        </span><span style=color:#928374;font-style:italic>// 随机生成一定数量的星星，初始化星星位置和大小。
+</span><span>        </span><span style=color:#fa5c4b>new </span><span style=color:#8ec07c>Star</span><span>(
+</span><span>          </span><span style=color:#fabd2f>Math</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>random</span><span>() </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fabd2f>width</span><span>,
+</span><span>          </span><span style=color:#fabd2f>Math</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>random</span><span>() </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fabd2f>height</span><span>,
+</span><span>          </span><span style=color:#fabd2f>Math</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>random</span><span>() </span><span style=color:#fe8019>* </span><span style=color:#d3869b>10 </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span>,
+</span><span>          </span><span style=color:#fabd2f>Math</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>random</span><span>() </span><span style=color:#fe8019>* </span><span style=color:#d3869b>30 </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>33
+</span><span>        )
+</span><span>      );
+</span><span>    }
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#8ec07c>render</span><span>() {
+</span><span>    </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>energy </span><span style=color:#fe8019>+= </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>energyChangeRate</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>(</span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>energy </span><span style=color:#fe8019>&lt;= </span><span style=color:#d3869b>0 </span><span style=color:#fe8019>|| </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>energy </span><span style=color:#fe8019>>= </span><span style=color:#d3869b>255</span><span>)
+</span><span>      </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>energyChangeRate </span><span style=color:#fe8019>= -</span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>energyChangeRate</span><span>;
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// 清空屏幕
+</span><span>    </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>ctx</span><span>.</span><span style=color:#fdf4c1>fillStyle </span><span style=color:#fe8019>= </span><span style=color:#b8bb26>"black"</span><span>;
+</span><span>    </span><span style=color:#fdf4c1>this.ctx.</span><span style=color:#8ec07c>fillRect</span><span>(</span><span style=color:#d3869b>0</span><span>, </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fabd2f>width</span><span>, </span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fabd2f>height</span><span>);
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>star </span><span style=color:#fe8019>of </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>stars</span><span>) {
+</span><span>      </span><span style=color:#fdf4c1>star.</span><span style=color:#8ec07c>draw</span><span>(</span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>ctx</span><span>, </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>energy</span><span>);
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>canvas </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>document</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>getElementById</span><span>(</span><span style=color:#b8bb26>"background-canvas"</span><span>);
+</span><span style=color:#928374;font-style:italic>// 确保不会变形
+</span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fabd2f>width </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fdf4c1>offsetWidth</span><span>;
+</span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fabd2f>height </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fdf4c1>offsetHeight</span><span>;
+</span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>galaxy </span><span style=color:#fe8019>= </span><span style=color:#fa5c4b>new </span><span style=color:#8ec07c>Galaxy</span><span>(</span><span style=color:#fdf4c1>canvas</span><span>);
+</span><span style=color:#fdf4c1>galaxy.</span><span style=color:#8ec07c>init</span><span>(</span><span style=color:#d3869b>50</span><span>);
+</span><span>
+</span><span style=color:#fa5c4b>function </span><span style=color:#8ec07c>render</span><span>() {
+</span><span>  </span><span style=color:#8ec07c>requestAnimationFrame</span><span>(</span><span style=color:#fdf4c1>render</span><span>);
+</span><span>  </span><span style=color:#fdf4c1>galaxy.</span><span style=color:#8ec07c>render</span><span>();
+</span><span>}
+</span><span>
+</span><span style=color:#8ec07c>render</span><span>();
+</span></code></pre><p>可以在<a href=https://codepen.io/weak_ptr/pen/jQqPoQ>codepen</a>查看效果和完整代码。<h3 id=1-6-xuan-zhuan-qi-lai>1.6 旋转起来！</h3><p>【加点细节预警】<p>接下来我们为星星准备轨道参数，让它们动起来！<p>首先修改<code>Star</code>类，加入几个字段。<pre class=language-js data-lang=js style=color:#fdf4c1aa;background-color:#282828><code class=language-js data-lang=js><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>Star </span><span>{
+</span><span>  </span><span style=color:#fa5c4b>constructor</span><span>(</span><span style=color:#fdf4c1>x</span><span>, </span><span style=color:#fdf4c1>y</span><span>, </span><span style=color:#fdf4c1>radius</span><span>, </span><span style=color:#fdf4c1>lightness</span><span>, </span><span style=color:#fdf4c1>orbit</span><span>, </span><span style=color:#fdf4c1>speed</span><span>, </span><span style=color:#fdf4c1>t</span><span>) {
+</span><span>    </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>radius </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>radius</span><span>;
+</span><span>    </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fabd2f>x </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>x</span><span>;
+</span><span>    </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fabd2f>y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>y</span><span>;
+</span><span>    </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>lightness</span><span>;
+</span><span>    </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>orbit </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>orbit</span><span>; </span><span style=color:#928374;font-style:italic>// 轨道
+</span><span>    </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>speed </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>speed</span><span>; </span><span style=color:#928374;font-style:italic>// 运动速度
+</span><span>    </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>t </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>t</span><span>; </span><span style=color:#928374;font-style:italic>// 三角函数x轴参数，用 sin/cos 组合计算位置
+</span><span>  }
+</span><span>  </span><span style=color:#928374;font-style:italic>// 下略
+</span><span>}
+</span></code></pre><p>修改初始化代码。<pre class=language-js data-lang=js style=color:#fdf4c1aa;background-color:#282828><code class=language-js data-lang=js><span style=color:#928374;font-style:italic>// 前略
+</span><span>  </span><span style=color:#8ec07c>init</span><span>(</span><span style=color:#fdf4c1>num</span><span>) {
+</span><span>    </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>longerAxis </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>Math</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>max</span><span>(</span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fabd2f>width</span><span>, </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fabd2f>height</span><span>);
+</span><span>    </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>diameter </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>Math</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>round</span><span>(
+</span><span>      </span><span style=color:#fabd2f>Math</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>sqrt</span><span>(</span><span style=color:#fdf4c1>longerAxis </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>longerAxis </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>longerAxis </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>longerAxis</span><span>)
+</span><span>    );
+</span><span>    </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>maxOrbit </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>diameter </span><span style=color:#fe8019>/ </span><span style=color:#d3869b>2</span><span>;
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>let </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>&lt; </span><span style=color:#fdf4c1>num</span><span>; </span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>++</span><span>) {
+</span><span>      </span><span style=color:#fdf4c1>this.stars.</span><span style=color:#fabd2f>push</span><span>(
+</span><span>        </span><span style=color:#928374;font-style:italic>// 随机生成一定数量的星星，初始化星星位置和大小。
+</span><span>        </span><span style=color:#fa5c4b>new </span><span style=color:#8ec07c>Star</span><span>(
+</span><span>          </span><span style=color:#fabd2f>Math</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>random</span><span>() </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fabd2f>width</span><span>,
+</span><span>          </span><span style=color:#fabd2f>Math</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>random</span><span>() </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fabd2f>height</span><span>,
+</span><span>          </span><span style=color:#fabd2f>Math</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>random</span><span>() </span><span style=color:#fe8019>* </span><span style=color:#d3869b>10 </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span>,
+</span><span>          </span><span style=color:#fabd2f>Math</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>random</span><span>() </span><span style=color:#fe8019>* </span><span style=color:#d3869b>30 </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>33</span><span>,
+</span><span>          </span><span style=color:#fabd2f>Math</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>random</span><span>() </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>maxOrbit</span><span>, </span><span style=color:#928374;font-style:italic>// 随机轨道
+</span><span>          </span><span style=color:#fabd2f>Math</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>random</span><span>() </span><span style=color:#fe8019>/ </span><span style=color:#d3869b>1000</span><span>, </span><span style=color:#928374;font-style:italic>// 随机速度
+</span><span>          </span><span style=color:#fabd2f>Math</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>random</span><span>() </span><span style=color:#fe8019>* </span><span style=color:#d3869b>100 </span><span style=color:#928374;font-style:italic>// 随机位置
+</span><span>        )
+</span><span>      );
+</span><span>    }
+</span><span>  </span><span style=color:#928374;font-style:italic>// 后略
+</span></code></pre><p>然后在<code>Galaxy</code>里加入控制移动的代码。<pre class=language-js data-lang=js style=color:#fdf4c1aa;background-color:#282828><code class=language-js data-lang=js><span style=color:#8ec07c>move</span><span>() {
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>star </span><span style=color:#fe8019>of </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>stars</span><span>) {
+</span><span>      </span><span style=color:#8ec07c>console</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>log</span><span>(</span><span style=color:#fdf4c1>star</span><span>.</span><span style=color:#fdf4c1>orbit</span><span>)
+</span><span>      </span><span style=color:#fdf4c1>star</span><span>.</span><span style=color:#fabd2f>x </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fabd2f>width</span><span style=color:#fe8019>/</span><span style=color:#d3869b>2</span><span style=color:#fe8019>+ </span><span style=color:#fabd2f>Math</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>cos</span><span>(</span><span style=color:#fdf4c1>star</span><span>.</span><span style=color:#fdf4c1>t</span><span>) </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>star</span><span>.</span><span style=color:#fdf4c1>orbit</span><span>;
+</span><span>      </span><span style=color:#fdf4c1>star</span><span>.</span><span style=color:#fabd2f>y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>this</span><span>.</span><span style=color:#fdf4c1>canvas</span><span>.</span><span style=color:#fabd2f>height</span><span style=color:#fe8019>/</span><span style=color:#d3869b>2</span><span style=color:#fe8019>+ </span><span style=color:#fabd2f>Math</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>sin</span><span>(</span><span style=color:#fdf4c1>star</span><span>.</span><span style=color:#fdf4c1>t</span><span>) </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>star</span><span>.</span><span style=color:#fdf4c1>orbit</span><span style=color:#fe8019>/</span><span style=color:#d3869b>2</span><span>;
+</span><span>      </span><span style=color:#fdf4c1>star</span><span>.</span><span style=color:#fdf4c1>t </span><span style=color:#fe8019>+= </span><span style=color:#fdf4c1>star</span><span>.</span><span style=color:#fdf4c1>speed</span><span>;
+</span><span>    }
+</span></code></pre><p>然后每一帧进行移动！<pre class=language-js data-lang=js style=color:#fdf4c1aa;background-color:#282828><code class=language-js data-lang=js><span style=color:#fa5c4b>function </span><span style=color:#8ec07c>render</span><span>() {
+</span><span>  </span><span style=color:#8ec07c>requestAnimationFrame</span><span>(</span><span style=color:#fdf4c1>render</span><span>);
+</span><span>  </span><span style=color:#fdf4c1>galaxy.</span><span style=color:#8ec07c>render</span><span>();
+</span><span>  </span><span style=color:#fdf4c1>galaxy.</span><span style=color:#fabd2f>move</span><span>(); </span><span style=color:#928374;font-style:italic>// 动起来！
+</span><span>}
+</span></code></pre><p>大功告成！<p>在<a href=https://codepen.io/weak_ptr/pen/NENGYm>codepen</a>查看完整源码！<h3 id=1-7-dai-xu>1.7 待续</h3><blockquote><p>PS：不保证粘贴的代码都能跑，反正 codepen 上是都能的。</blockquote></article><p class=tags-data><a href=/tags/javascript>/javascript/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

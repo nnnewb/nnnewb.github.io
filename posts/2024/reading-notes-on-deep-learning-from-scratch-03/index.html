@@ -1,0 +1,478 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>《深度学习入门》读书笔记03</title><meta content=《深度学习入门》读书笔记03 name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-03/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=《深度学习入门》读书笔记03 property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-03/ property=twitter:url><meta content=《深度学习入门》读书笔记03 property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-03/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>《深度学习入门》读书笔记03</h1><p class=author-line>作于：2024-01-07 20:48 ，预计阅读时间 17 分钟<article><h1 id=shen-jing-wang-luo>神经网络</h1><blockquote><p>具体地讲，神经网络的一个重要性质是它可以自动地从数据中学习到合适的权重参数。</blockquote><h2 id=shen-jing-wang-luo-1>神经网络</h2><p>例子：<p><img alt=neuro-network src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-03/./img/neuro-network-fig1.png.webp><p>图中的神经网络共三层，其中两层有权重（隐藏层和输出层）。<p>按顺序分为第0层（输入层）、第1层（隐藏层）、第2层（输出层）。<p>这一章有个<strong>无底深坑</strong>要注意：书里明确提示，文中的 n 层神经网络，<strong>n=输入层+隐藏层+输出层-1</strong>。<p>在下文的神经网络实现里讲的 3 层神经网络，实际和本章开头配的图完全不一样！ 下文神经网络实现一节中，实现的网络实际有一个输入层，两个隐藏层，一个输出层。<h2 id=ji-huo-han-shu>激活函数</h2><p>回顾感知机的定义：<p>$$ y=\begin{cases} 0 & (w_1x_1 + w_2x_2 + bias \le 0) \ 1 & (w_1x_1 + w_2x_2 + bias \gt 0) \end{cases} $$<p>引入新的函数 $h(x)$ 来表示 $x$ 大于零时返回 1，$x$ 小于 0 返回 0 的行为，将上面的式子简化为：<p>$$ a = w_1x_1 + w_2x_2 + bias y = h(a) $$<p>$y$ 表示输出信号，$a$ 表示输入信号的加权和和偏置的总和，而 $h$ 就是所谓的激活函数。<h3 id=jie-yue-han-shu>阶跃函数</h3><p>阶跃函数的定义是输入在某个阈值前后发生跳跃的函数，例如上面定义的<p>$$ h = \begin{cases} 0 & (a \le 0) \ 1 & (a \gt 0) \end{cases} $$<p>函数图像如下<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span style=color:#fa5c4b>import </span><span>matplotlib.pyplot </span><span style=color:#fa5c4b>as </span><span>plt
+</span><span>
+</span><span>x </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.arange(</span><span style=color:#fe8019>-</span><span style=color:#d3869b>5.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>5.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.1</span><span style=color:#fdf4c1>)
+</span><span>y </span><span style=color:#fe8019>= </span><span>(x </span><span style=color:#fe8019>> </span><span style=color:#d3869b>0</span><span>)</span><span style=color:#fdf4c1>.astype(np.int32)
+</span><span style=color:#fdf4c1>plt.axvline(</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, color</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'black'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>plt.axhline(</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, color</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'black'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>plt.xticks(np.arange(</span><span style=color:#fe8019>-</span><span style=color:#d3869b>5.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>5.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>))
+</span><span style=color:#fdf4c1>plt.plot(x, y)
+</span><span style=color:#fdf4c1>plt.show()
+</span></code></pre><p><img alt=png src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-03/index_files/index_1_0.webp><p>阶跃函数的值呈现阶梯状的变化，所以称为阶跃函数。<h3 id=sigmoid-han-shu>sigmoid 函数</h3><p>sigmoid 函数的定义是：<p>$$ h(a) = \frac{1}{1 + e^{-a}} $$<p>函数图像如下<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span style=color:#fa5c4b>import </span><span>matplotlib.pyplot </span><span style=color:#fa5c4b>as </span><span>plt
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>sigmoid</span><span>(</span><span style=color:#fdf4c1>x</span><span>):
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>1 </span><span style=color:#fe8019>/ </span><span>(</span><span style=color:#d3869b>1 </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>np.exp(</span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>x)</span><span>)
+</span><span>
+</span><span>
+</span><span>x </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.arange(</span><span style=color:#fe8019>-</span><span style=color:#d3869b>5.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>5.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.1</span><span style=color:#fdf4c1>)
+</span><span>y </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1 </span><span style=color:#fe8019>/ </span><span>(</span><span style=color:#d3869b>1 </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>np.exp(</span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>x)</span><span>)
+</span><span style=color:#fdf4c1>plt.axvline(</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, color</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'black'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>plt.axhline(</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, color</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'black'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>plt.xticks(np.arange(</span><span style=color:#fe8019>-</span><span style=color:#d3869b>5.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>5.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>))
+</span><span style=color:#fdf4c1>plt.plot(x, y)
+</span><span style=color:#fdf4c1>plt.plot(x, sigmoid(x))
+</span><span style=color:#fdf4c1>plt.show()
+</span></code></pre><p><img alt=png src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-03/index_files/index_3_0.webp><p>sigmoid 函数和阶跃函数的区别：<ol><li>sigmoid 函数的输出曲线是平滑的，阶跃函数的输出曲线是阶梯状的。<li>sigmoid 函数的输出范围是 $x \in \mathbb{R}, 0 \le x \le 1$，阶跃函数的输出范围在 $x \in {0,1}$。</ol><p>两者的相似之处：<ol><li>sigmoid 和阶跃函数在输入越是大于零，输出接近1，反之输入越小，输出越接近0。换言之，输入重要性（权重）越大，输出越大。<li>两者取值都在 $x \in \mathbb{R}, 0 \le x \le 1$ 区间。阶跃函数值域是 sigmoid 函数值域的真子集。</ol><h3 id=fei-xian-xing-han-shu>非线性函数</h3><p>线性函数的定义是 $h(x) = cx$，其中 $c$ 是常数。高中数学知识，$h(x)$ 的函数图像是一条直线。 而非线性函数顾名思义，函数图像不是一条直线。<p>神经网络的激活函数必须是<strong>非线性函数</strong>，原因是线性函数做激活函数时，无论如何叠加层数，都有等效的无隐藏层神经网络。<p>例如，将 $h(x) = cx$ 这个函数叠加两层，得到 $h(h(x)) = c^2x$，这个函数的函数图像是一条直线，和原函数区别只在常数项不同。<p>依然可以等效为单层神经元，激活函数定义为 $y = ax$，其中 $a = c^2$。这样叠加多层神经网络就没有意义了。<h3 id=relu-han-shu>ReLU 函数</h3><p>ReLU (Rectified Linear Unit) 函数定义如下。<p>$$ h(a) = \max(0, a) $$<p>python 实现如下：<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>relu</span><span>(</span><span style=color:#fdf4c1>x</span><span>):
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>np.maximum(</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, x)
+</span></code></pre><p>函数图像如下：<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span style=color:#fa5c4b>import </span><span>matplotlib.pyplot </span><span style=color:#fa5c4b>as </span><span>plt
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>relu</span><span>(</span><span style=color:#fdf4c1>x</span><span>):
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>np.maximum(</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, x)
+</span><span>
+</span><span>
+</span><span>x </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.arange(</span><span style=color:#fe8019>-</span><span style=color:#d3869b>5.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>5.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.1</span><span style=color:#fdf4c1>)
+</span><span>y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>relu(x)
+</span><span>
+</span><span style=color:#fdf4c1>plt.axvline(</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, color</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'black'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>plt.axhline(</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, color</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'black'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>plt.xticks(np.arange(</span><span style=color:#fe8019>-</span><span style=color:#d3869b>5.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>5.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>))
+</span><span style=color:#fdf4c1>plt.plot(x, y)
+</span><span style=color:#fdf4c1>plt.show()
+</span></code></pre><p><img alt=png src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-03/index_files/index_5_0.webp><h2 id=ju-zhen-ji-suan>矩阵计算</h2><p><code>ndarray</code> 的 <code>dot</code> 计算的才是点积，<code>*</code> 运算符计算的不是。<p>点积的计算方式参考<a href=https://www.shuxuele.com/algebra/matrix-multiplying.html>矩阵乘法</a><p>$$ \begin{bmatrix} a & b \ c & d \end{bmatrix} \begin{bmatrix} e & f \ g & h \end{bmatrix} = \begin{bmatrix} ae + bg & af + bh \ ce + dg & cf + dh \end{bmatrix} $$<p>值得注意的是矩阵点积计算是不满足交换律的，即 $A \dot B \ne B \dot A$。<p>要求矩阵的形状满足符号左边的x1的列数等于符号右边的x2的行数。比如说 2x3 矩阵 可以和 3x2 矩阵求点积，但不能和 2x2 矩阵求点积。<p>矩阵点积运算结果形状是左边矩阵的行数和右边矩阵的列数。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span>
+</span><span>x1 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>2</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>3</span><span style=color:#fdf4c1>], [</span><span style=color:#d3869b>4</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>5</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>6</span><span style=color:#fdf4c1>]])
+</span><span>x2 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>2</span><span style=color:#fdf4c1>], [</span><span style=color:#d3869b>3</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>4</span><span style=color:#fdf4c1>], [</span><span style=color:#d3869b>5</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>6</span><span style=color:#fdf4c1>]])
+</span><span>
+</span><span>result </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>x1.dot(x2)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(result)
+</span><span style=color:#fa5c4b>assert </span><span>result.shape </span><span style=color:#fe8019>== </span><span>(x1.shape[</span><span style=color:#d3869b>0</span><span>], x2.shape[</span><span style=color:#d3869b>1</span><span>])
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>[[22 28]
+</span><span> [49 64]]
+</span></code></pre><p>更多关于矩阵计算内容不赘述。<p>矩阵乘法可以应用于神经网络层的权重参数计算。<p>例如设有 2 个神经元的输入层为 $x_0$ ，3 个神经元的中间层为 $x_1$，2个神经元的输出层为 $y$ 的神经网络：<p>$$ x_0 inputs = \begin{bmatrix} x_1 & x_2 \end{bmatrix} \ x_1 weights = \begin{bmatrix} neuro_1w_1 & neuro_2w_1 & neuro_3w_1 \ neuro_1w_2 & neuro_2w_2 & neuro_3w_2 \end{bmatrix} \ y weights = \begin{bmatrix} neuro_1w_1 & neuro_2w_1 \ neuro_1w_2 & neuro_2w_2 \ neuro_1w_3 & neuro_2w_3 \end{bmatrix} $$<p>$x_1$ 的矩阵含义可以这么表示。<table><thead><tr><th>/<th>神经元1<th>神经元2<th>神经元3<tbody><tr><td>输入权重1<td>1.0<td>1.0<td>1.0<tr><td>输入权重2<td>1.0<td>1.0<td>1.0</table><p>把神经元和输入权重构建出矩阵后，就可以利用矩阵乘法来计算一整个层每个神经元的输入加权和了(即$y=h(a)$中的$a$)。<p>批量处理神经元输入的加权和在机器学习中很重要，因为神经元的数量非常大，计算量非常大。 批量计算可以充分利用硬件加速机制比如SIMD指令或者CUDA。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span>inputs </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>]])
+</span><span>weights </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>0.5</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.5</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.5</span><span style=color:#fdf4c1>], [</span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>]])
+</span><span>accumulate </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>inputs.dot(weights)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(accumulate)
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>[[1.5 1.5 1.5]]
+</span></code></pre><p>那么现在实现一下三层神经网络。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span style=color:#fa5c4b>from </span><span>typing </span><span style=color:#fa5c4b>import </span><span>Callable, Sequence
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>identity</span><span>(</span><span style=color:#fdf4c1>x</span><span>: np.ndarray):
+</span><span>    </span><span style=color:#fa5c4b>return </span><span>x
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>sigmoid</span><span>(</span><span style=color:#fdf4c1>x</span><span>: np.ndarray):
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>1 </span><span style=color:#fe8019>/ </span><span>(</span><span style=color:#d3869b>1 </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>np.exp(</span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>x)</span><span>)
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>Layer</span><span>:
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__init__</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>name</span><span>: </span><span style=color:#fabd2f>str</span><span>, </span><span style=color:#fdf4c1>weights</span><span>: np.ndarray, </span><span style=color:#fdf4c1>biases</span><span>: np.ndarray,
+</span><span>                 </span><span style=color:#fdf4c1>activation</span><span>: Callable[[np.ndarray], np.ndarray]):
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.name </span><span style=color:#fe8019>= </span><span>name
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.weights </span><span style=color:#fe8019>= </span><span>weights
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.biases </span><span style=color:#fe8019>= </span><span>biases
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.activation </span><span style=color:#fe8019>= </span><span>activation
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>evaluate</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>inputs</span><span>: np.ndarray) -> np.ndarray:
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>self.activation(inputs.dot(self.weights) </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>self.biases)
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>Network</span><span>:
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__init__</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>layers</span><span>: Sequence[Layer]):
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.layers </span><span style=color:#fe8019>= </span><span>layers
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>evaluate</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>inputs</span><span>: np.ndarray) -> np.ndarray:
+</span><span>        </span><span style=color:#fa5c4b>for </span><span>layer </span><span style=color:#fa5c4b>in </span><span style=color:#fdf4c1>self</span><span>.layers:
+</span><span>            inputs </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>layer.evaluate(inputs)
+</span><span>        </span><span style=color:#fa5c4b>return </span><span>inputs
+</span><span>
+</span><span>
+</span><span>layers </span><span style=color:#fe8019>= </span><span>[
+</span><span>    </span><span style=color:#928374;font-style:italic># 输入层实际就是输入的向量
+</span><span>    </span><span style=color:#928374;font-style:italic># 隐藏层
+</span><span>    </span><span style=color:#fdf4c1>Layer(
+</span><span style=color:#fdf4c1>        </span><span style=color:#b8bb26>'input'</span><span style=color:#fdf4c1>,
+</span><span style=color:#fdf4c1>        weights</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>0.5</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.5</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.5</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>                          [</span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>]]),
+</span><span style=color:#fdf4c1>        biases</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>np.array([</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>, </span><span style=color:#fe8019>-</span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>, </span><span style=color:#fe8019>-</span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>]),
+</span><span style=color:#fdf4c1>        activation</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>sigmoid
+</span><span style=color:#fdf4c1>    )</span><span>,
+</span><span>    </span><span style=color:#928374;font-style:italic># 隐藏层
+</span><span>    </span><span style=color:#fdf4c1>Layer(
+</span><span style=color:#fdf4c1>        </span><span style=color:#b8bb26>'middle'</span><span style=color:#fdf4c1>,
+</span><span style=color:#fdf4c1>        weights</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>                          [</span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>                          [</span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>]]),
+</span><span style=color:#fdf4c1>        biases</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>np.array([</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>, </span><span style=color:#fe8019>-</span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>]),
+</span><span style=color:#fdf4c1>        activation</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>sigmoid
+</span><span style=color:#fdf4c1>    )</span><span>,
+</span><span>    </span><span style=color:#928374;font-style:italic># 输出层
+</span><span>    </span><span style=color:#fdf4c1>Layer(
+</span><span style=color:#fdf4c1>        </span><span style=color:#b8bb26>'output'</span><span style=color:#fdf4c1>,
+</span><span style=color:#fdf4c1>        weights</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>                          [</span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>]]),
+</span><span style=color:#fdf4c1>        biases</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>np.array([</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>, </span><span style=color:#fe8019>-</span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>]),
+</span><span style=color:#fdf4c1>        activation</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>identity
+</span><span style=color:#fdf4c1>    )
+</span><span>]
+</span><span>
+</span><span>network </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>Network(layers)
+</span><span>output </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>network.evaluate(np.array([[</span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>]]))
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(output)
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>[[0.40839964 0.40839964]]
+</span></code></pre><p>其中有个让我很困惑的地方就是所谓的<strong>偏置单元</strong>。<p>偏置单元恒定输出 1 连接下一层神经网络，在前文的激活函数公式 $h(x) = wx+b$ 里以及案例代码中偏置值都是一个矩阵或<code>np.ndarray</code>， 但在图例中偏置值看起来是个标量常数。而我预期的是每个神经元有个独立的偏置值。<p>钻了几分钟的牛角尖后注意到，当偏置单元恒定输出 1 的时候，那偏置单元输出的权重其实就等于偏置值了。 所以输出层得到的输入其实是 $h(w_b+x_1w_1+x_2w_2+x_3w_3)$，其中 $w_b$ 就是偏置值。<p>不过实际算的时候还是套最初的加权和公式。用偏置单元来表示应该是方便后面的反向传播理解和计算。<h2 id=shu-chu-ceng-she-ji>输出层设计</h2><p>神经网络可以用在分类问题和回归问题上，不过需要根据情况改变输出层的激活函数。 一般而言，回归问题用恒等函数，分类问题用softmax函数。<blockquote><p>注：恒等函数就是上面例子代码里的<code>identity</code>函数，其定义就是 $h(a) = a$。<p>又注: 分类问题是指像前两章里学的感知机实现逻辑门，即数据属于哪个类别的问题。 回归问题则是根据输入预测一个(可能连续的)数值的问题，比如根据人的照片预测体重。</blockquote><p>这一节引入了 softmax 函数，定义如下：<p>$$ softmax(a_k)=\frac{\exp(a_k)}{\sum_{i=1}^{n}\exp(a_i)} $$<p>其中，下标k表示输出层的第k个神经元，a_k表示第k个神经元的输入信号加权和。 exp表示e为底的指数函数，比如 $exp(3)=e^3$。 仔细看下公式会发现其实求的就是第k个神经元激活的概率，其中引入exp的原因我比较好奇搜了下， 有说是因为指数函数求导比较方便？即 $(e^x)'=e^x$。<p>python 实现如下：<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>softmax</span><span>(</span><span style=color:#fdf4c1>x</span><span>: np.ndarray):
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>np.exp(x) </span><span style=color:#fe8019>/ </span><span style=color:#fdf4c1>np.sum(np.exp(x))
+</span><span>
+</span><span>
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(softmax(np.array([</span><span style=color:#d3869b>0.3</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>2.9</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>4.0</span><span style=color:#fdf4c1>])))
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>[0.01821127 0.24519181 0.73659691]
+</span></code></pre><p>然后是 softmax 的变体，softmax 的公式直接用 python 实现有个问题是指数函数的输出会爆炸， 而浮点数类型是会溢出的，溢出就会变成 inf 然后一参与计算就 nan 了。<p>在 numpy 的场合可以修改一下 softmax 函数，让 $exp(a_k)$ 中的 $a_k$ 减去常数 $C'$，定义为 $C'=\max(a_1,a_2,...,a_n)$， numpy 就可以保证不溢出了...吗？<blockquote><p>注：$exp(a_k)$ 输入 $a_k$ 的最小值都会算出 inf 了，那就不是 softmax 的问题了， 可以先加个 bias 把数值巨大但数值间差异相对小的输入集合降到一个比较小的数字再处理。</blockquote><p>公式推导如下，我懒得敲 Latex 了：<p><img alt=softmax-modified src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-03/./img/softmax-modified.png.webp><p>优化后的实现如下：<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>softmax</span><span>(</span><span style=color:#fdf4c1>x</span><span>: np.ndarray):
+</span><span>    C </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.max(x)
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>np.exp(x </span><span style=color:#fe8019>- </span><span style=color:#fdf4c1>C) </span><span style=color:#fe8019>/ </span><span style=color:#fdf4c1>np.sum(np.exp(x </span><span style=color:#fe8019>- </span><span style=color:#fdf4c1>C))
+</span></code></pre><p>顺便吐槽一句，讲完 softmax 才提到因为要计算指数函数所以 softmax 一般在分类问题的输出层忽略以节省性能。<p>所以重要的还是 softmax 在训练阶段的作用。<p>最后是输出层的神经元数量。<p>分类问题中输出层神经元数量一般就是类别的数量，比如手写数字识别就有 10 个类别。<h2 id=shi-bie-shou-xie-shu-zi>识别手写数字</h2><p>mnist 真的没啥可说的，对 ai 感兴趣上手走得第一步弯路就是 <code>import tensorflow as tf</code> 和 mnist 数据集。<h3 id=jia-zai-shu-ju-ji>加载数据集</h3><pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>sys
+</span><span style=color:#fa5c4b>import </span><span>os
+</span><span style=color:#fdf4c1>sys.path.append(os.pardir)
+</span><span>
+</span><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span style=color:#fa5c4b>from </span><span>matplotlib </span><span style=color:#fa5c4b>import </span><span>pyplot </span><span style=color:#fa5c4b>as </span><span>plt
+</span><span>
+</span><span style=color:#fa5c4b>from </span><span>dataset.mnist </span><span style=color:#fa5c4b>import </span><span>load_mnist
+</span><span>
+</span><span>(x_train, t_train), (x_test, t_test) </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>load_mnist(flatten</span><span style=color:#fe8019>=</span><span style=color:#d3869b>True</span><span style=color:#fdf4c1>, normalize</span><span style=color:#fe8019>=</span><span style=color:#d3869b>False</span><span style=color:#fdf4c1>)
+</span><span>img </span><span style=color:#fe8019>= </span><span>x_train[</span><span style=color:#d3869b>0</span><span>]
+</span><span>label </span><span style=color:#fe8019>= </span><span>t_train[</span><span style=color:#d3869b>0</span><span>]
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(label)  </span><span style=color:#928374;font-style:italic># 5
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(img.shape)  </span><span style=color:#928374;font-style:italic># (784,)
+</span><span>img </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>img.reshape(</span><span style=color:#d3869b>28</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>28</span><span style=color:#fdf4c1>)  </span><span style=color:#928374;font-style:italic># 把图像的形状变成原来的尺寸
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(img.shape)  </span><span style=color:#928374;font-style:italic># (28, 28)
+</span><span style=color:#fdf4c1>plt.imshow(img)
+</span><span style=color:#fdf4c1>plt.show()
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>5
+</span><span>(784,)
+</span><span>(28, 28)
+</span></code></pre><p><img alt=png src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-03/index_files/index_18_1.webp><p>代码有几个要解释的地方。<p><code>x_train</code> 是训练数据集，图片大小是 28x28 的灰度图，每个字节就是一个灰度值，每张图就是一个 784 长度的 numpy 数组。<p><code>t_train</code> 是训练的标签，同一个下标对应的 <code>x_train</code> 就是标签对应的图片。<p><code>reshape</code> 函数的作用是把一维的数组转换成二维的数组，比如把 784 长度的数组转换成 28x28 的二维数组。<h3 id=ping-gu-shen-jing-wang-luo>评估神经网络</h3><p>现在定义神经网络。示例的神经网络一共三层，两个隐藏层一个输出层。输入层 784 个神经元，隐藏层分别是 50 个和 100 个神经元，输出层 10 个神经元。<p>隐藏层神经元数量是任意的，不过我猜太少会对识别精度有影响，而超过一定数量对识别精度的帮助应该会出现边际效应递减。<p>需要注意的是下文示例中 <code>load_mnist</code> 默认使用了 <code>normalize=True</code> 参数，会把输入的灰度值 0~255 转成 0~1 的浮点数。<p><code>numpy.argmax</code> 函数的作用是找到最大值的下标，用于找出神经网络输出层10个神经元中哪个下标最大(最可能是哪个数字)，然后和 <code>t_train</code> 的标签对比，确认是否识别正确。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>pickle
+</span><span>
+</span><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span style=color:#fa5c4b>from </span><span>typing </span><span style=color:#fa5c4b>import </span><span>Callable, Sequence
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>Layer</span><span>:
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__init__</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>name</span><span>: </span><span style=color:#fabd2f>str</span><span>, </span><span style=color:#fdf4c1>weights</span><span>: np.ndarray, </span><span style=color:#fdf4c1>biases</span><span>: np.ndarray,
+</span><span>                 </span><span style=color:#fdf4c1>activation</span><span>: Callable[[np.ndarray], np.ndarray]):
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.name </span><span style=color:#fe8019>= </span><span>name
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.weights </span><span style=color:#fe8019>= </span><span>weights
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.biases </span><span style=color:#fe8019>= </span><span>biases
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.activation </span><span style=color:#fe8019>= </span><span>activation
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>evaluate</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>inputs</span><span>: np.ndarray) -> np.ndarray:
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>self.activation(inputs.dot(self.weights) </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>self.biases)
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>Network</span><span>:
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__init__</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>layers</span><span>: Sequence[Layer]):
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.layers </span><span style=color:#fe8019>= </span><span>layers
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>evaluate</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>inputs</span><span>: np.ndarray) -> np.ndarray:
+</span><span>        </span><span style=color:#fa5c4b>for </span><span>layer </span><span style=color:#fa5c4b>in </span><span style=color:#fdf4c1>self</span><span>.layers:
+</span><span>            inputs </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>layer.evaluate(inputs)
+</span><span>        </span><span style=color:#fa5c4b>return </span><span>inputs
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>softmax</span><span>(</span><span style=color:#fdf4c1>x</span><span>: np.ndarray):
+</span><span>    C </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.max(x)
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>np.exp(x </span><span style=color:#fe8019>- </span><span style=color:#fdf4c1>C) </span><span style=color:#fe8019>/ </span><span style=color:#fdf4c1>np.sum(np.exp(x </span><span style=color:#fe8019>- </span><span style=color:#fdf4c1>C))
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>sigmoid</span><span>(</span><span style=color:#fdf4c1>x</span><span>: np.ndarray):
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>1 </span><span style=color:#fe8019>/ </span><span>(</span><span style=color:#d3869b>1 </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>np.exp(</span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>x)</span><span>)
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>with </span><span style=color:#fabd2f>open</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'./sample_weight.pkl'</span><span style=color:#fdf4c1>, </span><span style=color:#b8bb26>'rb'</span><span style=color:#fdf4c1>) </span><span style=color:#fa5c4b>as </span><span>f:
+</span><span>    weights </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>pickle.load(f)
+</span><span>
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(weights.keys())
+</span><span>
+</span><span>layers </span><span style=color:#fe8019>= </span><span>[
+</span><span>    </span><span style=color:#928374;font-style:italic># 输入层略
+</span><span>    </span><span style=color:#928374;font-style:italic># 隐藏层1
+</span><span>    </span><span style=color:#fdf4c1>Layer(
+</span><span style=color:#fdf4c1>        name</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'hidden1'</span><span style=color:#fdf4c1>,
+</span><span style=color:#fdf4c1>        weights</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>weights[</span><span style=color:#b8bb26>'W1'</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>        biases</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>weights[</span><span style=color:#b8bb26>'b1'</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>        activation</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>sigmoid,
+</span><span style=color:#fdf4c1>    )</span><span>,
+</span><span>    </span><span style=color:#928374;font-style:italic># 隐藏层2
+</span><span>    </span><span style=color:#fdf4c1>Layer(
+</span><span style=color:#fdf4c1>        name</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'hidden2'</span><span style=color:#fdf4c1>,
+</span><span style=color:#fdf4c1>        weights</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>weights[</span><span style=color:#b8bb26>'W2'</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>        biases</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>weights[</span><span style=color:#b8bb26>'b2'</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>        activation</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>sigmoid,
+</span><span style=color:#fdf4c1>    )</span><span>,
+</span><span>    </span><span style=color:#928374;font-style:italic># 输出层
+</span><span>    </span><span style=color:#fdf4c1>Layer(
+</span><span style=color:#fdf4c1>        name</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'output'</span><span style=color:#fdf4c1>,
+</span><span style=color:#fdf4c1>        weights</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>weights[</span><span style=color:#b8bb26>'W3'</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>        biases</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>weights[</span><span style=color:#b8bb26>'b3'</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>        activation</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>softmax,
+</span><span style=color:#fdf4c1>    )</span><span>,
+</span><span>]
+</span><span>
+</span><span>network </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>Network(layers)
+</span><span>(x_train, t_train), (x_test, t_test) </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>load_mnist()
+</span><span>accuracy </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0
+</span><span style=color:#fa5c4b>for </span><span>i </span><span style=color:#fa5c4b>in </span><span style=color:#fabd2f>range</span><span style=color:#fdf4c1>(</span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(x_train))</span><span>:
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>i </span><span style=color:#fe8019>% </span><span style=color:#d3869b>1000 </span><span style=color:#fe8019>== </span><span style=color:#d3869b>0</span><span>:
+</span><span>        percent </span><span style=color:#fe8019>= </span><span>i</span><span style=color:#fe8019>/</span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(x_train)</span><span style=color:#fe8019>*</span><span style=color:#d3869b>100
+</span><span>        </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'evaluating ... %</span><span style=color:#fdf4c1>{</span><span style=color:#fabd2f>round</span><span style=color:#fdf4c1>(percent,</span><span style=color:#d3869b>2</span><span style=color:#fdf4c1>)}</span><span style=color:#b8bb26>'</span><span style=color:#fdf4c1>)
+</span><span>    y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>network.evaluate(x_train[i])
+</span><span>    p </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.argmax(y)
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>p </span><span style=color:#fe8019>== </span><span>t_train[i]:
+</span><span>        accuracy </span><span style=color:#fe8019>+= </span><span style=color:#d3869b>1
+</span><span>
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'accuracy: %'</span><span style=color:#fdf4c1>, </span><span style=color:#fabd2f>round</span><span style=color:#fdf4c1>(accuracy</span><span style=color:#fe8019>/</span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(x_train), </span><span style=color:#d3869b>4</span><span style=color:#fdf4c1>)</span><span style=color:#fe8019>*</span><span style=color:#d3869b>100</span><span style=color:#fdf4c1>)
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>dict_keys(['b2', 'W1', 'b1', 'W2', 'W3', 'b3'])
+</span><span>evaluating ... %0.0
+</span><span>evaluating ... %1.67
+</span><span>evaluating ... %3.33
+</span><span>evaluating ... %5.0
+</span><span>evaluating ... %6.67
+</span><span>evaluating ... %8.33
+</span><span>evaluating ... %10.0
+</span><span>evaluating ... %11.67
+</span><span>evaluating ... %13.33
+</span><span>evaluating ... %15.0
+</span><span>evaluating ... %16.67
+</span><span>evaluating ... %18.33
+</span><span>evaluating ... %20.0
+</span><span>evaluating ... %21.67
+</span><span>evaluating ... %23.33
+</span><span>evaluating ... %25.0
+</span><span>evaluating ... %26.67
+</span><span>evaluating ... %28.33
+</span><span>evaluating ... %30.0
+</span><span>evaluating ... %31.67
+</span><span>evaluating ... %33.33
+</span><span>evaluating ... %35.0
+</span><span>evaluating ... %36.67
+</span><span>evaluating ... %38.33
+</span><span>evaluating ... %40.0
+</span><span>evaluating ... %41.67
+</span><span>evaluating ... %43.33
+</span><span>evaluating ... %45.0
+</span><span>evaluating ... %46.67
+</span><span>evaluating ... %48.33
+</span><span>evaluating ... %50.0
+</span><span>evaluating ... %51.67
+</span><span>evaluating ... %53.33
+</span><span>evaluating ... %55.0
+</span><span>evaluating ... %56.67
+</span><span>evaluating ... %58.33
+</span><span>evaluating ... %60.0
+</span><span>evaluating ... %61.67
+</span><span>evaluating ... %63.33
+</span><span>evaluating ... %65.0
+</span><span>evaluating ... %66.67
+</span><span>evaluating ... %68.33
+</span><span>evaluating ... %70.0
+</span><span>evaluating ... %71.67
+</span><span>evaluating ... %73.33
+</span><span>evaluating ... %75.0
+</span><span>evaluating ... %76.67
+</span><span>evaluating ... %78.33
+</span><span>evaluating ... %80.0
+</span><span>evaluating ... %81.67
+</span><span>evaluating ... %83.33
+</span><span>evaluating ... %85.0
+</span><span>evaluating ... %86.67
+</span><span>evaluating ... %88.33
+</span><span>evaluating ... %90.0
+</span><span>evaluating ... %91.67
+</span><span>evaluating ... %93.33
+</span><span>evaluating ... %95.0
+</span><span>evaluating ... %96.67
+</span><span>evaluating ... %98.33
+</span><span>accuracy: % 93.58
+</span></code></pre><p>然后是更有趣的部分，批量化训练。<p>在前面的所有神经网络例子中，输入都是一维的，输出也是一维的。书中的批处理例子，则把输入改成了二维的，每行一个样本，输出也变成了二维的，一行一个结果。<p>不修改神经网络代码的情况下是怎么做到的呢？<p>还是要依赖矩阵乘法的计算法则。还记得矩阵点积定义吧？<p>$$ \begin{bmatrix} a & b \ c & d \end{bmatrix} \begin{bmatrix} e & f \ g & h \end{bmatrix} = \begin{bmatrix} ae + bg & af + bh \ ce + dg & cf + dh \end{bmatrix} $$<ol><li>点积用运算符左侧矩阵的行，分别乘以运算符右侧矩阵的列。<li>点积计算结果的行数等于运算符左侧的行数，列数等于运算符右侧的列数。</ol><p>神经网络的每个层，每个神经元，都有一个输入矩阵和权重矩阵，输出也是一个矩阵。当输入层输入是一维矩阵时，根据上述的定义，神经元的输入加权和总是一维的。<p>w 的下标对应的是输入信号的下标（运算符左侧矩阵的列号），上标是神经元的序号。 下面的公式中 a 的下标是输入样本的索引（运算符左侧矩阵的行号），上标是神经元的序号。<p>$$ \begin{bmatrix} x_1 & x_2 & x_3 \end{bmatrix} \begin{bmatrix} w_{1}^{1} & w_{1}^{2} & w_{1}^{3} \ w_{2}^{1} & w_{2}^{2} & w_{2}^{3} \ w_{3}^{1} & w_{3}^{2} & w_{3}^{3} \end{bmatrix}= \begin{bmatrix} a_{1}^{1} & a_{1}^{2} & a_{1}^{2} \end{bmatrix} $$<p>而神经元的输出不会改变输入加权和矩阵的形状。<p>$$ activation(\begin{bmatrix} a_1^1 & a_1^2 & a_1^3 \end{bmatrix})= \begin{bmatrix} y_1^1 & y_1^2 & y_1^3 \end{bmatrix} $$<p>而神经元输出会作为下一个神经元的输入，于是信号矩阵在神经网络层之间传递时，只有列数会发生变更，行数总是和输入一致的。<p>因此当输入是多维的时候，最终输出层输出的结果矩阵，总是和输入层的矩阵行数一致。<p>我们实际试一下。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>pickle
+</span><span>
+</span><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span style=color:#fa5c4b>from </span><span>typing </span><span style=color:#fa5c4b>import </span><span>Callable, Sequence
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>Layer</span><span>:
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__init__</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>name</span><span>: </span><span style=color:#fabd2f>str</span><span>, </span><span style=color:#fdf4c1>weights</span><span>: np.ndarray, </span><span style=color:#fdf4c1>biases</span><span>: np.ndarray,
+</span><span>                 </span><span style=color:#fdf4c1>activation</span><span>: Callable[[np.ndarray], np.ndarray]):
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.name </span><span style=color:#fe8019>= </span><span>name
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.weights </span><span style=color:#fe8019>= </span><span>weights
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.biases </span><span style=color:#fe8019>= </span><span>biases
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.activation </span><span style=color:#fe8019>= </span><span>activation
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>evaluate</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>inputs</span><span>: np.ndarray) -> np.ndarray:
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>self.activation(inputs.dot(self.weights) </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>self.biases)
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>Network</span><span>:
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__init__</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>layers</span><span>: Sequence[Layer]):
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.layers </span><span style=color:#fe8019>= </span><span>layers
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>evaluate</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>inputs</span><span>: np.ndarray) -> np.ndarray:
+</span><span>        </span><span style=color:#fa5c4b>for </span><span>layer </span><span style=color:#fa5c4b>in </span><span style=color:#fdf4c1>self</span><span>.layers:
+</span><span>            inputs </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>layer.evaluate(inputs)
+</span><span>        </span><span style=color:#fa5c4b>return </span><span>inputs
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>softmax</span><span>(</span><span style=color:#fdf4c1>x</span><span>: np.ndarray):
+</span><span>    C </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.max(x)
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>np.exp(x </span><span style=color:#fe8019>- </span><span style=color:#fdf4c1>C) </span><span style=color:#fe8019>/ </span><span style=color:#fdf4c1>np.sum(np.exp(x </span><span style=color:#fe8019>- </span><span style=color:#fdf4c1>C))
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>sigmoid</span><span>(</span><span style=color:#fdf4c1>x</span><span>: np.ndarray):
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>1 </span><span style=color:#fe8019>/ </span><span>(</span><span style=color:#d3869b>1 </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>np.exp(</span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>x)</span><span>)
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>with </span><span style=color:#fabd2f>open</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'./sample_weight.pkl'</span><span style=color:#fdf4c1>, </span><span style=color:#b8bb26>'rb'</span><span style=color:#fdf4c1>) </span><span style=color:#fa5c4b>as </span><span>f:
+</span><span>    weights </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>pickle.load(f)
+</span><span>
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(weights.keys())
+</span><span>
+</span><span>layers </span><span style=color:#fe8019>= </span><span>[
+</span><span>    </span><span style=color:#928374;font-style:italic># 输入层略
+</span><span>    </span><span style=color:#928374;font-style:italic># 隐藏层1
+</span><span>    </span><span style=color:#fdf4c1>Layer(
+</span><span style=color:#fdf4c1>        name</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'hidden1'</span><span style=color:#fdf4c1>,
+</span><span style=color:#fdf4c1>        weights</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>weights[</span><span style=color:#b8bb26>'W1'</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>        biases</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>weights[</span><span style=color:#b8bb26>'b1'</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>        activation</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>sigmoid,
+</span><span style=color:#fdf4c1>    )</span><span>,
+</span><span>    </span><span style=color:#928374;font-style:italic># 隐藏层2
+</span><span>    </span><span style=color:#fdf4c1>Layer(
+</span><span style=color:#fdf4c1>        name</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'hidden2'</span><span style=color:#fdf4c1>,
+</span><span style=color:#fdf4c1>        weights</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>weights[</span><span style=color:#b8bb26>'W2'</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>        biases</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>weights[</span><span style=color:#b8bb26>'b2'</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>        activation</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>sigmoid,
+</span><span style=color:#fdf4c1>    )</span><span>,
+</span><span>    </span><span style=color:#928374;font-style:italic># 输出层
+</span><span>    </span><span style=color:#fdf4c1>Layer(
+</span><span style=color:#fdf4c1>        name</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'output'</span><span style=color:#fdf4c1>,
+</span><span style=color:#fdf4c1>        weights</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>weights[</span><span style=color:#b8bb26>'W3'</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>        biases</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>weights[</span><span style=color:#b8bb26>'b3'</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>        activation</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>softmax,
+</span><span style=color:#fdf4c1>    )</span><span>,
+</span><span>]
+</span><span>
+</span><span>network </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>Network(layers)
+</span><span>(x_train, t_train), (x_test, t_test) </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>load_mnist()
+</span><span>accuracy </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0
+</span><span>batch_size</span><span style=color:#fe8019>=</span><span style=color:#d3869b>100
+</span><span style=color:#fa5c4b>for </span><span>i </span><span style=color:#fa5c4b>in </span><span style=color:#fabd2f>range</span><span style=color:#fdf4c1>(</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>,</span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(x_train),batch_size)</span><span>:
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>i </span><span style=color:#fe8019>% </span><span style=color:#d3869b>1000 </span><span style=color:#fe8019>== </span><span style=color:#d3869b>0</span><span>:
+</span><span>        percent </span><span style=color:#fe8019>= </span><span>i</span><span style=color:#fe8019>/</span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(x_train)</span><span style=color:#fe8019>*</span><span style=color:#d3869b>100
+</span><span>        </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'evaluating ... %</span><span style=color:#fdf4c1>{</span><span style=color:#fabd2f>round</span><span style=color:#fdf4c1>(percent,</span><span style=color:#d3869b>2</span><span style=color:#fdf4c1>)}</span><span style=color:#b8bb26>'</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span>    y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>network.evaluate(x_train[i:i</span><span style=color:#fe8019>+</span><span style=color:#fdf4c1>batch_size])
+</span><span>    p </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.argmax(y, axis</span><span style=color:#fe8019>=</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>) </span><span style=color:#928374;font-style:italic># 取每一行的最大值下标
+</span><span>    accuracy </span><span style=color:#fe8019>+= </span><span style=color:#fdf4c1>np.sum(p </span><span style=color:#fe8019>== </span><span style=color:#fdf4c1>t_train[i:i</span><span style=color:#fe8019>+</span><span style=color:#fdf4c1>batch_size])
+</span><span>
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'accuracy: %'</span><span style=color:#fdf4c1>, </span><span style=color:#fabd2f>round</span><span style=color:#fdf4c1>(accuracy</span><span style=color:#fe8019>/</span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(x_train), </span><span style=color:#d3869b>4</span><span style=color:#fdf4c1>)</span><span style=color:#fe8019>*</span><span style=color:#d3869b>100</span><span style=color:#fdf4c1>)
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>dict_keys(['b2', 'W1', 'b1', 'W2', 'W3', 'b3'])
+</span><span>evaluating ... %0.0
+</span><span>evaluating ... %1.67
+</span><span>evaluating ... %3.33
+</span><span>evaluating ... %5.0
+</span><span>evaluating ... %6.67
+</span><span>evaluating ... %8.33
+</span><span>evaluating ... %10.0
+</span><span>evaluating ... %11.67
+</span><span>evaluating ... %13.33
+</span><span>evaluating ... %15.0
+</span><span>evaluating ... %16.67
+</span><span>evaluating ... %18.33
+</span><span>evaluating ... %20.0
+</span><span>evaluating ... %21.67
+</span><span>evaluating ... %23.33
+</span><span>evaluating ... %25.0
+</span><span>evaluating ... %26.67
+</span><span>evaluating ... %28.33
+</span><span>evaluating ... %30.0
+</span><span>evaluating ... %31.67
+</span><span>evaluating ... %33.33
+</span><span>evaluating ... %35.0
+</span><span>evaluating ... %36.67
+</span><span>evaluating ... %38.33
+</span><span>evaluating ... %40.0
+</span><span>evaluating ... %41.67
+</span><span>evaluating ... %43.33
+</span><span>evaluating ... %45.0
+</span><span>evaluating ... %46.67
+</span><span>evaluating ... %48.33
+</span><span>evaluating ... %50.0
+</span><span>evaluating ... %51.67
+</span><span>evaluating ... %53.33
+</span><span>evaluating ... %55.0
+</span><span>evaluating ... %56.67
+</span><span>evaluating ... %58.33
+</span><span>evaluating ... %60.0
+</span><span>evaluating ... %61.67
+</span><span>evaluating ... %63.33
+</span><span>evaluating ... %65.0
+</span><span>evaluating ... %66.67
+</span><span>evaluating ... %68.33
+</span><span>evaluating ... %70.0
+</span><span>evaluating ... %71.67
+</span><span>evaluating ... %73.33
+</span><span>evaluating ... %75.0
+</span><span>evaluating ... %76.67
+</span><span>evaluating ... %78.33
+</span><span>evaluating ... %80.0
+</span><span>evaluating ... %81.67
+</span><span>evaluating ... %83.33
+</span><span>evaluating ... %85.0
+</span><span>evaluating ... %86.67
+</span><span>evaluating ... %88.33
+</span><span>evaluating ... %90.0
+</span><span>evaluating ... %91.67
+</span><span>evaluating ... %93.33
+</span><span>evaluating ... %95.0
+</span><span>evaluating ... %96.67
+</span><span>evaluating ... %98.33
+</span><span>accuracy: % 93.58
+</span></code></pre><p>我的机器上实测到的结果是，100个样本一批处理，训练集执行只花了0.3秒。一个一个处理则花费了7秒左右。<p>可以说批量化加速的效果是很明显的。</article><p class=tags-data><a href=/tags/python>/python/</a> <a href=/tags/numpy>/numpy/</a> <a href=/tags/matplotlib>/matplotlib/</a> <a href=/tags/shen-du-xue-xi>/深度学习/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

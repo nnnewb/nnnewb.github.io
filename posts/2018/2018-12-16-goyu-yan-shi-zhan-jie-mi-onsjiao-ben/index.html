@@ -1,0 +1,309 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>go语言实战之解密ons脚本</title><meta content=go语言实战之解密ons脚本 name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2018/2018-12-16-goyu-yan-shi-zhan-jie-mi-onsjiao-ben/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=go语言实战之解密ons脚本 property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2018/2018-12-16-goyu-yan-shi-zhan-jie-mi-onsjiao-ben/ property=twitter:url><meta content=go语言实战之解密ons脚本 property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2018/2018-12-16-goyu-yan-shi-zhan-jie-mi-onsjiao-ben/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>go语言实战之解密ons脚本</h1><p class=author-line>作于：2018-12-16 23:44 ，预计阅读时间 2 分钟<article><h2 id=intro>Intro</h2><p>ons 是一个开放源代码的视觉小说引擎，以简单实用出名。本博用 golang 来解密 ons 引擎的<code>.dat</code>和<code>.nt2</code>脚本，主要实践目标是异步解密输出。<h2 id=suan-fa>算法</h2><p><code>.dat</code>的加密非常简单，一次异或。密码是<code>0x84</code>。<p>可以用 go 非常简单粗暴地写出以下代码。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>:= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>&lt; </span><span style=color:#fabd2f>len</span><span>(</span><span style=color:#fdf4c1>buf</span><span>); </span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>++ </span><span>{
+</span><span>    </span><span style=color:#fdf4c1>buf</span><span>[</span><span style=color:#fdf4c1>i</span><span>] </span><span style=color:#fe8019>^= </span><span style=color:#d3869b>0x84
+</span><span>}
+</span></code></pre><p><code>.nt2</code>的加密同样简单，一次异或，密码是<code>0x85 & 0x97</code>。<p>可以用 go 非常粗暴地写出以下代码。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>:= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>&lt; </span><span style=color:#fabd2f>len</span><span>(</span><span style=color:#fdf4c1>buf</span><span>); </span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>++ </span><span>{
+</span><span>    </span><span style=color:#fdf4c1>buf</span><span>[</span><span style=color:#fdf4c1>i</span><span>] </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fdf4c1>buf</span><span>[</span><span style=color:#fdf4c1>i</span><span>] </span><span style=color:#fe8019>^ </span><span>(</span><span style=color:#d3869b>0x85 </span><span style=color:#fe8019>& </span><span style=color:#d3869b>0x97</span><span>)) </span><span style=color:#fe8019>- </span><span style=color:#d3869b>1
+</span><span>}
+</span></code></pre><h2 id=yi-bu-du-wen-jian>异步读文件</h2><p>go 方式比较多，<code>ioutil</code>或者<code>bufio</code>或者<code>os</code>都有文件模块。这里采用<code>bufio</code>套<code>os.Open</code>的方式读文件。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>readFile</span><span>(</span><span style=color:#fdf4c1>p </span><span style=color:#fabd2f>string</span><span>, </span><span style=color:#fdf4c1>outChannel </span><span style=color:#fa5c4b>chan </span><span>[]</span><span style=color:#fabd2f>byte</span><span>) {
+</span><span>    </span><span style=color:#928374;font-style:italic>// 只读方式打开文件
+</span><span>	</span><span style=color:#fdf4c1>file</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>os</span><span>.</span><span style=color:#fdf4c1>OpenFile</span><span>(</span><span style=color:#fdf4c1>p</span><span>, </span><span style=color:#fdf4c1>os</span><span>.</span><span style=color:#fdf4c1>O_RDONLY</span><span>, </span><span style=color:#d3869b>0644</span><span>)
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>		</span><span style=color:#fabd2f>panic</span><span>(</span><span style=color:#fdf4c1>err</span><span>)
+</span><span>	}
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// 包装一层 bufio
+</span><span>    </span><span style=color:#fdf4c1>reader </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>bufio</span><span>.</span><span style=color:#fdf4c1>NewReader</span><span>(</span><span style=color:#fdf4c1>file</span><span>)
+</span><span>    </span><span style=color:#928374;font-style:italic>// 准备一个保存读取结果的buf
+</span><span>	</span><span style=color:#fa5c4b>var </span><span style=color:#fdf4c1>buf </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>new</span><span>([</span><span style=color:#d3869b>1024000</span><span>]</span><span style=color:#fabd2f>byte</span><span>)
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>for </span><span>{
+</span><span>        </span><span style=color:#928374;font-style:italic>// 循环读
+</span><span>		</span><span style=color:#fdf4c1>n</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>reader</span><span>.</span><span style=color:#fdf4c1>Read</span><span>(</span><span style=color:#fdf4c1>buf</span><span>[:])
+</span><span>
+</span><span>        </span><span style=color:#928374;font-style:italic>// 没有内容了就退出循环
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>n </span><span style=color:#fe8019>== </span><span style=color:#d3869b>0 </span><span>{
+</span><span>			</span><span style=color:#fa5c4b>break
+</span><span>		}
+</span><span>
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>			</span><span style=color:#fabd2f>panic</span><span>(</span><span style=color:#fdf4c1>err</span><span>)
+</span><span>        }
+</span><span>
+</span><span>        </span><span style=color:#928374;font-style:italic>// 把读到的结果用 channel 传递给下一道处理工序
+</span><span>		</span><span style=color:#fdf4c1>outChannel </span><span style=color:#fe8019>&lt;- </span><span style=color:#fdf4c1>buf</span><span>[:</span><span style=color:#fdf4c1>n</span><span>]
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>defer func</span><span>() {
+</span><span>		</span><span style=color:#fabd2f>close</span><span>(</span><span style=color:#fdf4c1>outChannel</span><span>)
+</span><span>		</span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>file</span><span>.</span><span style=color:#fdf4c1>Close</span><span>()
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>			</span><span style=color:#fabd2f>panic</span><span>(</span><span style=color:#fdf4c1>err</span><span>)
+</span><span>		}
+</span><span>	}()
+</span><span>}
+</span></code></pre><h2 id=yi-bu-xie-wen-jian>异步写文件</h2><p>写文件的方式和读文件的方式差不多，由那几个包提供。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>writeFile</span><span>(</span><span style=color:#fdf4c1>p </span><span style=color:#fabd2f>string</span><span>, </span><span style=color:#fdf4c1>outChannel </span><span style=color:#fa5c4b>chan </span><span>[]</span><span style=color:#fabd2f>byte</span><span>, </span><span style=color:#fdf4c1>done </span><span style=color:#fa5c4b>chan </span><span style=color:#fabd2f>bool</span><span>) {
+</span><span>    </span><span style=color:#928374;font-style:italic>// 只读方式打开文件，已存在文件则清空内容，未存在文件则创建，文件权限 rw-r--r--
+</span><span>	</span><span style=color:#fdf4c1>file</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>os</span><span>.</span><span style=color:#fdf4c1>OpenFile</span><span>(</span><span style=color:#fdf4c1>p</span><span>, </span><span style=color:#fdf4c1>os</span><span>.</span><span style=color:#fdf4c1>O_WRONLY</span><span style=color:#fe8019>|</span><span style=color:#fdf4c1>os</span><span>.</span><span style=color:#fdf4c1>O_TRUNC</span><span style=color:#fe8019>|</span><span style=color:#fdf4c1>os</span><span>.</span><span style=color:#fdf4c1>O_CREATE</span><span>, </span><span style=color:#d3869b>0644</span><span>)
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>		</span><span style=color:#fabd2f>panic</span><span>(</span><span style=color:#fdf4c1>err</span><span>)
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fdf4c1>writer </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>bufio</span><span>.</span><span style=color:#fdf4c1>NewWriter</span><span>(</span><span style=color:#fdf4c1>file</span><span>)
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>for </span><span>{
+</span><span>        </span><span style=color:#928374;font-style:italic>// 从上一道工序取得解密后的数据
+</span><span>        </span><span style=color:#fdf4c1>buf</span><span>, </span><span style=color:#fdf4c1>more </span><span style=color:#fe8019>:= &lt;-</span><span style=color:#fdf4c1>outChannel
+</span><span>        </span><span style=color:#928374;font-style:italic>// 如果所有数据全部取得，则结束写入
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fe8019>!</span><span style=color:#fdf4c1>more </span><span>{
+</span><span>			</span><span style=color:#fa5c4b>break
+</span><span>		}
+</span><span>
+</span><span>        </span><span style=color:#928374;font-style:italic>// 写入
+</span><span>		</span><span style=color:#fdf4c1>_</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>writer</span><span>.</span><span style=color:#fdf4c1>Write</span><span>(</span><span style=color:#fdf4c1>buf</span><span>)
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>			</span><span style=color:#fabd2f>panic</span><span>(</span><span style=color:#fdf4c1>err</span><span>)
+</span><span>		}
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>defer func</span><span>() {
+</span><span>		</span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>writer</span><span>.</span><span style=color:#fdf4c1>Flush</span><span>()
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>			</span><span style=color:#fabd2f>panic</span><span>(</span><span style=color:#fdf4c1>err</span><span>)
+</span><span>		}
+</span><span>
+</span><span>		</span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>file</span><span>.</span><span style=color:#fdf4c1>Close</span><span>()
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>			</span><span style=color:#fabd2f>panic</span><span>(</span><span style=color:#fdf4c1>err</span><span>)
+</span><span>		}
+</span><span>
+</span><span>		</span><span style=color:#fdf4c1>done </span><span style=color:#fe8019>&lt;- </span><span style=color:#d3869b>true
+</span><span>	}()
+</span><span>}
+</span></code></pre><h2 id=yi-bu-jie-mi>异步解密</h2><p>解密过程就像是水管上的过滤器，水流进来处理好，流出去。内容乏善可陈，就直接丢代码好了。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>decodeDat</span><span>(</span><span style=color:#fdf4c1>inChannel </span><span style=color:#fa5c4b>chan </span><span>[]</span><span style=color:#fabd2f>byte</span><span>, </span><span style=color:#fdf4c1>outChannel </span><span style=color:#fa5c4b>chan </span><span>[]</span><span style=color:#fabd2f>byte</span><span>) {
+</span><span>	</span><span style=color:#fa5c4b>for </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>buf</span><span>, </span><span style=color:#fdf4c1>more </span><span style=color:#fe8019>:= &lt;-</span><span style=color:#fdf4c1>inChannel
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fe8019>!</span><span style=color:#fdf4c1>more </span><span>{
+</span><span>			</span><span style=color:#fa5c4b>break
+</span><span>		}
+</span><span>
+</span><span>		</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>:= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>&lt; </span><span style=color:#fabd2f>len</span><span>(</span><span style=color:#fdf4c1>buf</span><span>); </span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>++ </span><span>{
+</span><span>			</span><span style=color:#fdf4c1>buf</span><span>[</span><span style=color:#fdf4c1>i</span><span>] </span><span style=color:#fe8019>^= </span><span style=color:#d3869b>0x84
+</span><span>		}
+</span><span>		</span><span style=color:#fdf4c1>outChannel </span><span style=color:#fe8019>&lt;- </span><span style=color:#fdf4c1>buf
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>defer func</span><span>() {
+</span><span>		</span><span style=color:#fabd2f>close</span><span>(</span><span style=color:#fdf4c1>outChannel</span><span>)
+</span><span>	}()
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>decodeNt2</span><span>(</span><span style=color:#fdf4c1>inChannel </span><span style=color:#fa5c4b>chan </span><span>[]</span><span style=color:#fabd2f>byte</span><span>, </span><span style=color:#fdf4c1>outChannel </span><span style=color:#fa5c4b>chan </span><span>[]</span><span style=color:#fabd2f>byte</span><span>) {
+</span><span>	</span><span style=color:#fa5c4b>for </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>buf</span><span>, </span><span style=color:#fdf4c1>more </span><span style=color:#fe8019>:= &lt;-</span><span style=color:#fdf4c1>inChannel
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fe8019>!</span><span style=color:#fdf4c1>more </span><span>{
+</span><span>			</span><span style=color:#fa5c4b>break
+</span><span>		}
+</span><span>
+</span><span>		</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>:= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>&lt; </span><span style=color:#fabd2f>len</span><span>(</span><span style=color:#fdf4c1>buf</span><span>); </span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>++ </span><span>{
+</span><span>			</span><span style=color:#fdf4c1>buf</span><span>[</span><span style=color:#fdf4c1>i</span><span>] </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fdf4c1>buf</span><span>[</span><span style=color:#fdf4c1>i</span><span>] </span><span style=color:#fe8019>^ </span><span>(</span><span style=color:#d3869b>0x85 </span><span style=color:#fe8019>& </span><span style=color:#d3869b>0x97</span><span>)) </span><span style=color:#fe8019>- </span><span style=color:#d3869b>1
+</span><span>		}
+</span><span>		</span><span style=color:#fdf4c1>outChannel </span><span style=color:#fe8019>&lt;- </span><span style=color:#fdf4c1>buf
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>defer func</span><span>() {
+</span><span>		</span><span style=color:#fabd2f>close</span><span>(</span><span style=color:#fdf4c1>outChannel</span><span>)
+</span><span>	}()
+</span><span>}
+</span></code></pre><h2 id=diao-du>调度</h2><p>严肃地说，我认为这种调度模式是显然不对的。正确的调度方式应该是这样。<pre class=language-mermaid data-lang=mermaid style=color:#fdf4c1aa;background-color:#282828><code class=language-mermaid data-lang=mermaid><span style=color:#fa5c4b>graph </span><span style=color:#d3869b>TB</span><span>;
+</span><span>	</span><span style=color:#8ec07c>A</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>cli</span><span style=color:#fe8019>] </span><span>--> |启动|B[read worker];
+</span><span>	A </span><span style=color:#fe8019>--> |</span><span style=color:#b8bb26>启动</span><span style=color:#fe8019>|</span><span> C[write worker];
+</span><span>	A </span><span style=color:#fe8019>--> |</span><span style=color:#b8bb26>启动</span><span style=color:#fe8019>|</span><span> D[decode worker];
+</span><span>	A </span><span style=color:#fe8019>--> |</span><span style=color:#b8bb26>启动</span><span style=color:#fe8019>|</span><span> E[scheduler];
+</span><span>	E </span><span style=color:#fe8019>--> |</span><span style=color:#b8bb26>发出读指令</span><span style=color:#fe8019>|</span><span> B;
+</span><span>	B </span><span style=color:#fe8019>--></span><span> |发送来源标识符+内容| D;
+</span><span>	D </span><span style=color:#fe8019>--></span><span> |发送来源标识符+处理后的内容| C;
+</span></code></pre><p>对于有多个 worker 的情况，也需要调度器协调才行，不过直觉上来说硬盘读写性能会是先一步的瓶颈。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>main</span><span>() {
+</span><span>	</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>:= </span><span style=color:#d3869b>1</span><span>; </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>&lt; </span><span style=color:#fabd2f>len</span><span>(</span><span style=color:#fdf4c1>os</span><span>.</span><span style=color:#fdf4c1>Args</span><span>); </span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>++ </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>decodeChannel</span><span>, </span><span style=color:#fdf4c1>outChannel</span><span>, </span><span style=color:#fdf4c1>done </span><span style=color:#fe8019>:= </span><span style=color:#fabd2f>make</span><span>(</span><span style=color:#fa5c4b>chan </span><span>[]</span><span style=color:#fabd2f>byte</span><span>), </span><span style=color:#fabd2f>make</span><span>(</span><span style=color:#fa5c4b>chan </span><span>[]</span><span style=color:#fabd2f>byte</span><span>), </span><span style=color:#fabd2f>make</span><span>(</span><span style=color:#fa5c4b>chan </span><span style=color:#fabd2f>bool</span><span>)
+</span><span>		</span><span style=color:#fdf4c1>p </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>os</span><span>.</span><span style=color:#fdf4c1>Args</span><span>[</span><span style=color:#fdf4c1>i</span><span>]
+</span><span>		</span><span style=color:#fa5c4b>go </span><span style=color:#fdf4c1>readFile</span><span>(</span><span style=color:#fdf4c1>p</span><span>, </span><span style=color:#fdf4c1>decodeChannel</span><span>)
+</span><span>
+</span><span>		</span><span style=color:#fa5c4b>switch </span><span style=color:#fdf4c1>path</span><span>.</span><span style=color:#fdf4c1>Ext</span><span>(</span><span style=color:#fdf4c1>p</span><span>) {
+</span><span>		</span><span style=color:#fa5c4b>case </span><span style=color:#b8bb26>".dat"</span><span>:
+</span><span>			</span><span style=color:#fa5c4b>go </span><span style=color:#fdf4c1>decodeDat</span><span>(</span><span style=color:#fdf4c1>decodeChannel</span><span>, </span><span style=color:#fdf4c1>outChannel</span><span>)
+</span><span>		</span><span style=color:#fa5c4b>case </span><span style=color:#b8bb26>".nt2"</span><span>:
+</span><span>			</span><span style=color:#fa5c4b>go </span><span style=color:#fdf4c1>decodeNt2</span><span>(</span><span style=color:#fdf4c1>decodeChannel</span><span>, </span><span style=color:#fdf4c1>outChannel</span><span>)
+</span><span>		</span><span style=color:#fa5c4b>default</span><span>:
+</span><span>			</span><span style=color:#fdf4c1>log</span><span>.</span><span style=color:#fdf4c1>Println</span><span>(</span><span style=color:#fdf4c1>path</span><span>.</span><span style=color:#fdf4c1>Ext</span><span>(</span><span style=color:#fdf4c1>p</span><span>))
+</span><span>			</span><span style=color:#fabd2f>panic</span><span>(</span><span style=color:#b8bb26>"Input file should be .dat or .nt2 encrypted script!"</span><span>)
+</span><span>		}
+</span><span>
+</span><span>		</span><span style=color:#fa5c4b>go </span><span style=color:#fdf4c1>writeFile</span><span>(</span><span style=color:#fdf4c1>path</span><span>.</span><span style=color:#fdf4c1>Base</span><span>(</span><span style=color:#fdf4c1>p</span><span>)</span><span style=color:#fe8019>+</span><span style=color:#b8bb26>".txt"</span><span>, </span><span style=color:#fdf4c1>outChannel</span><span>, </span><span style=color:#fdf4c1>done</span><span>)
+</span><span>		</span><span style=color:#fe8019>&lt;-</span><span style=color:#fdf4c1>done
+</span><span>	}
+</span><span>}
+</span></code></pre><p>完整代码：<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>package </span><span style=color:#fdf4c1>main
+</span><span>
+</span><span style=color:#fa5c4b>import </span><span>(
+</span><span>	</span><span style=color:#b8bb26>"bufio"
+</span><span>	</span><span style=color:#b8bb26>"log"
+</span><span>	</span><span style=color:#b8bb26>"os"
+</span><span>	</span><span style=color:#b8bb26>"path"
+</span><span>)
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>main</span><span>() {
+</span><span>	</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>:= </span><span style=color:#d3869b>1</span><span>; </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>&lt; </span><span style=color:#fabd2f>len</span><span>(</span><span style=color:#fdf4c1>os</span><span>.</span><span style=color:#fdf4c1>Args</span><span>); </span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>++ </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>decodeChannel</span><span>, </span><span style=color:#fdf4c1>outChannel</span><span>, </span><span style=color:#fdf4c1>done </span><span style=color:#fe8019>:= </span><span style=color:#fabd2f>make</span><span>(</span><span style=color:#fa5c4b>chan </span><span>[]</span><span style=color:#fabd2f>byte</span><span>), </span><span style=color:#fabd2f>make</span><span>(</span><span style=color:#fa5c4b>chan </span><span>[]</span><span style=color:#fabd2f>byte</span><span>), </span><span style=color:#fabd2f>make</span><span>(</span><span style=color:#fa5c4b>chan </span><span style=color:#fabd2f>bool</span><span>)
+</span><span>		</span><span style=color:#fdf4c1>p </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>os</span><span>.</span><span style=color:#fdf4c1>Args</span><span>[</span><span style=color:#fdf4c1>i</span><span>]
+</span><span>		</span><span style=color:#fa5c4b>go </span><span style=color:#fdf4c1>readFile</span><span>(</span><span style=color:#fdf4c1>p</span><span>, </span><span style=color:#fdf4c1>decodeChannel</span><span>)
+</span><span>
+</span><span>		</span><span style=color:#fa5c4b>switch </span><span style=color:#fdf4c1>path</span><span>.</span><span style=color:#fdf4c1>Ext</span><span>(</span><span style=color:#fdf4c1>p</span><span>) {
+</span><span>		</span><span style=color:#fa5c4b>case </span><span style=color:#b8bb26>".dat"</span><span>:
+</span><span>			</span><span style=color:#fa5c4b>go </span><span style=color:#fdf4c1>decodeDat</span><span>(</span><span style=color:#fdf4c1>decodeChannel</span><span>, </span><span style=color:#fdf4c1>outChannel</span><span>)
+</span><span>		</span><span style=color:#fa5c4b>case </span><span style=color:#b8bb26>".nt2"</span><span>:
+</span><span>			</span><span style=color:#fa5c4b>go </span><span style=color:#fdf4c1>decodeNt2</span><span>(</span><span style=color:#fdf4c1>decodeChannel</span><span>, </span><span style=color:#fdf4c1>outChannel</span><span>)
+</span><span>		</span><span style=color:#fa5c4b>default</span><span>:
+</span><span>			</span><span style=color:#fdf4c1>log</span><span>.</span><span style=color:#fdf4c1>Println</span><span>(</span><span style=color:#fdf4c1>path</span><span>.</span><span style=color:#fdf4c1>Ext</span><span>(</span><span style=color:#fdf4c1>p</span><span>))
+</span><span>			</span><span style=color:#fabd2f>panic</span><span>(</span><span style=color:#b8bb26>"Input file should be .dat or .nt2 encrypted script!"</span><span>)
+</span><span>		}
+</span><span>
+</span><span>		</span><span style=color:#fa5c4b>go </span><span style=color:#fdf4c1>writeFile</span><span>(</span><span style=color:#fdf4c1>path</span><span>.</span><span style=color:#fdf4c1>Base</span><span>(</span><span style=color:#fdf4c1>p</span><span>)</span><span style=color:#fe8019>+</span><span style=color:#b8bb26>".txt"</span><span>, </span><span style=color:#fdf4c1>outChannel</span><span>, </span><span style=color:#fdf4c1>done</span><span>)
+</span><span>		</span><span style=color:#fe8019>&lt;-</span><span style=color:#fdf4c1>done
+</span><span>	}
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>readFile</span><span>(</span><span style=color:#fdf4c1>p </span><span style=color:#fabd2f>string</span><span>, </span><span style=color:#fdf4c1>outChannel </span><span style=color:#fa5c4b>chan </span><span>[]</span><span style=color:#fabd2f>byte</span><span>) {
+</span><span>	</span><span style=color:#fdf4c1>file</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>os</span><span>.</span><span style=color:#fdf4c1>OpenFile</span><span>(</span><span style=color:#fdf4c1>p</span><span>, </span><span style=color:#fdf4c1>os</span><span>.</span><span style=color:#fdf4c1>O_RDONLY</span><span>, </span><span style=color:#d3869b>0644</span><span>)
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>		</span><span style=color:#fabd2f>panic</span><span>(</span><span style=color:#fdf4c1>err</span><span>)
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fdf4c1>reader </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>bufio</span><span>.</span><span style=color:#fdf4c1>NewReader</span><span>(</span><span style=color:#fdf4c1>file</span><span>)
+</span><span>	</span><span style=color:#fa5c4b>var </span><span style=color:#fdf4c1>buf </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>new</span><span>([</span><span style=color:#d3869b>1024000</span><span>]</span><span style=color:#fabd2f>byte</span><span>)
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>for </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>n</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>reader</span><span>.</span><span style=color:#fdf4c1>Read</span><span>(</span><span style=color:#fdf4c1>buf</span><span>[:])
+</span><span>
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>n </span><span style=color:#fe8019>== </span><span style=color:#d3869b>0 </span><span>{
+</span><span>			</span><span style=color:#fa5c4b>break
+</span><span>		}
+</span><span>
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>			</span><span style=color:#fabd2f>panic</span><span>(</span><span style=color:#fdf4c1>err</span><span>)
+</span><span>		}
+</span><span>		</span><span style=color:#fdf4c1>outChannel </span><span style=color:#fe8019>&lt;- </span><span style=color:#fdf4c1>buf</span><span>[:</span><span style=color:#fdf4c1>n</span><span>]
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>defer func</span><span>() {
+</span><span>		</span><span style=color:#fabd2f>close</span><span>(</span><span style=color:#fdf4c1>outChannel</span><span>)
+</span><span>		</span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>file</span><span>.</span><span style=color:#fdf4c1>Close</span><span>()
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>			</span><span style=color:#fabd2f>panic</span><span>(</span><span style=color:#fdf4c1>err</span><span>)
+</span><span>		}
+</span><span>	}()
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>writeFile</span><span>(</span><span style=color:#fdf4c1>p </span><span style=color:#fabd2f>string</span><span>, </span><span style=color:#fdf4c1>outChannel </span><span style=color:#fa5c4b>chan </span><span>[]</span><span style=color:#fabd2f>byte</span><span>, </span><span style=color:#fdf4c1>done </span><span style=color:#fa5c4b>chan </span><span style=color:#fabd2f>bool</span><span>) {
+</span><span>	</span><span style=color:#fdf4c1>file</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>os</span><span>.</span><span style=color:#fdf4c1>OpenFile</span><span>(</span><span style=color:#fdf4c1>p</span><span>, </span><span style=color:#fdf4c1>os</span><span>.</span><span style=color:#fdf4c1>O_WRONLY</span><span style=color:#fe8019>|</span><span style=color:#fdf4c1>os</span><span>.</span><span style=color:#fdf4c1>O_TRUNC</span><span style=color:#fe8019>|</span><span style=color:#fdf4c1>os</span><span>.</span><span style=color:#fdf4c1>O_CREATE</span><span>, </span><span style=color:#d3869b>0644</span><span>)
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>		</span><span style=color:#fabd2f>panic</span><span>(</span><span style=color:#fdf4c1>err</span><span>)
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fdf4c1>writer </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>bufio</span><span>.</span><span style=color:#fdf4c1>NewWriter</span><span>(</span><span style=color:#fdf4c1>file</span><span>)
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>for </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>buf</span><span>, </span><span style=color:#fdf4c1>more </span><span style=color:#fe8019>:= &lt;-</span><span style=color:#fdf4c1>outChannel
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fe8019>!</span><span style=color:#fdf4c1>more </span><span>{
+</span><span>			</span><span style=color:#fa5c4b>break
+</span><span>		}
+</span><span>
+</span><span>		</span><span style=color:#fdf4c1>_</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>writer</span><span>.</span><span style=color:#fdf4c1>Write</span><span>(</span><span style=color:#fdf4c1>buf</span><span>)
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>			</span><span style=color:#fabd2f>panic</span><span>(</span><span style=color:#fdf4c1>err</span><span>)
+</span><span>		}
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>defer func</span><span>() {
+</span><span>		</span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>writer</span><span>.</span><span style=color:#fdf4c1>Flush</span><span>()
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>			</span><span style=color:#fabd2f>panic</span><span>(</span><span style=color:#fdf4c1>err</span><span>)
+</span><span>		}
+</span><span>
+</span><span>		</span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>file</span><span>.</span><span style=color:#fdf4c1>Close</span><span>()
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>			</span><span style=color:#fabd2f>panic</span><span>(</span><span style=color:#fdf4c1>err</span><span>)
+</span><span>		}
+</span><span>
+</span><span>		</span><span style=color:#fdf4c1>done </span><span style=color:#fe8019>&lt;- </span><span style=color:#d3869b>true
+</span><span>	}()
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>decodeDat</span><span>(</span><span style=color:#fdf4c1>inChannel </span><span style=color:#fa5c4b>chan </span><span>[]</span><span style=color:#fabd2f>byte</span><span>, </span><span style=color:#fdf4c1>outChannel </span><span style=color:#fa5c4b>chan </span><span>[]</span><span style=color:#fabd2f>byte</span><span>) {
+</span><span>	</span><span style=color:#fa5c4b>for </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>buf</span><span>, </span><span style=color:#fdf4c1>more </span><span style=color:#fe8019>:= &lt;-</span><span style=color:#fdf4c1>inChannel
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fe8019>!</span><span style=color:#fdf4c1>more </span><span>{
+</span><span>			</span><span style=color:#fa5c4b>break
+</span><span>		}
+</span><span>
+</span><span>		</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>:= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>&lt; </span><span style=color:#fabd2f>len</span><span>(</span><span style=color:#fdf4c1>buf</span><span>); </span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>++ </span><span>{
+</span><span>			</span><span style=color:#fdf4c1>buf</span><span>[</span><span style=color:#fdf4c1>i</span><span>] </span><span style=color:#fe8019>^= </span><span style=color:#d3869b>0x84
+</span><span>		}
+</span><span>		</span><span style=color:#fdf4c1>outChannel </span><span style=color:#fe8019>&lt;- </span><span style=color:#fdf4c1>buf
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>defer func</span><span>() {
+</span><span>		</span><span style=color:#fabd2f>close</span><span>(</span><span style=color:#fdf4c1>outChannel</span><span>)
+</span><span>	}()
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>decodeNt2</span><span>(</span><span style=color:#fdf4c1>inChannel </span><span style=color:#fa5c4b>chan </span><span>[]</span><span style=color:#fabd2f>byte</span><span>, </span><span style=color:#fdf4c1>outChannel </span><span style=color:#fa5c4b>chan </span><span>[]</span><span style=color:#fabd2f>byte</span><span>) {
+</span><span>	</span><span style=color:#fa5c4b>for </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>buf</span><span>, </span><span style=color:#fdf4c1>more </span><span style=color:#fe8019>:= &lt;-</span><span style=color:#fdf4c1>inChannel
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fe8019>!</span><span style=color:#fdf4c1>more </span><span>{
+</span><span>			</span><span style=color:#fa5c4b>break
+</span><span>		}
+</span><span>
+</span><span>		</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>:= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>&lt; </span><span style=color:#fabd2f>len</span><span>(</span><span style=color:#fdf4c1>buf</span><span>); </span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>++ </span><span>{
+</span><span>			</span><span style=color:#fdf4c1>buf</span><span>[</span><span style=color:#fdf4c1>i</span><span>] </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fdf4c1>buf</span><span>[</span><span style=color:#fdf4c1>i</span><span>] </span><span style=color:#fe8019>^ </span><span>(</span><span style=color:#d3869b>0x85 </span><span style=color:#fe8019>& </span><span style=color:#d3869b>0x97</span><span>)) </span><span style=color:#fe8019>- </span><span style=color:#d3869b>1
+</span><span>		}
+</span><span>		</span><span style=color:#fdf4c1>outChannel </span><span style=color:#fe8019>&lt;- </span><span style=color:#fdf4c1>buf
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>defer func</span><span>() {
+</span><span>		</span><span style=color:#fabd2f>close</span><span>(</span><span style=color:#fdf4c1>outChannel</span><span>)
+</span><span>	}()
+</span><span>}
+</span></code></pre></article><p class=tags-data><a href=/tags/golang>/golang/</a> <a href=/tags/ons>/ons/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

@@ -1,0 +1,97 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>go-sqlmock 上手记录和延伸的一些想法</title><meta content="go-sqlmock 上手记录和延伸的一些想法" name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2022/2022-06-24-go-sqlmock-shang-shou-ji-lu-he-yan-shen-de-yi-xie-xiang-fa/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content="go-sqlmock 上手记录和延伸的一些想法" property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2022/2022-06-24-go-sqlmock-shang-shou-ji-lu-he-yan-shen-de-yi-xie-xiang-fa/ property=twitter:url><meta content="go-sqlmock 上手记录和延伸的一些想法" property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2022/2022-06-24-go-sqlmock-shang-shou-ji-lu-he-yan-shen-de-yi-xie-xiang-fa/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>go-sqlmock 上手记录和延伸的一些想法</h1><p class=author-line>作于：2022-06-24 14:38 ，预计阅读时间 6 分钟<article><h2 id=qian-yan>前言</h2><p>用 <code>DATA-DOG/go-sqlmock</code> 结合 gorm 的简单案例和一些延伸想法。<h2 id=wei-shen-me-mock>为什么mock</h2><p>使用 mock 技术的主要原因就是确保待测代码的行为稳定，不会因为外部条件变化而造成测试结果不稳定。比如网络延迟或断开、数据库高负载或维护中、你需要的微服务正在被另一个人调试或者你不在内网但急需排查个问题等等。<p>开发中这些问题都还好，因为偶发原因失败就失败，排除后测通就行。但一旦单测进入自动化运行的阶段，这些问题就会变得很烦人：测一个服务要启动一整个集群；写用例的时候要考虑支持并发测试提高单测速度；各种偶发故障/平台故障/环境问题/配置错误频繁打断工作流......<p>实际体验过亲手写微服务 API 单测然后放 CI 跑这会儿该都是泪。<h2 id=gou-zao-gorm-db>构造 GORM.DB</h2><pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fdf4c1>db</span><span>, </span><span style=color:#fdf4c1>mock</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>sqlmock</span><span>.</span><span style=color:#fdf4c1>New</span><span>()
+</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>err
+</span><span>}
+</span><span>
+</span><span style=color:#fdf4c1>gormDB</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>gorm</span><span>.</span><span style=color:#fdf4c1>Open</span><span>(</span><span style=color:#fdf4c1>postgres</span><span>.</span><span style=color:#fdf4c1>New</span><span>(</span><span style=color:#fdf4c1>postgres</span><span>.</span><span style=color:#fdf4c1>Config</span><span>{</span><span style=color:#fdf4c1>Conn</span><span>: </span><span style=color:#fdf4c1>db</span><span>}))
+</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>err
+</span><span>}
+</span></code></pre><p><code>gorm.Open</code>的首参数 <code>Dialector</code>是具体数据库驱动，同时也指定了使用的 SQL 方言。<code>go-sqlmock</code>只提供了<code>*sql.DB</code>，所以还需要 <code>Dialector</code> 构造方法支持从 <code>sql.DB</code> 创建。常用的数据库大概都支持。<h2 id=kong-zhi-fan-zhuan>控制反转</h2><p>非常重要的一步，待测代码不能硬编码了数据库实例，不然就没有 mock 的空间了。放 python 里说不定还能 monkeypatch 弥补下，go 里就全看代码架构设计好不好。<p>go 的设计理念之一就是 <em>Composition over inheritance</em> ，不仅体现在类型系统设计上，在组织代码时的体现就是优先用显式装配的方式构造对象，避免使用全局变量等强耦合方式。<p>再做一句补充，什么叫强耦合？如果你发现待测功能有一个依赖项没法单测的时候 mock 掉，那多半就是写法强耦合了。<p>所以用 mock 写单测还有个好处，就是发现待测代码里不好的设计。当然前提还是单测设计得好的情况下，不管做什么事想搞砸总比想做好容易。<p>回到正题，虽然这一小节说 IoC ，但并不是要求用什么 DI 框架，而是指优先用装配的方式显式提供依赖或依赖的工厂函数，避免在待测代码内自行构造依赖对象或引用全局变量。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>type </span><span style=color:#8ec07c>B </span><span style=color:#fa5c4b>interface </span><span>{ </span><span style=color:#928374;font-style:italic>/* ... */ </span><span>}
+</span><span style=color:#fa5c4b>type </span><span style=color:#8ec07c>BImpl </span><span style=color:#fa5c4b>struct </span><span>{ </span><span style=color:#928374;font-style:italic>/* ... */ </span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>type </span><span style=color:#8ec07c>A </span><span style=color:#fa5c4b>struct </span><span>{
+</span><span>    </span><span style=color:#fdf4c1>b </span><span style=color:#fe8019>*</span><span style=color:#fa5c4b>B
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>NewA</span><span>(</span><span style=color:#fdf4c1>b </span><span style=color:#fe8019>*</span><span style=color:#fa5c4b>B</span><span>) </span><span style=color:#fe8019>*</span><span style=color:#fa5c4b>A </span><span>{
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>A</span><span>{
+</span><span>        </span><span style=color:#fdf4c1>b</span><span>: </span><span style=color:#fdf4c1>b</span><span>,
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span>(</span><span style=color:#fe8019>*</span><span style=color:#fa5c4b>A</span><span>) </span><span style=color:#8ec07c>method</span><span>() {
+</span><span>    </span><span style=color:#fdf4c1>NewBImpl</span><span>().</span><span style=color:#fdf4c1>Say</span><span>() </span><span style=color:#928374;font-style:italic>// 强耦合，想再把 B 换成别的东西必须侵入 A 的业务，无法 mock
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span>(</span><span style=color:#fdf4c1>a </span><span style=color:#fe8019>*</span><span style=color:#fa5c4b>A</span><span>) </span><span style=color:#8ec07c>method2</span><span>() {
+</span><span>    </span><span style=color:#fdf4c1>a</span><span>.</span><span style=color:#fdf4c1>b</span><span>.</span><span style=color:#fdf4c1>Say</span><span>() </span><span style=color:#928374;font-style:italic>// 弱耦合，可以随便把 b 换成别的类型，单测这个接口时 b 可以替换
+</span><span>}
+</span></code></pre><p>这种耦合关系还得具体分析，像是业务代码里直接用 <code>gorm.DB</code> 做函数签名，的确对 GORM 形成了强耦合，但 GORM 内部和 <code>gorm.Dialect</code> 又是弱耦合，<code>gorm.Dialect</code> 和 <code>sql.DB</code> 强耦合，<code>sql.DB</code> 和驱动弱耦合。<p>于是我们可以选择 mock <code>gorm.Dialect</code> 或 mock 驱动，实际分析来看，<code>gorm.Dialect</code> 大多可以从 <code>sql.DB</code> 构造，mock 掉 <code>sql.DB</code> 就等于 mock 掉了 <code>gorm.Dialect</code>，等于 mock 掉了 <code>gorm.DB</code>，所以 mock <code>sql.DB</code> 收益更好。当然，mock <code>sql.DB</code> 的底层实现还是 mock 驱动。<p>和 <code>gorm</code> 构成强耦合不是特别严重的问题（不太可能随便更换 ORM 框架），但能把数据库操作单独抽象出来肯定是更好的，一方面可以单独单测，另一方面出现破坏性变更比如大版本升级时影响范围会更可控，变更结果也可以被已经写好的单测验证。<h2 id=li-zi>例子</h2><pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>package </span><span style=color:#fdf4c1>tests
+</span><span>
+</span><span style=color:#fa5c4b>import </span><span>(
+</span><span>	</span><span style=color:#b8bb26>"testing"
+</span><span>
+</span><span>	</span><span style=color:#fdf4c1>sqlmock </span><span style=color:#b8bb26>"github.com/DATA-DOG/go-sqlmock"
+</span><span>	</span><span style=color:#b8bb26>"gorm.io/driver/postgres"
+</span><span>	</span><span style=color:#b8bb26>"gorm.io/gorm"
+</span><span>)
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>TestMockGORM</span><span>(</span><span style=color:#fdf4c1>t </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>testing</span><span>.</span><span style=color:#fa5c4b>T</span><span>) {
+</span><span>	</span><span style=color:#fdf4c1>db</span><span>, </span><span style=color:#fdf4c1>mock</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>sqlmock</span><span>.</span><span style=color:#fdf4c1>New</span><span>()
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>t</span><span>.</span><span style=color:#fdf4c1>Fatal</span><span>(</span><span style=color:#fdf4c1>err</span><span>)
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fdf4c1>gormDB</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>gorm</span><span>.</span><span style=color:#fdf4c1>Open</span><span>(</span><span style=color:#fdf4c1>postgres</span><span>.</span><span style=color:#fdf4c1>New</span><span>(</span><span style=color:#fdf4c1>postgres</span><span>.</span><span style=color:#fdf4c1>Config</span><span>{</span><span style=color:#fdf4c1>Conn</span><span>: </span><span style=color:#fdf4c1>db</span><span>}))
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>t</span><span>.</span><span style=color:#fdf4c1>Fatal</span><span>(</span><span style=color:#fdf4c1>err</span><span>)
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fdf4c1>mock</span><span>.</span><span style=color:#fdf4c1>ExpectQuery</span><span>(</span><span style=color:#b8bb26>`SELECT "id" FROM "tbl"`</span><span>).</span><span style=color:#fdf4c1>WillReturnRows</span><span>(</span><span style=color:#fdf4c1>mock</span><span>.</span><span style=color:#fdf4c1>NewRows</span><span>([]</span><span style=color:#fabd2f>string</span><span>{</span><span style=color:#b8bb26>"id"</span><span>}).</span><span style=color:#fdf4c1>AddRow</span><span>(</span><span style=color:#d3869b>1</span><span>))
+</span><span>	</span><span style=color:#fdf4c1>results </span><span style=color:#fe8019>:= </span><span style=color:#fabd2f>make</span><span>([]</span><span style=color:#fabd2f>int</span><span>, </span><span style=color:#d3869b>0</span><span>)
+</span><span>	</span><span style=color:#fdf4c1>gormDB</span><span>.</span><span style=color:#fdf4c1>Table</span><span>(</span><span style=color:#b8bb26>"tbl"</span><span>).</span><span style=color:#fdf4c1>Pluck</span><span>(</span><span style=color:#b8bb26>"id"</span><span>, </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>results</span><span>)
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fabd2f>len</span><span>(</span><span style=color:#fdf4c1>results</span><span>) </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>1 </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>t</span><span>.</span><span style=color:#fdf4c1>Fatal</span><span>(</span><span style=color:#b8bb26>"应该只有1行结果"</span><span>)
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>results</span><span>[</span><span style=color:#d3869b>0</span><span>] </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>1 </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>t</span><span>.</span><span style=color:#fdf4c1>Fatal</span><span>(</span><span style=color:#b8bb26>"结果应该是1"</span><span>)
+</span><span>	}
+</span><span>}
+</span><span>
+</span></code></pre><p>go-sqlmock 也不是完美的，mock 驱动的方案比较烦心的问题就是需要针对每个查询请求添加 <code>ExpectQuery</code>，为了模拟真实环境，还需要<code>WillReturnRows</code>添加返回结果。对于<code>SELECT * FROM tbl</code> 的情况就需要手写一遍字段名和模拟数据，相当啰嗦。可以考虑自己写个助手函数从 gorm 模型生成<code>sqlmock.Rows</code>。<h2 id=jie-lun>结论</h2><p>用 mock 技术写单测成本比较高，收益是单测跑起来稳定不容易意外挂，能并发测试，特别适合自动化跑，测试粒度也更细。<p>反之测 API 的话写起来成本比较低，但依赖一整套配套的运行环境（这一成本在系统规模很大或需要自动化频繁跑的时候会很明显），依赖的外部因素比较多容易意外挂，测试粒度比较粗。适合开发阶段写一个，或者大可用 <code>grpcurl</code> 或 <code>postman</code> 一类工具替代。<p>以上。</article><p class=tags-data><a href=/tags/golang>/golang/</a> <a href=/tags/go-sqlmock>/go-sqlmock/</a> <a href=/tags/mock>/mock/</a> <a href=/tags/dan-yuan-ce-shi>/单元测试/</a> <a href=/tags/ce-shi>/测试/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

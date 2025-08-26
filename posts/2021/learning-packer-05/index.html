@@ -1,0 +1,191 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>加壳原理05：利用图片隐藏</title><meta content=加壳原理05：利用图片隐藏 name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2021/learning-packer-05/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=加壳原理05：利用图片隐藏 property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2021/learning-packer-05/ property=twitter:url><meta content=加壳原理05：利用图片隐藏 property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2021/learning-packer-05/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>加壳原理05：利用图片隐藏</h1><p class=author-line>作于：2021-10-21 21:17 ，预计阅读时间 7 分钟<article><h2 id=qian-yan>前言</h2><p>完成了简单的压缩壳之后放松下，在52论坛病毒分析区看到过几次把代码隐藏到图片里的做法，也看到过把程序转成图片后训练神经网络来判断有没有恶意的，于是就想，淦，这不是挺好玩的嘛。<h2 id=0x01-si-lu>0x01 思路</h2><p>用图片保存程序最简单的做法就是直接把程序每个字节都转成像素，然后输出成灰度图。比较进阶的做法就像是二维码了，大色块，容错校验，图片被压到包浆也能扫出来。但那个有点点难（我菜）最终成果也大到不现实，而且实话说打包到程序里就不用考虑被二次压缩的情况了。所以简单的8bit灰度图就刑。<p>说到位图肯定有人想到了 BMP ，我记得上学那会儿还跟着网上哪儿找的教程，学着用 ffmpeg 把 <em>Bad Apple</em> 转成位图序列，再转成字符图合并成 HTML，用 js 播放。说起来都是泪。<p>现在已经成了正经的码农，再折腾 BMP 就没意思了，PNG 就挺好的。<p>图片可以放到 Section 里——但并没有意义，所以我选择放到资源里。写一个 <code>.rc</code> 文件用 <code>windres</code> 编译出目标文件，再拿 <code>gcc</code> 链接就行了。如此一来并没有 lief 出场的机会，编译好的加载器就是加完壳的程序。<p>加载器则采用开启 ASLR 的模式，这样程序的节表会比较干净，没有明显特征（虽然也没什么卵用）。<h2 id=0x02-jia-zai-qi>0x02 加载器</h2><h3 id=2-1-zi-yuan-jie-shao>2.1 资源介绍</h3><p>参考微软的文档 <a href=https://docs.microsoft.com/en-us/windows/win32/menurc/using-resources>Using Resources</a>、<a href=https://docs.microsoft.com/en-us/windows/win32/menurc/resources>Menu and Other Resources</a>。<blockquote><p>A <em>resource</em> is binary data that you can add to the executable file of a Windows-based application. A resource can be either standard or defined. The data in a <em>standard resource</em> describes an icon, cursor, menu, dialog box, bitmap, enhanced metafile, font, accelerator table, message-table entry, string-table entry, or version information. An <em>application-defined resource</em>, also called a <em>custom resource</em>, contains any data required by a specific application.</blockquote><p>资源就是一堆打包进可执行文件里的二进制数据，有标准资源类型和自定义的资源类型，标准的回头看就全是微软的历史包袱了，自定义的就是随便什么东西。<p>资源本身是有结构的，大体上分三层：<ol><li>类型；比如图标、对话框、位图、Manifest等等。<li>ID；资源的标识符，可以是数字或字符串。<li>语言；英语法语等等..</ol><p>经过这样三层索引就能找到对应资源的原始数据了。<p>如图：<p><img alt=07_resource_tree.png src=https://nnnewb.github.io/posts/2021/learning-packer-05/07_resource_tree.webp><h3 id=2-2-cha-zhao-bing-jia-zai-zi-yuan>2.2 查找并加载资源</h3><p>步骤很简单：<ol><li><code>FindResource</code> 找到你要的资源<li><code>SizeofResource</code> 确定你要的资源大小<li><code>LoadResource</code> 加载资源，得到 HANDLE<li><code>LockResource</code> 锁定资源，得到资源首字节指针</ol><p>实现比较啰嗦，主要是错误检查很啰嗦。我这返回值都是随便 return 的，更好的做法应该是 <code>GetLastError</code> 去拿错误码。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#fa5c4b>int </span><span style=color:#8ec07c>get_resource</span><span>(</span><span style=color:#fa5c4b>const char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>name</span><span>, </span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>**</span><span style=color:#fdf4c1>buffer</span><span>, </span><span style=color:#fabd2f>size_t </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>length</span><span>) {
+</span><span>  </span><span style=color:#fabd2f>HRSRC</span><span> res_found </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>FindResourceA(</span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>, </span><span style=color:#b8bb26>"BEAUTIFUL.PNG"</span><span style=color:#fdf4c1>, RT_RCDATA)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(res_found </span><span style=color:#fe8019>== </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>    </span><span style=color:#fdf4c1>MessageBoxA(</span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>, </span><span style=color:#b8bb26>"find resource failed"</span><span style=color:#fdf4c1>, </span><span style=color:#b8bb26>"FindResourceA"</span><span style=color:#fdf4c1>, MB_OK)</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>1</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> sizeof_res </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>SizeofResource(</span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>, res_found)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(sizeof_res </span><span style=color:#fe8019>== </span><span style=color:#d3869b>0</span><span>) {
+</span><span>    </span><span style=color:#fdf4c1>MessageBoxA(</span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>, </span><span style=color:#b8bb26>"sizeof resource failed"</span><span style=color:#fdf4c1>, </span><span style=color:#b8bb26>"SizeofResource"</span><span style=color:#fdf4c1>, MB_OK)</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>2</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#fabd2f>HGLOBAL</span><span> res_loaded </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>LoadResource(</span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>, res_found)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(res_loaded </span><span style=color:#fe8019>== </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>    </span><span style=color:#fdf4c1>MessageBoxA(</span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>, </span><span style=color:#b8bb26>"load resource failed"</span><span style=color:#fdf4c1>, </span><span style=color:#b8bb26>"LoadResource"</span><span style=color:#fdf4c1>, MB_OK)</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>3</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#fabd2f>LPVOID</span><span> res_acquired </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>LockResource(res_loaded)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(res_acquired </span><span style=color:#fe8019>== </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>    </span><span style=color:#fdf4c1>MessageBoxA(</span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>, </span><span style=color:#b8bb26>"lock resource failed"</span><span style=color:#fdf4c1>, </span><span style=color:#b8bb26>"LockResource"</span><span style=color:#fdf4c1>, MB_OK)</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>3</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#fe8019>*</span><span>buffer </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>malloc</span><span style=color:#fdf4c1>(sizeof_res)</span><span>;
+</span><span>  </span><span style=color:#fe8019>*</span><span>length </span><span style=color:#fe8019>=</span><span> sizeof_res;
+</span><span>  </span><span style=color:#fabd2f>memcpy</span><span style=color:#fdf4c1>(</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>buffer, res_acquired, sizeof_res)</span><span>;
+</span><span>  </span><span style=color:#fdf4c1>UnlockResource(res_loaded)</span><span>;
+</span><span>  </span><span style=color:#fdf4c1>FreeResource(res_loaded)</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>;
+</span><span>}
+</span></code></pre><p>得到数据后复制到新分配的内存里返回出去就完事了。<h3 id=2-3-jie-xi-tu-pian>2.3 解析图片</h3><p>得到了资源图片的内容之后，下一步就是把图片解码成像素，还原到程序本身了。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>"png.h"
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;stddef.h>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;stdint.h>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;stdio.h>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;stdlib.h>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;string.h>
+</span><span>
+</span><span style=color:#fa5c4b>typedef </span><span style=color:#fabd2f>uint8_t</span><span> u8, </span><span style=color:#fe8019>*</span><span style=color:#8ec07c>u8p</span><span>;
+</span><span style=color:#fa5c4b>typedef </span><span style=color:#fabd2f>uint32_t</span><span> u32, </span><span style=color:#fe8019>*</span><span style=color:#8ec07c>u32p</span><span>;
+</span><span>
+</span><span style=color:#928374;font-style:italic>// decode PNG in memory
+</span><span style=color:#928374;font-style:italic>// https://stackoverflow.com/questions/53237065/using-libpng-1-2-to-write-rgb-image-buffer-to-png-buffer-in-memory-causing-segme
+</span><span>u8p </span><span style=color:#8ec07c>read_program_from_png</span><span>(u8p </span><span style=color:#fdf4c1>data</span><span>, </span><span style=color:#fabd2f>size_t </span><span style=color:#fdf4c1>length</span><span>) {
+</span><span>  png_image image;
+</span><span>  </span><span style=color:#fabd2f>memset</span><span style=color:#fdf4c1>(</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>image, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#fe8019>sizeof</span><span style=color:#fdf4c1>(image))</span><span>;
+</span><span>  image.</span><span style=color:#fdf4c1>version </span><span style=color:#fe8019>=</span><span> PNG_IMAGE_VERSION;
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(</span><span style=color:#fdf4c1>png_image_begin_read_from_memory(</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>image, data, length) </span><span style=color:#fe8019>== </span><span style=color:#d3869b>0</span><span>) {
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>NULL</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  png_bytep buffer;
+</span><span>  image.</span><span style=color:#fdf4c1>format </span><span style=color:#fe8019>=</span><span> PNG_FORMAT_GRAY;
+</span><span>  </span><span style=color:#fabd2f>size_t</span><span> input_data_length </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>PNG_IMAGE_SIZE(image)</span><span>;
+</span><span>  buffer </span><span style=color:#fe8019>= </span><span>(png_bytep)</span><span style=color:#fabd2f>malloc</span><span style=color:#fdf4c1>(input_data_length)</span><span>;
+</span><span>  </span><span style=color:#fabd2f>memset</span><span style=color:#fdf4c1>(buffer, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, input_data_length)</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(</span><span style=color:#fdf4c1>png_image_finish_read(</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>image, </span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>, buffer, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>) </span><span style=color:#fe8019>== </span><span style=color:#d3869b>0</span><span>) {
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>NULL</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  u32 actual_len </span><span style=color:#fe8019>= *</span><span>((u32 </span><span style=color:#fe8019>*</span><span>)buffer);
+</span><span>  </span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span>program </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>malloc</span><span style=color:#fdf4c1>(actual_len)</span><span>;
+</span><span>  </span><span style=color:#fabd2f>memcpy</span><span style=color:#fdf4c1>(program, buffer </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>4</span><span style=color:#fdf4c1>, actual_len)</span><span>;
+</span><span>  </span><span style=color:#fabd2f>free</span><span style=color:#fdf4c1>(buffer)</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>return </span><span>(u8p)program;
+</span><span>}
+</span></code></pre><p>面向 stackoverflow 编程，照着抄一个 libpng 的解码实现。不同的是把解码后的头4个字节作为小端序无符号整型，认为是程序的实际大小。因为程序的大小可能并不正好是图片的像素数量（width*height）。<p>最后是把解码后的内容复制到新分配的内存里返回。现在返回的指针应该就指向我们的 PE 文件内容了。<h3 id=2-4-ru-kou-dian>2.4 入口点</h3><p>在入口点，调用加载资源函数获得资源数据的指针，传给解码的函数，得到解码后的PE文件指针，然后加载并跳转到被加载程序的入口点，就这么简单。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#fa5c4b>int </span><span style=color:#8ec07c>_start</span><span>(</span><span style=color:#fa5c4b>void</span><span>) {
+</span><span>  </span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span>buffer </span><span style=color:#fe8019>= </span><span style=color:#d3869b>NULL</span><span>;
+</span><span>  </span><span style=color:#fabd2f>size_t</span><span> length </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(</span><span style=color:#fdf4c1>get_resource(</span><span style=color:#b8bb26>"BEAUTIFUL.PNG"</span><span style=color:#fdf4c1>, </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>buffer, </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>length) </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0</span><span>) {
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>1</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  u8p program </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>read_program_from_png((u8p)buffer, length)</span><span>;
+</span><span>  </span><span style=color:#fabd2f>free</span><span style=color:#fdf4c1>(buffer)</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(program </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>    </span><span style=color:#fa5c4b>void </span><span>(</span><span style=color:#fe8019>*</span><span>entrypoint)(</span><span style=color:#fa5c4b>void</span><span>) </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fa5c4b>void </span><span>(</span><span style=color:#fe8019>*</span><span>)(</span><span style=color:#fa5c4b>void</span><span>))</span><span style=color:#fdf4c1>load_PE((</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>)program)</span><span>;
+</span><span>    </span><span style=color:#fdf4c1>entrypoint()</span><span>;
+</span><span>
+</span><span>    </span><span style=color:#fabd2f>free</span><span style=color:#fdf4c1>(program)</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#fdf4c1>MessageBoxA(</span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>, </span><span style=color:#b8bb26>".packed section not found"</span><span style=color:#fdf4c1>, </span><span style=color:#b8bb26>"loader error"</span><span style=color:#fdf4c1>, MB_OK)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>;
+</span><span>}
+</span></code></pre><h2 id=0x03-jia-ke-ji>0x03 加壳机</h2><h3 id=3-1-cheng-xu-zhuan-tu-pian>3.1 程序转图片</h3><p>使用 <code>pypng</code> 这个包实现把二进制程序转图片。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fdf4c1>IMG_PATH </span><span style=color:#fe8019>= </span><span style=color:#b8bb26>'packer5-packed.png'
+</span><span style=color:#fdf4c1>ROW_LEN </span><span style=color:#fe8019>= </span><span style=color:#d3869b>256
+</span><span style=color:#fa5c4b>with </span><span style=color:#fabd2f>open</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'example.exe'</span><span style=color:#fdf4c1>, </span><span style=color:#b8bb26>'rb'</span><span style=color:#fdf4c1>) </span><span style=color:#fa5c4b>as </span><span>f:
+</span><span>    arr </span><span style=color:#fe8019>= </span><span>[]
+</span><span>    content </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>f.read()
+</span><span>    content </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>struct.pack(</span><span style=color:#b8bb26>'&lt;I'</span><span style=color:#fdf4c1>, </span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(content))</span><span style=color:#fe8019>+</span><span>content
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>i </span><span style=color:#fa5c4b>in </span><span style=color:#fabd2f>range</span><span style=color:#fdf4c1>(</span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(content)</span><span style=color:#fe8019>//</span><span style=color:#fdf4c1>ROW_LEN)</span><span>:
+</span><span>        t </span><span style=color:#fe8019>= </span><span>content[i</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>ROW_LEN</span><span>:i</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>ROW_LEN</span><span style=color:#fe8019>+</span><span style=color:#fdf4c1>ROW_LEN</span><span>]
+</span><span>        </span><span style=color:#fdf4c1>arr.append(t)
+</span><span>
+</span><span>    </span><span style=color:#fdf4c1>png.from_array(arr, </span><span style=color:#b8bb26>'L'</span><span style=color:#fdf4c1>).save(IMG_PATH)
+</span></code></pre><p>非常简单的一段脚本。把内容长度和内容拼接后，以 <code>ROW_LEN</code> 每行，拆成一个二维数组，然后用 pypng 编码并保存。<h3 id=3-2-bian-yi-zi-yuan>3.2 编译资源</h3><p>随便新建一个 <code>rsrc.rc</code> 。<p>别问 <code>.rc</code> 怎么写，不知道，问就是面向谷歌编程抄的。<pre style=color:#fdf4c1aa;background-color:#282828><code><span>beautiful.png RCDATA "packer5-packed.png"
+</span></code></pre><p>然后在脚本里调用 <code>windres</code> 编译。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>windres</span><span>(</span><span style=color:#fdf4c1>sources</span><span>, </span><span style=color:#fdf4c1>output</span><span>):
+</span><span>    executable </span><span style=color:#fe8019>= </span><span style=color:#b8bb26>'windres'
+</span><span>    args </span><span style=color:#fe8019>= </span><span style=color:#b8bb26>''
+</span><span>    </span><span style=color:#fa5c4b>if </span><span style=color:#fabd2f>isinstance</span><span style=color:#fdf4c1>(sources, (</span><span style=color:#fabd2f>str</span><span style=color:#fdf4c1>, </span><span style=color:#fabd2f>bytes</span><span style=color:#fdf4c1>))</span><span>:
+</span><span>        args </span><span style=color:#fe8019>+= </span><span>sources
+</span><span>    </span><span style=color:#fa5c4b>elif </span><span style=color:#fabd2f>isinstance</span><span style=color:#fdf4c1>(sources, (</span><span style=color:#fabd2f>list</span><span style=color:#fdf4c1>, </span><span style=color:#fabd2f>tuple</span><span style=color:#fdf4c1>))</span><span>:
+</span><span>        args </span><span style=color:#fe8019>+= </span><span style=color:#b8bb26>' '</span><span style=color:#fdf4c1>.join(sources)
+</span><span>
+</span><span>    cmd </span><span style=color:#fe8019>= </span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'</span><span>{</span><span style=color:#fdf4c1>executable</span><span>} {</span><span style=color:#fdf4c1>args</span><span>}</span><span style=color:#b8bb26> -o </span><span>{</span><span style=color:#fdf4c1>output</span><span>}</span><span style=color:#b8bb26>'
+</span><span>    proc </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>run(cmd, shell</span><span style=color:#fe8019>=</span><span style=color:#d3869b>True</span><span style=color:#fdf4c1>, stderr</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>STDOUT)
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>proc.returncode </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0</span><span>:
+</span><span>        </span><span style=color:#fa5c4b>raise </span><span style=color:#fdf4c1>CompilationError(proc.returncode, proc.stdout)
+</span><span>
+</span><span style=color:#fdf4c1>windres(path.join(src_dir, </span><span style=color:#b8bb26>'rsrc.rc'</span><span style=color:#fdf4c1>), path.join(src_dir, </span><span style=color:#b8bb26>'rsrc.o'</span><span style=color:#fdf4c1>))
+</span></code></pre><p>就得到了 <code>rsrc.o</code> 。<h3 id=3-3-bian-yi-jia-zai-qi>3.3 编译加载器</h3><pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#928374;font-style:italic># compile shifted loader program
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>compile</span><span>(</span><span style=color:#fdf4c1>sources</span><span>, </span><span style=color:#fdf4c1>flags</span><span>):
+</span><span>    args </span><span style=color:#fe8019>= </span><span style=color:#b8bb26>''
+</span><span>    compiler </span><span style=color:#fe8019>= </span><span style=color:#b8bb26>'gcc'
+</span><span>
+</span><span>    args </span><span style=color:#fe8019>+= </span><span style=color:#b8bb26>''
+</span><span>    </span><span style=color:#fa5c4b>if </span><span style=color:#fabd2f>isinstance</span><span style=color:#fdf4c1>(sources, (</span><span style=color:#fabd2f>str</span><span style=color:#fdf4c1>, </span><span style=color:#fabd2f>bytes</span><span style=color:#fdf4c1>))</span><span>:
+</span><span>        args </span><span style=color:#fe8019>+= </span><span>sources
+</span><span>    </span><span style=color:#fa5c4b>elif </span><span style=color:#fabd2f>isinstance</span><span style=color:#fdf4c1>(sources, (</span><span style=color:#fabd2f>list</span><span style=color:#fdf4c1>, </span><span style=color:#fabd2f>tuple</span><span style=color:#fdf4c1>))</span><span>:
+</span><span>        args </span><span style=color:#fe8019>+= </span><span style=color:#b8bb26>' '</span><span style=color:#fdf4c1>.join(sources)
+</span><span>
+</span><span>    args </span><span style=color:#fe8019>+= </span><span style=color:#b8bb26>' '
+</span><span>    </span><span style=color:#fa5c4b>if </span><span style=color:#fabd2f>isinstance</span><span style=color:#fdf4c1>(flags, (</span><span style=color:#fabd2f>str</span><span style=color:#fdf4c1>, </span><span style=color:#fabd2f>bytes</span><span style=color:#fdf4c1>))</span><span>:
+</span><span>        args </span><span style=color:#fe8019>+= </span><span>flags
+</span><span>    </span><span style=color:#fa5c4b>elif </span><span style=color:#fabd2f>isinstance</span><span style=color:#fdf4c1>(flags, (</span><span style=color:#fabd2f>list</span><span style=color:#fdf4c1>, </span><span style=color:#fabd2f>tuple</span><span style=color:#fdf4c1>))</span><span>:
+</span><span>        args </span><span style=color:#fe8019>+= </span><span style=color:#b8bb26>' '</span><span style=color:#fdf4c1>.join(flags)
+</span><span>
+</span><span>    cmd </span><span style=color:#fe8019>= </span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'</span><span>{</span><span style=color:#fdf4c1>compiler</span><span>} {</span><span style=color:#fdf4c1>args</span><span>}</span><span style=color:#b8bb26>'
+</span><span>    proc </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>run(cmd, shell</span><span style=color:#fe8019>=</span><span style=color:#d3869b>True</span><span style=color:#fdf4c1>, stderr</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>STDOUT)
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>proc.returncode </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0</span><span>:
+</span><span>        </span><span style=color:#fa5c4b>raise </span><span style=color:#fdf4c1>CompilationError(proc.returncode, proc.stdout)
+</span><span>
+</span><span>cflags </span><span style=color:#fe8019>= </span><span>[
+</span><span>    </span><span style=color:#b8bb26>'-m32'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-O2'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-Wall'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-I.'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-Wl,--entry=__start'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-nodefaultlibs'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-nostartfiles'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-lkernel32'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-luser32'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-lmsvcrt'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-lpng'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'-o'</span><span>,
+</span><span>    </span><span style=color:#b8bb26>'packed.exe'
+</span><span>]
+</span><span style=color:#fabd2f>compile</span><span style=color:#fdf4c1>([path.join(src_dir, src) </span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>src </span><span style=color:#fa5c4b>in </span><span style=color:#fdf4c1>[</span><span style=color:#b8bb26>'loader.c'</span><span style=color:#fdf4c1>, </span><span style=color:#b8bb26>'png_decode.c'</span><span style=color:#fdf4c1>, </span><span style=color:#b8bb26>'rsrc.o'</span><span style=color:#fdf4c1>]], cflags)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'[+] compile loader with resource success.'</span><span style=color:#fdf4c1>)
+</span></code></pre><p>主要是加上 <code>-lpng</code> 链接参数，链接 <code>libpng</code> 。输入文件里加上 <code>png_decode.c</code> 这个里面实现了 <code>read_program_from_png</code>，还有编译好的资源 <code>rsrc.o</code>。<h2 id=0x04-cheng-guo-zhan-shi>0x04 成果展示</h2><h3 id=4-1-wan-zheng-dai-ma>4.1 完整代码</h3><p><a href=https://github.com/nnnewb/learning-packer/tree/main/packer5>github.com - packer05</a><h3 id=4-2-cheng-guo>4.2 成果</h3><p><img alt=png-packer src=https://nnnewb.github.io/posts/2021/learning-packer-05/png-packer.gif><p><img alt=image-20211021172402101 src=https://nnnewb.github.io/posts/2021/learning-packer-05/image-20211021172402101.webp><p><img alt=image-20211021172445654 src=https://nnnewb.github.io/posts/2021/learning-packer-05/image-20211021172445654.webp><p><img alt=image-20211021172504888 src=https://nnnewb.github.io/posts/2021/learning-packer-05/image-20211021172504888.webp><h2 id=zong-jie>总结</h2><p>这次实验主要是验证了从资源加载程序，本质和之前的其他加壳方式没有区别。把应用程序转换成图片后看到的效果确实比较有趣，我想如果用一张普通的图片或者其他文件类型，藏起来可能更隐蔽。<p>但到这里还是有明显的问题：壳和被加载的程序还是泾渭分明。</article><p class=tags-data><a href=/tags/ni-xiang>/逆向/</a> <a href=/tags/windows>/windows/</a> <a href=/tags/c>/c++/</a> <a href=/tags/python>/python/</a> <a href=/tags/security>/security/</a> <a href=/tags/binary-analysis>/binary-analysis/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

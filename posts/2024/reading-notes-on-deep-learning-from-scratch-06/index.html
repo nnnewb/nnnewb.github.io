@@ -1,0 +1,438 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>《深度学习入门》读书笔记06</title><meta content=《深度学习入门》读书笔记06 name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-06/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=《深度学习入门》读书笔记06 property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-06/ property=twitter:url><meta content=《深度学习入门》读书笔记06 property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-06/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>《深度学习入门》读书笔记06</h1><p class=author-line>作于：2024-02-28 16:00 ，预计阅读时间 20 分钟<article><h2 id=cnnjuan-ji-shen-jing-wang-luo>CNN卷积神经网络</h2><h3 id=gai-shu>概述</h3><p>卷积神经网络是一种神经网络，它主要用来处理图像和语音。<p>全连接神经网络在图像处理任务中存在缺陷，因其输入是一个向量，丢失了图像的空间特征，如相邻像素之间的关系。 在图像处理任务中，卷积层可以提取图像的空间特征，如相邻像素之间的关系。<p>典型的 CNN 卷积神经网络如图所示。<p><img alt=图7-2 src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-06/img/7-2.webp><h3 id=juan-ji-ceng>卷积层</h3><p>书中卷积定义为：图像处理中的滤波器运算。<p><img alt=图7-3 src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-06/img/7-3.webp><p>输入数据为三维图像信息(<code>channel</code>,<code>height</code>,<code>width</code>)，也称特征图， 定义卷积核（或者卷积滤波器）为二维矩阵， 卷积核的大小为（<code>channel</code>,<code>kernel_height</code>,<code>kernel_width</code>）， 卷积核的移动步长为<code>stride</code>， 卷积核的填充为<code>padding</code>。 矩阵元素的值就是卷积核的权重。<p>想象将卷积核从图像的左上角开始，向右移动<code>stride</code>个像素，然后从卷积核的左上角开始，向下移动<code>stride</code>个像素，重复这个过程，直到卷积核到达图像的右下角。<p>对卷积核覆盖的区域，与卷积核矩阵对位元素相乘，然后求和，得到卷积结果。<p><img alt=图7-4 src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-06/img/7-4.webp><p>对于多通道图像的卷积如下。<p><img alt=图7-8 src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-06/img/7-8.webp><p>卷积层同样也有偏置值。<p><img alt=图7-5 src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-06/img/7-5.webp><p>卷积核的填充，指的是对输入图像四周的填充，目的是为了保证卷积结果的大小不变。<p>无填充的情况下，应用卷积操作后，卷积结果的大小为：<code>height</code>-<code>kernel_height</code>+1, <code>width</code>-<code>kernel_width</code>+1。 多应用几次卷积操作，卷积结果的大小会越来越小。在某个时刻，卷积结果的大小会等于1，此时无法再继续应用卷积操作。<p>填充的作用是，保持卷积结果的大小和原输入图像大小一致。可以保持空间大小不变的情况下把数据传给下一层。<p>其次是步幅<code>stride</code>，步幅大小影响卷积结果的大小。 带<code>padding</code>时，步幅大小为1，卷积结果的大小不变。 步幅大小为2时，卷积结果的大小变为原来的1/2。 步幅大小为3时，卷积结果的大小变为原来的1/3。<p>书中提供了一条公式：<p><img alt=式7-1 src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-06/img/formula-7-1.webp><p>以上。对于多通道图像卷积我们会发现，卷积结果的通道数固定是1，也就是输出空间对比输入空间还是缩小了。 如果我们需要输出多个通道的结果，则可以定义多个卷积核。卷积核数量等于输出通道数。<p><img alt=图7-11 src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-06/img/7-11.webp><p>注意多个卷积核的情况下，偏置是一个三维的张量 (FN,1,1)。<p><img alt=图7-12 src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-06/img/7-12.webp><h3 id=juan-ji-ceng-pi-chu-li>卷积层批处理</h3><p>卷积层的批处理就是给输入的特征图再增加一个维度，批样本数量 N。<p>之后的处理就是对这个 N 个特征图进行卷积操作，输出N个数据。<p><img alt=图7-13 src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-06/img/7-13.webp><h2 id=juan-ji-ceng-de-shi-xian>卷积层的实现</h2><h3 id=im2col>im2col</h3><p>首先定义卷积层的参数，即上面提到的四维数组 (卷积核数量FN,通道数量C,卷积核高度FH,卷积核宽度FW)，使用 <code>numpy.ndarray</code> 实现。<p>输入同样是四维数组， 定义为 (批样本数N,通道数量C,特征图高度H,特征图宽度W)。<p>卷积运算的实现用的是 <code>im2col</code>。其基本思路是把每个卷积运算都转换为一个矩阵的运算。参考文章 <a href=https://zhuanlan.zhihu.com/p/63974249>im2col方法实现卷积算法</a>。<p>例如对下面的 4<em>4 的输入 X，应用 3</em>3 的卷积核 W，我们需要对输入X做四次卷积运算。我们先提取四次卷积运算的参数 $X^i$<p>输入 X 如下<table><thead><tr><th>/<th>1<th>2<th>3<th>4<tbody><tr><td>1<td>x(1,1)<td>x(1,2)<td>x(1,3)<td>x(1,4)<tr><td>2<td>x(2,1)<td>x(2,2)<td>x(2,3)<td>x(2,4)<tr><td>3<td>x(3,1)<td>x(3,2)<td>x(3,3)<td>x(3,4)<tr><td>4<td>x(4,1)<td>x(4,2)<td>x(4,3)<td>x(4,4)</table><p>第一次卷积(X的坐标1,1到3,3的卷积运算)的参数 $X^1$ 是输入 $X$ 的一部分。<table><thead><tr><th>/<th>1<th>2<th>3<tbody><tr><td>1<td>x(1,1)<td>x(1,2)<td>x(1,3)<tr><td>2<td>x(2,1)<td>x(2,2)<td>x(2,3)<tr><td>3<td>x(3,1)<td>x(3,2)<td>x(3,3)</table><p>将这个矩阵平坦化，转换成一个行向量，得到下面的向量。<table><thead><tr><th>/<th>1<th>2<th>3<th>4<th>5<th>6<th>7<th>8<th>9<tbody><tr><td>1<td>x(1,1)<td>x(1,2)<td>x(1,3)<td>x(2,1)<td>x(2,2)<td>x(2,3)<td>x(3,1)<td>x(3,2)<td>x(3,3)</table><p>卷积核 W 的定义如下。<table><thead><tr><th>/<th>1<th>2<th>3<tbody><tr><td>1<td>w(1,1)<td>w(1,2)<td>w(1,3)<tr><td>2<td>w(2,1)<td>w(2,2)<td>w(2,3)<tr><td>3<td>w(3,1)<td>w(3,2)<td>w(3,3)</table><p>同样平坦化为行向量，然后转置成只有一个列的矩阵，得到下面的矩阵。<table><thead><tr><th>/<th>1<tbody><tr><td>1<td>w(1,1)<tr><td>2<td>w(1,2)<tr><td>3<td>w(1,3)<tr><td>4<td>w(2,1)<tr><td>5<td>w(2,2)<tr><td>6<td>w(2,3)<tr><td>7<td>w(3,1)<tr><td>8<td>w(3,2)<tr><td>9<td>w(3,3)</table><p>这样一个卷积运算就可以转换为一个简单的矩阵乘法运算。<p><img alt=式-author-1 src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-06/img/formula-author-1.webp><p>然后全局地看，4x4 特征图对 3x3 卷积核的卷积操作，可以视为四次上述矩阵运算的结果，定义为<p>$$ \begin{aligned} A &= \begin{bmatrix} A^1 \ A^2 \ A^3 \ A^4 \end{bmatrix} \ &= \begin{bmatrix} X^1 \ X^2 \ X^3 \ X^4 \end{bmatrix} W\ &= \begin{bmatrix} X^1 W \ X^2 W\ X^3 W\ X^4 W\end{bmatrix} \ \end{aligned} $$<p>也就是四次卷积，我们可以提取出输入特征图子集构成输入矩阵 X，合并成一个矩阵乘法运算 $A=XW$。<p>我们尝试用 python 验证下计算过程是否符合预期。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span style=color:#fa5c4b>from </span><span>common.util </span><span style=color:#fa5c4b>import </span><span>im2col
+</span><span>
+</span><span style=color:#928374;font-style:italic># 输入特征图 (N,C,H,W)=(1,1,4,4)
+</span><span>X </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[
+</span><span style=color:#fdf4c1>    [[</span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>2.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>3.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>4.0</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>     [</span><span style=color:#d3869b>5.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>6.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>7.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>8.0</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>     [</span><span style=color:#d3869b>9.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>10.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>11.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>12.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>     [</span><span style=color:#d3869b>13.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>14.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>15.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>16.</span><span style=color:#fdf4c1>]],
+</span><span style=color:#fdf4c1>]])
+</span><span>
+</span><span style=color:#928374;font-style:italic># 卷积核 (FN,C,FH,FW)=(1,1,3,3)
+</span><span>W </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>2.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>3.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>              [</span><span style=color:#d3869b>4.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>5.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>6.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>              [</span><span style=color:#d3869b>7.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>8.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>9.</span><span style=color:#fdf4c1>]])
+</span><span>
+</span><span style=color:#928374;font-style:italic># im2col 卷积参数为 3x3 步长1 无填充
+</span><span>cols </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>im2col(X, </span><span style=color:#d3869b>3</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>3</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>)
+</span><span style=color:#928374;font-style:italic># 得到矩阵 [X^1 X^2 X^3 X^4]
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'X ='</span><span style=color:#fdf4c1>, cols)
+</span><span>
+</span><span style=color:#928374;font-style:italic># 平坦化W再转置
+</span><span>Wt </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([W.flatten()])</span><span>.T
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'W ='</span><span style=color:#fdf4c1>, Wt)
+</span><span>
+</span><span style=color:#928374;font-style:italic># 点乘！
+</span><span>A </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.dot(cols, Wt)
+</span><span>
+</span><span style=color:#928374;font-style:italic># 结果平坦化后再 reshape 成 2x2
+</span><span>At </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>A.flatten().reshape((</span><span style=color:#d3869b>2</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>2</span><span style=color:#fdf4c1>))
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'A = </span><span style=color:#fdf4c1>{At}</span><span style=color:#b8bb26>'</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span style=color:#928374;font-style:italic># 验算过程。ndarray 切片取矩阵子集，平坦化后和卷积核W对位相乘求和。
+</span><span>a1 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.sum(X[</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, :</span><span style=color:#d3869b>3</span><span style=color:#fdf4c1>, :</span><span style=color:#d3869b>3</span><span style=color:#fdf4c1>].flatten() </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>W.flatten())
+</span><span>a2 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.sum(X[</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, :</span><span style=color:#d3869b>3</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>:</span><span style=color:#d3869b>4</span><span style=color:#fdf4c1>].flatten() </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>W.flatten())
+</span><span>a3 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.sum(X[</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>:</span><span style=color:#d3869b>4</span><span style=color:#fdf4c1>, :</span><span style=color:#d3869b>3</span><span style=color:#fdf4c1>].flatten() </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>W.flatten())
+</span><span>a4 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.sum(X[</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>:</span><span style=color:#d3869b>4</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>:</span><span style=color:#d3869b>4</span><span style=color:#fdf4c1>].flatten() </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>W.flatten())
+</span><span>expected </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[a1, a2],
+</span><span style=color:#fdf4c1>                     [a3, a4]])
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'expected </span><span style=color:#fdf4c1>{expected}</span><span style=color:#b8bb26>'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fa5c4b>assert </span><span style=color:#fdf4c1>np.allclose(At, expected)
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>X = [[ 1.  2.  3.  5.  6.  7.  9. 10. 11.]
+</span><span> [ 2.  3.  4.  6.  7.  8. 10. 11. 12.]
+</span><span> [ 5.  6.  7.  9. 10. 11. 13. 14. 15.]
+</span><span> [ 6.  7.  8. 10. 11. 12. 14. 15. 16.]]
+</span><span>W = [[1.]
+</span><span> [2.]
+</span><span> [3.]
+</span><span> [4.]
+</span><span> [5.]
+</span><span> [6.]
+</span><span> [7.]
+</span><span> [8.]
+</span><span> [9.]]
+</span><span>A = [[348. 393.]
+</span><span> [528. 573.]]
+</span><span>expected [[348. 393.]
+</span><span> [528. 573.]]
+</span></code></pre><p>对于多通道的输入，卷积核也是多通道的。多通道特征图的卷积操作和单通道的卷积操作类似。只需要把各通道的输入上下拼接成矩阵得到 $X^1$ ，然后同样平坦化。<p>对于多通道卷积核 W 也是一样操作，将各通道的 W 上下拼接得到矩阵 W ，然后平坦化再转置得到新的单列矩阵 $W^T$。<p>如下：<p>输入特征图通道1<table><thead><tr><th>/<th>1<th>2<th>3<th>4<tbody><tr><td>1<td>x(1,1,1)<td>x(1,1,2)<td>x(1,1,3)<td>x(1,1,4)<tr><td>2<td>x(1,2,1)<td>x(1,2,2)<td>x(1,2,3)<td>x(1,2,4)<tr><td>3<td>x(1,3,1)<td>x(1,3,2)<td>x(1,3,3)<td>x(1,3,4)<tr><td>4<td>x(1,4,1)<td>x(1,4,2)<td>x(1,4,3)<td>x(1,4,4)</table><p>输入特征图通道2<table><thead><tr><th>/<th>1<th>2<th>3<th>4<tbody><tr><td>1<td>x(2,1,1)<td>x(2,1,2)<td>x(2,1,3)<td>x(2,1,4)<tr><td>2<td>x(2,2,1)<td>x(2,2,2)<td>x(2,2,3)<td>x(2,2,4)<tr><td>3<td>x(2,3,1)<td>x(2,3,2)<td>x(2,3,3)<td>x(2,3,4)<tr><td>4<td>x(2,4,1)<td>x(2,4,2)<td>x(2,4,3)<td>x(2,4,4)</table><p>则创建的 $X^1$ 矩阵为：<table><thead><tr><th>/<th>1<th>2<th>3<tbody><tr><td>1<td>x(1,1,1)<td>x(1,1,2)<td>x(1,1,3)<tr><td>2<td>x(1,2,1)<td>x(1,2,2)<td>x(1,2,3)<tr><td>3<td>x(1,3,1)<td>x(1,3,2)<td>x(1,3,3)<tr><td>4<td>x(2,1,1)<td>x(2,1,2)<td>x(2,1,3)<tr><td>5<td>x(2,2,1)<td>x(2,2,2)<td>x(2,2,3)<tr><td>6<td>x(2,3,1)<td>x(2,3,2)<td>x(2,3,3)</table><p>类似的，创建的 $W^T$ 矩阵为：<table><thead><tr><th>/<th>1<th>2<th>3<tbody><tr><td>1<td>w(1,1,1)<td>w(1,1,2)<td>w(1,1,3)<tr><td>2<td>w(1,2,1)<td>w(1,2,2)<td>w(1,2,3)<tr><td>3<td>w(1,3,1)<td>w(1,3,2)<td>w(1,3,3)<tr><td>4<td>w(2,1,1)<td>w(2,1,2)<td>w(2,1,3)<tr><td>5<td>w(2,2,1)<td>w(2,2,2)<td>w(2,2,3)<tr><td>6<td>w(2,3,1)<td>w(2,3,2)<td>w(2,3,3)</table><p>多通道卷积核输出是单通道的，计算和单通道卷积核差异不大。 我们接着考虑多个卷积核的情况，即完整的卷积层 Conv(FN,C,FH,FW) 使用 im2col 实现卷积运算的思路。<p>依然很简单，考虑 $W^T=\begin{bmatrix}W_1 & W_2\end{bmatrix}$，也就是第一个卷积核元素放在 $W^T$ 的第一列，第二个卷积核放在第二列...<p>最后依然是简单的矩阵乘法运算。<p>为什么可以这样？考虑矩阵点积的定义，X 矩阵的 行是单个卷积操作的输入特征图子集，$W^T$ 矩阵的列 是单个卷积操作的卷积核权重。 $XW$ 运算将 X 的行乘 W 的列然后求和，即完成一个卷积运算。$W^T$ 有多个列的情况下，X的行逐个和列运算，相当于多个卷积核在同一个输入特征图上进行卷积。 最终输出的每个列，对应一个卷积核的结果。<p>完整的卷积层看完，最后是批量化。<p>批量化依然是同样的思路，例如对输入(2,2,4,4)，卷积参数(2,2,3,3)，把样本1和样本2的 $X^1$ 纵向拼接得到 $\begin{bmatrix}X_{1,1} \ X_{1,2} \ X_{1,3} \ X_{1,4} \ X_{2,1} \ X_{2,2} \ X_{2,3} \ X_{2,4} \ \end{bmatrix}$ ，其中 $X_{1,2}$ 表示样本 1 的第 2 步卷积操作的输入特征图子集。<p>创建出矩阵 $X$ 之后和卷积核矩阵 $W$ 求点积即可。<p>我们实现一下完整的卷积层 Conv(FN,C,FH,FW) 正向传播运算。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span style=color:#fa5c4b>from </span><span>common.util </span><span style=color:#fa5c4b>import </span><span>im2col
+</span><span style=color:#fa5c4b>from </span><span>common.layers </span><span style=color:#fa5c4b>import </span><span>Convolution
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>Conv</span><span>:
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__init__</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>fn</span><span>: </span><span style=color:#fabd2f>int</span><span>, </span><span style=color:#fdf4c1>c</span><span>: </span><span style=color:#fabd2f>int</span><span>, </span><span style=color:#fdf4c1>fh</span><span>: </span><span style=color:#fabd2f>int</span><span>, </span><span style=color:#fdf4c1>fw</span><span>: </span><span style=color:#fabd2f>int</span><span>, </span><span style=color:#fdf4c1>stride</span><span>: </span><span style=color:#fabd2f>int</span><span>, </span><span style=color:#fdf4c1>padding</span><span>: </span><span style=color:#fabd2f>int</span><span>, </span><span style=color:#fdf4c1>bias</span><span>: </span><span style=color:#fabd2f>float</span><span>):
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.fn </span><span style=color:#fe8019>= </span><span>fn
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.c </span><span style=color:#fe8019>= </span><span>c
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.fh </span><span style=color:#fe8019>= </span><span>fh
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.fw </span><span style=color:#fe8019>= </span><span>fw
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.stride </span><span style=color:#fe8019>= </span><span>stride
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.padding </span><span style=color:#fe8019>= </span><span>padding
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.b </span><span style=color:#fe8019>= </span><span>bias
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>._kernels </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.random.randn(fn, c, fh, fw)
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>._w_columns </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.reshape(self.kernels, (self.fn, </span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>))</span><span>.T
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.x_columns </span><span style=color:#fe8019>= </span><span style=color:#d3869b>None
+</span><span>
+</span><span>    @</span><span style=color:#fabd2f>property
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>kernels</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>self</span><span>._kernels
+</span><span>
+</span><span>    @kernels.</span><span style=color:#fdf4c1>setter
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>kernels</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>k</span><span>):
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>._kernels </span><span style=color:#fe8019>= </span><span>k
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>._w_columns </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.reshape(self.kernels, (self.fn, </span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>))</span><span>.T
+</span><span>
+</span><span>    @</span><span style=color:#fabd2f>property
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>w_columns</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>self</span><span>._w_columns
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>forward</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>x</span><span>):
+</span><span>        n, c, h, w </span><span style=color:#fe8019>= </span><span>x.shape
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.x_columns </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>im2col(x, self.fh, self.fw, self.stride, self.padding)
+</span><span>        out </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.dot(self.x_columns, self.w_columns) </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>self</span><span>.b
+</span><span>        out_h </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1 </span><span style=color:#fe8019>+ </span><span style=color:#fabd2f>int</span><span style=color:#fdf4c1>((h </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>2 </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>self.padding </span><span style=color:#fe8019>- </span><span style=color:#fdf4c1>self.fh) </span><span style=color:#fe8019>/ </span><span style=color:#fdf4c1>self.stride)
+</span><span>        out_w </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1 </span><span style=color:#fe8019>+ </span><span style=color:#fabd2f>int</span><span style=color:#fdf4c1>((w </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>2 </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>self.padding </span><span style=color:#fe8019>- </span><span style=color:#fdf4c1>self.fw) </span><span style=color:#fe8019>/ </span><span style=color:#fdf4c1>self.stride)
+</span><span>        out </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>out.reshape(n, out_h, out_w, </span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>).transpose(</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>3</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>2</span><span style=color:#fdf4c1>)
+</span><span>        </span><span style=color:#fa5c4b>return </span><span>out
+</span><span>
+</span><span>
+</span><span style=color:#928374;font-style:italic># 批量输入特征图，(2,2,4,4)
+</span><span>x </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([
+</span><span style=color:#fdf4c1>    [
+</span><span style=color:#fdf4c1>        [[</span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>2.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>3.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>4.0</span><span style=color:#fdf4c1>],  </span><span style=color:#928374;font-style:italic># 样本 1 通道 1
+</span><span style=color:#fdf4c1>         [</span><span style=color:#d3869b>5.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>6.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>7.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>8.0</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>         [</span><span style=color:#d3869b>9.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>10.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>11.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>12.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>         [</span><span style=color:#d3869b>13.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>14.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>15.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>16.</span><span style=color:#fdf4c1>]],
+</span><span style=color:#fdf4c1>        [[</span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>2.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>3.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>4.0</span><span style=color:#fdf4c1>],  </span><span style=color:#928374;font-style:italic># 样本 1 通道 2
+</span><span style=color:#fdf4c1>         [</span><span style=color:#d3869b>5.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>6.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>7.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>8.0</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>         [</span><span style=color:#d3869b>9.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>10.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>11.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>12.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>         [</span><span style=color:#d3869b>13.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>14.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>15.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>16.</span><span style=color:#fdf4c1>]],
+</span><span style=color:#fdf4c1>    ],
+</span><span style=color:#fdf4c1>    [
+</span><span style=color:#fdf4c1>        [[</span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>2.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>3.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>4.0</span><span style=color:#fdf4c1>],  </span><span style=color:#928374;font-style:italic># 样本 2 通道 1
+</span><span style=color:#fdf4c1>         [</span><span style=color:#d3869b>5.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>6.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>7.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>8.0</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>         [</span><span style=color:#d3869b>9.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>10.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>11.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>12.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>         [</span><span style=color:#d3869b>13.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>14.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>15.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>16.</span><span style=color:#fdf4c1>]],
+</span><span style=color:#fdf4c1>        [[</span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>2.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>3.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>4.0</span><span style=color:#fdf4c1>],  </span><span style=color:#928374;font-style:italic># 样本 2 通道 2
+</span><span style=color:#fdf4c1>         [</span><span style=color:#d3869b>5.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>6.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>7.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>8.0</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>         [</span><span style=color:#d3869b>9.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>10.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>11.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>12.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>         [</span><span style=color:#d3869b>13.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>14.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>15.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>16.</span><span style=color:#fdf4c1>]],
+</span><span style=color:#fdf4c1>    ],
+</span><span style=color:#fdf4c1>])
+</span><span>
+</span><span>c </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>Conv(</span><span style=color:#d3869b>2</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>2</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>3</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>3</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>)
+</span><span style=color:#928374;font-style:italic># 初始化一个简单的卷积核 (2,2,3,3)
+</span><span>c.kernels </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([
+</span><span style=color:#fdf4c1>    [
+</span><span style=color:#fdf4c1>        [[</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>],  </span><span style=color:#928374;font-style:italic># 卷积核 1 通道 1
+</span><span style=color:#fdf4c1>         [</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>         [</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>]],
+</span><span style=color:#fdf4c1>        [[</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>],  </span><span style=color:#928374;font-style:italic># 卷积核 1 通道 2
+</span><span style=color:#fdf4c1>         [</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>         [</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>]],
+</span><span style=color:#fdf4c1>    ],
+</span><span style=color:#fdf4c1>    [
+</span><span style=color:#fdf4c1>        [[</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>],  </span><span style=color:#928374;font-style:italic># 卷积核 2 通道 1
+</span><span style=color:#fdf4c1>         [</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>         [</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>]],
+</span><span style=color:#fdf4c1>        [[</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>],  </span><span style=color:#928374;font-style:italic># 卷积核 2 通道 2
+</span><span style=color:#fdf4c1>         [</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>         [</span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.</span><span style=color:#fdf4c1>]],
+</span><span style=color:#fdf4c1>    ],
+</span><span style=color:#fdf4c1>])
+</span><span>a </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>c.forward(x)
+</span><span>expected </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>Convolution(c.kernels, c.b).forward(x)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(a)
+</span><span style=color:#fa5c4b>assert </span><span style=color:#fdf4c1>np.allclose(a, expected)</span><span>, </span><span style=color:#b8bb26>'forward result not equals to expected'
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>[[[[109. 127.]
+</span><span>   [181. 199.]]
+</span><span>
+</span><span>  [[109. 127.]
+</span><span>   [181. 199.]]]
+</span><span>
+</span><span>
+</span><span> [[[109. 127.]
+</span><span>   [181. 199.]]
+</span><span>
+</span><span>  [[109. 127.]
+</span><span>   [181. 199.]]]]
+</span></code></pre><p>文中实现最为魔术的地方就是对 <code>out</code> 的 <code>reshape</code> 和 <code>transpose</code> 了。<p>要理解 <code>out = out.reshape(n, out_h, out_w, -1).transpose(0, 3, 1, 2)</code> 这句代码需要从批量卷积，点积结果矩阵的构成说起。<p>我们知道单张输入特征图 (C,H,W) 在点积运算中体现为矩阵 X 的一行，单个卷积核 (C,FH,FW) 在点积运算中体现为矩阵 W 的一列。 而最终结果矩阵 A 的点是单张特征图对单个卷积核的卷积结果，矩阵 A 的一个行对应输入的一张特征图，矩阵 A 的一个列则对应一个卷积核。<p>而我们预期的卷积层输出结果是 (N,C,H,W) 这样一个四维数组，可以作为下一个卷积层的输入。结果矩阵 A 则是 (样本数N,样本多个卷积核的卷积结果C)。<p>注意 A 的行实际是多个卷积核卷积结果横向连接起来的，单个卷积核的结果又是 (H,W) 矩阵平坦化组成的。也就是：<table><thead><tr><th>/<th>1<th>2<th>3<th>4<th>5<th>6<th>7<th>8<tbody><tr><td>1<td>a(1,1,1)<td>a(1,1,2)<td>a(1,2,1)<td>a(1,2,2)<td>a(2,1,1)<td>a(2,1,2)<td>a(2,2,1)<td>a(2,2,2)</table><p>其中 <code>a(1,2,1)</code> 表示卷积核 1 输出的第 2 行第 1 列<p>所以我们先进行 <code>reshape</code> 操作，目的是把卷积结果 C 转换成矩阵形式 (H,W)，因此 <code>reshape</code> 参数是 <code>(n,out_h,out_w,-1)</code>， 即把矩阵 A 拆成一个四维数组 (N,OH,OW,C)，此时 C 维度的大小为 2，2 个元素分别表示两个卷积核在 (N,OH,OW) 上的卷积结果。<p>然后进行 <code>transpose</code> 操作调整轴的顺序，这是个非常魔术的过程。这里直接看书中图示。<p><img alt=图7-20 src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-06/img/7-20.webp><p><code>transpose</code> 后的多维数组，我们对各个维度的解读发生了改变。如图所示，<code>transpose</code> 后得到的是 (N,C,OH,OW) 的数组， 其中 N 表示样本数，C 对应卷积核个数(输出通道数)，OH 表示输出特征图的高度，OW 表示输出特征图的宽度。<h3 id=fan-xiang-chuan-bo>反向传播</h3><p>卷积层的反向传播书中说法是和 Affine 层的反向传播实现类似。<p>我们知道 Affine 层的反向传播计算公式是<p>$$ \begin{aligned} \frac{\partial L}{\partial X}&=\frac{\partial L}{\partial Y} \times W^T \ \frac{\partial L}{\partial W}&=\frac{\partial L}{\partial Y} \times X^T \ \end{aligned} $$<p>Affine 层的正向传播中，$X$ 的每个行对应样本，$W$ 的每个列对应神经元。这与 Convolution 层很相似。Convolution 层的 $W$ 每个列对应卷积核。<p>Convolution 层和 Affine 层正向传播的差异在于 Convolution 层的卷积核和输入特征图需要先变换成矩阵形式再参与运算。 影响是，预期传入的 <code>dout</code> 会是一个四维数组 (N,C,H,W) 元素对应 $W$ 矩阵元素的偏导数。 在计算前，要先把 <code>dout</code> 转换为矩阵形式，同样的 $W$ 也要转为矩阵，然后用 Affine 的反向传播公式求关于 $W$ 和 $X$ 的梯度。 最后将求得的关于 $X$ 的梯度转为四维数组 (N,C,H,W) 形式返回，保存 $\frac{\partial L}{\partial W}$。<p>我实在懒得再写一遍了，以后精读的时候可能再针对每个层都进行详细分析。迫不及待想刷完这书再去看下一本进阶了。 这里就略过反向传播的实现细节了。<h2 id=chi-hua-ceng>池化层</h2><p>池化层是缩小空间的运算。<p>和卷积层一样有大小和步长参数，但没有卷积核（权重），只单纯对输入压缩。<p>书中例子如下：<p><img alt=图7-14 src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-06/img/7-14.webp><p>常见的池化层有最大池化和平均池化两种。最大池化是取池化窗口内的最大值，平均池化是取池化窗口内的平均值。<h3 id=zheng-xiang-chuan-bo-shi-xian>正向传播实现</h3><p>池化层的正向传播和卷积层类似，区别在于不需要把一个样本的所有卷积参数 $X^i$ 平坦化到一个行，而是每个 $X^i$ 一个行。 把不同通道的输入特征图拆出来的 $X^i$ 上下连接起来。<p>书中图示比较清楚：<p><img alt=图7-21 src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-06/img/7-21.webp><p>处理完之后按行池化，得到结果，再 <code>reshape</code> 回 4 维数组 (N,C,H,W) 即可。注意池化层输入多少通道输出就是多少通道。<h3 id=fan-xiang-chuan-bo-shi-xian>反向传播实现</h3><p>池化层的反向传播和 ReLU 类似，例如最大池化，除最大元素外其他元素在池化后是置0的，也就是这些位置的系数为0，偏导数为0。<p>具体实现细节这里略。<h2 id=shi-yong-pytorch-shi-xian-cnn>使用 pytorch 实现 CNN</h2><p>从这里就偏离原书了，直接上 pytorch 玩玩。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>torch
+</span><span style=color:#fa5c4b>from </span><span>torch.utils.data </span><span style=color:#fa5c4b>import </span><span>DataLoader
+</span><span style=color:#fa5c4b>from </span><span>torchvision </span><span style=color:#fa5c4b>import </span><span>datasets
+</span><span style=color:#fa5c4b>from </span><span>torchvision.transforms </span><span style=color:#fa5c4b>import </span><span>ToTensor
+</span><span>
+</span><span style=color:#928374;font-style:italic># Download training data from open datasets.
+</span><span>training_data </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>datasets.MNIST(root</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>"data"</span><span style=color:#fdf4c1>, train</span><span style=color:#fe8019>=</span><span style=color:#d3869b>True</span><span style=color:#fdf4c1>, download</span><span style=color:#fe8019>=</span><span style=color:#d3869b>True</span><span style=color:#fdf4c1>, transform</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>ToTensor())
+</span><span style=color:#928374;font-style:italic># Download test data from open datasets.
+</span><span>test_data </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>datasets.MNIST(root</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>"data"</span><span style=color:#fdf4c1>, train</span><span style=color:#fe8019>=</span><span style=color:#d3869b>False</span><span style=color:#fdf4c1>, download</span><span style=color:#fe8019>=</span><span style=color:#d3869b>True</span><span style=color:#fdf4c1>, transform</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>ToTensor())
+</span><span style=color:#928374;font-style:italic># batch size
+</span><span>batch_size </span><span style=color:#fe8019>= </span><span style=color:#d3869b>64
+</span><span>
+</span><span style=color:#928374;font-style:italic># Create data loaders.
+</span><span>train_dataloader </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>DataLoader(training_data, batch_size</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>batch_size)
+</span><span>test_dataloader </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>DataLoader(test_data, batch_size</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>batch_size)
+</span><span>
+</span><span>device </span><span style=color:#fe8019>= </span><span style=color:#b8bb26>'cuda' </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>torch.cuda.is_available() </span><span style=color:#fa5c4b>else </span><span style=color:#b8bb26>'cpu'
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>MyNetwork</span><span>(</span><span style=color:#8ec07c>torch.nn.Module</span><span>):
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__init__</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        </span><span style=color:#fabd2f>super</span><span style=color:#fdf4c1>().</span><span style=color:#fabd2f>__init__</span><span style=color:#fdf4c1>()
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.flatten </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>torch.nn.Flatten()
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.linear </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>torch.nn.Sequential(
+</span><span style=color:#fdf4c1>            torch.nn.Conv2d(</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>30</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>5</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>),
+</span><span style=color:#fdf4c1>            torch.nn.ReLU(),
+</span><span style=color:#fdf4c1>            torch.nn.MaxPool2d(</span><span style=color:#d3869b>2</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>),
+</span><span style=color:#fdf4c1>            torch.nn.Flatten(), </span><span style=color:#928374;font-style:italic># 为了把 Convolution/Pooling 层的输出和 Affine 层输入串起来，需要先把 Convolution/Pooling 层输出的 4D 数组平坦化
+</span><span style=color:#fdf4c1>            torch.nn.Linear(</span><span style=color:#d3869b>15870</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>100</span><span style=color:#fdf4c1>),
+</span><span style=color:#fdf4c1>            torch.nn.ReLU(),
+</span><span style=color:#fdf4c1>            torch.nn.Linear(</span><span style=color:#d3869b>100</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>10</span><span style=color:#fdf4c1>),
+</span><span style=color:#fdf4c1>            torch.nn.Softmax(),
+</span><span style=color:#fdf4c1>        )
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>forward</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>x</span><span>):
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>self.linear(x)
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>train</span><span>(</span><span style=color:#fdf4c1>dataloader</span><span>, </span><span style=color:#fdf4c1>model</span><span>, </span><span style=color:#fdf4c1>loss_fn</span><span>, </span><span style=color:#fdf4c1>optimizer</span><span>):
+</span><span>    size </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(dataloader.dataset)
+</span><span>    </span><span style=color:#fdf4c1>model.train()
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>batch, (X, y) </span><span style=color:#fa5c4b>in </span><span style=color:#fabd2f>enumerate</span><span style=color:#fdf4c1>(dataloader)</span><span>:
+</span><span>        X, y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>X.to(device)</span><span>, </span><span style=color:#fdf4c1>y.to(device)
+</span><span>        X </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>torch.reshape(X, (X.shape[</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>], </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>28</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>28</span><span style=color:#fdf4c1>))
+</span><span>
+</span><span>        </span><span style=color:#928374;font-style:italic># Compute prediction error
+</span><span>        pred </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>model(X)
+</span><span>        loss </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>loss_fn(pred, y)
+</span><span>
+</span><span>        </span><span style=color:#928374;font-style:italic># Backpropagation
+</span><span>        </span><span style=color:#fdf4c1>loss.backward()
+</span><span>        </span><span style=color:#fdf4c1>optimizer.step()
+</span><span>        </span><span style=color:#fdf4c1>optimizer.zero_grad()
+</span><span>
+</span><span>        </span><span style=color:#fa5c4b>if </span><span>batch </span><span style=color:#fe8019>% </span><span style=color:#d3869b>100 </span><span style=color:#fe8019>== </span><span style=color:#d3869b>0</span><span>:
+</span><span>            loss, current </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>loss.item()</span><span>, (batch </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span>) </span><span style=color:#fe8019>* </span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(X)
+</span><span>            </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>"loss: </span><span style=color:#fdf4c1>{loss:>7f}</span><span style=color:#b8bb26>  [</span><span style=color:#fdf4c1>{current:>5d}</span><span style=color:#b8bb26>/</span><span style=color:#fdf4c1>{size:>5d}</span><span style=color:#b8bb26>]"</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>test</span><span>(</span><span style=color:#fdf4c1>dataloader</span><span>, </span><span style=color:#fdf4c1>model</span><span>, </span><span style=color:#fdf4c1>loss_fn</span><span>):
+</span><span>    size </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(dataloader.dataset)
+</span><span>    num_batches </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(dataloader)
+</span><span>    </span><span style=color:#fdf4c1>model.eval()
+</span><span>    test_loss, correct </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#d3869b>0
+</span><span>    </span><span style=color:#fa5c4b>with </span><span style=color:#fdf4c1>torch.no_grad()</span><span>:
+</span><span>        </span><span style=color:#fa5c4b>for </span><span>X, y </span><span style=color:#fa5c4b>in </span><span>dataloader:
+</span><span>            X </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>torch.reshape(X, (X.shape[</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>], </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>28</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>28</span><span style=color:#fdf4c1>))
+</span><span>            X, y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>X.to(device)</span><span>, </span><span style=color:#fdf4c1>y.to(device)
+</span><span>            pred </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>model(X)
+</span><span>            test_loss </span><span style=color:#fe8019>+= </span><span style=color:#fdf4c1>loss_fn(pred, y).item()
+</span><span>            correct </span><span style=color:#fe8019>+= </span><span>(</span><span style=color:#fdf4c1>pred.argmax(</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>) </span><span style=color:#fe8019>== </span><span>y)</span><span style=color:#fdf4c1>.type(torch.float).sum().item()
+</span><span>    test_loss </span><span style=color:#fe8019>/= </span><span>num_batches
+</span><span>    correct </span><span style=color:#fe8019>/= </span><span>size
+</span><span>    </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>"Test Error: \n Accuracy: </span><span style=color:#fdf4c1>{(</span><span style=color:#d3869b>100 </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>correct):>0.1f}</span><span style=color:#b8bb26>%, Avg loss: </span><span style=color:#fdf4c1>{test_loss:>8f} </span><span style=color:#b8bb26>\n"</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span>
+</span><span>n </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>MyNetwork().to(device)
+</span><span>loss_fn </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>torch.nn.CrossEntropyLoss()
+</span><span>optimizer </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>torch.optim.SGD(n.parameters(), lr</span><span style=color:#fe8019>=</span><span style=color:#d3869b>0.01</span><span style=color:#fdf4c1>)
+</span><span>epochs </span><span style=color:#fe8019>= </span><span style=color:#d3869b>10
+</span><span>
+</span><span style=color:#fa5c4b>for </span><span>t </span><span style=color:#fa5c4b>in </span><span style=color:#fabd2f>range</span><span style=color:#fdf4c1>(epochs)</span><span>:
+</span><span>    </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>"Epoch </span><span style=color:#fdf4c1>{t </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>}</span><span style=color:#b8bb26>\n-------------------------------"</span><span style=color:#fdf4c1>)
+</span><span>    </span><span style=color:#fdf4c1>train(train_dataloader, n, loss_fn, optimizer)
+</span><span>    </span><span style=color:#fdf4c1>test(test_dataloader, n, loss_fn)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"Done!"</span><span style=color:#fdf4c1>)
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>Files already downloaded
+</span><span>Files already downloaded
+</span><span>Epoch 1
+</span><span>-------------------------------
+</span><span>
+</span><span>
+</span><span>F:\repos\deep-learning\venv\lib\site-packages\torch\nn\modules\module.py:1511: UserWarning: Implicit dimension choice for softmax has been deprecated. Change the call to include dim=X as an argument.
+</span><span>  return self._call_impl(*args, **kwargs)
+</span><span>
+</span><span>
+</span><span>loss: 2.301144  [   64/60000]
+</span><span>loss: 2.279937  [ 6464/60000]
+</span><span>loss: 2.266119  [12864/60000]
+</span><span>loss: 2.148455  [19264/60000]
+</span><span>loss: 2.036764  [25664/60000]
+</span><span>loss: 1.925048  [32064/60000]
+</span><span>loss: 1.805400  [38464/60000]
+</span><span>loss: 1.857848  [44864/60000]
+</span><span>loss: 1.821546  [51264/60000]
+</span><span>loss: 1.758208  [57664/60000]
+</span><span>Test Error: 
+</span><span> Accuracy: 74.0%, Avg loss: 1.750762 
+</span><span>
+</span><span>Epoch 2
+</span><span>-------------------------------
+</span><span>loss: 1.735336  [   64/60000]
+</span><span>loss: 1.741934  [ 6464/60000]
+</span><span>loss: 1.733680  [12864/60000]
+</span><span>loss: 1.639817  [19264/60000]
+</span><span>loss: 1.652467  [25664/60000]
+</span><span>loss: 1.673727  [32064/60000]
+</span><span>loss: 1.586213  [38464/60000]
+</span><span>loss: 1.640192  [44864/60000]
+</span><span>loss: 1.644729  [51264/60000]
+</span><span>loss: 1.602930  [57664/60000]
+</span><span>Test Error: 
+</span><span> Accuracy: 89.7%, Avg loss: 1.588926 
+</span><span>
+</span><span>Epoch 3
+</span><span>-------------------------------
+</span><span>loss: 1.579320  [   64/60000]
+</span><span>loss: 1.579364  [ 6464/60000]
+</span><span>loss: 1.563474  [12864/60000]
+</span><span>loss: 1.592638  [19264/60000]
+</span><span>loss: 1.576006  [25664/60000]
+</span><span>loss: 1.623149  [32064/60000]
+</span><span>loss: 1.539580  [38464/60000]
+</span><span>loss: 1.600444  [44864/60000]
+</span><span>loss: 1.608010  [51264/60000]
+</span><span>loss: 1.577690  [57664/60000]
+</span><span>Test Error: 
+</span><span> Accuracy: 91.1%, Avg loss: 1.566124 
+</span><span>
+</span><span>Epoch 4
+</span><span>-------------------------------
+</span><span>loss: 1.552503  [   64/60000]
+</span><span>loss: 1.560335  [ 6464/60000]
+</span><span>loss: 1.546871  [12864/60000]
+</span><span>loss: 1.581722  [19264/60000]
+</span><span>loss: 1.556692  [25664/60000]
+</span><span>loss: 1.605762  [32064/60000]
+</span><span>loss: 1.528894  [38464/60000]
+</span><span>loss: 1.589878  [44864/60000]
+</span><span>loss: 1.591401  [51264/60000]
+</span><span>loss: 1.566346  [57664/60000]
+</span><span>Test Error: 
+</span><span> Accuracy: 91.6%, Avg loss: 1.555532 
+</span><span>
+</span><span>Epoch 5
+</span><span>-------------------------------
+</span><span>loss: 1.538584  [   64/60000]
+</span><span>loss: 1.551226  [ 6464/60000]
+</span><span>loss: 1.536254  [12864/60000]
+</span><span>loss: 1.573621  [19264/60000]
+</span><span>loss: 1.545673  [25664/60000]
+</span><span>loss: 1.588099  [32064/60000]
+</span><span>loss: 1.522446  [38464/60000]
+</span><span>loss: 1.584719  [44864/60000]
+</span><span>loss: 1.583256  [51264/60000]
+</span><span>loss: 1.560601  [57664/60000]
+</span><span>Test Error: 
+</span><span> Accuracy: 92.3%, Avg loss: 1.548232 
+</span><span>
+</span><span>Epoch 6
+</span><span>-------------------------------
+</span><span>loss: 1.529052  [   64/60000]
+</span><span>loss: 1.545700  [ 6464/60000]
+</span><span>loss: 1.527557  [12864/60000]
+</span><span>loss: 1.567937  [19264/60000]
+</span><span>loss: 1.539456  [25664/60000]
+</span><span>loss: 1.574068  [32064/60000]
+</span><span>loss: 1.516613  [38464/60000]
+</span><span>loss: 1.580732  [44864/60000]
+</span><span>loss: 1.576618  [51264/60000]
+</span><span>loss: 1.558007  [57664/60000]
+</span><span>Test Error: 
+</span><span> Accuracy: 92.7%, Avg loss: 1.542547 
+</span><span>
+</span><span>Epoch 7
+</span><span>-------------------------------
+</span><span>loss: 1.524871  [   64/60000]
+</span><span>loss: 1.541902  [ 6464/60000]
+</span><span>loss: 1.519567  [12864/60000]
+</span><span>loss: 1.564264  [19264/60000]
+</span><span>loss: 1.534474  [25664/60000]
+</span><span>loss: 1.562087  [32064/60000]
+</span><span>loss: 1.507874  [38464/60000]
+</span><span>loss: 1.578054  [44864/60000]
+</span><span>loss: 1.566317  [51264/60000]
+</span><span>loss: 1.555856  [57664/60000]
+</span><span>Test Error: 
+</span><span> Accuracy: 93.1%, Avg loss: 1.537830 
+</span><span>
+</span><span>Epoch 8
+</span><span>-------------------------------
+</span><span>loss: 1.522017  [   64/60000]
+</span><span>loss: 1.538967  [ 6464/60000]
+</span><span>loss: 1.513827  [12864/60000]
+</span><span>loss: 1.560773  [19264/60000]
+</span><span>loss: 1.529202  [25664/60000]
+</span><span>loss: 1.553353  [32064/60000]
+</span><span>loss: 1.500312  [38464/60000]
+</span><span>loss: 1.574624  [44864/60000]
+</span><span>loss: 1.555169  [51264/60000]
+</span><span>loss: 1.554117  [57664/60000]
+</span><span>Test Error: 
+</span><span> Accuracy: 93.5%, Avg loss: 1.533476 
+</span><span>
+</span><span>Epoch 9
+</span><span>-------------------------------
+</span><span>loss: 1.519567  [   64/60000]
+</span><span>loss: 1.536195  [ 6464/60000]
+</span><span>loss: 1.510207  [12864/60000]
+</span><span>loss: 1.557672  [19264/60000]
+</span><span>loss: 1.524510  [25664/60000]
+</span><span>loss: 1.547272  [32064/60000]
+</span><span>loss: 1.495671  [38464/60000]
+</span><span>loss: 1.570410  [44864/60000]
+</span><span>loss: 1.543279  [51264/60000]
+</span><span>loss: 1.552659  [57664/60000]
+</span><span>Test Error: 
+</span><span> Accuracy: 93.8%, Avg loss: 1.529591 
+</span><span>
+</span><span>Epoch 10
+</span><span>-------------------------------
+</span><span>loss: 1.517417  [   64/60000]
+</span><span>loss: 1.534307  [ 6464/60000]
+</span><span>loss: 1.507608  [12864/60000]
+</span><span>loss: 1.554423  [19264/60000]
+</span><span>loss: 1.520418  [25664/60000]
+</span><span>loss: 1.542946  [32064/60000]
+</span><span>loss: 1.493244  [38464/60000]
+</span><span>loss: 1.565224  [44864/60000]
+</span><span>loss: 1.534792  [51264/60000]
+</span><span>loss: 1.551990  [57664/60000]
+</span><span>Test Error: 
+</span><span> Accuracy: 94.0%, Avg loss: 1.526247 
+</span><span>
+</span><span>Done!
+</span></code></pre></article><p class=tags-data><a href=/tags/shen-du-xue-xi>/深度学习/</a> <a href=/tags/python>/python/</a> <a href=/tags/numpy>/numpy/</a> <a href=/tags/matplotlib>/matplotlib/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

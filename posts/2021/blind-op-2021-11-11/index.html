@@ -1,0 +1,54 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>运维瞎记 2021年11月11日</title><meta content="运维瞎记 2021年11月11日" name=title><meta content=瞎运维的操作笔记，但愿别让我有机会去生产环境里瞎折腾 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2021/blind-op-2021-11-11/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content="运维瞎记 2021年11月11日" property=og:title><meta content=瞎运维的操作笔记，但愿别让我有机会去生产环境里瞎折腾 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2021/blind-op-2021-11-11/ property=twitter:url><meta content="运维瞎记 2021年11月11日" property=twitter:title><meta content=瞎运维的操作笔记，但愿别让我有机会去生产环境里瞎折腾 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2021/blind-op-2021-11-11/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>运维瞎记 2021年11月11日</h1><p class=author-line>作于：2021-11-11 10:19 ，预计阅读时间 2 分钟<article><h2 id=ji-xu-ni-ji-wang-luo-wei-lian-jie>记虚拟机网络未连接</h2><h3 id=qi-yin>起因</h3><p>因为Ubuntu server安装时更新的话需要从网络下载，慢的一批，所以安装的时候虚拟机的网络断开了，安装好启动之后才重新链接。<p>但是...<p>连接后进入系统却发现并没有网络（VirtualBox），检查 <code>networkctl</code> 发现 <code>enp0s3</code> 是 <code>off</code> 状态。<h3 id=yuan-yin>原因</h3><p>别问，不知道。<h3 id=chu-li>处理</h3><p>顺藤摸瓜不求甚解了。<p>看到 <code>enp0s3</code> 是 <code>off</code> 那就先查查怎么解决。<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>sudo ip link set enp0s3 up
+</span></code></pre><p>再检查连接状态。<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>networkctl status
+</span></code></pre><p>发现连接进入 <code>downgrade</code> 状态，搜索得知是未分配 IP 地址。<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>sudo dhclient enp0s3
+</span></code></pre><p>报了一个奇怪的CMP什么的错误，不管了。再检查下网络。<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>networkctl
+</span></code></pre><p>发现 <code>enp0s3</code> 进入 <code>routable</code> 状态，大功告成。<h3 id=zong-jie>总结</h3><p>我总结个蛋。<blockquote><p>2022年5月6日 补充<p>发现问题本源是 netplan 配置未正确生成，dhclient 是暂时性解决。彻底解决的办法是在 <code>/etc/netplan</code> 添加 <code>01-netcfg.yaml</code>，内容如下：<pre class=language-yaml data-lang=yaml style=color:#fdf4c1aa;background-color:#282828><code class=language-yaml data-lang=yaml><span style=color:#8ec07c;font-weight:700>network</span><span>:
+</span><span>	</span><span style=color:#8ec07c;font-weight:700>version</span><span>: </span><span style=color:#d3869b>2
+</span><span>	</span><span style=color:#8ec07c;font-weight:700>renderer</span><span>: </span><span style=color:#b8bb26>networkd
+</span><span>	</span><span style=color:#8ec07c;font-weight:700>ethernets</span><span>:
+</span><span>		</span><span style=color:#8ec07c;font-weight:700>enp0s3</span><span>:
+</span><span>			</span><span style=color:#8ec07c;font-weight:700>dhcp4</span><span>: </span><span style=color:#d3869b>true
+</span></code></pre><p>注意 <code>enp0s3</code> 改成你自己的以太网连接名，用 <code>networkctl</code> 或者 <code>ip show addr</code> 都能列出来。<p>文件添加好之后用命令：<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>sudo netplan generate
+</span><span style=color:#fdf4c1>sudo netplan apply
+</span></code></pre><p>就好了。之后重启vm再运行<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>networkctl
+</span></code></pre><p>可以看到<pre style=color:#fdf4c1aa;background-color:#282828><code><span>IDX LINK            TYPE     OPERATIONAL SETUP
+</span><span>  1 lo              loopback carrier     unmanaged
+</span><span>  2 enp0s3          ether    routable    configured
+</span><span>  3 docker0         bridge   no-carrier  unmanaged
+</span><span>  4 br-e2b0cf462af2 bridge   no-carrier  unmanaged
+</span><span>
+</span><span>4 links listed.
+</span></code></pre><p>注意 <code>enp0s3</code> 已经变成了 <code>configured</code> 状态，确认问题彻底处理完毕。</blockquote></article><p class=tags-data><a href=/tags/linuxyun-wei>/linux运维/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

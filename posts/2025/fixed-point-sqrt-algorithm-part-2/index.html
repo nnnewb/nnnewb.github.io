@@ -1,0 +1,78 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>定点数开根号算法（2）</title><meta content=定点数开根号算法（2） name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2025/fixed-point-sqrt-algorithm-part-2/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=定点数开根号算法（2） property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2025/fixed-point-sqrt-algorithm-part-2/ property=twitter:url><meta content=定点数开根号算法（2） property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2025/fixed-point-sqrt-algorithm-part-2/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>定点数开根号算法（2）</h1><p class=author-line>作于：2025-08-14 01:36 ，预计阅读时间 5 分钟<article><h2 id=qian-yan>前言</h2><p>在<a href=/posts/2025/fixed-point-sqrt-algorithm-part-1>上一篇文章</a>中，我们介绍了定点数开根号的几种算法原理，包括牛顿-拉弗森法和逐比特确认法。本文继续写牛顿-拉弗森法的实现细节。<h2 id=niu-dun-la-fu-sen-fa-de-shi-xian-xi-jie>牛顿-拉弗森法的实现细节</h2><h3 id=chu-shi-zhi-de-xuan-ze>初始值的选择</h3><p>根据上一篇文章中我们推导的根的比特数公式：<p>$$ \begin{cases} B_r = \frac{B_N}{2} &\text{if } B_N=2k, k\in \mathbb{Z} \\ B_r = \frac{B_N+1}{2} &\text{if } B_N=2k+1, k \in \mathbb{Z} \end{cases} $$<p>定义根为 $B$ ，我们可以得出根的取值范围大约是<p>$$ 2^{B_r-1}\le{B}\lt{2^{B_r}} $$<p>我们可以选择牛顿法的初始值为 $x_0=2^{B_r}$ 也就是根取值范围的上边界，来保证足够接近真实根，让牛顿法可以较快收敛。<p>这种方法的优点是计算简单，只需要进行位宽计算和移位操作，能够保证初始值在合理范围内，确保算法收敛。<h3 id=ding-dian-shu-tui-yan>定点数推广</h3><p>我们将定点数 $V$ 的整数部分设为 $M$，小数部分设为 $F$，小数有 $n$ 比特，定点数根为 $R$ ， $V=M+\frac{F}{2^n}$ 。<p>$V$ 的整数表示形式为 $V_{int}=V \cdot 2^n=M \cdot 2^n + F$ 。<p>$R$ 的整数表示形式为 $R_{int}=R \cdot 2^n$<p>我们有下面的方程：<p>$$ \begin{aligned} R &= \sqrt{V} \\ &= \sqrt{M+\frac{F}{2^n}} \\ &= \sqrt{\frac{M \cdot 2^n + F}{2^n}} \\ &= \frac{\sqrt{M \cdot 2^n + F}}{\sqrt{2^n}} \\ &= \frac{\sqrt{M \cdot 2^n + F}}{2^{\frac{n}{2}}} \\ &= \frac{\sqrt{V_{int}}}{2^{\frac{n}{2}}} \end{aligned} $$<p>我们将两边同时乘 $2^n$，把根转为整数表示（即定点数）<p>$$ \begin{aligned} R \cdot 2^n &= \frac{\sqrt{V_{int}}}{2^{\frac{n}{2}}} \cdot 2^n \\ R_{int} &= \sqrt{V_{int}} \cdot \frac{1}{2^{\frac{n}{2}}} \cdot 2^n \\ R_{int} &= \sqrt{V_{int}} \cdot \frac{2^n}{2^{\frac{n}{2}}} \\ R_{int} &= \sqrt{V_{int}} \cdot 2^{n-\frac{n}{2}} \\ R_{int} &= \sqrt{V_{int}} \cdot 2^{\frac{n}{2}} \\ \end{aligned} $$<h3 id=ti-gao-jing-du>提高精度</h3><p>从最终的方程：$R_{int} = \sqrt{V_{int}} \cdot 2^{\frac{n}{2}}$ 不难看出，迭代收敛的 $\sqrt{V_{int}}$ 最终会进行一个左移操作，当 $\sqrt{V_{int}}$ 迭代只有 32 位精度，$n=16$ 时，我们的结果最多只能达到小数点后 $\frac{n}{2}$ 比特的精度。<p>最直接的思路就是我们提高中间迭代的精度，也就是从 Q15.16 转为更大的，比如 Q31.32 表示。<p>转换方法非常直接，目标精度 $p\gt{n}$，只要把 $n$ 位精度的表示形式左移 $p-n$ 比特即可缩放到 $p$ 位精度的表示形式。<p>当迭代使用的 $V_{int}$ 是Q31.32 时，得到的 $R_{int}$ 也是 Q31.32 表示。<p>我们把 32 位精度的 $R_{int}$ 记作 $R_{q32}$ ，32 位精度的 $V_{int}$ 记作 $V_{q32}$，类似的，我们把 Q15.16 表示的根记作 $R_{q16}$。<p>$$ \begin{aligned} R_{q32} &= \sqrt{V_{q32}} \cdot 2^{\frac{32}{2}} \\ R_{q32} &= \sqrt{V_{q32}} \cdot 2^{16} \\ \end{aligned} $$<p>求出 $R_{q32}$ 后，我们需要将 $R_{q32}$ 从 Q31.32 转回 Q15.16 ，方法是右移 $p-n=32-16=16$ 位。<p>$$ \begin{aligned} R_{q16} &= \frac{R_{q32}}{2^{16}} \\ R_{q16} &= \frac{\sqrt{V_{q32}} \cdot 2^{16}}{2^{16}} \\ R_{q16} &= \sqrt{V_{q32}} \\ \end{aligned} $$<p>我们还可以更简单地去证明：<p>$$ \begin{aligned} \sqrt{V_{q32}} &= \sqrt{V \cdot 2^{32}} \\ &= \sqrt{V} \cdot 2^{16} \end{aligned} $$<p>$\sqrt{V_{q32}}$ 的结果就已经是 $\sqrt{V}$ 的 Q15.16 精度表示形式。<h3 id=die-dai-zhong-zhi-tiao-jian>迭代终止条件</h3><p>我们确定迭代中，如果本轮计算的 $x_{n+1}$ 等于 $x_n$ 的话，下一轮也只会得到相同的 $x_n$，所以此时可以认为达到了最大精度。<p>为了避免出现接近最大精度时抖动无法收敛的情况，我们再增加一个防御性的最大迭代轮次检查。<h3 id=zui-zhong-shi-xian>最终实现</h3><pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#928374;font-style:italic>// Sqrt performs fixed-point arithmetic square root of a Fix32 number in Newton & Raphson method.
+</span><span style=color:#fa5c4b>func </span><span>(</span><span style=color:#fdf4c1>f </span><span style=color:#fa5c4b>Fix32</span><span>) </span><span style=color:#8ec07c>Sqrt</span><span>() (</span><span style=color:#fa5c4b>Fix32</span><span>, </span><span style=color:#fabd2f>error</span><span>) {
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>f </span><span style=color:#fe8019>&lt; </span><span style=color:#d3869b>0 </span><span>{
+</span><span>		</span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#fdf4c1>ErrNaN
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#928374;font-style:italic>// square root of zero is always zero
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>f </span><span style=color:#fe8019>== </span><span style=color:#d3869b>0 </span><span>{
+</span><span>		</span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#d3869b>nil
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>var </span><span>(
+</span><span>		</span><span style=color:#928374;font-style:italic>// convert q15.16 to q31.32
+</span><span>		</span><span style=color:#fdf4c1>v </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>int64</span><span>(</span><span style=color:#fdf4c1>f</span><span>) </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#d3869b>16
+</span><span>		</span><span style=color:#928374;font-style:italic>// f always be positive, bitwidth correctly reflect the minimum bits needed to represent the number f
+</span><span>		</span><span style=color:#fdf4c1>bitwidth </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>bits</span><span>.</span><span style=color:#fdf4c1>Len64</span><span>(</span><span style=color:#fabd2f>uint64</span><span>(</span><span style=color:#fdf4c1>v</span><span>))
+</span><span>	)
+</span><span>
+</span><span>	</span><span style=color:#928374;font-style:italic>// choose initial guess.
+</span><span>	</span><span style=color:#928374;font-style:italic>// We can proof that the square root bitwidth is ceil(bitwidth/2).
+</span><span>	</span><span style=color:#928374;font-style:italic>// It means square root is between 2^(ceil(bitwidth/2)-1) and 2^ceil(bitwidth/2).
+</span><span>	</span><span style=color:#928374;font-style:italic>// So we can always choose upper bound as initial guess which is 2^(bitwidth/2).
+</span><span>	</span><span style=color:#fa5c4b>var </span><span style=color:#fdf4c1>x </span><span style=color:#fabd2f>int64
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>bitwidth</span><span style=color:#fe8019>&</span><span style=color:#d3869b>1 </span><span style=color:#fe8019>== </span><span style=color:#d3869b>1 </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>x </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1 </span><span style=color:#fe8019>&lt;&lt; </span><span>((</span><span style=color:#fdf4c1>bitwidth </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span>) </span><span style=color:#fe8019>/ </span><span style=color:#d3869b>2</span><span>)
+</span><span>	} </span><span style=color:#fa5c4b>else </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>x </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1 </span><span style=color:#fe8019>&lt;&lt; </span><span>(</span><span style=color:#fdf4c1>bitwidth </span><span style=color:#fe8019>/ </span><span style=color:#d3869b>2</span><span>)
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>for range </span><span style=color:#fdf4c1>NewtonRaphsonDivMaximumRounds </span><span>{
+</span><span>		</span><span style=color:#928374;font-style:italic>// x = (x+(a/x))/2
+</span><span>		</span><span style=color:#fdf4c1>nx </span><span style=color:#fe8019>:= </span><span>(</span><span style=color:#fdf4c1>x </span><span style=color:#fe8019>+ </span><span>(</span><span style=color:#fdf4c1>v </span><span style=color:#fe8019>/ </span><span style=color:#fdf4c1>x</span><span>)) </span><span style=color:#fe8019>/ </span><span style=color:#d3869b>2
+</span><span>
+</span><span>		</span><span style=color:#928374;font-style:italic>// we can promise fixpoint arithmetic with same input always produce same output
+</span><span>		</span><span style=color:#928374;font-style:italic>// so if x and nx are equal, we can expect next round still produce same nx as this round
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>nx </span><span style=color:#fe8019>== </span><span style=color:#fdf4c1>x </span><span>{
+</span><span>			</span><span style=color:#fa5c4b>break
+</span><span>		}
+</span><span>
+</span><span>		</span><span style=color:#fdf4c1>x </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>nx
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>Fix32</span><span>(</span><span style=color:#fdf4c1>x</span><span>), </span><span style=color:#d3869b>nil
+</span><span>}
+</span></code></pre></article><p class=tags-data><a href=/tags/ding-dian-shu>/定点数/</a> <a href=/tags/suan-fa>/算法/</a> <a href=/tags/shu-xue>/数学/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

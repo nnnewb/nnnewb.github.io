@@ -1,0 +1,92 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>轻量级 django 阅读笔记：最小的 django 应用</title><meta content="轻量级 django 阅读笔记：最小的 django 应用" name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2019/2019-03-03-qing-liang-djangoyue-du-bi-ji/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content="轻量级 django 阅读笔记：最小的 django 应用" property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2019/2019-03-03-qing-liang-djangoyue-du-bi-ji/ property=twitter:url><meta content="轻量级 django 阅读笔记：最小的 django 应用" property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2019/2019-03-03-qing-liang-djangoyue-du-bi-ji/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>轻量级 django 阅读笔记：最小的 django 应用</h1><p class=author-line>作于：2019-03-03 12:26 ，预计阅读时间 4 分钟<article><h2 id=intro>Intro</h2><p>找不到工作十分难受，在家看书，恰巧翻到这本《轻量级 Django》，看起来还蛮有意思的，做个读书笔记。<h2 id=1-zui-xiao-de-django-app>1. 最小的 Django App</h2><p>Django 是个重量级框架，所谓最小指的是写最少的代码，理解一个 Django App 的最小组成元素。<p>作为开场，先创建一个 <code>app.py</code> 文件，作为整个 Django App 存储的地方。<h3 id=1-1-django-conf-settings>1.1 django.conf.settings</h3><p>书中使用 <code>django.core.management.execute_from_command_line</code> 作为启动 Django app 的手段。<p><code>execute_from_command_line</code>，就是通过 <code>django startproject</code>的方式创建的<code>manage.py</code>内的主要内容，这种方式启动必须要配置<code>settings</code>才行。<p>在一个常规方式创建的 Django App 中，<code>settings.py</code>是一个独立的 python 模块，<code>Django</code>通过<code>DJANGO_SETTINGS_MODULE</code>这个环境变量来确定配置信息存储位置。<p>但是换一种方式，<code>django.conf.settings.configure()</code>可以手动完成配置。<p>看代码。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>from </span><span>django.conf </span><span style=color:#fa5c4b>import </span><span>settings
+</span><span>
+</span><span style=color:#fdf4c1>settings.configure(DEBUG</span><span style=color:#fe8019>=</span><span style=color:#d3869b>True</span><span style=color:#fdf4c1>, ROOT_URLCONF</span><span style=color:#fe8019>=</span><span style=color:#fabd2f>__name__</span><span style=color:#fdf4c1>, )
+</span></code></pre><p>每一个 keyword argument 都和 <code>settings.py</code>这个模块内的名字相同，去除所有不必要的元素之后，剩下的就是<code>DEBUG</code>和<code>ROOT_URLCONF</code>了。<p>阅读源码可知<code>configure</code>只能被调用一次。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#928374;font-style:italic># 摘自 django.conf.settings.configure 源码
+</span><span style=color:#928374;font-style:italic># Django 版本号:
+</span><span style=color:#928374;font-style:italic># VERSION = (2, 1, 7, 'final', 0)
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>configure</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>default_settings</span><span style=color:#fe8019>=</span><span>global_settings, </span><span style=color:#fe8019>**</span><span style=color:#fdf4c1>options</span><span>):
+</span><span>    </span><span style=color:#928374;font-style:italic>"""
+</span><span style=color:#928374;font-style:italic>    Called to manually configure the settings. The 'default_settings'
+</span><span style=color:#928374;font-style:italic>    parameter sets where to retrieve any unspecified values from (its
+</span><span style=color:#928374;font-style:italic>    argument must support attribute access (__getattr__)).
+</span><span style=color:#928374;font-style:italic>    """
+</span><span>    </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>self</span><span>._wrapped </span><span style=color:#fe8019>is not </span><span>empty:
+</span><span>        </span><span style=color:#fa5c4b>raise </span><span style=color:#fabd2f>RuntimeError</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'Settings already configured.'</span><span style=color:#fdf4c1>)
+</span><span>    holder </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>UserSettingsHolder(default_settings)
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>name, value </span><span style=color:#fa5c4b>in </span><span style=color:#fdf4c1>options.items()</span><span>:
+</span><span>        </span><span style=color:#fabd2f>setattr</span><span style=color:#fdf4c1>(holder, name, value)
+</span><span>    </span><span style=color:#fdf4c1>self</span><span>._wrapped </span><span style=color:#fe8019>= </span><span>holder
+</span></code></pre><h3 id=1-2-urlpatterns>1.2 urlpatterns</h3><p>都知道 <code>Django</code> 的路由是需要手动写明的，和<code>flask</code>等以装饰器的方式配置路由的风格迥异。哪种风格更好，就看用户自己见仁见智了。<p>上文的<code>settings.configure</code>中可以看到有一句<code>ROOT_URLCONF=__name__</code>，意义明确，就是指定哪个 python 模块保存了路由配置信息，而这里指定的<code>__name__</code>正是自己。<p>所以我们的<code>urlpatterns</code>也应当如配置所述，写到这个文件中。<p>见代码。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>from </span><span>django.urls </span><span style=color:#fa5c4b>import </span><span>path
+</span><span style=color:#fa5c4b>from </span><span>django.http </span><span style=color:#fa5c4b>import </span><span>HttpResponse
+</span><span>
+</span><span>urlpatterns </span><span style=color:#fe8019>= </span><span>[</span><span style=color:#fdf4c1>path(</span><span style=color:#b8bb26>''</span><span style=color:#fdf4c1>, </span><span style=color:#fa5c4b>lambda </span><span style=color:#fdf4c1>req: HttpResponse(</span><span style=color:#b8bb26>'Hello world'</span><span style=color:#fdf4c1>))</span><span>]
+</span></code></pre><h3 id=1-3-main>1.3 <code>__main__</code></h3><p>最后将所有的代码整合起来，就形成了这样一个 python 程序。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>sys
+</span><span>
+</span><span style=color:#fa5c4b>from </span><span>django.conf </span><span style=color:#fa5c4b>import </span><span>settings
+</span><span style=color:#fa5c4b>from </span><span>django.core.management </span><span style=color:#fa5c4b>import </span><span>execute_from_command_line
+</span><span style=color:#fa5c4b>from </span><span>django.http </span><span style=color:#fa5c4b>import </span><span>HttpResponse
+</span><span style=color:#fa5c4b>from </span><span>django.urls </span><span style=color:#fa5c4b>import </span><span>path
+</span><span>
+</span><span style=color:#fdf4c1>settings.configure(DEBUG</span><span style=color:#fe8019>=</span><span style=color:#d3869b>True</span><span style=color:#fdf4c1>, ROOT_URLCONF</span><span style=color:#fe8019>=</span><span style=color:#fabd2f>__name__</span><span style=color:#fdf4c1>, )
+</span><span>
+</span><span>urlpatterns </span><span style=color:#fe8019>= </span><span>[</span><span style=color:#fdf4c1>path(</span><span style=color:#b8bb26>''</span><span style=color:#fdf4c1>, </span><span style=color:#fa5c4b>lambda </span><span style=color:#fdf4c1>req: HttpResponse(</span><span style=color:#b8bb26>'Hello world'</span><span style=color:#fdf4c1>))</span><span>]
+</span><span>
+</span><span style=color:#fa5c4b>if </span><span style=color:#fabd2f>__name__ </span><span style=color:#fe8019>== </span><span style=color:#b8bb26>'__main__'</span><span>: </span><span style=color:#fdf4c1>execute_from_command_line(sys.argv)
+</span></code></pre><p>算上所有的 import 在内共 12 行，4 行空行，5 行 import，3 行代码，即构成了一个麻雀虽小五脏俱全的 Django hello world。<p>在命令行执行<code>python app.py runserver</code>即可看到以下输出。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fdf4c1>PS </span><span>D:\</span><span style=color:#fdf4c1;background-color:#932b1e>GitHub\minimum-django> python .\app.py runserver</span><span>
+</span><span>Performing system checks</span><span style=color:#d3869b>...
+</span><span>
+</span><span>System check identified no </span><span style=color:#fdf4c1>issues (</span><span style=color:#d3869b>0 </span><span style=color:#fdf4c1>silenced)</span><span>.
+</span><span>March </span><span style=color:#d3869b>03</span><span>, </span><span style=color:#d3869b>2019 </span><span style=color:#fe8019>- </span><span style=color:#d3869b>12</span><span>:</span><span style=color:#d3869b>10</span><span>:</span><span style=color:#d3869b>21
+</span><span>Django version </span><span style=color:#d3869b>2.1.7</span><span>, using settings </span><span style=color:#d3869b>None
+</span><span>Starting development server at http:</span><span style=color:#fe8019>//</span><span style=color:#d3869b>127.0.0.1</span><span>:</span><span style=color:#d3869b>8000</span><span style=color:#fe8019>/
+</span><span>Quit the server </span><span style=color:#fa5c4b>with </span><span style=color:#fdf4c1>CTRL</span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>BREAK</span><span>.
+</span></code></pre><h3 id=1-4-wsgi>1.4 wsgi</h3><p>完成了最小的 django app，依然有一个问题。<p>如何部署这个 django app？<p>固然，使用 runserver 的方式执行，再 nginx 反向代理是一个不错的主意，但 uwsgi 之类的部署方式依然有其独到的优势。<p>使用 uwsgi 或者 gunicorn 之类的基于 wsgi 协议的服务器就必须取得一个 wsgi app 实例才行。<p>Django 提供了函数 <code>django.core.wsgi.get_wsgi_application</code> 用于取得 wsgi app。<p>手头没 linux 机器，懒得演示 output 了。就这样吧。<p>最终代码如下。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>sys
+</span><span>
+</span><span style=color:#fa5c4b>from </span><span>django.conf </span><span style=color:#fa5c4b>import </span><span>settings
+</span><span style=color:#fa5c4b>from </span><span>django.core.management </span><span style=color:#fa5c4b>import </span><span>execute_from_command_line
+</span><span style=color:#fa5c4b>from </span><span>django.core.wsgi </span><span style=color:#fa5c4b>import </span><span>get_wsgi_application
+</span><span style=color:#fa5c4b>from </span><span>django.http </span><span style=color:#fa5c4b>import </span><span>HttpResponse
+</span><span style=color:#fa5c4b>from </span><span>django.urls </span><span style=color:#fa5c4b>import </span><span>path
+</span><span>
+</span><span style=color:#fdf4c1>settings.configure(DEBUG</span><span style=color:#fe8019>=</span><span style=color:#d3869b>True</span><span style=color:#fdf4c1>, ROOT_URLCONF</span><span style=color:#fe8019>=</span><span style=color:#fabd2f>__name__</span><span style=color:#fdf4c1>, )
+</span><span>
+</span><span>urlpatterns </span><span style=color:#fe8019>= </span><span>[</span><span style=color:#fdf4c1>path(</span><span style=color:#b8bb26>''</span><span style=color:#fdf4c1>, </span><span style=color:#fa5c4b>lambda </span><span style=color:#fdf4c1>req: HttpResponse(</span><span style=color:#b8bb26>'Hello world'</span><span style=color:#fdf4c1>))</span><span>]
+</span><span>
+</span><span>application </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>get_wsgi_application()
+</span><span>
+</span><span style=color:#fa5c4b>if </span><span style=color:#fabd2f>__name__ </span><span style=color:#fe8019>== </span><span style=color:#b8bb26>'__main__'</span><span>: </span><span style=color:#fdf4c1>execute_from_command_line(sys.argv)
+</span></code></pre><p>使用<code>gunicorn app.py --log-file=-</code>启动。</article><p class=tags-data><a href=/tags/python>/python/</a> <a href=/tags/django>/django/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

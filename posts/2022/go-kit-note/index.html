@@ -1,0 +1,320 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>go-kit 笔记</title><meta content="go-kit 笔记" name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2022/go-kit-note/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content="go-kit 笔记" property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2022/go-kit-note/ property=twitter:url><meta content="go-kit 笔记" property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2022/go-kit-note/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>go-kit 笔记</h1><p class=author-line>作于：2022-03-01 12:30 ，预计阅读时间 12 分钟<article><h2 id=qian-yan>前言</h2><p>初步看了下 gokit 的案例 <code>stringsvc</code>和<code>apigateway</code>，记录一下对 gokit 的映像。<h2 id=gokitding-wei>gokit定位</h2><blockquote><p><strong>Go kit</strong> is a <strong>programming toolkit</strong> for building microservices (or elegant monoliths) in Go. We solve common problems in distributed systems and application architecture so you can focus on delivering business value.<p>Go has emerged as the language of the server, but it remains underrepresented in so-called "modern enterprise" companies like Facebook, Twitter, Netflix, and SoundCloud. Many of these organizations have turned to JVM-based stacks for their business logic, owing in large part to libraries and ecosystems that directly support their microservice architectures.<p>To reach its next level of success, Go needs more than simple primitives and idioms. It needs a comprehensive toolkit, for coherent distributed programming in the large. Go kit is a set of packages and best practices, which provide a comprehensive, robust, and trustable way of building microservices for organizations of any size.</blockquote><p>gokit 大概算是框架，因为和 gokit 打交道基本离不开 gokit 定义的几个接口类型。用 gokit 开发服务的可定制性很强，几乎每个细节都可以控制。<p>而实际上手体验下来，缺点大概就是海量的样板代码，实现一个服务需要大量的适配代码来控制 Endpoint 。又因为 Go 语言表现力不足，也没有运行时元编程的能力，这些样板代码只能靠代码生成来解决。<p>还好 gokit 自己也知道，在仓库首页就提供了很多代码生成器的链接。<p>用 gokit 还有一个好处是一定程度上避免技术栈绑定在某个特定平台或者框架上，毕竟 gokit 比起框架，更像是一个工具箱，组件之间没有特别的依赖关系，顺手就用，不顺手可以换个锤子。<h2 id=kuang-jia-da-jian>框架搭建</h2><h3 id=niao-kan>鸟瞰</h3><p>gokit 编写的服务有几个基本元素，这些基本元素都是围绕 <strong>Endpoint</strong> 接口转的，gokit 自己把 Endpoint 称为 <em>构建服务器和客户端的基本块</em> 。<p>几个基本元素是：<ul><li>服务接口定义 <code>type StringService interface { /*...*/ }</code><li>应用级中间件定义 <code>type AppMiddleware struct {} // implement StringService</code><li>传输层接口定义，包括 <code>Endpoint</code> 定义、序列化、服务发现等<li>传输层中间件定义，<code>type Middleware func(Endpoint) Endpoint</code></ul><p>此外还有一些可选的组件：<ul><li><code>tracing</code>，分布式跟踪<li><code>ratelimit</code>，限流<li><code>metrics</code>，指标收集<li><code>log</code>，日志收集<li><code>circuitbreaker</code>，熔断<li><code>auth</code>，身份认证</ul><p>我自己整的目录结构如下。<p><img alt=目录结构 src=https://nnnewb.github.io/posts/2022/go-kit-note/image-20220228155029310.webp><p>服务本质是一系列接口的集合，gokit 的 tutorial 中将服务抽象成了一个 <code>interface</code> ，在这个接口上用户可以提供不同实现。像是服务端、客户端、中间件，不管传输层怎么定义，最终实现的都是这个接口。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>type </span><span style=color:#8ec07c>StringService </span><span style=color:#fa5c4b>interface </span><span>{
+</span><span>	</span><span style=color:#8ec07c>Uppercase</span><span>(</span><span style=color:#fabd2f>string</span><span>) (</span><span style=color:#fabd2f>string</span><span>, </span><span style=color:#fabd2f>error</span><span>)
+</span><span>	</span><span style=color:#8ec07c>Count</span><span>(</span><span style=color:#fabd2f>string</span><span>) </span><span style=color:#fabd2f>int
+</span><span>}
+</span></code></pre><p>微服务的开发者提供这个接口的实现。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>type </span><span style=color:#8ec07c>StringServiceImpl </span><span style=color:#fa5c4b>struct</span><span>{}
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span>(</span><span style=color:#fdf4c1>s </span><span style=color:#fe8019>*</span><span style=color:#fa5c4b>StringServiceImpl</span><span>) </span><span style=color:#8ec07c>Uppercase</span><span>(</span><span style=color:#fdf4c1>arg </span><span style=color:#fabd2f>string</span><span>) (</span><span style=color:#fabd2f>string</span><span>, </span><span style=color:#fabd2f>error</span><span>) {
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>arg </span><span style=color:#fe8019>== </span><span style=color:#b8bb26>"" </span><span>{
+</span><span>		</span><span style=color:#fa5c4b>return </span><span style=color:#b8bb26>""</span><span>, </span><span style=color:#d3869b>nil
+</span><span>	}
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>strings</span><span>.</span><span style=color:#fdf4c1>ToUpper</span><span>(</span><span style=color:#fdf4c1>arg</span><span>), </span><span style=color:#d3869b>nil
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span>(</span><span style=color:#fdf4c1>s </span><span style=color:#fe8019>*</span><span style=color:#fa5c4b>StringServiceImpl</span><span>) </span><span style=color:#8ec07c>Count</span><span>(</span><span style=color:#fdf4c1>arg </span><span style=color:#fabd2f>string</span><span>) </span><span style=color:#fabd2f>int </span><span>{
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#fabd2f>len</span><span>(</span><span style=color:#fdf4c1>arg</span><span>)
+</span><span>}
+</span></code></pre><p>然后通过某种传输层协议暴露给调用方。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>MakeUppercaseEndpoint</span><span>(</span><span style=color:#fdf4c1>svc stringsvc1</span><span>.</span><span style=color:#fa5c4b>StringService</span><span>) </span><span style=color:#fdf4c1>endpoint</span><span>.</span><span style=color:#fa5c4b>Endpoint </span><span>{
+</span><span>	</span><span style=color:#fa5c4b>return func</span><span>(</span><span style=color:#fdf4c1>ctx context</span><span>.</span><span style=color:#fa5c4b>Context</span><span>, </span><span style=color:#fdf4c1>request </span><span style=color:#fa5c4b>interface</span><span>{}) (</span><span style=color:#fa5c4b>interface</span><span>{}, </span><span style=color:#fabd2f>error</span><span>) {
+</span><span>		</span><span style=color:#fdf4c1>req </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>request</span><span>.(</span><span style=color:#fa5c4b>UppercaseRequest</span><span>)
+</span><span>		</span><span style=color:#fdf4c1>v</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>svc</span><span>.</span><span style=color:#fdf4c1>Uppercase</span><span>(</span><span style=color:#fdf4c1>req</span><span>.</span><span style=color:#fdf4c1>S</span><span>)
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>			</span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>nil</span><span>, </span><span style=color:#fdf4c1>err
+</span><span>		}
+</span><span>
+</span><span>		</span><span style=color:#fa5c4b>return </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>UppercaseResponse</span><span>{
+</span><span>			</span><span style=color:#fdf4c1>V</span><span>: </span><span style=color:#fdf4c1>v</span><span>,
+</span><span>		}, </span><span style=color:#d3869b>nil
+</span><span>	}
+</span><span>}
+</span><span>
+</span><span style=color:#928374;font-style:italic>// ... 略
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>main</span><span>() {
+</span><span>	</span><span style=color:#fdf4c1>logger </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>log</span><span>.</span><span style=color:#fdf4c1>NewLogfmtLogger</span><span>(</span><span style=color:#fdf4c1>os</span><span>.</span><span style=color:#fdf4c1>Stderr</span><span>)
+</span><span>	</span><span style=color:#fdf4c1>svc </span><span style=color:#fe8019>:= &</span><span style=color:#fdf4c1>stringsvc1</span><span>.</span><span style=color:#fdf4c1>StringServiceImpl</span><span>{}
+</span><span>
+</span><span>	</span><span style=color:#fdf4c1>uppercase </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>transport</span><span>.</span><span style=color:#fdf4c1>MakeUppercaseEndpoint</span><span>(</span><span style=color:#fdf4c1>svc</span><span>)
+</span><span>	</span><span style=color:#fdf4c1>uppercaseHandler </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>httptransport</span><span>.</span><span style=color:#fdf4c1>NewServer</span><span>(</span><span style=color:#fdf4c1>uppercase</span><span>, </span><span style=color:#fdf4c1>transport</span><span>.</span><span style=color:#fdf4c1>DecodeUppercaseRequest</span><span>, </span><span style=color:#fdf4c1>transport</span><span>.</span><span style=color:#fdf4c1>EncodeResponse</span><span>)
+</span><span>	</span><span style=color:#fdf4c1>http</span><span>.</span><span style=color:#fdf4c1>Handle</span><span>(</span><span style=color:#b8bb26>"/uppercase"</span><span>, </span><span style=color:#fdf4c1>uppercaseHandler</span><span>)
+</span><span>
+</span><span>	</span><span style=color:#fdf4c1>count </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>transport</span><span>.</span><span style=color:#fdf4c1>MakeCountEndpoint</span><span>(</span><span style=color:#fdf4c1>svc</span><span>)
+</span><span>	</span><span style=color:#fdf4c1>countHandler </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>httptransport</span><span>.</span><span style=color:#fdf4c1>NewServer</span><span>(</span><span style=color:#fdf4c1>count</span><span>, </span><span style=color:#fdf4c1>transport</span><span>.</span><span style=color:#fdf4c1>DecodeCountRequest</span><span>, </span><span style=color:#fdf4c1>transport</span><span>.</span><span style=color:#fdf4c1>EncodeResponse</span><span>)
+</span><span>	</span><span style=color:#fdf4c1>http</span><span>.</span><span style=color:#fdf4c1>Handle</span><span>(</span><span style=color:#b8bb26>"/count"</span><span>, </span><span style=color:#fdf4c1>countHandler</span><span>)
+</span><span>
+</span><span>	</span><span style=color:#fdf4c1>logger</span><span>.</span><span style=color:#fdf4c1>Log</span><span>(</span><span style=color:#b8bb26>"msg"</span><span>, </span><span style=color:#b8bb26>"HTTP"</span><span>, </span><span style=color:#b8bb26>"addr"</span><span>, </span><span style=color:#b8bb26>":8080"</span><span>)
+</span><span>	</span><span style=color:#fdf4c1>logger</span><span>.</span><span style=color:#fdf4c1>Log</span><span>(</span><span style=color:#b8bb26>"err"</span><span>, </span><span style=color:#fdf4c1>http</span><span>.</span><span style=color:#fdf4c1>ListenAndServe</span><span>(</span><span style=color:#b8bb26>":8080"</span><span>, </span><span style=color:#d3869b>nil</span><span>))
+</span><span>}
+</span></code></pre><p>一个简单的服务提供方需要做的就是这些。下面具体看看其中涉及的概念。<h3 id=endpoint-jie-xi>endpoint 解析</h3><p>一个最简单的服务 <code>Endpoint</code> 定义如下。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>package </span><span style=color:#fdf4c1>main
+</span><span>
+</span><span style=color:#fa5c4b>import </span><span>(
+</span><span>	</span><span style=color:#b8bb26>"context"
+</span><span>	</span><span style=color:#b8bb26>"encoding/json"
+</span><span>	</span><span style=color:#b8bb26>"net/http"
+</span><span>	</span><span style=color:#b8bb26>"os"
+</span><span>	</span><span style=color:#b8bb26>"strings"
+</span><span>
+</span><span>	</span><span style=color:#fdf4c1>httptransport </span><span style=color:#b8bb26>"github.com/go-kit/kit/transport/http"
+</span><span>	</span><span style=color:#b8bb26>"github.com/go-kit/log"
+</span><span>)
+</span><span>
+</span><span style=color:#fa5c4b>type </span><span style=color:#8ec07c>uppercaseRequest </span><span style=color:#fa5c4b>struct </span><span>{
+</span><span>	</span><span style=color:#fdf4c1>S </span><span style=color:#fabd2f>string </span><span style=color:#b8bb26>`json:"s,omitempty"`
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>type </span><span style=color:#8ec07c>uppercaseResponse </span><span style=color:#fa5c4b>struct </span><span>{
+</span><span>	</span><span style=color:#fdf4c1>S </span><span style=color:#fabd2f>string </span><span style=color:#b8bb26>`json:"s,omitempty"`
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>main</span><span>() {
+</span><span>	</span><span style=color:#fdf4c1>logger </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>log</span><span>.</span><span style=color:#fdf4c1>NewLogfmtLogger</span><span>(</span><span style=color:#fdf4c1>os</span><span>.</span><span style=color:#fdf4c1>Stderr</span><span>)
+</span><span>
+</span><span>	</span><span style=color:#fdf4c1>http</span><span>.</span><span style=color:#fdf4c1>Handle</span><span>(</span><span style=color:#b8bb26>"/uppercase"</span><span>, </span><span style=color:#fdf4c1>httptransport</span><span>.</span><span style=color:#fdf4c1>NewServer</span><span>(
+</span><span>		</span><span style=color:#928374;font-style:italic>// endpoint 定义
+</span><span>		</span><span style=color:#fa5c4b>func</span><span>(</span><span style=color:#fdf4c1>ctx context</span><span>.</span><span style=color:#fa5c4b>Context</span><span>, </span><span style=color:#fdf4c1>request </span><span style=color:#fa5c4b>interface</span><span>{}) (</span><span style=color:#fdf4c1>response </span><span style=color:#fa5c4b>interface</span><span>{}, </span><span style=color:#fdf4c1>err </span><span style=color:#fabd2f>error</span><span>) {
+</span><span>			</span><span style=color:#fdf4c1>req </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>request</span><span>.(</span><span style=color:#fa5c4b>uppercaseRequest</span><span>)
+</span><span>			</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>req</span><span>.</span><span style=color:#fdf4c1>S </span><span style=color:#fe8019>== </span><span style=color:#b8bb26>"" </span><span>{
+</span><span>				</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>uppercaseResponse</span><span>{</span><span style=color:#b8bb26>""</span><span>}, </span><span style=color:#d3869b>nil
+</span><span>			}
+</span><span>			</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>uppercaseResponse</span><span>{</span><span style=color:#fdf4c1>strings</span><span>.</span><span style=color:#fdf4c1>ToUpper</span><span>(</span><span style=color:#fdf4c1>req</span><span>.</span><span style=color:#fdf4c1>S</span><span>)}, </span><span style=color:#d3869b>nil
+</span><span>		},
+</span><span>		</span><span style=color:#928374;font-style:italic>// 请求 decoder
+</span><span>		</span><span style=color:#fa5c4b>func</span><span>(</span><span style=color:#fdf4c1>c context</span><span>.</span><span style=color:#fa5c4b>Context</span><span>, </span><span style=color:#fdf4c1>r </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>http</span><span>.</span><span style=color:#fa5c4b>Request</span><span>) (</span><span style=color:#fa5c4b>interface</span><span>{}, </span><span style=color:#fabd2f>error</span><span>) {
+</span><span>			</span><span style=color:#fa5c4b>var </span><span style=color:#fdf4c1>request </span><span style=color:#fa5c4b>uppercaseRequest
+</span><span>			</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>json</span><span>.</span><span style=color:#fdf4c1>NewDecoder</span><span>(</span><span style=color:#fdf4c1>r</span><span>.</span><span style=color:#fdf4c1>Body</span><span>).</span><span style=color:#fdf4c1>Decode</span><span>(</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>request</span><span>); </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>				</span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>nil</span><span>, </span><span style=color:#fdf4c1>err
+</span><span>			}
+</span><span>			</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>request</span><span>, </span><span style=color:#d3869b>nil
+</span><span>		},
+</span><span>		</span><span style=color:#928374;font-style:italic>// 响应 encoder
+</span><span>		</span><span style=color:#fa5c4b>func</span><span>(</span><span style=color:#fdf4c1>c context</span><span>.</span><span style=color:#fa5c4b>Context</span><span>, </span><span style=color:#fdf4c1>w http</span><span>.</span><span style=color:#fa5c4b>ResponseWriter</span><span>, </span><span style=color:#fdf4c1>response </span><span style=color:#fa5c4b>interface</span><span>{}) </span><span style=color:#fabd2f>error </span><span>{
+</span><span>			</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>json</span><span>.</span><span style=color:#fdf4c1>NewEncoder</span><span>(</span><span style=color:#fdf4c1>w</span><span>).</span><span style=color:#fdf4c1>Encode</span><span>(</span><span style=color:#fdf4c1>response</span><span>)
+</span><span>		},
+</span><span>	))
+</span><span>
+</span><span>	</span><span style=color:#fdf4c1>logger</span><span>.</span><span style=color:#fdf4c1>Log</span><span>(</span><span style=color:#b8bb26>"msg"</span><span>, </span><span style=color:#b8bb26>"HTTP"</span><span>, </span><span style=color:#b8bb26>"addr"</span><span>, </span><span style=color:#b8bb26>":8080"</span><span>)
+</span><span>	</span><span style=color:#fdf4c1>logger</span><span>.</span><span style=color:#fdf4c1>Log</span><span>(</span><span style=color:#b8bb26>"err"</span><span>, </span><span style=color:#fdf4c1>http</span><span>.</span><span style=color:#fdf4c1>ListenAndServe</span><span>(</span><span style=color:#b8bb26>":8080"</span><span>, </span><span style=color:#d3869b>nil</span><span>))
+</span><span>}
+</span><span>
+</span></code></pre><p><code>Endpoint</code> 本质是一个函数，类型签名如下。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#928374;font-style:italic>// Endpoint is the fundamental building block of servers and clients.
+</span><span style=color:#928374;font-style:italic>// It represents a single RPC method.
+</span><span style=color:#fa5c4b>type </span><span style=color:#8ec07c>Endpoint </span><span style=color:#fa5c4b>func</span><span>(</span><span style=color:#fdf4c1>ctx context</span><span>.</span><span style=color:#fa5c4b>Context</span><span>, </span><span style=color:#fdf4c1>request </span><span style=color:#fa5c4b>interface</span><span>{}) (</span><span style=color:#fdf4c1>response </span><span style=color:#fa5c4b>interface</span><span>{}, </span><span style=color:#fdf4c1>err </span><span style=color:#fabd2f>error</span><span>)
+</span></code></pre><p><code>Endpoint</code> 抽象了 RPC 调用，隐藏了调用对象是“本地”还是“远程”的。像是上面的案例里，<code>Endpoint</code> 背后是本地的代码。而在客户端使用<code>Endpoint</code>时，<code>Endpoint</code>的背后往往是传输层代码，发起了一次远程调用。<p><code>Endpoint</code> 本身不做请求/响应的编解码工作，进入 <code>Endpoint</code> 的都是已经准备好的结构化数据。<h3 id=endpoint-middleware-jie-xi>endpoint.Middleware 解析</h3><p><code>endpoint.Middleware</code> 是在 <code>Endpoint</code> 上包装的中间件，签名如下。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#928374;font-style:italic>// Middleware is a chainable behavior modifier for endpoints.
+</span><span style=color:#fa5c4b>type </span><span style=color:#8ec07c>Middleware </span><span style=color:#fa5c4b>func</span><span>(</span><span style=color:#fa5c4b>Endpoint</span><span>) </span><span style=color:#fa5c4b>Endpoint
+</span></code></pre><p>和 <code>gin</code> 之类的框架中间件体系很相似，都是基于高阶函数的方式。一个简单的日志中间件实现如下。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>import </span><span>(
+</span><span>	</span><span style=color:#b8bb26>"context"
+</span><span>
+</span><span>	</span><span style=color:#b8bb26>"github.com/go-kit/kit/endpoint"
+</span><span>	</span><span style=color:#b8bb26>"github.com/go-kit/log"
+</span><span>)
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>LoggingMiddleware</span><span>(</span><span style=color:#fdf4c1>logger log</span><span>.</span><span style=color:#fa5c4b>Logger</span><span>) </span><span style=color:#fdf4c1>endpoint</span><span>.</span><span style=color:#fa5c4b>Middleware </span><span>{
+</span><span>	</span><span style=color:#fa5c4b>return func</span><span>(</span><span style=color:#fdf4c1>next endpoint</span><span>.</span><span style=color:#fa5c4b>Endpoint</span><span>) </span><span style=color:#fdf4c1>endpoint</span><span>.</span><span style=color:#fa5c4b>Endpoint </span><span>{
+</span><span>		</span><span style=color:#fa5c4b>return func</span><span>(</span><span style=color:#fdf4c1>ctx context</span><span>.</span><span style=color:#fa5c4b>Context</span><span>, </span><span style=color:#fdf4c1>request </span><span style=color:#fa5c4b>interface</span><span>{}) (</span><span style=color:#fa5c4b>interface</span><span>{}, </span><span style=color:#fabd2f>error</span><span>) {
+</span><span>			</span><span style=color:#fdf4c1>logger</span><span>.</span><span style=color:#fdf4c1>Log</span><span>(</span><span style=color:#b8bb26>"msg"</span><span>, </span><span style=color:#b8bb26>"calling endpoint"</span><span>)
+</span><span>			</span><span style=color:#fa5c4b>defer </span><span style=color:#fdf4c1>logger</span><span>.</span><span style=color:#fdf4c1>Log</span><span>(</span><span style=color:#b8bb26>"msg"</span><span>, </span><span style=color:#b8bb26>"called endpoint"</span><span>)
+</span><span>			</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>next</span><span>(</span><span style=color:#fdf4c1>ctx</span><span>, </span><span style=color:#fdf4c1>request</span><span>)
+</span><span>		}
+</span><span>	}
+</span><span>}
+</span></code></pre><p>像这样定义的中间件用法也很简单，以 <code>Endpoint</code> 为参数调用即可。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fdf4c1>LoggingMiddleware</span><span>(</span><span style=color:#fdf4c1>log</span><span>.</span><span style=color:#fdf4c1>With</span><span>(</span><span style=color:#fdf4c1>logger</span><span>, </span><span style=color:#b8bb26>"method"</span><span>, </span><span style=color:#b8bb26>"method-name"</span><span>))(</span><span style=color:#fdf4c1>endpoint</span><span>)
+</span></code></pre><p>说起这个我就怀念 python 的装饰器。<h3 id=ying-yong-zhong-jian-jian>应用中间件</h3><p>应用中间件不算是 gokit 的一部分，gokit 的示例中给出了<a href=http://gokit.io/examples/stringsvc.html#application-logging>应用级中间件的做法</a>。实话说我不喜欢。<p>所谓的应用中间件做法其实就是再定义一个结构，实现你的服务接口，然后在实现的服务接口里加上需要的中间件代码。<p>如果要说有什么好处的话，就是满足了类型约束，免去了用 <code>reflect</code>。<code>Endpoint</code>一级的中间件只能拿到一个 <code>request interface{}</code> ，但下面这样写的话，参数就是已经填好的了，服务实现里拿到什么参数这个中间件就拿到什么参数。但问题也很明显——为了满足 <code>type Service interface</code> 的约束，这样的中间件必须把服务的所有接口都写个 stub 。就算是用编辑器的 <code>generate interface stubs</code> 功能也没法直接帮你填好转发参数的代码啊...<p>我自己倒是折腾出一个有点怪的解法，利用 go 的 embed 字段和动态分发机制，部分实现了有继承的语言里的 override 。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>import </span><span>(
+</span><span>	</span><span style=color:#b8bb26>"play/stringsvc1"
+</span><span>
+</span><span>	</span><span style=color:#b8bb26>"github.com/go-kit/log"
+</span><span>)
+</span><span>
+</span><span style=color:#fa5c4b>type </span><span style=color:#8ec07c>LoggingMiddleware </span><span style=color:#fa5c4b>struct </span><span>{
+</span><span>	</span><span style=color:#fdf4c1>stringsvc1</span><span>.</span><span style=color:#8ec07c>StringService </span><span style=color:#928374;font-style:italic>// LoggingMiddleware 自己没有实现全部的 stringsvc1.StringService 接口，但这个 embed 字段实现了
+</span><span>	</span><span style=color:#fdf4c1>Logger log</span><span>.</span><span style=color:#fa5c4b>Logger
+</span><span>}
+</span><span>
+</span><span style=color:#928374;font-style:italic>// 这个实现覆盖掉了结构里的 stringsvc1.StringService.Uppercase 暴露的实现
+</span><span style=color:#928374;font-style:italic>// 然后内部又使用了 `.StringService.Uppercase` 这种语法来调用结构里的 
+</span><span style=color:#928374;font-style:italic>// stringsvc1.StringService.Uppercase 实现
+</span><span style=color:#928374;font-style:italic>// 就像是有继承的语言里子类通过 super() 或者 ParentClass::Uppercase 这样的方式调用父类实现一样。
+</span><span style=color:#fa5c4b>func </span><span>(</span><span style=color:#fdf4c1>m </span><span style=color:#fe8019>*</span><span style=color:#fa5c4b>LoggingMiddleware</span><span>) </span><span style=color:#8ec07c>Uppercase</span><span>(</span><span style=color:#fdf4c1>s </span><span style=color:#fabd2f>string</span><span>) (</span><span style=color:#fabd2f>string</span><span>, </span><span style=color:#fabd2f>error</span><span>) {
+</span><span>	</span><span style=color:#fdf4c1>m</span><span>.</span><span style=color:#fdf4c1>Logger</span><span>.</span><span style=color:#fdf4c1>Log</span><span>(</span><span style=color:#b8bb26>"msg"</span><span>, </span><span style=color:#b8bb26>"call endpoint"</span><span>, </span><span style=color:#b8bb26>"arg"</span><span>, </span><span style=color:#fdf4c1>s</span><span>)
+</span><span>	</span><span style=color:#fa5c4b>defer </span><span style=color:#fdf4c1>m</span><span>.</span><span style=color:#fdf4c1>Logger</span><span>.</span><span style=color:#fdf4c1>Log</span><span>(</span><span style=color:#b8bb26>"msg"</span><span>, </span><span style=color:#b8bb26>"called endpoint"</span><span>, </span><span style=color:#b8bb26>"arg"</span><span>, </span><span style=color:#fdf4c1>s</span><span>)
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>m</span><span>.</span><span style=color:#fdf4c1>StringService</span><span>.</span><span style=color:#fdf4c1>Uppercase</span><span>(</span><span style=color:#fdf4c1>s</span><span>)
+</span><span>}
+</span><span>
+</span></code></pre><p>通过这种办法倒是实现了应用级的特定接口中间件。但还要另外定义一个 <code>struct</code> 也比较麻烦。<p>贴一下示例里的代码。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#928374;font-style:italic>// middleware.go
+</span><span style=color:#fa5c4b>type </span><span style=color:#8ec07c>loggingMiddleware </span><span style=color:#fa5c4b>struct </span><span>{
+</span><span>	</span><span style=color:#fdf4c1>logger log</span><span>.</span><span style=color:#fa5c4b>Logger
+</span><span>	</span><span style=color:#fdf4c1>next   </span><span style=color:#fa5c4b>StringService
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span>(</span><span style=color:#fdf4c1>mw </span><span style=color:#fa5c4b>loggingMiddleware</span><span>) </span><span style=color:#8ec07c>Uppercase</span><span>(</span><span style=color:#fdf4c1>s </span><span style=color:#fabd2f>string</span><span>) (</span><span style=color:#fdf4c1>output </span><span style=color:#fabd2f>string</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fabd2f>error</span><span>) {
+</span><span>	</span><span style=color:#fa5c4b>defer func</span><span>(</span><span style=color:#fdf4c1>begin time</span><span>.</span><span style=color:#fa5c4b>Time</span><span>) {
+</span><span>		</span><span style=color:#fdf4c1>mw</span><span>.</span><span style=color:#fdf4c1>logger</span><span>.</span><span style=color:#fdf4c1>Log</span><span>(
+</span><span>			</span><span style=color:#b8bb26>"method"</span><span>, </span><span style=color:#b8bb26>"uppercase"</span><span>,
+</span><span>			</span><span style=color:#b8bb26>"input"</span><span>, </span><span style=color:#fdf4c1>s</span><span>,
+</span><span>			</span><span style=color:#b8bb26>"output"</span><span>, </span><span style=color:#fdf4c1>output</span><span>,
+</span><span>			</span><span style=color:#b8bb26>"err"</span><span>, </span><span style=color:#fdf4c1>err</span><span>,
+</span><span>			</span><span style=color:#b8bb26>"took"</span><span>, </span><span style=color:#fdf4c1>time</span><span>.</span><span style=color:#fdf4c1>Since</span><span>(</span><span style=color:#fdf4c1>begin</span><span>),
+</span><span>		)
+</span><span>	}(</span><span style=color:#fdf4c1>time</span><span>.</span><span style=color:#fdf4c1>Now</span><span>())
+</span><span>
+</span><span>	</span><span style=color:#fdf4c1>output</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>mw</span><span>.</span><span style=color:#fdf4c1>next</span><span>.</span><span style=color:#fdf4c1>Uppercase</span><span>(</span><span style=color:#fdf4c1>s</span><span>)
+</span><span>	</span><span style=color:#fa5c4b>return
+</span><span>}
+</span></code></pre><pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#928374;font-style:italic>// main.go
+</span><span style=color:#fa5c4b>import </span><span>(
+</span><span>	</span><span style=color:#b8bb26>"os"
+</span><span>
+</span><span>	</span><span style=color:#b8bb26>"github.com/go-kit/kit/log"
+</span><span>	</span><span style=color:#fdf4c1>httptransport </span><span style=color:#b8bb26>"github.com/go-kit/kit/transport/http"
+</span><span>)
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>main</span><span>() {
+</span><span>	</span><span style=color:#fdf4c1>logger </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>log</span><span>.</span><span style=color:#fdf4c1>NewLogfmtLogger</span><span>(</span><span style=color:#fdf4c1>os</span><span>.</span><span style=color:#fdf4c1>Stderr</span><span>)
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>var </span><span style=color:#fdf4c1>svc </span><span style=color:#fa5c4b>StringService
+</span><span>	</span><span style=color:#fdf4c1>svc </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>stringService</span><span>{}
+</span><span>	</span><span style=color:#fdf4c1>svc </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>loggingMiddleware</span><span>{</span><span style=color:#fdf4c1>logger</span><span>, </span><span style=color:#fdf4c1>svc</span><span>}
+</span><span>
+</span><span>	</span><span style=color:#928374;font-style:italic>// ...
+</span><span>
+</span><span>	</span><span style=color:#fdf4c1>uppercaseHandler </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>httptransport</span><span>.</span><span style=color:#fdf4c1>NewServer</span><span>(
+</span><span>		</span><span style=color:#fdf4c1>makeUppercaseEndpoint</span><span>(</span><span style=color:#fdf4c1>svc</span><span>),
+</span><span>		</span><span style=color:#928374;font-style:italic>// ...
+</span><span>	)
+</span><span>}
+</span></code></pre><h3 id=ke-hu-duan-shi-xian>客户端实现</h3><p>客户端实现可以很简单，同样有很强的扩展性。比如说可以结合服务发现、负载均衡、频率限制、熔断器实现一个功能强大的客户端。<p>先从简单的开始。一般考虑客户端实现的话，会准备一个特殊的结构来保存服务的 <code>Endpoint</code>，再对这个结构实现服务定义的接口。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#928374;font-style:italic>// https://github.com/go-kit/examples/blob/master/addsvc/pkg/addendpoint/set.go
+</span><span>
+</span><span style=color:#928374;font-style:italic>// Set collects all of the endpoints that compose an add service. It's meant to
+</span><span style=color:#928374;font-style:italic>// be used as a helper struct, to collect all of the endpoints into a single
+</span><span style=color:#928374;font-style:italic>// parameter.
+</span><span style=color:#fa5c4b>type </span><span style=color:#8ec07c>Set </span><span style=color:#fa5c4b>struct </span><span>{
+</span><span>	</span><span style=color:#fdf4c1>SumEndpoint    endpoint</span><span>.</span><span style=color:#fa5c4b>Endpoint
+</span><span>	</span><span style=color:#fdf4c1>ConcatEndpoint endpoint</span><span>.</span><span style=color:#fa5c4b>Endpoint
+</span><span>}
+</span><span>
+</span><span style=color:#928374;font-style:italic>// Sum implements the service interface, so Set may be used as a service.
+</span><span style=color:#928374;font-style:italic>// This is primarily useful in the context of a client library.
+</span><span style=color:#fa5c4b>func </span><span>(</span><span style=color:#fdf4c1>s </span><span style=color:#fa5c4b>Set</span><span>) </span><span style=color:#8ec07c>Sum</span><span>(</span><span style=color:#fdf4c1>ctx context</span><span>.</span><span style=color:#fa5c4b>Context</span><span>, </span><span style=color:#fdf4c1>a</span><span>, </span><span style=color:#fdf4c1>b </span><span style=color:#fabd2f>int</span><span>) (</span><span style=color:#fabd2f>int</span><span>, </span><span style=color:#fabd2f>error</span><span>) {
+</span><span>	</span><span style=color:#fdf4c1>resp</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>s</span><span>.</span><span style=color:#fdf4c1>SumEndpoint</span><span>(</span><span style=color:#fdf4c1>ctx</span><span>, </span><span style=color:#fdf4c1>SumRequest</span><span>{</span><span style=color:#fdf4c1>A</span><span>: </span><span style=color:#fdf4c1>a</span><span>, </span><span style=color:#fdf4c1>B</span><span>: </span><span style=color:#fdf4c1>b</span><span>})
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>		</span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#fdf4c1>err
+</span><span>	}
+</span><span>	</span><span style=color:#fdf4c1>response </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>resp</span><span>.(</span><span style=color:#fa5c4b>SumResponse</span><span>)
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>response</span><span>.</span><span style=color:#fdf4c1>V</span><span>, </span><span style=color:#fdf4c1>response</span><span>.</span><span style=color:#fdf4c1>Err
+</span><span>}
+</span><span>
+</span><span style=color:#928374;font-style:italic>// ... 略
+</span></code></pre><p>这么做的好处是可以像是调用 Go 方法一样去调用 RPC 函数，比起 <code>grpc</code> 一类的调用方式来说更直观了。<p>客户端的 <code>Endpoint</code> 的构造方式和服务器不一样，隐藏在 <code>Endpoint</code> 背后的不是本地代码，而是一个网络请求。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#928374;font-style:italic>// Each individual endpoint is an http/transport.Client (which implements
+</span><span style=color:#928374;font-style:italic>// endpoint.Endpoint) that gets wrapped with various middlewares. If you
+</span><span style=color:#928374;font-style:italic>// made your own client library, you'd do this work there, so your server
+</span><span style=color:#928374;font-style:italic>// could rely on a consistent set of client behavior.
+</span><span style=color:#fa5c4b>var </span><span style=color:#fdf4c1>sumEndpoint  </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>httptransport</span><span>.</span><span style=color:#fdf4c1>NewClient</span><span>(
+</span><span>    </span><span style=color:#b8bb26>"POST"</span><span>,
+</span><span>    </span><span style=color:#fdf4c1>copyURL</span><span>(</span><span style=color:#fdf4c1>u</span><span>, </span><span style=color:#b8bb26>"/sum"</span><span>),
+</span><span>    </span><span style=color:#fdf4c1>encodeHTTPGenericRequest</span><span>,
+</span><span>    </span><span style=color:#fdf4c1>decodeHTTPSumResponse</span><span>,
+</span><span>).</span><span style=color:#fdf4c1>Endpoint</span><span>()
+</span></code></pre><p><code>github.com/go-kit/kit/transport</code> 这个包提供了很多有用的助手函数来帮助构造 <code>Endpoint</code> ，以及黏合服务端的 <code>Endpoint</code> 到传输层代码。（PS：请回顾前文中使用的 <code>httptransport.NewServer</code>）<h3 id=fu-wu-fa-xian>服务发现</h3><p>参考 <a href=https://github.com/go-kit/examples/blob/master/apigateway/main.go>apigateway</a> 的代码。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#928374;font-style:italic>// Each method gets constructed with a factory. Factories take an
+</span><span style=color:#928374;font-style:italic>// instance string, and return a specific endpoint. In the factory we
+</span><span style=color:#928374;font-style:italic>// dial the instance string we get from Consul, and then leverage an
+</span><span style=color:#928374;font-style:italic>// addsvc client package to construct a complete service. We can then
+</span><span style=color:#928374;font-style:italic>// leverage the addsvc.Make{Sum,Concat}Endpoint constructors to convert
+</span><span style=color:#928374;font-style:italic>// the complete service to specific endpoint.
+</span><span style=color:#fa5c4b>var </span><span>(
+</span><span>    </span><span style=color:#fdf4c1>tags        </span><span style=color:#fe8019>= </span><span>[]</span><span style=color:#fabd2f>string</span><span>{}
+</span><span>    </span><span style=color:#fdf4c1>passingOnly </span><span style=color:#fe8019>= </span><span style=color:#d3869b>true
+</span><span>    </span><span style=color:#fdf4c1>endpoints   </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>addendpoint</span><span>.</span><span style=color:#fdf4c1>Set</span><span>{}
+</span><span>    </span><span style=color:#fdf4c1>instancer   </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>consulsd</span><span>.</span><span style=color:#fdf4c1>NewInstancer</span><span>(</span><span style=color:#fdf4c1>client</span><span>, </span><span style=color:#fdf4c1>logger</span><span>, </span><span style=color:#b8bb26>"addsvc"</span><span>, </span><span style=color:#fdf4c1>tags</span><span>, </span><span style=color:#fdf4c1>passingOnly</span><span>)
+</span><span>)
+</span><span>{
+</span><span>    </span><span style=color:#fdf4c1>factory </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>addsvcFactory</span><span>(</span><span style=color:#fdf4c1>addendpoint</span><span>.</span><span style=color:#fdf4c1>MakeSumEndpoint</span><span>, </span><span style=color:#fdf4c1>tracer</span><span>, </span><span style=color:#fdf4c1>zipkinTracer</span><span>, </span><span style=color:#fdf4c1>logger</span><span>)
+</span><span>    </span><span style=color:#fdf4c1>endpointer </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>sd</span><span>.</span><span style=color:#fdf4c1>NewEndpointer</span><span>(</span><span style=color:#fdf4c1>instancer</span><span>, </span><span style=color:#fdf4c1>factory</span><span>, </span><span style=color:#fdf4c1>logger</span><span>)
+</span><span>    </span><span style=color:#fdf4c1>balancer </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>lb</span><span>.</span><span style=color:#fdf4c1>NewRoundRobin</span><span>(</span><span style=color:#fdf4c1>endpointer</span><span>)
+</span><span>    </span><span style=color:#fdf4c1>retry </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>lb</span><span>.</span><span style=color:#fdf4c1>Retry</span><span>(</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>retryMax</span><span>, </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>retryTimeout</span><span>, </span><span style=color:#fdf4c1>balancer</span><span>)
+</span><span>    </span><span style=color:#fdf4c1>endpoints</span><span>.</span><span style=color:#fdf4c1>SumEndpoint </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>retry
+</span><span>}
+</span></code></pre><p><img alt=示意图 src=https://nnnewb.github.io/posts/2022/go-kit-note/image-20220228171821569.webp><p>总得来说，go kit 的服务发现机制靠客户端以特定的方式构造 <code>Endpoint</code> ，这和反向代理或者 side-car 代理实现的服务发现不一样。<p>比如说 kubernetes 的 ClusterIP 基于 kube-proxy，后端有多个 POD 的时候 kube-proxy 会自动进行负载均衡，但算法是 kube-proxy 实现决定的，不可依赖。<p>再比如 nginx 也能一定程度实现服务发现和负载均衡。<p>再比如，linkerd 这样的 service mesh，非侵入，提供负载均衡、服务发现、重试这些功能。<p>go kit 的工具箱里提供的是客户端的负载均衡机制。上图里的代码可以用下图表示。<p><img alt=负载均衡 src=https://nnnewb.github.io/posts/2022/go-kit-note/image-20220228172730622.webp><h3 id=duo-chuan-shu-ceng-shi-xian>多传输层实现</h3><p>这里尝试实现 <code>http</code> 和 <code>grpc</code> 两种 rpc 传输层协议。首先为了保证最大化复用代码，在 <code>http</code> 实现中定义的结构和 endpoint 肯定是要复用起来的，不然每个传输层都来一次的话没codegen非得手指敲断不可。<p>先提取 <code>makeXXXEndpoint</code> 代码和 <code>XXXRequest</code> 这样的结构到单独的文件里。<p><img alt=提取定义 src=https://nnnewb.github.io/posts/2022/go-kit-note/image-20220301115635464.webp><p>思路上部分参考的 gokit 案例中 <code>addsvc</code>，<a href=https://github.com/go-kit/examples/blob/master/addsvc/README.md>链接</a>。<p>proto 文件如下。<pre class=language-proto data-lang=proto style=color:#fdf4c1aa;background-color:#282828><code class=language-proto data-lang=proto><span style=color:#928374;font-style:italic>// play/stringsvc/transport/pb/stringsvc.proto
+</span><span style=color:#fa5c4b>syntax </span><span style=color:#fe8019>= </span><span style=color:#b8bb26>"proto3"</span><span>;
+</span><span style=color:#fa5c4b>option </span><span style=color:#fdf4c1>go_package </span><span style=color:#fe8019>= </span><span style=color:#b8bb26>"play/stringsvc/transport/pb"</span><span>;
+</span><span>
+</span><span style=color:#fa5c4b>message </span><span style=color:#8ec07c>UppercaseRequest </span><span>{ </span><span style=color:#fabd2f>string </span><span style=color:#fdf4c1>s </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1</span><span>; }
+</span><span>
+</span><span style=color:#fa5c4b>message </span><span style=color:#8ec07c>UppercaseResponse </span><span>{ </span><span style=color:#fabd2f>string </span><span style=color:#fdf4c1>v </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1</span><span>; }
+</span><span>
+</span><span style=color:#fa5c4b>message </span><span style=color:#8ec07c>CountRequest </span><span>{ </span><span style=color:#fabd2f>string </span><span style=color:#fdf4c1>s </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1</span><span>; }
+</span><span>
+</span><span style=color:#fa5c4b>message </span><span style=color:#8ec07c>CountResponse </span><span>{ </span><span style=color:#fabd2f>int32 </span><span style=color:#fdf4c1>n </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1</span><span>; }
+</span><span>
+</span><span style=color:#fa5c4b>service </span><span style=color:#8ec07c>StringService </span><span>{
+</span><span>  </span><span style=color:#fa5c4b>rpc </span><span style=color:#8ec07c>Uppercase</span><span>(</span><span style=color:#fdf4c1>UppercaseRequest</span><span>) </span><span style=color:#fa5c4b>returns </span><span>(</span><span style=color:#fdf4c1>UppercaseResponse</span><span>);
+</span><span>  </span><span style=color:#fa5c4b>rpc </span><span style=color:#8ec07c>Count</span><span>(</span><span style=color:#fdf4c1>CountRequest</span><span>) </span><span style=color:#fa5c4b>returns </span><span>(</span><span style=color:#fdf4c1>CountResponse</span><span>);
+</span><span>}
+</span></code></pre><p>然后使用 protoc 生成 go 源码，具体参考 <a href=https://www.grpc.io/docs/languages/go/quickstart/>gRPC 的官方文档</a>。继续下一步之前要先了解 go 语言的 gRPC 服务框架在一般情况下怎么实现。同样建议直接看文档。简单说就是写一个结构，实现 protoc 根据你的 proto 文件生成的接口，最后调用注册方法把你的实现注册到 gRPC 服务器上就可以了。<p>再考虑请求进入我们的服务代码要经过的流程，gRPC 接口的实现要做事情其实就是把 proto 定义的结构转换成我们之前定义的结构，再调用之前定义的 <code>Endpoint</code> 。<p><img alt=gRPC作为传输层协议的交互流程 src=https://nnnewb.github.io/posts/2022/go-kit-note/image-20220301134821969.webp><p>其中对请求编解码是个很无聊的过程，字段一一赋值即可。endpoint 继续复用先前 http 的版本。gRPC 实现比较取巧，我们把所有 <code>Endpoint</code> 放到一个结构里保存，然后实现 gRPC 的接口。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>import </span><span>(
+</span><span>	</span><span style=color:#b8bb26>"context"
+</span><span>	</span><span style=color:#b8bb26>"play/stringsvc"
+</span><span>	</span><span style=color:#b8bb26>"play/stringsvc/transport/pb"
+</span><span>
+</span><span>	</span><span style=color:#fdf4c1>grpctransport </span><span style=color:#b8bb26>"github.com/go-kit/kit/transport/grpc"
+</span><span>)
+</span><span>
+</span><span style=color:#fa5c4b>type </span><span style=color:#8ec07c>set </span><span style=color:#fa5c4b>struct </span><span>{
+</span><span>	</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>pb</span><span>.</span><span style=color:#8ec07c>UnimplementedStringServiceServer
+</span><span>	</span><span style=color:#fdf4c1>uppercase grpctransport</span><span>.</span><span style=color:#fa5c4b>Handler
+</span><span>	</span><span style=color:#fdf4c1>count     grpctransport</span><span>.</span><span style=color:#fa5c4b>Handler
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>NewGRPCServer</span><span>(</span><span style=color:#fdf4c1>svc stringsvc</span><span>.</span><span style=color:#fa5c4b>StringService</span><span>) </span><span style=color:#fe8019>*</span><span style=color:#fa5c4b>set </span><span>{
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>set</span><span>{
+</span><span>		</span><span style=color:#fdf4c1>uppercase</span><span>: </span><span style=color:#fdf4c1>grpctransport</span><span>.</span><span style=color:#fdf4c1>NewServer</span><span>(</span><span style=color:#fdf4c1>MakeUppercaseEndpoint</span><span>(</span><span style=color:#fdf4c1>svc</span><span>), </span><span style=color:#fdf4c1>decodeUppercaseRequestGRPC</span><span>, </span><span style=color:#fdf4c1>encodeUppercaseResponseGRPC</span><span>),
+</span><span>		</span><span style=color:#fdf4c1>count</span><span>:     </span><span style=color:#fdf4c1>grpctransport</span><span>.</span><span style=color:#fdf4c1>NewServer</span><span>(</span><span style=color:#fdf4c1>MakeCountEndpoint</span><span>(</span><span style=color:#fdf4c1>svc</span><span>), </span><span style=color:#fdf4c1>decodeCountRequestGRPC</span><span>, </span><span style=color:#fdf4c1>encodeCountResponseGRPC</span><span>),
+</span><span>	}
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span>(</span><span style=color:#fdf4c1>s </span><span style=color:#fe8019>*</span><span style=color:#fa5c4b>set</span><span>) </span><span style=color:#8ec07c>Uppercase</span><span>(</span><span style=color:#fdf4c1>ctx context</span><span>.</span><span style=color:#fa5c4b>Context</span><span>, </span><span style=color:#fdf4c1>req </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>pb</span><span>.</span><span style=color:#fa5c4b>UppercaseRequest</span><span>) (</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>pb</span><span>.</span><span style=color:#fa5c4b>UppercaseResponse</span><span>, </span><span style=color:#fabd2f>error</span><span>) {
+</span><span>	</span><span style=color:#fdf4c1>_</span><span>, </span><span style=color:#fdf4c1>resp</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>s</span><span>.</span><span style=color:#fdf4c1>uppercase</span><span>.</span><span style=color:#fdf4c1>ServeGRPC</span><span>(</span><span style=color:#fdf4c1>ctx</span><span>, </span><span style=color:#fdf4c1>req</span><span>)
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>		</span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>nil</span><span>, </span><span style=color:#fdf4c1>err
+</span><span>	}
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>resp</span><span>.(</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>pb</span><span>.</span><span style=color:#fa5c4b>UppercaseResponse</span><span>), </span><span style=color:#d3869b>nil
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span>(</span><span style=color:#fdf4c1>s </span><span style=color:#fe8019>*</span><span style=color:#fa5c4b>set</span><span>) </span><span style=color:#8ec07c>Count</span><span>(</span><span style=color:#fdf4c1>ctx context</span><span>.</span><span style=color:#fa5c4b>Context</span><span>, </span><span style=color:#fdf4c1>req </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>pb</span><span>.</span><span style=color:#fa5c4b>CountRequest</span><span>) (</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>pb</span><span>.</span><span style=color:#fa5c4b>CountResponse</span><span>, </span><span style=color:#fabd2f>error</span><span>) {
+</span><span>	</span><span style=color:#fdf4c1>_</span><span>, </span><span style=color:#fdf4c1>resp</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>s</span><span>.</span><span style=color:#fdf4c1>count</span><span>.</span><span style=color:#fdf4c1>ServeGRPC</span><span>(</span><span style=color:#fdf4c1>ctx</span><span>, </span><span style=color:#fdf4c1>req</span><span>)
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>		</span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>nil</span><span>, </span><span style=color:#fdf4c1>err
+</span><span>	}
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>resp</span><span>.(</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>pb</span><span>.</span><span style=color:#fa5c4b>CountResponse</span><span>), </span><span style=color:#d3869b>nil
+</span><span>}
+</span></code></pre><p>这里利用了一个 <code>github.com/go-kit/kit/transport/grpc</code> 的帮助结构，<code>grpctransport.NewServer</code> 创建的 <code>grpctransport.Server</code>。这个结构的用途和 <code>httptransport.NewServer</code>一样，本质上是一个适配器，把 gRPC 的输入适配到我们定义的服务接口。理论上来说不用这玩意儿也没事，但实现代码里就要显式调用 <code>Decode</code>和<code>Encode</code>。从解耦的角度来说这种设计会更好。<h2 id=zong-jie>总结</h2><p>之所以说 gokit 大概算是框架，是因为 gokit 提供的这些工具其实有一套自己的最佳实践，但并不强迫遵循。比如 transport 并不是一定要用 gokit 的 transport ，完全可以自己写 <code>http.Handler</code> ，把 encode/decode 写到一起。也可以把其他方式编写的 RPC 封装成 <code>Endpoint</code>，获得 gokit 提供的一系列支持。<p>gokit 提供了很多有用的工具，解决一些诸如服务发现、熔断器、分布式跟踪和可观测性这样的问题。gokit 的案例代码示范的实践方式也很有启发性。</article><p class=tags-data><a href=/tags/golang>/golang/</a> <a href=/tags/kubernetes>/kubernetes/</a> <a href=/tags/go-kit>/go-kit/</a> <a href=/tags/wei-fu-wu>/微服务/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

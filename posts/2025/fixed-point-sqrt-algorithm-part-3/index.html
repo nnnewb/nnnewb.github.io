@@ -1,0 +1,64 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>定点数开根号算法（3）</title><meta content=定点数开根号算法（3） name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2025/fixed-point-sqrt-algorithm-part-3/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=定点数开根号算法（3） property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2025/fixed-point-sqrt-algorithm-part-3/ property=twitter:url><meta content=定点数开根号算法（3） property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2025/fixed-point-sqrt-algorithm-part-3/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>定点数开根号算法（3）</h1><p class=author-line>作于：2025-08-15 01:20 ，预计阅读时间 4 分钟<article><h2 id=qian-yan>前言</h2><p>在<a href=/posts/2025/fixed-point-sqrt-algorithm-part-1>定点数开方算法文章的第1部分</a>中，我们介绍了定点数开根号的几种算法原理，包括牛顿-拉弗森法和逐比特确认法。<p>在<a href=/posts/2025/fixed-point-sqrt-algorithm-part-2>定点数开方算法文章的第2部分</a>中，我们具体推导了牛顿-拉弗森法的定点数推广和实现。<p>本文继续写逐比特确认法的实现细节。<h2 id=zhu-bi-te-que-ren-fa>逐比特确认法</h2><h3 id=que-ren-gen-wei-kuan>确认根位宽</h3><p>在第一部分里我们证明了根的位宽 $B_r$：<p>$$ B_r = \begin{cases} \frac{B_N}{2} &\text{if } B_N=2k, k\in \mathbb{Z} \\ \frac{B_N+1}{2} &\text{if } B_N=2k+1, k \in \mathbb{Z} \end{cases} $$<p>这里不作赘述。<h3 id=die-dai-gong-shi>迭代公式</h3><p>不使用余数的迭代公式是最直接的，同样在第1部分已经有过论述和证明。<p>确认比特位的公式是：<p>$$ r_{n-1} = \begin{cases} 1 &\text{if } N\ge{(R_n+2^{n-1})^2} \\ 0 &\text{if } N\lt{(R_n+2^{n-1})^2} \end{cases} $$<p>已经求得的根的迭代公式则是：<p>$$ R_{n-1} = R_{n} + r_{n-1}2^{n-1} $$<h3 id=ding-dian-shu-tui-yan>定点数推广</h3><p>逐比特确认法求的是正整数的根，而我们需要的是求实数 $V$ 的根 $B$。<p>这一步我们回顾第2部分牛顿法的定点数推广，有下面的结论：<p>$n$ 比特精度定点数 $V_{int}$ 的实数根 $R$ 的定义：<p>$$ R = \frac{\sqrt{V_{int}}}{2^{\frac{n}{2}}} $$<p>实数根 $R$ 的 $n$ 比特精度定点数形式 $R_{int}$ 定义：<p>$$ R_{int} = \sqrt{V_{int}} \cdot 2^{\frac{n}{2}} $$<p>我们使用逐比特确认法迭代得到 $\sqrt{V_{int}}$ 的值后，还要经过一个缩放因子 $2^{\frac{n}{2}}$ 才能得到定点数形式的根 $R_{int}$ 。<p>考虑到精度问题（同样在第2部分有过论述，我们使用 Q31.32 迭代，最终得到<p>$$ \sqrt{V_{q32}} = \sqrt{V} \cdot 2^{16} $$<p>具体证明过程见第2部分。<h3 id=dai-ma-shi-xian>代码实现</h3><blockquote><p>下述代码的 <code>Fix32</code> 类型是 Q15.16 格式。</blockquote><pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#928374;font-style:italic>// BitByBitSquareRoot performs fixed-point arithmetic square root of a Fix32 number in bit-by-bit method
+</span><span style=color:#fa5c4b>func </span><span>(</span><span style=color:#fdf4c1>f </span><span style=color:#fa5c4b>Fix32</span><span>) </span><span style=color:#8ec07c>BitByBitSquareRoot</span><span>() (</span><span style=color:#fa5c4b>Fix32</span><span>, </span><span style=color:#fabd2f>error</span><span>) {
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>f </span><span style=color:#fe8019>&lt; </span><span style=color:#d3869b>0 </span><span>{
+</span><span>		</span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#fdf4c1>ErrNaN
+</span><span>	}
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>f </span><span style=color:#fe8019>== </span><span style=color:#d3869b>0 </span><span>{
+</span><span>		</span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#d3869b>nil
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>var </span><span>(
+</span><span>		</span><span style=color:#fdf4c1>x            </span><span style=color:#fabd2f>int64
+</span><span>		</span><span style=color:#fdf4c1>v            </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>int64</span><span>(</span><span style=color:#fdf4c1>f</span><span>) </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#d3869b>16 </span><span style=color:#928374;font-style:italic>// scale up to Q31.32
+</span><span>		</span><span style=color:#fdf4c1>bitwidth     </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>bits</span><span>.</span><span style=color:#fdf4c1>Len64</span><span>(</span><span style=color:#fabd2f>uint64</span><span>(</span><span style=color:#fdf4c1>v</span><span>))
+</span><span>		</span><span style=color:#fdf4c1>rootBitwidth </span><span style=color:#fabd2f>int
+</span><span>	)
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>bitwidth</span><span style=color:#fe8019>&</span><span style=color:#d3869b>1 </span><span style=color:#fe8019>> </span><span style=color:#d3869b>0 </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>rootBitwidth </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fdf4c1>bitwidth </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span>) </span><span style=color:#fe8019>/ </span><span style=color:#d3869b>2
+</span><span>	} </span><span style=color:#fa5c4b>else </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>rootBitwidth </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>bitwidth </span><span style=color:#fe8019>/ </span><span style=color:#d3869b>2
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>rootBitwidth</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>; </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>>= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>-- </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>intermediate </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>x </span><span style=color:#fe8019>| </span><span>(</span><span style=color:#d3869b>1 </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#fdf4c1>i</span><span>)
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>v </span><span style=color:#fe8019>>= </span><span style=color:#fdf4c1>intermediate</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>intermediate </span><span>{
+</span><span>			</span><span style=color:#fdf4c1>x </span><span style=color:#fe8019>|= </span><span style=color:#d3869b>1 </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#fdf4c1>i
+</span><span>		}
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>Fix32</span><span>(</span><span style=color:#fdf4c1>x</span><span>), </span><span style=color:#d3869b>nil
+</span><span>}
+</span></code></pre><h3 id=guan-yu-yu-shu-fa>关于余数法</h3><p>第 $X_{n-1}$ 比特的确认公式是：<p>$$ X_{n-1}= \begin{cases} 1 &\text{if } X_n \ge{R_n2^{n} + 2^{2n-2}} \\ 0 &\text{if } X_n \lt{R_n2^{n} + 2^{2n-2}} \end{cases} $$<p>余数的迭代公式为：<p>$$ X_{n-1} = X_n - 2R_n\cdot r_{n-1} \cdot 2^{n-1} - r_{n-1}^2 \cdot 2^{2n-2} $$<p>根的迭代公式<p>$$ R_{n-1} = R_{n} + r_{n-1}2^{n-1} $$<p>余数法的实现会比直接比较复杂很多，还要考虑到余数法公式中 $2^{2n-2}$ 这样的式子转为代码时的复杂性，性能也没有明显优势，这里不再展开。</article><p class=tags-data><a href=/tags/ding-dian-shu>/定点数/</a> <a href=/tags/suan-fa>/算法/</a> <a href=/tags/shu-xue>/数学/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>
