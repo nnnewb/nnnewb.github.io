@@ -1,0 +1,74 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>处理一个git问题</title><meta content=处理一个git问题 name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2023/2023-03-21-chu-li-yi-ge-gitwen-ti/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=处理一个git问题 property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2023/2023-03-21-chu-li-yi-ge-gitwen-ti/ property=twitter:url><meta content=处理一个git问题 property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2023/2023-03-21-chu-li-yi-ge-gitwen-ti/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>处理一个git问题</h1><p class=author-line>作于：2023-03-21 17:07 ，预计阅读时间 2 分钟<article><h2 id=xian-xiang>现象</h2><p>环境：Windows+Git 2.39.1 (scoop 安装，git-with-openssh)<p>在 clone 仓库的时候报错。<pre style=color:#fdf4c1aa;background-color:#282828><code><span>Enumerating objects: 27, done.
+</span><span>Counting objects: 100% (27/27), done.
+</span><span>Delta compression using up to 16 threads
+</span><span>Compressing objects: 100% (24/24), done.
+</span><span>Writing objects: 100% (25/25), 187.79 KiB | 9.39 MiB/s, done.
+</span><span>Total 25 (delta 1), reused 0 (delta 0), pack-reused 0
+</span><span>send-pack: unexpected disconnect while reading sideband packet
+</span><span>fatal: the remote end hung up unexpectedly
+</span></code></pre><p>提取关键词 <code>send-pack: unexpected disconnect while reading sideband packet</code><h2 id=fen-xi>分析</h2><p>不太可能是 SSH 层面的错误。<p>之前遇到过奇怪的问题，git 客户端版本可能有影响。<p>搜索 StackOverflow 找到相关问答：<a href=https://stackoverflow.com/questions/66366582/github-unexpected-disconnect-while-reading-sideband-packet>Github - unexpected disconnect while reading sideband packet</a><h2 id=chang-shi>尝试</h2><h3 id=huan-jing-bian-liang>环境变量</h3><pre class=language-powershell data-lang=powershell style=color:#fdf4c1aa;background-color:#282828><code class=language-powershell data-lang=powershell><span style=color:#fdf4c1>$</span><span style=color:#fabd2f>env:</span><span style=color:#fdf4c1>GIT_TRACE_PACKET</span><span style=color:#fe8019>=</span><span style=color:#d3869b>1
+</span><span style=color:#fdf4c1>$</span><span style=color:#fabd2f>env:</span><span style=color:#fdf4c1>GIT_TRACE</span><span style=color:#fe8019>=</span><span style=color:#d3869b>1
+</span><span style=color:#fdf4c1>$</span><span style=color:#fabd2f>env:</span><span style=color:#fdf4c1>GIT_CURL_VERBOSE</span><span style=color:#fe8019>=</span><span style=color:#d3869b>1
+</span></code></pre><p>结果：<strong>不行</strong><h3 id=pei-zhi-http-postbuffer>配置 <code>http.postBuffer</code></h3><pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>git config --global http.postBuffer 157286400
+</span></code></pre><p>结果：<strong>不行</strong><h3 id=core-pack-pei-zhi>core/pack 配置</h3><pre class=language-ini data-lang=ini style=color:#fdf4c1aa;background-color:#282828><code class=language-ini data-lang=ini><span style=color:#fa5c4b>[core] 
+</span><span>    </span><span style=color:#fdf4c1>packedGitLimit </span><span style=color:#fe8019>= </span><span style=color:#d3869b>512m 
+</span><span>    </span><span style=color:#fdf4c1>packedGitWindowSize </span><span style=color:#fe8019>= </span><span style=color:#d3869b>512m 
+</span><span style=color:#fa5c4b>[pack] 
+</span><span>    </span><span style=color:#fdf4c1>deltaCacheSize </span><span style=color:#fe8019>= </span><span style=color:#d3869b>2047m 
+</span><span>    </span><span style=color:#fdf4c1>packSizeLimit </span><span style=color:#fe8019>= </span><span style=color:#d3869b>2047m 
+</span><span>    </span><span style=color:#fdf4c1>windowMemory </span><span style=color:#fe8019>= </span><span style=color:#d3869b>2047m
+</span></code></pre><p>结果：<strong>不行</strong><h3 id=xian-qian-clonezai-fetch>先浅clone再fetch</h3><pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>git config --global core.compression 0
+</span><span style=color:#fdf4c1>git clone --depth 1 </span><span style=color:#fe8019>&lt;</span><span style=color:#fdf4c1>repo_URI</span><span style=color:#fe8019>>
+</span><span style=color:#fdf4c1>git fetch --unshallow 
+</span></code></pre><p>结果：可以 clone 但是不能 fetch ，报错相同。<strong>不行</strong>。<h3 id=pei-zhi-pack-window>配置 <code>pack.window</code></h3><pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>git config --global pack.window 1
+</span></code></pre><p>和<pre class=language-ini data-lang=ini style=color:#fdf4c1aa;background-color:#282828><code class=language-ini data-lang=ini><span style=color:#fa5c4b>[core] 
+</span><span>    </span><span style=color:#fdf4c1>packedGitLimit </span><span style=color:#fe8019>= </span><span style=color:#d3869b>512m 
+</span><span>    </span><span style=color:#fdf4c1>packedGitWindowSize </span><span style=color:#fe8019>= </span><span style=color:#d3869b>512m 
+</span><span style=color:#fa5c4b>[pack] 
+</span><span>    </span><span style=color:#fdf4c1>deltaCacheSize </span><span style=color:#fe8019>= </span><span style=color:#d3869b>2047m 
+</span><span>    </span><span style=color:#fdf4c1>packSizeLimit </span><span style=color:#fe8019>= </span><span style=color:#d3869b>2047m 
+</span><span>    </span><span style=color:#fdf4c1>windowMemory </span><span style=color:#fe8019>= </span><span style=color:#d3869b>2047m
+</span></code></pre><p>搭配，问题消失。<p>结果：略作变更，<strong>可行</strong>。<h2 id=ling-yi-chong-ban-fa-jiang-ji>另一种办法：降级</h2><p>把 git 降级到2.19.2，不修改配置，也能正常 clone 。<p>因为<a href=https://nnnewb.github.io/posts/2023/2023-03-21-chu-li-yi-ge-gitwen-ti/git-scm.com>git-scm.com</a>没放开下载历史版本（那个 older release 里没有Windows安装包），所以需要手动改下正常下载的 url 。<pre style=color:#fdf4c1aa;background-color:#282828><code><span>https://github.com/git-for-windows/git/releases/download/v2.19.2.windows.1/Git-2.19.2-64-bit.exe
+</span><span>把这个链接的 2.19.2 改成想下载的版本，如果文件还在的话就能正常下了。
+</span></code></pre><p>当然看这个 url 也可以选择从 github 下载，直接打开项目地址然后找 release 就ok。<h2 id=jie-lun>结论</h2><p>两种办法解决<ol><li><p>修改 <code>~/.gitconfig</code>，内容</p> <pre class=language-ini data-lang=ini style=color:#fdf4c1aa;background-color:#282828><code class=language-ini data-lang=ini><span style=color:#fa5c4b>[core] 
+</span><span>    </span><span style=color:#fdf4c1>packedGitLimit </span><span style=color:#fe8019>= </span><span style=color:#d3869b>512m 
+</span><span>    </span><span style=color:#fdf4c1>packedGitWindowSize </span><span style=color:#fe8019>= </span><span style=color:#d3869b>512m 
+</span><span style=color:#fa5c4b>[pack] 
+</span><span>    </span><span style=color:#fdf4c1>deltaCacheSize </span><span style=color:#fe8019>= </span><span style=color:#d3869b>2047m 
+</span><span>    </span><span style=color:#fdf4c1>packSizeLimit </span><span style=color:#fe8019>= </span><span style=color:#d3869b>2047m 
+</span><span>    </span><span style=color:#fdf4c1>windowMemory </span><span style=color:#fe8019>= </span><span style=color:#d3869b>2047m
+</span><span>    </span><span style=color:#fdf4c1>window </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1
+</span></code></pre><li><p>降级 git 到 1.19.2 （或者别的版本，二分法）</p></ol></article><p class=tags-data><a href=/tags/git>/git/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

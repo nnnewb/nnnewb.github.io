@@ -1,0 +1,280 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>协程原理和实现</title><meta content=协程原理和实现 name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2022/2022-08-05-xie-cheng-yuan-li-he-shi-xian/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=协程原理和实现 property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2022/2022-08-05-xie-cheng-yuan-li-he-shi-xian/ property=twitter:url><meta content=协程原理和实现 property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2022/2022-08-05-xie-cheng-yuan-li-he-shi-xian/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>协程原理和实现</h1><p class=author-line>作于：2022-08-05 19:41 ，预计阅读时间 13 分钟<article><h2 id=qian-yan>前言</h2><p>尝试阅读分析云风大佬的 <a href=https://github.com/cloudwu/coroutine>cloudwu/coroutine</a> ，学习协程的基本原理和实现，然后自己写一个。<h2 id=yuan-li>原理</h2><p>协程是协同运行的程序，不同语言的实现可以有很大差异。但从基本的来说，协程应该是要低于线程一级的，在用户态调度的程序。<p>既然是用户态调度，也就意味着开两个线程然后用信号量或互斥锁同步就不叫协程，因为线程都是内核调度和切换上下文的。<p>所以实现协程，实现的就是程序的上下文切换和调度分配，代码实现也关注这一块。<h3 id=xie-tong-shi-xie-cheng>协同式协程</h3><p>不确定有没有专有名词描述这种调度方式。<p>“协同式”，指的是需要协程主动放弃执行，调度器才切换调度其他协程运行的情况。协同式调度，协程可以自由决定什么时候交还控制权。<p>云风大佬的 coroutine 库就是协同式调度。<h3 id=qiang-zhan-shi-xie-cheng>抢占式协程</h3><p>如 go 的 <code>goroutine</code> 就是，不需要协程主动放弃执行，调度器会主动在合适的时候停止协程，或创建新的线程，来调度协程运行。<h3 id=shang-xia-wen-qie-huan>上下文切换</h3><p>上下文切换，上下文指的是程序运行的状态。具体点说，包括：<ul><li>寄存器（通用寄存器和浮点寄存器）<li>栈</ul><p>以及一些其他的内容，比如监听/屏蔽的 UNIX 信号等，按平台可能有所区别。<p>在 Linux 上，GNU C Lib 提供了 <code>ucontext.h</code> 头文件暴露相关内核接口。而在 Windows 上，微软也也提供了 <a href=https://docs.microsoft.com/en-us/windows/win32/procthread/fibers>fibers 抽象</a>。<h3 id=diao-du>调度</h3><p>以协作式调度为例，只需要简单地在需要让出CPU时，主动保存自己的执行状态，恢复调度器的上下文，然后跳转到调度器继续执行即可。而恢复协程执行也是同理，将执行状态恢复后跳转回上一个中断点即可。<p>抢占式调度则更复杂一些，因为被调度的协程可能处于不能打断的状态或频繁打断产生性能上的负面影响。调度器需要综合多种因素，选择合适的时机打断和切换上下文。<h2 id=shi-xian>实现</h2><p>学习为主，云风的 coroutine 直接用了 <code>ucontext</code>，但我对 <code>ucontext</code> 实现的方式更好奇，所以选择自己用汇编实现上下文的保存和恢复。<p>由于是自己瞎造轮子，难免会有各种错误和潜在问题，但就这样吧。<h3 id=chu-bu-she-ji>初步设计</h3><p><img alt=image-20220805101240814 src=https://nnnewb.github.io/posts/2022/2022-08-05-xie-cheng-yuan-li-he-shi-xian/image-20220805101240814.webp><p>构想中的协程应该有自己的独立栈区，而调度器继续停留在系统栈。<p>调度器通过 <code>resume</code> 切换上下文到协程，协程通过 <code>yield</code> 切换上下文到调度器。当 <code>resume</code> 时，应该从协程上一次调用 <code>yield</code> 的地方（或函数入口）开始执行。而调用 <code>yield</code> 的时候，应该回到调度器上一次调用 <code>resume</code> 进入协程上下文的地方继续执行。<p>当所有协程都结束后，调度器正常返回。<h3 id=shi-xian-si-lu>实现思路</h3><p>实现协程最大的难点就在如何切换上下文，我考虑的方法是通过修改 <code>bp</code> 和 <code>sp</code> 寄存器劫持返回地址，让<code>yield</code>和<code>resume</code>返回到对方的位置，来实现上下文切换。<h3 id=xie-cheng-he-diao-du-qi-jie-gou>协程和调度器结构</h3><pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#fa5c4b>struct </span><span style=color:#8ec07c>wo_routine </span><span>{
+</span><span>  </span><span style=color:#fabd2f>uint64_t</span><span> registers[</span><span style=color:#d3869b>17</span><span>];  </span><span style=color:#928374;font-style:italic>// 寄存器状态
+</span><span>  </span><span style=color:#fabd2f>uint8_t </span><span style=color:#fe8019>*</span><span>stack;          </span><span style=color:#928374;font-style:italic>// 协程专属栈
+</span><span>  wo_fp func;              </span><span style=color:#928374;font-style:italic>// 协程入口点
+</span><span>  </span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span>args;              </span><span style=color:#928374;font-style:italic>// 参数指针，存放到 RDI 寄存器
+</span><span>  wo_state state;          </span><span style=color:#928374;font-style:italic>// 协程状态
+</span><span>  </span><span style=color:#fa5c4b>struct </span><span style=color:#8ec07c>wo_routine</span><span> *next; </span><span style=color:#928374;font-style:italic>// 协程队列，环形链表
+</span><span>  </span><span style=color:#fa5c4b>struct </span><span style=color:#8ec07c>wo_routine</span><span> *prev; </span><span style=color:#928374;font-style:italic>// 协程队列，环形链表
+</span><span>};
+</span><span>
+</span><span style=color:#fa5c4b>struct </span><span style=color:#8ec07c>wo_scheduler </span><span>{
+</span><span>  </span><span style=color:#fabd2f>uint64_t</span><span> registers[</span><span style=color:#d3869b>17</span><span>]; </span><span style=color:#928374;font-style:italic>// 调取协程的寄存器状态
+</span><span>  </span><span style=color:#fa5c4b>struct </span><span style=color:#8ec07c>wo_routine</span><span> *C;   </span><span style=color:#928374;font-style:italic>// 当前正在运行的协程
+</span><span>};
+</span><span>
+</span><span style=color:#928374;font-style:italic>// 调度器实例指针，每个线程独享一个
+</span><span style=color:#fa5c4b>extern</span><span> _Thread_local </span><span style=color:#fa5c4b>struct</span><span> wo_scheduler </span><span style=color:#fe8019>*</span><span>S;
+</span></code></pre><p>基于上面的思路，设计出基本的协程结构。包含寄存器、栈、函数入口和参数。为了让多个协程可以轮流执行，将协程结构设计成一个环形链表，以允许随时插入新的协程，在当前协程后被调度执行。<p><img alt=image-20220805103145105 src=https://nnnewb.github.io/posts/2022/2022-08-05-xie-cheng-yuan-li-he-shi-xian/image-20220805103145105.webp><p>协程本身也存在状态，不同状态的协程进入调度时会有不同的处理。<p><img alt=image-20220805112501182 src=https://nnnewb.github.io/posts/2022/2022-08-05-xie-cheng-yuan-li-he-shi-xian/image-20220805112501182.webp><h3 id=apishe-ji>API设计</h3><p>依照上面的思路，可以比较简单地列出需要的接口：<ul><li><code>wo_main</code>，主函数，必要的初始化和启动调度器，开始运行协程。<li><code>wo_start</code>，在工作队列里添加一个协程，可以在 <code>wo_main</code> 之前或协程中调用。<li><code>wo_yield</code>，只能在协程里调用，切换上下文到调度器。<li><code>wo_resume</code>，只能在调度器里调用，切换上下文到协程。</ul><p>就是这些。<h3 id=diao-du-qi-bu-fen-shi-xian>调度器部分实现</h3><p>调度器主要工作是管理工作队列（协程组成的环形链表），添加协程或移除已结束的协程，在没有可调度协程时退出。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>wo_schedule</span><span>(</span><span style=color:#fa5c4b>void</span><span>) {
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(S->C </span><span style=color:#fe8019>== </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>    </span><span style=color:#fa5c4b>return</span><span>;
+</span><span>  }
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>(;;) {
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>(S->C </span><span style=color:#fe8019>== </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>      </span><span style=color:#fa5c4b>break</span><span>;
+</span><span>    }
+</span><span>
+</span><span>    </span><span style=color:#fdf4c1>wo_resume()</span><span>;
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>switch </span><span>(S->C->state) {
+</span><span>    </span><span style=color:#fa5c4b>case</span><span> WO_STATE_EXITED:
+</span><span>      </span><span style=color:#928374;font-style:italic>// 从工作队列删除自己
+</span><span>      </span><span style=color:#fa5c4b>if </span><span>(S->C </span><span style=color:#fe8019>!=</span><span> S->C->next </span><span style=color:#fe8019>&&</span><span> S->C->next </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>        S->C->next->prev </span><span style=color:#fe8019>=</span><span> S->C->prev;
+</span><span>        S->C->prev->next </span><span style=color:#fe8019>=</span><span> S->C->next;
+</span><span>        S->C </span><span style=color:#fe8019>=</span><span> S->C->next;
+</span><span>        </span><span style=color:#fa5c4b>break</span><span>;
+</span><span>      } </span><span style=color:#fa5c4b>else </span><span>{
+</span><span>        </span><span style=color:#fa5c4b>return</span><span>;
+</span><span>      }
+</span><span>    </span><span style=color:#fa5c4b>case</span><span> WO_STATE_SUSPENDED:
+</span><span>      </span><span style=color:#fa5c4b>if </span><span>(S->C </span><span style=color:#fe8019>!=</span><span> S->C->next </span><span style=color:#fe8019>&&</span><span> S->C->next </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>        S->C </span><span style=color:#fe8019>=</span><span> S->C->next;
+</span><span>      }
+</span><span>      </span><span style=color:#fa5c4b>break</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>default</span><span>:
+</span><span>      </span><span style=color:#fabd2f>assert</span><span style=color:#fdf4c1>(</span><span style=color:#d3869b>false</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>      </span><span style=color:#fa5c4b>return</span><span>;
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span></code></pre><p>调度器主循环。<p>按设计协程 <code>yield</code> 或 <code>return</code> 后都是从 <code>resume</code> 返回。所以在<code>resume</code> 后 <code>switch</code> 检查协程的状态。如果协程是 <code>yield</code> 则状态为 <code>SUSPENDED</code>，调度器取下一个协程继续运行。若协程为 <code>return</code> 返回，结束运行，则进入 <code>EXIT</code> 状态，调度器从工作队列里删除协程。其他情况都是不应该出现的。<p>添加协程的 <code>start</code> 函数如下。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>wo_start</span><span>(wo_fp </span><span style=color:#fdf4c1>func</span><span>, </span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>args</span><span>) {
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(S </span><span style=color:#fe8019>== </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>    S </span><span style=color:#fe8019>= </span><span>(wo_sp)</span><span style=color:#fabd2f>calloc</span><span style=color:#fdf4c1>(</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, </span><span style=color:#fe8019>sizeof</span><span style=color:#fdf4c1>(wo_s))</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  wo_rp routine </span><span style=color:#fe8019>= </span><span>(wo_rp)</span><span style=color:#fabd2f>calloc</span><span style=color:#fdf4c1>(</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, </span><span style=color:#fe8019>sizeof</span><span style=color:#fdf4c1>(wo_r))</span><span>;
+</span><span>  routine->stack </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fabd2f>uint8_t </span><span style=color:#fe8019>*</span><span>)</span><span style=color:#fabd2f>malloc</span><span style=color:#fdf4c1>(STACK_SIZE)</span><span>;
+</span><span>  </span><span style=color:#fabd2f>memset</span><span style=color:#fdf4c1>(routine->stack, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, STACK_SIZE)</span><span>;
+</span><span>  routine->func </span><span style=color:#fe8019>=</span><span> func;
+</span><span>  routine->args </span><span style=color:#fe8019>=</span><span> args;
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(S->C </span><span style=color:#fe8019>== </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>    S->C </span><span style=color:#fe8019>=</span><span> routine;
+</span><span>    </span><span style=color:#fa5c4b>return</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// 把自己插入队列
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(S->C->next </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>    routine->next </span><span style=color:#fe8019>=</span><span> S->C->next;
+</span><span>    S->C->next->prev </span><span style=color:#fe8019>=</span><span> routine;
+</span><span>  } </span><span style=color:#fa5c4b>else </span><span>{
+</span><span>    routine->next </span><span style=color:#fe8019>=</span><span> S->C;
+</span><span>    S->C->prev </span><span style=color:#fe8019>=</span><span> routine;
+</span><span>  }
+</span><span>  routine->prev </span><span style=color:#fe8019>=</span><span> S->C;
+</span><span>  S->C->next </span><span style=color:#fe8019>=</span><span> routine;
+</span><span>}
+</span></code></pre><p>主要工作就是构造出 <code>wo_routine</code> 结构，初始化栈，然后加入工作队列，等待调度。<h3 id=resume>resume</h3><p><code>resume</code> 负责保存上下文并切换到协程。切换到协程又分两种情况：<ol><li>协程处于 <code>READY</code> 状态，也就是还没开始执行，此时协程的寄存器、栈都是空的。<li>协程处于 <code>SUSPENDED</code> 状态，也就是协程已经执行过，寄存器和栈保存的是协程 <code>yield</code> 时储存的状态。</ol><p>当协程处于 <code>READY</code> 状态时是没法恢复上下文的，因为根本就不存在 <em>上一次执行时的上下文</em> 。<code>READY</code> 状态时 <code>resume</code> 做的并不是 <em>恢复</em> 上下文，而是 <em>构造</em> 一个合适的初始状态，让协程从这个初始状态开始执行。<p>在实现思路中提到过我想要控制 <code>sp</code> 寄存器，劫持返回地址来实现切换上下文，这里展开说一说具体怎么做。讨论限定在 Linux x86-64 GCC 编译器环境下。<p>还是从<code>READY</code>状态的协程开始说。<h4 id=qi-dong-xin-xie-cheng>启动新协程</h4><p>新协程的启动主要考虑两个问题：<ol><li>如何让新协程用自己的栈和寄存器。<li>如何让新协程开始执行。<li>如何让新协程结束时返回到 <code>resume</code> 。避免在协程代码里调一次 <code>exit</code> 之类的函数，协程代码编写更自然。</ol><p>对问题1，让新协程用自己的栈和寄存器可以很简单，保存主线程的寄存器状态，然后将<code>rsp</code>寄存器设置为协程栈的栈底即可。至于新协程的寄存器状态，我们需要关注的只有 <code>rdi</code>、<code>rsi</code> 这些 x86-64 基于寄存器的调用约定里，规定用于传递参数的寄存器即可。出于简化考虑，我们只在<code>start</code>中允许一个初始参数，所以设置好 <code>rdi</code> 寄存器的值即可。除<code>rsp</code>、<code>rdi</code>外，应该无需再设置其他寄存器的值。<p>对问题2和3，我的方法是正常调用协程函数。<code>call</code>指令会在协程栈上压栈返回地址，协程函数的序言部分会压栈<code>rbp</code>，然后把<code>rbp</code>设置成<code>rsp</code>，我们不需要关注旧的<code>rbp</code>值，在协程中不会再用到。<p><img alt=image-20220805165740406 src=https://nnnewb.github.io/posts/2022/2022-08-05-xie-cheng-yuan-li-he-shi-xian/image-20220805165740406.webp><p>协程正常执行结束后，在返回时，会弹出<code>rbp</code>并返回到调用者，也就是 <code>resume</code> 中调用协程函数的地方。此时必须注意 <code>resume</code> 运行在协程栈上，而且<code>rsp</code>已经是栈底。如果在调用协程函数后直接<code>return</code>，会导致<code>rsp</code>越界读到无效的<code>rbp</code>和返回地址，让协程跑飞。在协程函数返回后，<code>resume</code> 里需要标记协程状态为结束，并手动做一次上下文切换，返回到调度器函数。<p><img alt=image-20220805170336172 src=https://nnnewb.github.io/posts/2022/2022-08-05-xie-cheng-yuan-li-he-shi-xian/image-20220805170336172.webp><h4 id=hui-fu-jiu-xie-cheng>恢复旧协程</h4><p>对旧协程的恢复较为简单，因为<code>rsp</code>寄存器已经在 <code>yield</code> 中保存，恢复寄存器后栈状态其实和 <code>yield</code> 中相同。此时只要保证 <code>resume</code> 和 <code>yield</code> 函数的清栈操作相同（栈帧大小相同），清栈后 <code>rsp</code> 都能落在返回地址上，则 <code>resume</code> 的 <code>return</code> 实际等于 <code>yield</code> 中 <code>return</code> 。在 <code>resume</code> 的 <code>return</code> 执行后，就会返回到协程调用 <code>yield</code> 的位置。<p><img alt=image-20220805165516661 src=https://nnnewb.github.io/posts/2022/2022-08-05-xie-cheng-yuan-li-he-shi-xian/image-20220805165516661.webp><h4 id=shi-xian-dai-ma>实现代码</h4><pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>wo_exit</span><span>(</span><span style=color:#fa5c4b>void</span><span>) {
+</span><span>  S->C->state </span><span style=color:#fe8019>=</span><span> WO_STATE_EXITED;
+</span><span>  </span><span style=color:#928374;font-style:italic>// 协程已结束。不保存上下文。
+</span><span>  </span><span style=color:#928374;font-style:italic>// 恢复调度器上下文
+</span><span>  </span><span style=color:#928374;font-style:italic>// 调度器独享系统栈所以不用复制栈，仅恢复寄存器状态
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rbx"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_RBX]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rcx"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_RCX]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rdx"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_RDX]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rsi"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_RSI]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rdi"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_RDI]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rsp"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_RSP]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rbp"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_RBP]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r8"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_R8]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r9"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_R9]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r10"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_R10]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r11"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_R11]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r12"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_R12]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r13"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_R13]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r14"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_R14]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r15"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_R15]));
+</span><span>  </span><span style=color:#fa5c4b>return</span><span>;
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>wo_resume</span><span>() {
+</span><span>  </span><span style=color:#928374;font-style:italic>// 保存上下文
+</span><span>  </span><span style=color:#928374;font-style:italic>// 调度器运行在系统栈上，所以不保存栈，只记录寄存器
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rbx, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->registers[REG_RBX]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rcx, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->registers[REG_RCX]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rdx, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->registers[REG_RDX]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rsi, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->registers[REG_RSI]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rdi, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->registers[REG_RDI]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rsp, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->registers[REG_RSP]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rbp, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->registers[REG_RBP]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r8, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->registers[REG_R8]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r9, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->registers[REG_R9]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r10, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->registers[REG_R10]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r11, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->registers[REG_R11]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r12, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->registers[REG_R12]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r13, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->registers[REG_R13]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r14, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->registers[REG_R14]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r15, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->registers[REG_R15]));
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// 第一次进入时使用 call 方式，在栈底记录返回地址为 resume。
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(S->C->state </span><span style=color:#fe8019>==</span><span> WO_STATE_READY) {
+</span><span>    S->C->state </span><span style=color:#fe8019>=</span><span> WO_STATE_RUNNING;
+</span><span>    </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rsp"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->C->stack </span><span style=color:#fe8019>+</span><span> STACK_SIZE));
+</span><span>    </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rbp"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->C->stack </span><span style=color:#fe8019>+</span><span> STACK_SIZE));
+</span><span>    S->C-></span><span style=color:#fdf4c1>func(S->C->args)</span><span>;
+</span><span>  } </span><span style=color:#fa5c4b>else </span><span>{
+</span><span>    S->C->state </span><span style=color:#fe8019>=</span><span> WO_STATE_RUNNING;
+</span><span>    </span><span style=color:#928374;font-style:italic>// 恢复协程上下文
+</span><span>    </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rbx"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->C->registers[REG_RBX]));
+</span><span>    </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rcx"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->C->registers[REG_RCX]));
+</span><span>    </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rdx"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->C->registers[REG_RDX]));
+</span><span>    </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rsi"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->C->registers[REG_RSI]));
+</span><span>    </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rdi"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->C->registers[REG_RDI]));
+</span><span>    </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rsp"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->C->registers[REG_RSP]));
+</span><span>    </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rbp"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->C->registers[REG_RBP]));
+</span><span>    </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r8"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->C->registers[REG_R8]));
+</span><span>    </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r9"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->C->registers[REG_R9]));
+</span><span>    </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r10"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->C->registers[REG_R10]));
+</span><span>    </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r11"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->C->registers[REG_R11]));
+</span><span>    </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r12"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->C->registers[REG_R12]));
+</span><span>    </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r13"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->C->registers[REG_R13]));
+</span><span>    </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r14"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->C->registers[REG_R14]));
+</span><span>    </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r15"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->C->registers[REG_R15]));
+</span><span>    </span><span style=color:#fa5c4b>return</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// 协程结束时会返回到 resume
+</span><span>  </span><span style=color:#928374;font-style:italic>// 此时上下文是协程栈，直接 return 会跑飞，所以还需要 yield 切换回系统栈
+</span><span>  </span><span style=color:#928374;font-style:italic>// 再在 schedule 里从链表移除协程
+</span><span>  S->C->state </span><span style=color:#fe8019>=</span><span> WO_STATE_EXITED;
+</span><span>  </span><span style=color:#fdf4c1>wo_exit()</span><span>;
+</span><span>}
+</span></code></pre><p>此处关于 inline assembly 的写法，在最后会给出在线手册地址。<h3 id=yield>yield</h3><p><code>yield</code> 负责保存协程的运行状态。因为协程栈是独立独享的，所以无需对协程栈做备份操作，只需要保存寄存器信息。<p>恢复调度器上下文的原理和<code>resume</code>的原理一样，只要保证<code>yield</code>和<code>resume</code>的栈帧大小一致清栈操作后<code>rsp</code>落到正确返回地址上，即可在恢复寄存器后直接<code>return</code>，就像是在 <code>resume</code> 里 <code>return</code> 一样。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>wo_yield</span><span>(</span><span style=color:#fa5c4b>void</span><span>) {
+</span><span>  S->C->state </span><span style=color:#fe8019>=</span><span> WO_STATE_SUSPENDED;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// 保存协程上下文
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rbx, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->C->registers[REG_RBX]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rcx, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->C->registers[REG_RCX]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rdx, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->C->registers[REG_RDX]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rsi, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->C->registers[REG_RSI]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rdi, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->C->registers[REG_RDI]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rsp, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->C->registers[REG_RSP]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rbp, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->C->registers[REG_RBP]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r8, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->C->registers[REG_R8]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r9, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->C->registers[REG_R9]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r10, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->C->registers[REG_R10]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r11, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->C->registers[REG_R11]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r12, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->C->registers[REG_R12]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r13, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->C->registers[REG_R13]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r14, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->C->registers[REG_R14]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r15, %0" </span><span style=color:#fe8019>: </span><span style=color:#b8bb26>"=m"</span><span>(S->C->registers[REG_R15]));
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// 恢复调度器上下文
+</span><span>  </span><span style=color:#928374;font-style:italic>// 调度器独享系统栈所以不用复制栈，仅恢复寄存器状态
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rbx"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_RBX]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rcx"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_RCX]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rdx"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_RDX]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rsi"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_RSI]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rdi"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_RDI]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rsp"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_RSP]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>rbp"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_RBP]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r8"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_R8]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r9"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_R9]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r10"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_R10]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r11"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_R11]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r12"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_R12]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r13"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_R13]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r14"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_R14]));
+</span><span>  </span><span style=color:#fa5c4b>__asm__</span><span>(</span><span style=color:#b8bb26>"movq %0, </span><span style=color:#fdf4c1>%%</span><span style=color:#b8bb26>r15"</span><span> :</span><span style=color:#fe8019>:</span><span style=color:#b8bb26>"a"</span><span>(S->registers[REG_R15]));
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>return</span><span>;
+</span><span>}
+</span></code></pre><h2 id=shi-yong>使用</h2><p>几个简单的用例。<h3 id=dan-xian-cheng-duo-xie-cheng>单线程多协程</h3><pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>co1</span><span>(</span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>args</span><span>) {
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> n </span><span style=color:#fe8019>= </span><span style=color:#d3869b>5</span><span>; n </span><span style=color:#fe8019>>= </span><span style=color:#d3869b>0</span><span>; n </span><span style=color:#fe8019>-= </span><span style=color:#d3869b>2</span><span>) {
+</span><span>    </span><span style=color:#fabd2f>printf</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"co1: n=</span><span style=color:#fdf4c1>%d</span><span style=color:#b8bb26>\n"</span><span style=color:#fdf4c1>, n)</span><span>;
+</span><span>    </span><span style=color:#fdf4c1>wo_yield()</span><span>;
+</span><span>  }
+</span><span>  </span><span style=color:#fa5c4b>return</span><span>;
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>co2</span><span>(</span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>args</span><span>) {
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> n </span><span style=color:#fe8019>= </span><span style=color:#d3869b>4</span><span>; n </span><span style=color:#fe8019>>= </span><span style=color:#d3869b>0</span><span>; n </span><span style=color:#fe8019>-= </span><span style=color:#d3869b>2</span><span>) {
+</span><span>    </span><span style=color:#fabd2f>printf</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"co2: n=</span><span style=color:#fdf4c1>%d</span><span style=color:#b8bb26>\n"</span><span style=color:#fdf4c1>, n)</span><span>;
+</span><span>    </span><span style=color:#fdf4c1>wo_yield()</span><span>;
+</span><span>  }
+</span><span>  </span><span style=color:#fa5c4b>return</span><span>;
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>greeting</span><span>(</span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>args</span><span>) {
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; i </span><span style=color:#fe8019>&lt; </span><span style=color:#d3869b>6</span><span>; i</span><span style=color:#fe8019>++</span><span>) {
+</span><span>    </span><span style=color:#fdf4c1>wo_yield()</span><span>;
+</span><span>  }
+</span><span>  </span><span style=color:#fabd2f>printf</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"greeting: </span><span style=color:#fdf4c1>%s</span><span style=color:#b8bb26>"</span><span style=color:#fdf4c1>, (</span><span style=color:#fa5c4b>const char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>)args)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>return</span><span>;
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>run_single</span><span>(</span><span style=color:#fa5c4b>void</span><span>) {
+</span><span>  </span><span style=color:#fdf4c1>wo_start(co1, </span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  </span><span style=color:#fdf4c1>wo_start(co2, </span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  </span><span style=color:#fdf4c1>wo_start(greeting, </span><span style=color:#b8bb26>"Hello world!\n"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  </span><span style=color:#fdf4c1>wo_main()</span><span>;
+</span><span>  </span><span style=color:#fabd2f>printf</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"run single end.\n"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>}
+</span></code></pre><h3 id=duo-xian-cheng-duo-xie-cheng>多线程多协程</h3><p>这个用例展示多个线程同时使用 <code>wo_main()</code> 启动协程调度器时的场景。未来如果有机会的话应该会再让多线程中的调度器调度对方的协程，甚至启动新调度器，就像 go 的 goroutine 一样。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#fa5c4b>int </span><span style=color:#8ec07c>thrd1</span><span>(</span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>args</span><span>) {
+</span><span>  </span><span style=color:#fdf4c1>wo_start(co1, </span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  </span><span style=color:#fdf4c1>wo_start(co2, </span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  </span><span style=color:#fdf4c1>wo_start(greeting, </span><span style=color:#b8bb26>"Hello world!\n"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  </span><span style=color:#fdf4c1>wo_main()</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>;
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>int </span><span style=color:#8ec07c>thrd2</span><span>(</span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>args</span><span>) {
+</span><span>  </span><span style=color:#fdf4c1>wo_start(co1, </span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  </span><span style=color:#fdf4c1>wo_start(co2, </span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  </span><span style=color:#fdf4c1>wo_start(greeting, </span><span style=color:#b8bb26>"Hello world!\n"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  </span><span style=color:#fdf4c1>wo_main()</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>;
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>run_parallels</span><span>(</span><span style=color:#fa5c4b>void</span><span>) {
+</span><span>  thrd_t t1, t2;
+</span><span>  </span><span style=color:#fdf4c1>thrd_create(</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>t1, thrd1, </span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  </span><span style=color:#fdf4c1>thrd_create(</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>t2, thrd2, </span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  </span><span style=color:#fdf4c1>thrd_join(t1, </span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  </span><span style=color:#fdf4c1>thrd_join(t2, </span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  </span><span style=color:#fabd2f>printf</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"run parallels end.\n"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>}
+</span></code></pre><h2 id=zong-jie>总结</h2><p>参考资料列出如下。<ul><li><a href=http://www.ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html>GCC inline assembly HOWTO</a><li><a href=https://github.com/cloudwu/coroutine>cloudwu/coroutine</a><li><a href=https://zhuanlan.zhihu.com/p/84935949>云风coroutine协程库源码分析</a>，评论区有些相关的项目和资料，谨慎参考。<li><a href=http://www.vishalchovatiya.com/coroutine-in-c-language/>Coroutine in C Language</a><li><a href=https://gist.github.com/zhuowei/b8bc5d8d4a09c9437876>getcontext implementation</a></ul><p>这里手写汇编代码显然有问题，比如我存了所有通用寄存器但没有存 FPU 和 FLAGS 的状态，也没有存段寄存器。<code>ucontext</code>的实现考虑周全得多，用 <code>jmp</code> 也比我用 <code>return</code> 的形式好。再比如协程栈不能自动扩容，只有一个固定大小。<p>再对比 libco 的话，还缺少非常关键的系统调用异步化改造，让 io 时能自动 yield ，准备就绪后再继续执行。<p>我都不知道算不算摸到了云风大佬十年前水平的边角，太菜了我。</article><p class=tags-data><a href=/tags/c>/c/</a> <a href=/tags/hui-bian>/汇编/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

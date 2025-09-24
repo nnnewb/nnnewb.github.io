@@ -1,0 +1,168 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>protogen代码生成</title><meta content=protogen代码生成 name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2022/protogen-code-generation/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=protogen代码生成 property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2022/protogen-code-generation/ property=twitter:url><meta content=protogen代码生成 property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2022/protogen-code-generation/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>protogen代码生成</h1><p class=author-line>作于：2022-02-21 16:32 ，预计阅读时间 6 分钟<article><h2 id=qian-yan>前言</h2><p>最大的问题其实是 proto 直接生成的 swagger 不好用，过去的 gRPC 写法只在服务端，客户端没享受到静态类型定义的接口的快乐，而且手工写的文档还有一堆很无语的问题，整个系统维护起来蛋疼无比。<p>后来解决办法也简单，代码生成，缺什么生成什么，先后经历了用 <code>go</code> + proto解析写改成用 <code>typescript</code> 写，再改回 <code>go</code> + <code>protogen</code>，一番折腾下来最后还是用 <code>protogen</code> 最简单舒服。<p>这篇博客主要就是介绍下 <code>protogen</code> 配上 go 模板能做到的事情。<h2 id=protogenjie-shao><code>protogen</code>介绍</h2><p><code>protogen</code>的官方文档在<a href=https://pkg.go.dev/google.golang.org/protobuf/compiler/protogen>这里</a>，<code>protogen</code>是google官方<code>protoc-gen-go</code>插件使用的支持库，代码托管在<a href=https://github.com/protocolbuffers/protobuf-go>github.com/protocolbuffers/protobuf-go</a> 。可以通过 <a href=https://github.com/protocolbuffers/protobuf-go/blob/master/cmd/protoc-gen-go/main.go><code>protoc-gen-go</code> 的 <code>main</code> 包代码</a> 初窥门径。<p>不过在开始前，还得先了解下 <code>protoc</code> 插件是怎么工作的。从官方文档<a href=https://developers.google.com/protocol-buffers/docs/reference/other>other languages and plugins</a>摘录如下。<blockquote><p><code>protoc</code>, the Protocol Buffers Compiler, can be extended to support new languages via plugins. <strong>A plugin is just a program which reads a</strong> <code>CodeGeneratorRequest</code> <strong>protocol buffer from standard input and then writes a</strong> <code>CodeGeneratorResponse</code> <strong>protocol buffer to standard output.</strong> These message types are defined in <code>plugin.proto</code>. We recommend that all third-party code generators be written as plugins, as this allows all generators to provide a consistent interface and share a single parser implementation.</blockquote><p>简单地说，<code>protoc</code>插件从<code>stdin</code>读取一个<code>protobuf</code>消息，往<code>stdout</code>写一个<code>protobuf</code>消息。把<code>protoc</code>插件理解成服务器，<code>protoc</code>发送请求，插件返回响应，交互过程不经过网络，而是标准输入/输出，就这样。<p>我也不想解释为什么不从零开始写了。<code>protogen</code>提供了相当完善的封装，很轻松就可以写出一个完整的 <code>protoc</code> 插件。<h3 id=helloworld>HelloWorld</h3><p>先来个惯例。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>package </span><span style=color:#fdf4c1>main
+</span><span>
+</span><span style=color:#fa5c4b>import </span><span>(
+</span><span>    </span><span style=color:#b8bb26>"log"
+</span><span>	</span><span style=color:#b8bb26>"flags"
+</span><span>    </span><span style=color:#b8bb26>"google.golang.org/protobuf/compiler/protogen"
+</span><span>)
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>main</span><span>() {
+</span><span>    </span><span style=color:#fdf4c1>log</span><span>.</span><span style=color:#fdf4c1>SetFlags</span><span>(</span><span style=color:#d3869b>0</span><span>)
+</span><span>    </span><span style=color:#fdf4c1>log</span><span>.</span><span style=color:#fdf4c1>SetPrefix</span><span>(</span><span style=color:#b8bb26>"protoc-gen-hello: "</span><span>)
+</span><span>    </span><span style=color:#fdf4c1>flags </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>flag</span><span>.</span><span style=color:#fdf4c1>FlagSet</span><span>{}
+</span><span>    </span><span style=color:#fdf4c1>protogen</span><span>.</span><span style=color:#fdf4c1>Options</span><span>{</span><span style=color:#fdf4c1>ParamFunc</span><span>: </span><span style=color:#fdf4c1>flags</span><span>.</span><span style=color:#fdf4c1>Set</span><span>}.</span><span style=color:#fdf4c1>Run</span><span>(</span><span style=color:#fdf4c1>Gen</span><span>)
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>Gen</span><span>(</span><span style=color:#fdf4c1>plugin </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>protogen</span><span>.</span><span style=color:#fa5c4b>Plugin</span><span>) </span><span style=color:#fabd2f>error </span><span>{
+</span><span>    </span><span style=color:#fdf4c1>log</span><span>.</span><span style=color:#fdf4c1>Printf</span><span>(</span><span style=color:#b8bb26>"Hello world"</span><span>)
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>nil
+</span><span>}
+</span></code></pre><p>什么也不生成，就只是输出一句 Hello world。<h3 id=jian-dan-sheng-cheng>简单生成</h3><p>一个简单的<code>proto</code>文件。<pre class=language-proto data-lang=proto style=color:#fdf4c1aa;background-color:#282828><code class=language-proto data-lang=proto><span style=color:#fa5c4b>syntax </span><span style=color:#fe8019>= </span><span style=color:#b8bb26>"proto3"</span><span>;
+</span><span style=color:#fa5c4b>option </span><span style=color:#fdf4c1>go_package </span><span style=color:#fe8019>= </span><span style=color:#b8bb26>"play/proto"</span><span>;
+</span><span>
+</span><span style=color:#fa5c4b>message </span><span style=color:#8ec07c>Hello </span><span>{ </span><span style=color:#fabd2f>string </span><span style=color:#fdf4c1>name </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1</span><span>; }
+</span><span>
+</span><span style=color:#fa5c4b>message </span><span style=color:#8ec07c>World </span><span>{ </span><span style=color:#fabd2f>string </span><span style=color:#fdf4c1>greeting </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1</span><span>; }
+</span><span>
+</span><span style=color:#fa5c4b>service </span><span style=color:#8ec07c>greeter </span><span>{ </span><span style=color:#fa5c4b>rpc </span><span style=color:#8ec07c>SayHello</span><span>(</span><span style=color:#fdf4c1>Hello</span><span>) </span><span style=color:#fa5c4b>returns </span><span>(</span><span style=color:#fdf4c1>World</span><span>); }
+</span></code></pre><p>输出文件里所有的结构、服务、RPC方法名称。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>package </span><span style=color:#fdf4c1>main
+</span><span>
+</span><span style=color:#fa5c4b>import </span><span>(
+</span><span>	</span><span style=color:#b8bb26>"flag"
+</span><span>	</span><span style=color:#b8bb26>"log"
+</span><span>
+</span><span>	</span><span style=color:#b8bb26>"google.golang.org/protobuf/compiler/protogen"
+</span><span>)
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>main</span><span>() {
+</span><span>	</span><span style=color:#fdf4c1>log</span><span>.</span><span style=color:#fdf4c1>SetFlags</span><span>(</span><span style=color:#d3869b>0</span><span>)
+</span><span>	</span><span style=color:#fdf4c1>log</span><span>.</span><span style=color:#fdf4c1>SetPrefix</span><span>(</span><span style=color:#b8bb26>"protoc-gen-hello: "</span><span>)
+</span><span>	</span><span style=color:#fdf4c1>flags </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>flag</span><span>.</span><span style=color:#fdf4c1>FlagSet</span><span>{}
+</span><span>	</span><span style=color:#fdf4c1>protogen</span><span>.</span><span style=color:#fdf4c1>Options</span><span>{</span><span style=color:#fdf4c1>ParamFunc</span><span>: </span><span style=color:#fdf4c1>flags</span><span>.</span><span style=color:#fdf4c1>Set</span><span>}.</span><span style=color:#fdf4c1>Run</span><span>(</span><span style=color:#fdf4c1>Gen</span><span>)
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>Gen</span><span>(</span><span style=color:#fdf4c1>plugin </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>protogen</span><span>.</span><span style=color:#fa5c4b>Plugin</span><span>) </span><span style=color:#fabd2f>error </span><span>{
+</span><span>	</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>_</span><span>, </span><span style=color:#fdf4c1>filename </span><span style=color:#fe8019>:= </span><span style=color:#fa5c4b>range </span><span style=color:#fdf4c1>plugin</span><span>.</span><span style=color:#fdf4c1>Request</span><span>.</span><span style=color:#fdf4c1>FileToGenerate </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>file </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>plugin</span><span>.</span><span style=color:#fdf4c1>FilesByPath</span><span>[</span><span style=color:#fdf4c1>filename</span><span>]
+</span><span>		</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>_</span><span>, </span><span style=color:#fdf4c1>msg </span><span style=color:#fe8019>:= </span><span style=color:#fa5c4b>range </span><span style=color:#fdf4c1>file</span><span>.</span><span style=color:#fdf4c1>Messages </span><span>{
+</span><span>			</span><span style=color:#fdf4c1>log</span><span>.</span><span style=color:#fdf4c1>Printf</span><span>(</span><span style=color:#b8bb26>"message: </span><span style=color:#fdf4c1>%s</span><span style=color:#b8bb26>"</span><span>, </span><span style=color:#fdf4c1>msg</span><span>.</span><span style=color:#fdf4c1>Desc</span><span>.</span><span style=color:#fdf4c1>FullName</span><span>())
+</span><span>		}
+</span><span>
+</span><span>		</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>_</span><span>, </span><span style=color:#fdf4c1>svc </span><span style=color:#fe8019>:= </span><span style=color:#fa5c4b>range </span><span style=color:#fdf4c1>file</span><span>.</span><span style=color:#fdf4c1>Services </span><span>{
+</span><span>			</span><span style=color:#fdf4c1>log</span><span>.</span><span style=color:#fdf4c1>Printf</span><span>(</span><span style=color:#b8bb26>"service: </span><span style=color:#fdf4c1>%s</span><span style=color:#b8bb26>"</span><span>, </span><span style=color:#fdf4c1>svc</span><span>.</span><span style=color:#fdf4c1>Desc</span><span>.</span><span style=color:#fdf4c1>FullName</span><span>())
+</span><span>			</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>_</span><span>, </span><span style=color:#fdf4c1>method </span><span style=color:#fe8019>:= </span><span style=color:#fa5c4b>range </span><span style=color:#fdf4c1>svc</span><span>.</span><span style=color:#fdf4c1>Methods </span><span>{
+</span><span>				</span><span style=color:#fdf4c1>log</span><span>.</span><span style=color:#fdf4c1>Printf</span><span>(</span><span style=color:#b8bb26>"method: </span><span style=color:#fdf4c1>%s</span><span style=color:#b8bb26>"</span><span>, </span><span style=color:#fdf4c1>method</span><span>.</span><span style=color:#fdf4c1>Desc</span><span>.</span><span style=color:#fdf4c1>FullName</span><span>())
+</span><span>			}
+</span><span>		}
+</span><span>	}
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>nil
+</span><span>}
+</span><span>
+</span></code></pre><p>可以看出来使用非常简单，但需要注意的是 <code>message</code> 是可以嵌套的，<code>message</code>内还能定义<code>message</code>和<code>enum</code>，上面的例子没有处理。<p>接下来我们把命令行输出改成输出到文件，让程序有点实际用途。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>package </span><span style=color:#fdf4c1>main
+</span><span>
+</span><span style=color:#fa5c4b>import </span><span>(
+</span><span>	</span><span style=color:#b8bb26>"flag"
+</span><span>	</span><span style=color:#b8bb26>"log"
+</span><span>	</span><span style=color:#b8bb26>"path"
+</span><span>	</span><span style=color:#b8bb26>"strings"
+</span><span>
+</span><span>	</span><span style=color:#b8bb26>"google.golang.org/protobuf/compiler/protogen"
+</span><span>)
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>main</span><span>() {
+</span><span>	</span><span style=color:#fdf4c1>log</span><span>.</span><span style=color:#fdf4c1>SetFlags</span><span>(</span><span style=color:#d3869b>0</span><span>)
+</span><span>	</span><span style=color:#fdf4c1>log</span><span>.</span><span style=color:#fdf4c1>SetPrefix</span><span>(</span><span style=color:#b8bb26>"protoc-gen-hello: "</span><span>)
+</span><span>	</span><span style=color:#fdf4c1>flags </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>flag</span><span>.</span><span style=color:#fdf4c1>FlagSet</span><span>{}
+</span><span>	</span><span style=color:#fdf4c1>protogen</span><span>.</span><span style=color:#fdf4c1>Options</span><span>{</span><span style=color:#fdf4c1>ParamFunc</span><span>: </span><span style=color:#fdf4c1>flags</span><span>.</span><span style=color:#fdf4c1>Set</span><span>}.</span><span style=color:#fdf4c1>Run</span><span>(</span><span style=color:#fdf4c1>Gen</span><span>)
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>Gen</span><span>(</span><span style=color:#fdf4c1>plugin </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>protogen</span><span>.</span><span style=color:#fa5c4b>Plugin</span><span>) </span><span style=color:#fabd2f>error </span><span>{
+</span><span>	</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>_</span><span>, </span><span style=color:#fdf4c1>filename </span><span style=color:#fe8019>:= </span><span style=color:#fa5c4b>range </span><span style=color:#fdf4c1>plugin</span><span>.</span><span style=color:#fdf4c1>Request</span><span>.</span><span style=color:#fdf4c1>FileToGenerate </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>g </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>plugin</span><span>.</span><span style=color:#fdf4c1>NewGeneratedFile</span><span>(</span><span style=color:#fdf4c1>strings</span><span>.</span><span style=color:#fdf4c1>ReplaceAll</span><span>(</span><span style=color:#fdf4c1>path</span><span>.</span><span style=color:#fdf4c1>Base</span><span>(</span><span style=color:#fdf4c1>filename</span><span>), </span><span style=color:#b8bb26>".proto"</span><span>, </span><span style=color:#b8bb26>".md"</span><span>), </span><span style=color:#b8bb26>""</span><span>)
+</span><span>		</span><span style=color:#fdf4c1>g</span><span>.</span><span style=color:#fdf4c1>P</span><span>(</span><span style=color:#b8bb26>"# API 文档"</span><span>)
+</span><span>		</span><span style=color:#fdf4c1>g</span><span>.</span><span style=color:#fdf4c1>P</span><span>()
+</span><span>		</span><span style=color:#fdf4c1>g</span><span>.</span><span style=color:#fdf4c1>P</span><span>(</span><span style=color:#b8bb26>"## 结构定义"</span><span>)
+</span><span>		</span><span style=color:#fdf4c1>g</span><span>.</span><span style=color:#fdf4c1>P</span><span>()
+</span><span>
+</span><span>		</span><span style=color:#fdf4c1>file </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>plugin</span><span>.</span><span style=color:#fdf4c1>FilesByPath</span><span>[</span><span style=color:#fdf4c1>filename</span><span>]
+</span><span>		</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>_</span><span>, </span><span style=color:#fdf4c1>msg </span><span style=color:#fe8019>:= </span><span style=color:#fa5c4b>range </span><span style=color:#fdf4c1>file</span><span>.</span><span style=color:#fdf4c1>Messages </span><span>{
+</span><span>			</span><span style=color:#fdf4c1>log</span><span>.</span><span style=color:#fdf4c1>Printf</span><span>(</span><span style=color:#b8bb26>"message: </span><span style=color:#fdf4c1>%s</span><span style=color:#b8bb26>"</span><span>, </span><span style=color:#fdf4c1>msg</span><span>.</span><span style=color:#fdf4c1>Desc</span><span>.</span><span style=color:#fdf4c1>FullName</span><span>())
+</span><span>			</span><span style=color:#fdf4c1>g</span><span>.</span><span style=color:#fdf4c1>P</span><span>(</span><span style=color:#b8bb26>"### "</span><span>, </span><span style=color:#fdf4c1>msg</span><span>.</span><span style=color:#fdf4c1>Desc</span><span>.</span><span style=color:#fdf4c1>Name</span><span>())
+</span><span>			</span><span style=color:#fdf4c1>g</span><span>.</span><span style=color:#fdf4c1>P</span><span>()
+</span><span>		}
+</span><span>
+</span><span>		</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>_</span><span>, </span><span style=color:#fdf4c1>svc </span><span style=color:#fe8019>:= </span><span style=color:#fa5c4b>range </span><span style=color:#fdf4c1>file</span><span>.</span><span style=color:#fdf4c1>Services </span><span>{
+</span><span>			</span><span style=color:#fdf4c1>g</span><span>.</span><span style=color:#fdf4c1>P</span><span>(</span><span style=color:#b8bb26>"## 服务 "</span><span>, </span><span style=color:#fdf4c1>svc</span><span>.</span><span style=color:#fdf4c1>Desc</span><span>.</span><span style=color:#fdf4c1>FullName</span><span>())
+</span><span>			</span><span style=color:#fdf4c1>g</span><span>.</span><span style=color:#fdf4c1>P</span><span>()
+</span><span>			</span><span style=color:#fdf4c1>log</span><span>.</span><span style=color:#fdf4c1>Printf</span><span>(</span><span style=color:#b8bb26>"service: </span><span style=color:#fdf4c1>%s</span><span style=color:#b8bb26>"</span><span>, </span><span style=color:#fdf4c1>svc</span><span>.</span><span style=color:#fdf4c1>Desc</span><span>.</span><span style=color:#fdf4c1>FullName</span><span>())
+</span><span>			</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>_</span><span>, </span><span style=color:#fdf4c1>method </span><span style=color:#fe8019>:= </span><span style=color:#fa5c4b>range </span><span style=color:#fdf4c1>svc</span><span>.</span><span style=color:#fdf4c1>Methods </span><span>{
+</span><span>				</span><span style=color:#fdf4c1>log</span><span>.</span><span style=color:#fdf4c1>Printf</span><span>(</span><span style=color:#b8bb26>"method: </span><span style=color:#fdf4c1>%s</span><span style=color:#b8bb26>"</span><span>, </span><span style=color:#fdf4c1>method</span><span>.</span><span style=color:#fdf4c1>Desc</span><span>.</span><span style=color:#fdf4c1>FullName</span><span>())
+</span><span>				</span><span style=color:#fdf4c1>g</span><span>.</span><span style=color:#fdf4c1>P</span><span>(</span><span style=color:#b8bb26>"### 接口 "</span><span>, </span><span style=color:#fdf4c1>method</span><span>.</span><span style=color:#fdf4c1>Desc</span><span>.</span><span style=color:#fdf4c1>Name</span><span>())
+</span><span>			}
+</span><span>		}
+</span><span>	}
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>nil
+</span><span>}
+</span><span>
+</span></code></pre><p>注意使用了 <code>plugin.NewGeneratedFile</code>而不是直接<code>os.Open</code>，因为这是<code>protoc</code>插件的约定之一。<code>protoc</code>插件系统允许插件提供<code>insert point</code>，让别的插件修改插件生成的代码。不过目前我们没有这种功能，但遵循约定的方式来编写代码总是没坏处的。<p>代码里会有很多没看懂的东西，比如 <code>Desc</code> ，其实是<code>Descriptor</code>的缩写。<code>Descriptor</code>是一种设计模式，我自己的粗暴理解就是<code>Descriptor</code>“描述”对象的结构和属性，借助<code>Descriptor</code>来访问和修改对象。听起来像是反射，用起来也是反射的感觉。在 Python 里也有个 <code>descriptor</code>，<a href=https://docs.python.org/3/howto/descriptor.html>Descriptor HowTo Guide</a>，和这里的<code>Descriptor</code>有相似的地方，仅供参考。<h3 id=mo-ban-hua>模板化</h3><p>虽然也能直接在代码里用 <code>g.P</code> 完成生成工作，但是未免麻烦。<code>g.P</code>这个接口实话说我觉得不行，怎么不实现一个<code>StringWriter</code>。<p>这里用模板最大的好处是能轻松地完成一大堆字符串拼接混合一些简单的逻辑的情况，如果用 go 代码实现会非常啰嗦。<p>先展示下我使用的模板，代码太罗嗦就不贴了。<pre class=language-markdown data-lang=markdown style=color:#fdf4c1aa;background-color:#282828><code class=language-markdown data-lang=markdown><span>{{ define "message-link" -}}
+</span><span>{{ if .Message -}}
+</span><span>../../../{{ .Message.ParentFile.Path | base | replace ".proto" "" }}/types/{{ .Message.FullName | toString | replace "." "</span><span style=color:#fdf4c1aa;font-style:italic>_"}}/
+</span><span style=color:#fdf4c1aa;font-style:italic>{{- else if .Enum -}}
+</span><span style=color:#fdf4c1aa;font-style:italic>../../../{{ .Enum.ParentFile.Path | base | replace ".proto" "" }}/types/{{ .Enum.FullName | toString | replace "." "_</span><span>" }}/
+</span><span>{{- end }}
+</span><span>{{- end -}}
+</span><span>
+</span><span>{{ define "message" -}}
+</span><span style=color:#fdf4c1aa;font-weight:700>**JSON:**
+</span><span>
+</span><span>```</span><span style=color:#fdf4c1>json
+</span><span style=color:#fdf4c1>{</span><span style=color:#fdf4c1;background-color:#932b1e>{</span><span style=color:#fdf4c1> </span><span style=color:#fdf4c1;background-color:#932b1e>.Desc</span><span style=color:#fdf4c1> </span><span style=color:#fdf4c1;background-color:#932b1e>|</span><span style=color:#fdf4c1> </span><span style=color:#fdf4c1;background-color:#932b1e>GenerateExample</span><span style=color:#fdf4c1> }}
+</span><span>```
+</span><span>
+</span><span style=color:#fdf4c1aa;font-weight:700>**字段说明:**
+</span><span>
+</span><span>|字段|类型|说明|
+</span><span>|----|----|----|
+</span><span>{{ range .Fields -}}
+</span><span>|`{{- .Desc.Name }}`|[`{{ template "field-type" .Desc }}`]({{template </span><span style=color:#b8bb26>"message-link"</span><span style=color:#fdf4c1;background-color:#932b1e> </span><span>.Desc</span><span style=color:#fdf4c1;background-color:#932b1e> </span><span>}})|{{ .Comments | InlineMarkdownDocString | default "</span><span style=color:#fdf4c1aa;font-style:italic>*此字段没有文档注释*</span><span>"}}|
+</span><span>{{ end }}
+</span><span>{{- end -}}
+</span><span>
+</span><span style=color:#8ec07c;font-weight:700># </span><span style=color:#8ec07c>{{ .Desc.FullName | toString | replace "." "</span><span style=color:#8ec07c;font-style:italic>_" }}
+</span><span style=color:#fdf4c1;background-color:#932b1e;font-style:italic>
+</span><span>{{ template "message" . }}
+</span><span>
+</span></code></pre><p>最终生成结果就像是这样。<p><img alt=生成结果 src=https://nnnewb.github.io/posts/2022/protogen-code-generation/image-20220221161802205.webp><h2 id=zong-jie>总结</h2><p>本身是个很简单的东西。原先用解析proto文件语法树再生成文档的方法不是不行，但一来第三方的解析库经常有不支持的语法和奇怪的bug，<code>protoc</code>本身又是事实标准，官方的 DSL Specification 文档就是个废物文档，连 <code>option(http) {}</code> 这样的都算是 specification 之外，还有 <code>optional</code> 在 proto3 还能用之类的让人想骂傻逼的问题。<p>后来改成了 <code>typescript</code> + <code>protobuf.js</code> ，官方支持的稳定性一下子就好多了，但这个跑起来性能实在有点拉，而且 ts 版本用了 <code>ejs</code> 作为模板引擎，<code>ejs</code>的标签写起来罗嗦到不行，内嵌 js 的写法一时爽，爽完自己都快看不懂写了什么玩意儿了。<p>最后换回 <code>go</code>+<code>protogen</code>，一下子就舒服多了。</article><p class=tags-data><a href=/tags/codegen>/codegen/</a> <a href=/tags/golang>/golang/</a> <a href=/tags/protobuf>/protobuf/</a> <a href=/tags/grpc>/grpc/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

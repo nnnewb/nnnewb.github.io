@@ -1,0 +1,66 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>一个有点离谱的trick</title><meta content=一个有点离谱的trick name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2022/a-trick-that-was-a-bit-off/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=一个有点离谱的trick property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2022/a-trick-that-was-a-bit-off/ property=twitter:url><meta content=一个有点离谱的trick property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2022/a-trick-that-was-a-bit-off/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>一个有点离谱的trick</h1><p class=author-line>作于：2022-05-06 11:06 ，预计阅读时间 6 分钟<article><h2 id=qian-yan>前言</h2><p>打 red tiger 靶场的时候遇到一个有点怪的 trick ，慢慢道来。<p>level 3 里会拿到一个 php 文件，里面有加密/解密算法。算法本身不算怪，就是个简单的 xor ，比较怪的是秘钥流的生成算法，还有涉及到的密码学内容。<h2 id=zheng-wen>正文</h2><h3 id=jie-mi-suan-fa>解密算法</h3><p>先看解密的算法。<pre class=language-php data-lang=php style=color:#fdf4c1aa;background-color:#282828><code class=language-php data-lang=php><span>function decrypt ($str)
+</span><span>{
+</span><span>    srand(3284724);
+</span><span>    if(preg_match('%^[a-zA-Z0-9/+]*={0,2}$%',$str))
+</span><span>    {
+</span><span>        $str = base64_decode($str);
+</span><span>        if ($str != "" && $str != null && $str != false)
+</span><span>        {
+</span><span>            // 前面都是参数验证，下面才是真正的解密
+</span><span>            $decStr = "";
+</span><span>
+</span><span>            // 把字符串按3个字符一组分割
+</span><span>            // 比如 123456789 分割成数组 123,456,789
+</span><span>            // 密文每3位表示一个明文字符
+</span><span>            for ($i=0; $i &lt; strlen($str); $i+=3)
+</span><span>            {
+</span><span>                $array[$i/3] = substr($str,$i,3);
+</span><span>            }
+</span><span>
+</span><span>            // 有趣的地方：伪随机数 xor 密文完成解密。
+</span><span>            foreach($array as $s)
+</span><span>            {
+</span><span>                $a = $s ^ rand(0, 255);
+</span><span>                $decStr .= chr($a);
+</span><span>            }
+</span><span>
+</span><span>            return $decStr;
+</span><span>        }
+</span><span>        return false;
+</span><span>    }
+</span><span>    return false;
+</span><span>}
+</span></code></pre><p>我加了点注释。接着说说为什么有趣。<h3 id=wei-sui-ji-shu>伪随机数</h3><blockquote><p>口胡警告。</blockquote><p>首先显而易见，接触过随机数函数都应该知道什么叫 <em>伪随机</em> ，基本伪随机数函数的文档都会给个密码学相关的警告，一般说的是这个函数不能生成在密码学而言安全的随机数。php 的 <code>rand</code> 函数也有个这样的警告。<blockquote><p>This function does not generate cryptographically secure values, and should not be used for cryptographic purposes. If you need a cryptographically secure value, consider using <a href=https://www.php.net/manual/en/function.random-int.php>random_int()</a>, <a href=https://www.php.net/manual/en/function.random-bytes.php>random_bytes()</a>, or <a href=https://www.php.net/manual/en/function.openssl-random-pseudo-bytes.php>openssl_random_pseudo_bytes()</a> instead.</blockquote><p>这就涉及所谓 <em>伪随机</em> 的本质了。伪随机数之所以是 <em>伪</em> 的，是因为其内部实现是一个让生成数字尽可能平均地分布到值域里的算法，如果给定输入则经过这个算法会得到固定的输出序列。对于不够强的伪随机数算法，得到一定数量的随机值后可以猜出随机种子或未来会出现的某个随机值的话，显然是不安全的。比如用作秘钥生成或者 <code>nonce</code> 之类的场景。<p>不过提到“不够强”，自然也有够强的伪随机数算法。也就是密码学安全的伪随机数生成器 <em>cryptographically-secure pseudorandom number generator, CSPRNG or CPRNG</em>。参考 wiki 定义如下。<blockquote><p>除了满足统计学伪随机性外，还需满足“不能通过给定的随机序列的一部分而以显著大于 1/2 的概率在多项式时间内演算出比特序列的任何其他部分。”</blockquote><p>真的不是很懂所以就不瞎扯了，继续说为啥有意思。<code>rand</code> 函数产生的是一个 <strong>随机序列</strong> ，然后这个序列被用来加密和解密，而且这个随机序列理论上来说是无限长的，而前述解密算法利用随机序列作为秘钥流解密密文。这就让人想到了另一个有意思的事情，<em>一次一密</em>。<h3 id=yi-ci-yi-mi>一次一密</h3><p>密码学入门教材应该有说过，一次一密是无条件安全的，统计学攻击对一次一密无效。但一次一密的难点在于如何传递或约定秘钥流，毕竟密文可以无条件安全，秘钥传递不行。如果是约定一个很长的秘钥流重复使用，那一次一密就退化成了MTP，获取到足够数量的密文还是可以被攻击。<p>上面的解密算法有趣的地方就在于使用了 <code>rand</code> 产生的随机数序列作为秘钥，如果再稍微改进一下，<code>$_SESSION</code>里记录<code>rand</code>的步数，完全可以实现伪一次一密，每次返回给浏览器的密文都不相同，凭密文也找不出规律。不过这样靶场难度就太高了=。=对我来说。<p>对上面给出的解密算法只能算是 MTP，虽然秘钥长度是无限的，但加密总是在用前 N 个数当秘钥。如果已知明文再多一点的话即使不拿到这个加密/解密算法也可以简单拼凑下密文发起攻击（因为 xor 是简单的替代密码，没有置换）。<h3 id=sui-ji-shu-ping-tai-ban-ben-chai-yi>随机数平台/版本差异</h3><p>回到题目本身，这个解密算法其实不是那么可移植。我验证了一下，在 Windows 下 php 5.4 <code>rand</code> 产生的序列和 Linux 下 php 5.6 <code>rand</code> 产生的序列是不同的。直接把上面的解密算法在 Windows 下跑无法正常解密。<p>同时，php 5 的随机数算法和 php 7/8 的随机数算法又不一样，产生的序列不同。升级 php 版本也会导致原先加密的内容无法解密。<p>最终用在线沙盒解决了问题。<h2 id=zong-jie>总结</h2><p>代码跑不起来注意下平台和版本差异，我觉得干过几年自己搭过项目环境都应该知道怎么回事吧......<p>其他就是闲扯淡没什么好总结的，密码学的东西只看了点基础的，写不出证明也没怎么接触过什么正经实现。非要说的话就是比啥也不懂好一点。</article><p class=tags-data><a href=/tags/security>/security/</a> <a href=/tags/php>/php/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

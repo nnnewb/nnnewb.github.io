@@ -1,0 +1,68 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>Unity3d 摄像机跟随旋转的方案</title><meta content="Unity3d 摄像机跟随旋转的方案" name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2018/2018-11-03-unity3dshe-xiang-ji-gen-sui-xuan-zhuan-fang-an/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content="Unity3d 摄像机跟随旋转的方案" property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2018/2018-11-03-unity3dshe-xiang-ji-gen-sui-xuan-zhuan-fang-an/ property=twitter:url><meta content="Unity3d 摄像机跟随旋转的方案" property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2018/2018-11-03-unity3dshe-xiang-ji-gen-sui-xuan-zhuan-fang-an/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>Unity3d 摄像机跟随旋转的方案</h1><p class=author-line>作于：2018-11-03 18:20 ，预计阅读时间 2 分钟<article><h2 id=intro>Intro</h2><p>主要想探讨的是如何令摄像机随鼠标操作进行旋转和移动，摄像机跟随的脚本官方就有 Example。<h2 id=fang-an-du-li-de-jiao-du-bian-liang>方案：独立的角度变量</h2><p>主要的特点是使用独立的角度变量，每次处理鼠标移动操作都会创建一个新的<code>Quaternion</code>用于计算。<p>先看 Demo。<pre class=language-c# data-lang=c# style=color:#fdf4c1aa;background-color:#282828><code class=language-c# data-lang=c#><span style=color:#fa5c4b>public class </span><span style=color:#8ec07c>PlayerControls </span><span>: </span><span style=color:#8ec07c>MonoBehaviour
+</span><span>{
+</span><span>    </span><span style=color:#fa5c4b>public </span><span style=color:#fabd2f>GameObject </span><span style=color:#fdf4c1>Player</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>public float </span><span style=color:#fdf4c1>Distance</span><span>;
+</span><span>    </span><span style=color:#928374;font-style:italic>//public float CameraRepositionSpeed;
+</span><span>    </span><span style=color:#fa5c4b>public float </span><span style=color:#fdf4c1>MouseMotionScaleLevel</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>public bool </span><span style=color:#fdf4c1>ReverseAxisY</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>public float </span><span style=color:#fdf4c1>PitchMaximum</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>public float </span><span style=color:#fdf4c1>PitchMinimum</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>private float </span><span style=color:#fdf4c1>_CurrentCameraAngleAroundX</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>private float </span><span style=color:#fdf4c1>_CurrentCameraAngleAroundY</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>private </span><span style=color:#fabd2f>Vector3 </span><span style=color:#fdf4c1>_PositionTarget</span><span>;
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// Use this for initialization
+</span><span>    </span><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>Start</span><span>()
+</span><span>    {
+</span><span>    }
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// Update is called once per frame
+</span><span>    </span><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>Update</span><span>()
+</span><span>    {
+</span><span>        </span><span style=color:#fdf4c1>_CurrentCameraAngleAroundX </span><span style=color:#fe8019>+= </span><span style=color:#fdf4c1>Input</span><span>.</span><span style=color:#fdf4c1>GetAxis(</span><span style=color:#b8bb26>"Mouse Y"</span><span style=color:#fdf4c1>) </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>MouseMotionScaleLevel </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>Time</span><span>.</span><span style=color:#fdf4c1>deltaTime </span><span style=color:#fe8019>* </span><span>(</span><span style=color:#fdf4c1>ReverseAxisY </span><span style=color:#fe8019>? -</span><span style=color:#d3869b>1 </span><span style=color:#fe8019>: </span><span style=color:#d3869b>1</span><span>);
+</span><span>        </span><span style=color:#fdf4c1>_CurrentCameraAngleAroundY </span><span style=color:#fe8019>+= </span><span style=color:#fdf4c1>Input</span><span>.</span><span style=color:#fdf4c1>GetAxis(</span><span style=color:#b8bb26>"Mouse X"</span><span style=color:#fdf4c1>) </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>MouseMotionScaleLevel </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>Time</span><span>.</span><span style=color:#fdf4c1>deltaTime</span><span>;
+</span><span>        </span><span style=color:#fdf4c1>_CurrentCameraAngleAroundX </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>Mathf</span><span>.</span><span style=color:#fdf4c1>Clamp(_CurrentCameraAngleAroundX, PitchMinimum, PitchMaximum)</span><span>;
+</span><span>        </span><span style=color:#fdf4c1>_PositionTarget </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>Player</span><span>.</span><span style=color:#fdf4c1>transform</span><span>.</span><span style=color:#fdf4c1>position </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>Quaternion</span><span>.</span><span style=color:#fdf4c1>Euler(_CurrentCameraAngleAroundX, _CurrentCameraAngleAroundY, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>) </span><span style=color:#fe8019>* </span><span>(</span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>Player</span><span>.</span><span style=color:#fdf4c1>transform</span><span>.</span><span style=color:#fdf4c1>forward </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>Distance</span><span>);
+</span><span>
+</span><span>        </span><span style=color:#928374;font-style:italic>//transform.position = Vector3.Lerp(transform.position, _PositionTarget, Time.deltaTime * CameraRepositionSpeed);
+</span><span>        </span><span style=color:#fdf4c1>transform</span><span>.</span><span style=color:#fdf4c1>position </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>_PositionTarget</span><span>;
+</span><span>        </span><span style=color:#fdf4c1>transform</span><span>.</span><span style=color:#fdf4c1>LookAt(Player.transform)</span><span>;
+</span><span>    }
+</span><span>}
+</span></code></pre><p>核心在于<code>_CurrentCameraAngleAroundX</code>和<code>_CurrentCameraAngleAroundY</code>以及<code>Distance</code>，这三个变量共同决定了以玩家<code>Player</code>为原点的极坐标系下摄像机所处的空间位置。<p>计算坐标时只需要通过<code>Quaternion.Euler</code>来取得旋转四元数，以玩家为原点衍生一条（0,0,-1）的向量并乘上四元数以旋转至<code>Player</code>指向摄像机的方向，最后乘上<code>Distance</code>，即可得到摄像机相对玩家的偏移。<pre class=language-c# data-lang=c# style=color:#fdf4c1aa;background-color:#282828><code class=language-c# data-lang=c#><span style=color:#fdf4c1>_PositionTarget </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>Player</span><span>.</span><span style=color:#fdf4c1>transform</span><span>.</span><span style=color:#fdf4c1>position </span><span style=color:#fe8019>+
+</span><span>    </span><span style=color:#fdf4c1>Quaternion</span><span>.</span><span style=color:#fdf4c1>Euler(_CurrentCameraAngleAroundX, _CurrentCameraAngleAroundY, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>) </span><span style=color:#fe8019>*
+</span><span>    (</span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>Player</span><span>.</span><span style=color:#fdf4c1>transform</span><span>.</span><span style=color:#fdf4c1>forward </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>Distance</span><span>);
+</span></code></pre><p>最后只要将摄像机放置在那个位置，然后<code>LookAt</code>旋转到<code>z</code>轴正方向指向玩家就完事儿了。</article><p class=tags-data><a href=/tags/unity3d>/unity3d/</a> <a href=/tags/c>/c#/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

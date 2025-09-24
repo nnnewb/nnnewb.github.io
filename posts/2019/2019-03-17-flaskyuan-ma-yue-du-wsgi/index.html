@@ -1,0 +1,138 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>Flask源码阅读笔记：WSGI</title><meta content=Flask源码阅读笔记：WSGI name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2019/2019-03-17-flaskyuan-ma-yue-du-wsgi/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=Flask源码阅读笔记：WSGI property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2019/2019-03-17-flaskyuan-ma-yue-du-wsgi/ property=twitter:url><meta content=Flask源码阅读笔记：WSGI property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2019/2019-03-17-flaskyuan-ma-yue-du-wsgi/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>Flask源码阅读笔记：WSGI</h1><p class=author-line>作于：2019-03-17 00:00 ，预计阅读时间 5 分钟<article><h2 id=0-intro>0. Intro</h2><p>Flask 是一个基于 WSGI 协议的上层应用框架，据我了解应该是和 Tornado、Django 流行程度相近，当然 Django 老大哥始终占据了最多的份额。Flask 是一个轻量级的 Micro Framework，源码值得一读。<h2 id=1-hui-gu-wsgi>1. 回顾 WSGI</h2><p>开始之前，需要先回顾以下 WSGI 协议。<p>WSGI 是一个针对 Python 的协议，故说到的 App、Server、函数、参数等描述都是指 Python 对应的概念或实现。<h3 id=1-1-pep-0333-dao-pep-3333>1.1 PEP-0333 到 PEP-3333</h3><p>PEP-0333 是初版的 WSGI 协议提案，PEP-3333 是 1.0.1 版本的 WSGI 提案，差别不大，主要是对 py3 和 py2 不兼容的部分作了更新说明（<code>str</code>和<code>unicode</code>方面的问题，python2 的 str 在 python3 是 bytes，故 python3 编写的 wsgi app 必须返回 bytes）。<p>WSGI 协议规范了 Python Web 应用的两个层级：服务器层（Server）和应用层（Application），两者通过 WSGI 协议进行通信。<p>其中 Server 负责处理请求，将请求转换成符合 WSGI 要求的模式（<code>environ</code>参数）。 Application 完成处理后再通知 Server 返回 Response（<code>start_response</code>参数）。<p>WSGI 规定 App 必须是一个可以被调用的对象，接受指定数量的参数，WSGI Server 不关注任何其他 App 实现细节。而 WSGI App 也应当遵守这一要求，对 <code>start_response</code> 参数也遵守不依赖于任何 WSGI Server 的实现细节。<p>WSGI App 的接口规范声明如下。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>app</span><span>(</span><span style=color:#fdf4c1>environ</span><span>, </span><span style=color:#fdf4c1>start_response</span><span>): </span><span style=color:#d3869b>...
+</span></code></pre><p><code>start_response</code>的声明如下。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>start_response</span><span>(</span><span style=color:#fdf4c1>status</span><span>, </span><span style=color:#fdf4c1>response_headers</span><span>, </span><span style=color:#fdf4c1>exc_info</span><span style=color:#fe8019>=</span><span style=color:#d3869b>None</span><span>): </span><span style=color:#d3869b>...
+</span></code></pre><h3 id=1-2-wsgi-server>1.2 WSGI Server</h3><p>常见的 WSGI Server 有几个。Nginx 和 Apache 都有 WSGI 插件，除此之外还有 gunicorn、gevent.wsgi 等。<p>举一个典型的例子来说。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#928374;font-style:italic># app.py
+</span><span style=color:#fa5c4b>import </span><span>wsgiserver
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>app</span><span>(</span><span style=color:#fdf4c1>environ</span><span>, </span><span style=color:#fdf4c1>start_response</span><span>):
+</span><span>    </span><span style=color:#fdf4c1>start_response(</span><span style=color:#b8bb26>'200 OK'</span><span style=color:#fdf4c1>, [(</span><span style=color:#b8bb26>'Content-Type'</span><span style=color:#fdf4c1>,</span><span style=color:#b8bb26>'text-plain'</span><span style=color:#fdf4c1>)])
+</span><span>    </span><span style=color:#fa5c4b>return </span><span>[</span><span style=color:#fa5c4b>b</span><span style=color:#b8bb26>"Hello world!"</span><span>]
+</span><span>
+</span><span style=color:#fdf4c1>wsgiserver.WSGIServer(app, host</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'127.0.0.1'</span><span style=color:#fdf4c1>, port</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'5000'</span><span style=color:#fdf4c1>).start()
+</span></code></pre><p>在 windows 下使用如下命令安装 wsgiserver<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>pip install wsgiserver
+</span></code></pre><p>最后执行<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>python app.py
+</span></code></pre><h2 id=2-ru-kou-dian>2. 入口点</h2><p>看完 WSGI ，接下来看 Flask 请求的入口点在哪儿。<h3 id=2-1-wsgi-server-yu-run>2.1 WSGI Server 与 <code>.run</code></h3><p><code>Flask</code>这个类定义于<code>flask.app</code>，看这里的代码。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>Flask</span><span>(</span><span style=color:#8ec07c>_PackageBoundObject</span><span>):
+</span><span>    </span><span style=color:#d3869b>...
+</span></code></pre><p>先不去管 <code>_PackageBoundObject</code> 是啥。我们知道 <code>Flask</code>有一个<code>run</code>方法可以快速启动服务，直接跳转到那儿。<blockquote><p><a href=https://github.com/pallets/flask/blob/master/flask/app.py>flask/app.py</a> COMMIT a74864e , Line 844 ~ 949<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>run</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>host</span><span style=color:#fe8019>=</span><span style=color:#d3869b>None</span><span>, </span><span style=color:#fdf4c1>port</span><span style=color:#fe8019>=</span><span style=color:#d3869b>None</span><span>, </span><span style=color:#fdf4c1>debug</span><span style=color:#fe8019>=</span><span style=color:#d3869b>None</span><span>, </span><span style=color:#fdf4c1>load_dotenv</span><span style=color:#fe8019>=</span><span style=color:#d3869b>True</span><span>, </span><span style=color:#fe8019>**</span><span style=color:#fdf4c1>options</span><span>):
+</span><span>        </span><span style=color:#928374;font-style:italic>""" 略 """
+</span><span>        </span><span style=color:#928374;font-style:italic># Change this into a no-op if the server is invoked from the
+</span><span>        </span><span style=color:#928374;font-style:italic># command line. Have a look at cli.py for more information.
+</span><span>        </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>os.environ.get(</span><span style=color:#b8bb26>'FLASK_RUN_FROM_CLI'</span><span style=color:#fdf4c1>) </span><span style=color:#fe8019>== </span><span style=color:#b8bb26>'true'</span><span>:
+</span><span>            </span><span style=color:#fa5c4b>from .</span><span>debughelpers </span><span style=color:#fa5c4b>import </span><span>explain_ignored_app_run
+</span><span>            </span><span style=color:#fdf4c1>explain_ignored_app_run()
+</span><span>            </span><span style=color:#fa5c4b>return
+</span><span>
+</span><span>        </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>get_load_dotenv(load_dotenv)</span><span>:
+</span><span>            </span><span style=color:#fdf4c1>cli.load_dotenv()
+</span><span>
+</span><span>            </span><span style=color:#928374;font-style:italic># if set, let env vars override previous values
+</span><span>            </span><span style=color:#fa5c4b>if </span><span style=color:#b8bb26>'FLASK_ENV' </span><span style=color:#fe8019>in </span><span>os.environ:
+</span><span>                </span><span style=color:#fdf4c1>self</span><span>.env </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>get_env()
+</span><span>                </span><span style=color:#fdf4c1>self</span><span>.debug </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>get_debug_flag()
+</span><span>            </span><span style=color:#fa5c4b>elif </span><span style=color:#b8bb26>'FLASK_DEBUG' </span><span style=color:#fe8019>in </span><span>os.environ:
+</span><span>                </span><span style=color:#fdf4c1>self</span><span>.debug </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>get_debug_flag()
+</span><span>
+</span><span>        </span><span style=color:#928374;font-style:italic># debug passed to method overrides all other sources
+</span><span>        </span><span style=color:#fa5c4b>if </span><span>debug </span><span style=color:#fe8019>is not </span><span style=color:#d3869b>None</span><span>:
+</span><span>            </span><span style=color:#fdf4c1>self</span><span>.debug </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>bool</span><span style=color:#fdf4c1>(debug)
+</span><span>
+</span><span>        _host </span><span style=color:#fe8019>= </span><span style=color:#b8bb26>'127.0.0.1'
+</span><span>        _port </span><span style=color:#fe8019>= </span><span style=color:#d3869b>5000
+</span><span>        server_name </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self.config.get(</span><span style=color:#b8bb26>'SERVER_NAME'</span><span style=color:#fdf4c1>)
+</span><span>        sn_host, sn_port </span><span style=color:#fe8019>= </span><span style=color:#d3869b>None</span><span>, </span><span style=color:#d3869b>None
+</span><span>
+</span><span>        </span><span style=color:#fa5c4b>if </span><span>server_name:
+</span><span>            sn_host, </span><span style=color:#fdf4c1>_</span><span>, sn_port </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>server_name.partition(</span><span style=color:#b8bb26>':'</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span>        host </span><span style=color:#fe8019>= </span><span>host </span><span style=color:#fe8019>or </span><span>sn_host </span><span style=color:#fe8019>or </span><span>_host
+</span><span>        port </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>int</span><span style=color:#fdf4c1>(port </span><span style=color:#fe8019>or </span><span style=color:#fdf4c1>sn_port </span><span style=color:#fe8019>or </span><span style=color:#fdf4c1>_port)
+</span><span>
+</span><span>        </span><span style=color:#fdf4c1>options.setdefault(</span><span style=color:#b8bb26>'use_reloader'</span><span style=color:#fdf4c1>, self.debug)
+</span><span>        </span><span style=color:#fdf4c1>options.setdefault(</span><span style=color:#b8bb26>'use_debugger'</span><span style=color:#fdf4c1>, self.debug)
+</span><span>        </span><span style=color:#fdf4c1>options.setdefault(</span><span style=color:#b8bb26>'threaded'</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>True</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span>        </span><span style=color:#fdf4c1>cli.show_server_banner(self.env, self.debug, self.name, </span><span style=color:#d3869b>False</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span>        </span><span style=color:#fa5c4b>from </span><span>werkzeug.serving </span><span style=color:#fa5c4b>import </span><span>run_simple
+</span><span>
+</span><span>        </span><span style=color:#fa5c4b>try</span><span>:
+</span><span>            </span><span style=color:#fdf4c1>run_simple(host, port, self, </span><span style=color:#fe8019>**</span><span style=color:#fdf4c1>options)
+</span><span>        </span><span style=color:#fa5c4b>finally</span><span>:
+</span><span>            </span><span style=color:#928374;font-style:italic># reset the first request information if the development server
+</span><span>            </span><span style=color:#928374;font-style:italic># reset normally.  This makes it possible to restart the server
+</span><span>            </span><span style=color:#928374;font-style:italic># without reloader and that stuff from an interactive shell.
+</span><span>            </span><span style=color:#fdf4c1>self</span><span>._got_first_request </span><span style=color:#fe8019>= </span><span style=color:#d3869b>False
+</span></code></pre></blockquote><p>首先进入眼帘的是关于 flask/cli 的内容。 点进 <code>explain_ignored_app_run</code> 可以得知这是一个防止用户犯蠢写下 app.run() 后又用 <code>flask run</code>在命令行启动留下的说明性输出。<p>其次是 dotenv 相关的玩意儿，没用过 dotenv 推荐去了解下 python-dotenv 这个包。可以很方便地配置好开发环境下的环境变量。<p>经过一堆类型转换和检查之后，终于看到了这几行。<blockquote><p><a href=https://github.com/pallets/flask/blob/master/flask/app.py>flask/app.py</a> COMMIT a74864e , Line 941 ~ 949<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span>        </span><span style=color:#fa5c4b>from </span><span>werkzeug.serving </span><span style=color:#fa5c4b>import </span><span>run_simple
+</span><span>
+</span><span>        </span><span style=color:#fa5c4b>try</span><span>:
+</span><span>            </span><span style=color:#fdf4c1>run_simple(host, port, self, </span><span style=color:#fe8019>**</span><span style=color:#fdf4c1>options)
+</span><span>        </span><span style=color:#fa5c4b>finally</span><span>:
+</span><span>            </span><span style=color:#928374;font-style:italic># reset the first request information if the development server
+</span><span>            </span><span style=color:#928374;font-style:italic># reset normally.  This makes it possible to restart the server
+</span><span>            </span><span style=color:#928374;font-style:italic># without reloader and that stuff from an interactive shell.
+</span><span>            </span><span style=color:#fdf4c1>self</span><span>._got_first_request </span><span style=color:#fe8019>= </span><span style=color:#d3869b>False
+</span></code></pre></blockquote><p><code>run_simple</code>？这就是 WSGI Server 启动的地方了。<p><a href=http://werkzeug.pocoo.org/docs/0.14/serving/>看看 werkzeug 文档吧</a>，我这里摘一段。<blockquote><p>Serving WSGI Applications There are many ways to serve a WSGI application. While you’re developing it, you usually don’t want to have a full-blown webserver like Apache up and running, but instead a simple standalone one. Because of that Werkzeug comes with a builtin development server. The easiest way is creating a small start-myproject.py file that runs the application using the builtin server:<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#928374;font-style:italic>#!/usr/bin/env python
+</span><span style=color:#928374;font-style:italic># -*- coding: utf-8 -*-
+</span><span>
+</span><span style=color:#fa5c4b>from </span><span>werkzeug.serving </span><span style=color:#fa5c4b>import </span><span>run_simple
+</span><span style=color:#fa5c4b>from </span><span>myproject </span><span style=color:#fa5c4b>import </span><span>make_app
+</span><span>
+</span><span>app </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>make_app(</span><span style=color:#d3869b>...</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>run_simple(</span><span style=color:#b8bb26>'localhost'</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>8080</span><span style=color:#fdf4c1>, app, use_reloader</span><span style=color:#fe8019>=</span><span style=color:#d3869b>True</span><span style=color:#fdf4c1>)
+</span></code></pre></blockquote><p>从函数签名可以看得出，<code>run_simple</code>启动时，flask 将自己作为 wsgi app 参数传给了 werkzeug，不难猜测出，Flask 本身是一个可调用对象，即重写了 <code>__call__</code> 方法。<h3 id=2-2-call>2.2 <code>__call__</code></h3><p>来到<code>__call__</code>，发现它调用了<code>self.wsgi_app</code>，本身没做任何事。<blockquote><p><a href=https://github.com/pallets/flask/blob/master/flask/app.py>flask/app.py</a> COMMIT a74864e , Line 2323 ~ 2327<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__call__</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>environ</span><span>, </span><span style=color:#fdf4c1>start_response</span><span>):
+</span><span>        </span><span style=color:#928374;font-style:italic>"""The WSGI server calls the Flask application object as the
+</span><span style=color:#928374;font-style:italic>        WSGI application. This calls :meth:`wsgi_app` which can be
+</span><span style=color:#928374;font-style:italic>        wrapped to applying middleware."""
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>self.wsgi_app(environ, start_response)
+</span></code></pre></blockquote><p>再来到 <code>wsgi_app</code> 的定义。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>wsgi_app</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>environ</span><span>, </span><span style=color:#fdf4c1>start_response</span><span>):
+</span><span>        </span><span style=color:#928374;font-style:italic>""" 略 """
+</span><span>        ctx </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self.request_context(environ)
+</span><span>        error </span><span style=color:#fe8019>= </span><span style=color:#d3869b>None
+</span><span>        </span><span style=color:#fa5c4b>try</span><span>:
+</span><span>            </span><span style=color:#fa5c4b>try</span><span>:
+</span><span>                </span><span style=color:#fdf4c1>ctx.push()
+</span><span>                response </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self.full_dispatch_request()
+</span><span>            </span><span style=color:#fa5c4b>except </span><span style=color:#fabd2f>Exception </span><span style=color:#fa5c4b>as </span><span>e:
+</span><span>                error </span><span style=color:#fe8019>= </span><span>e
+</span><span>                response </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self.handle_exception(e)
+</span><span>            </span><span style=color:#fa5c4b>except</span><span>:
+</span><span>                error </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>sys.exc_info()</span><span>[</span><span style=color:#d3869b>1</span><span>]
+</span><span>                </span><span style=color:#fa5c4b>raise
+</span><span>            </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>response(environ, start_response)
+</span><span>        </span><span style=color:#fa5c4b>finally</span><span>:
+</span><span>            </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>self.should_ignore_error(error)</span><span>:
+</span><span>                error </span><span style=color:#fe8019>= </span><span style=color:#d3869b>None
+</span><span>            </span><span style=color:#fdf4c1>ctx.auto_pop(error)
+</span></code></pre><p>这里，就是整个 Flask 作为 wsgi app，处理 request 的入口点了。<p>从这儿我们能鸟瞰整个 flask 框架的核心逻辑。<code>environ</code>被包装成 <code>request</code>，压栈，<code>full_dispatch_request</code>路由至视图，处理异常，一切结束后清栈。</article><p class=tags-data><a href=/tags/python>/python/</a> <a href=/tags/flask>/flask/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

@@ -1,0 +1,52 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>git魔法上网的技巧</title><meta content=git魔法上网的技巧 name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2022/git-magic-surfing-skill/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=git魔法上网的技巧 property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2022/git-magic-surfing-skill/ property=twitter:url><meta content=git魔法上网的技巧 property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2022/git-magic-surfing-skill/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>git魔法上网的技巧</h1><p class=author-line>作于：2022-06-23 17:50 ，预计阅读时间 2 分钟<article><h2 id=qian-yan>前言</h2><p>不想再在配置新虚拟机之类的环境的时候临时现查了。<h2 id=ssh-fang-shi>ssh 方式</h2><p>简而言之，利用 <code>.ssh/config</code> 配置一条 <code>ProxyCommand</code> 即可，linux 下考虑用 <code>nc</code>，windows 非 git bash 可以装个 nmap 用里面带的 <code>ncat</code> 工具，git bash 下可以用 <code>connect</code> 。<h3 id=linux-xia-yong-nc-ming-ling>Linux 下用 nc 命令</h3><pre style=color:#fdf4c1aa;background-color:#282828><code><span>Host github.com
+</span><span>    HostName github.com
+</span><span>    ProxyCommand nc -X 5 -x 127.0.0.1:7891 %h %p
+</span><span>    Port 22
+</span><span>    User git
+</span><span>    PubKeyAuthentication yes
+</span></code></pre><p>特别注意 <code>-X 5</code> 表示魔法类型是 s0cks5 ，Windows 下 C 开头的软件在一个端口同时支持了 http 魔法和 s0cks 魔法所以可以直接配同一个端口，Linux 下 C 开头软件社区版是分开监听的，所以别写错了。<h3 id=windows-fei-git-bash-xia-yong-ncat-ming-ling>Windows 非 Git Bash 下用 ncat 命令</h3><pre style=color:#fdf4c1aa;background-color:#282828><code><span>Host github.com
+</span><span>    HostName github.com
+</span><span>    Port 22
+</span><span>    User git
+</span><span>    ProxyCommand C:/Users/USER/scoop/shims/ncat.exencat --proxy 127.0.0.1:7890 %h %p
+</span></code></pre><p>特别注意路径，<code>ncat</code>使用完整路径，而且不要用反斜杠，用正斜杠。<h3 id=windows-git-bash-xia-ke-yi-yong-connect-ming-ling>Windows Git Bash 下可以用 connect 命令</h3><pre style=color:#fdf4c1aa;background-color:#282828><code><span>Host github.com
+</span><span>    HostName github.com
+</span><span>    Port 22
+</span><span>    User git
+</span><span>    ProxyCommand connect -S 127.0.0.1:7890 %h %p
+</span></code></pre><p>没用过，不知道有什么坑。<h2 id=https-fang-shi>https 方式</h2><p>在 <code>~/.gitconfig</code> 里这样配置。<pre style=color:#fdf4c1aa;background-color:#282828><code><span>[http "https://github.com"]
+</span><span>    proxy = socks5://192.168.10.120:7890
+</span></code></pre><p>魔法类型和端口注意改成自己的。<h2 id=zong-jie>总结</h2><p>如果不是工作需要，麻瓜大可用 gitee 一类的服务，反正免费私有仓库对个人把玩用途绝对够了。<p>Pages 的话最好走正规渠道。</article><p class=tags-data><a href=/tags/git>/git/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

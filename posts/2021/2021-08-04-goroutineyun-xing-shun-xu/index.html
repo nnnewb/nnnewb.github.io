@@ -1,0 +1,92 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>面试题之 goroutine 运行顺序</title><meta content="面试题之 goroutine 运行顺序" name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2021/2021-08-04-goroutineyun-xing-shun-xu/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content="面试题之 goroutine 运行顺序" property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2021/2021-08-04-goroutineyun-xing-shun-xu/ property=twitter:url><meta content="面试题之 goroutine 运行顺序" property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2021/2021-08-04-goroutineyun-xing-shun-xu/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>面试题之 goroutine 运行顺序</h1><p class=author-line>作于：2021-08-04 10:37 ，预计阅读时间 5 分钟<article><p>不是我做的沙雕面试题，在 segmentfault 上看到的。</p><span id=continue-reading></span><h2 id=yuan-ti>原题</h2><pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>package </span><span style=color:#fdf4c1>main
+</span><span>
+</span><span style=color:#fa5c4b>import </span><span>(
+</span><span>    </span><span style=color:#b8bb26>"fmt"
+</span><span>    </span><span style=color:#b8bb26>"runtime"
+</span><span>    </span><span style=color:#b8bb26>"sync"
+</span><span>)
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>main</span><span>() {
+</span><span>    </span><span style=color:#fdf4c1>runtime</span><span>.</span><span style=color:#fdf4c1>GOMAXPROCS</span><span>(</span><span style=color:#d3869b>1</span><span>)
+</span><span>    </span><span style=color:#fdf4c1>wg </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>sync</span><span>.</span><span style=color:#fdf4c1>WaitGroup</span><span>{}
+</span><span>    </span><span style=color:#fdf4c1>wg</span><span>.</span><span style=color:#fdf4c1>Add</span><span>(</span><span style=color:#d3869b>10</span><span>)
+</span><span>    </span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>:= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>&lt; </span><span style=color:#d3869b>5</span><span>; </span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>++ </span><span>{
+</span><span>        </span><span style=color:#fa5c4b>go func</span><span>() {
+</span><span>            </span><span style=color:#fdf4c1>fmt</span><span>.</span><span style=color:#fdf4c1>Println</span><span>(</span><span style=color:#b8bb26>"A:"</span><span>, </span><span style=color:#fdf4c1>i</span><span>)
+</span><span>            </span><span style=color:#fdf4c1>wg</span><span>.</span><span style=color:#fdf4c1>Done</span><span>()
+</span><span>        }()
+</span><span>    }
+</span><span>    </span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>:= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>&lt; </span><span style=color:#d3869b>5</span><span>; </span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>++ </span><span>{
+</span><span>        </span><span style=color:#fa5c4b>go func</span><span>(</span><span style=color:#fdf4c1>num </span><span style=color:#fabd2f>int</span><span>) {
+</span><span>            </span><span style=color:#fdf4c1>fmt</span><span>.</span><span style=color:#fdf4c1>Println</span><span>(</span><span style=color:#b8bb26>"B:"</span><span>, </span><span style=color:#fdf4c1>num</span><span>)
+</span><span>            </span><span style=color:#fdf4c1>wg</span><span>.</span><span style=color:#fdf4c1>Done</span><span>()
+</span><span>        }(</span><span style=color:#fdf4c1>i</span><span>)
+</span><span>    }
+</span><span>    </span><span style=color:#fdf4c1>wg</span><span>.</span><span style=color:#fdf4c1>Wait</span><span>()
+</span><span>}
+</span></code></pre><p>问：代码输出结果是什么？<h2 id=hu-luan-fen-xi>胡乱分析</h2><p>第一眼进去看到 <code>runtime.GOMAXPROCS(1)</code> ，初步怀疑是又在考什么 GMP 面试题了。<p>但凡说到 Go 面试好像就一定要考一下 goroutine 调度和 GMP 模型，招进来又只让你写 curd 。搞得面试跟考试背书一样。<p>先不吐槽，继续看。跳过两行 <code>sync.WaitGroup</code> 之后就是一个经典 for 循环陷阱。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>:= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>&lt; </span><span style=color:#d3869b>5</span><span>; </span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>++ </span><span>{
+</span><span>    </span><span style=color:#fa5c4b>go func</span><span>() {
+</span><span>        </span><span style=color:#fdf4c1>fmt</span><span>.</span><span style=color:#fdf4c1>Println</span><span>(</span><span style=color:#b8bb26>"A:"</span><span>, </span><span style=color:#fdf4c1>i</span><span>)
+</span><span>        </span><span style=color:#fdf4c1>wg</span><span>.</span><span style=color:#fdf4c1>Done</span><span>()
+</span><span>    }()
+</span><span>}
+</span></code></pre><p>就是个典型的闭包捕获问题，<code>i</code> 被以引用形式捕获进匿名函数，循环中的 <code>i++</code> 会导致所有匿名函数捕获的 <code>i</code> 的值都跟着变。<p>但有所区别的是，这个匿名函数被当 goroutine 执行了。之后再细说。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>:= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>&lt; </span><span style=color:#d3869b>5</span><span>; </span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>++ </span><span>{
+</span><span>    </span><span style=color:#fa5c4b>go func</span><span>(</span><span style=color:#fdf4c1>num </span><span style=color:#fabd2f>int</span><span>) {
+</span><span>        </span><span style=color:#fdf4c1>fmt</span><span>.</span><span style=color:#fdf4c1>Println</span><span>(</span><span style=color:#b8bb26>"B:"</span><span>, </span><span style=color:#fdf4c1>num</span><span>)
+</span><span>        </span><span style=color:#fdf4c1>wg</span><span>.</span><span style=color:#fdf4c1>Done</span><span>()
+</span><span>    }(</span><span style=color:#fdf4c1>i</span><span>)
+</span><span>}
+</span></code></pre><p>这就是上面错误例子的正确写法，把闭包捕获变成了参数传递，将 <code>i</code> 复制了一份进匿名函数。<p>好了，那么根据上面的分析，最终结果是...？<pre style=color:#fdf4c1aa;background-color:#282828><code><span>A: 5
+</span><span>A: 5
+</span><span>A: 5
+</span><span>A: 5
+</span><span>A: 5
+</span><span>B: 0
+</span><span>B: 1
+</span><span>B: 2
+</span><span>B: 3
+</span><span>B: 4
+</span></code></pre><p>是这样吗？<h2 id=zai-ci-hu-luan-fen-xi>再次胡乱分析</h2><p>遗憾的是实际跑起来结果是<pre style=color:#fdf4c1aa;background-color:#282828><code><span>B: 4
+</span><span>A: 5
+</span><span>A: 5
+</span><span>A: 5
+</span><span>A: 5
+</span><span>A: 5
+</span><span>B: 0
+</span><span>B: 1
+</span><span>B: 2
+</span><span>B: 3
+</span></code></pre><p>可以看到最后一个启动的 goroutine 的输出跑到了最开头。其他顺序倒是没啥变化。为啥呢？<p>先看 <code>runtime.GOMAXPROCS(1)</code> 。<p><img alt=GMP src=https://nnnewb.github.io/posts/2021/2021-08-04-goroutineyun-xing-shun-xu/image/goroutines-schedule-order/G-M-P.webp><p>从 GMP 模型可以得知这一句代码实际限制了所有 goroutine 只能被顺序串行执行（所有 g 都只能在这唯一一个 p 的本地队列里等待 m）。<p>而 <code>main()</code> 函数里创建 goroutine 的顺序是明确的，5 个 A，5 个 B。<p>按照一般理解的话，队列是先进先出 FIFO 的结构，一个 p 又限制了其他 m 即使唤醒了，抢占了 p，也不能做 work stealing（也用不着做），那么 goroutine 的执行顺序自然只能是先进先出了。<p>那么这个程序的行为就很奇怪了，先创建的 goroutine 先执行的话，那么输出顺序应该和我们预料的一样。实际运行结果为什么会变成这样呢？<h2 id=bu-mai-guan-zi-liao>不卖关子了</h2><p>直接说结论嗷。<p><strong>不知道。</strong><p>别笑，真的不知道。特地上<a href=https://stackoverflow.com/questions/35153010/goroutines-always-execute-last-in-first-out>爆栈搜了下</a>，得到的结论就是，不知道。<blockquote><p>In Go 1.5, the order in which goroutines are scheduled has been changed. <strong>The properties of the scheduler were never defined by the language</strong>, but programs that depend on the scheduling order may be broken by this change. We have seen a few (erroneous) programs affected by this change. If you have programs that implicitly depend on the scheduling order, you will need to update them.</blockquote><p>从一个 Go 语言使用者的角度来说，goroutine 调度器的实现细节（像是多个 goroutine 之间的运行顺序）并不是能依赖的东西。<p>如果写过一段时间的 C/C++ ，那么面试官应该很清楚，C/C++ 有几样臭名昭著的东西： <em>Undefined Behavior</em>, <em>Unspecified Behavior</em>。而 goroutine 执行顺序就是一个 Go 中的 <em>Undefined Behavior</em>。<h2 id=jie-lun>结论</h2><p>我理解中的拿来主义，既不能被动地等待，也不能不加分辨地拿来，而既然加以分辨了，自然更不应该将拿来的事物当成解决一切问题的万能药。<p>Go 虽然是一门不错的语言，试图将语言细节尽可能明确定义来避免再次陷入 C/C++的陷阱，但显然 Go 用户不这么想。至少，有部分 Go 用户不这么想，他们想搞清楚 Go 的一切，然后把这一切都当作至高无上的准则，来鞭挞其余人。<p>目前为止，GMP 很好，作为面试题也说得过去。<p>到底我只是厌恶这世上的一部分人罢了。</article><p class=tags-data><a href=/tags/golang>/golang/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

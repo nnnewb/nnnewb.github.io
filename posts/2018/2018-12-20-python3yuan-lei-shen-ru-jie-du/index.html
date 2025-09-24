@@ -1,0 +1,118 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>python3元类深入解读</title><meta content=python3元类深入解读 name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2018/2018-12-20-python3yuan-lei-shen-ru-jie-du/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=python3元类深入解读 property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2018/2018-12-20-python3yuan-lei-shen-ru-jie-du/ property=twitter:url><meta content=python3元类深入解读 property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2018/2018-12-20-python3yuan-lei-shen-ru-jie-du/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>python3元类深入解读</h1><p class=author-line>作于：2018-12-20 19:46 ，预计阅读时间 6 分钟<article><h2 id=0-intro>0. intro</h2><p>元类是 python 里被说烂了的一个东西，然而日常用到的地方实在不多，每次想到都得查一下谷歌，想想干脆在博客留个笔记好了。<p>元类的主要用途是定制<strong>类</strong>的产生过程，以便于根据类声明包含的信息来创建出不同的类。<h2 id=1-type>1. type</h2><p>提到元类不得不说一下 python 的类型系统。<p>python 的 class 也被视作一个对象，定制一个 class 的构造过程其实就和平时在 class 定义里写<code>__init__</code>没啥区别。<p>python3 里类的类型是<code>type</code>，<code>type</code>又继承自<code>object</code>，<code>object</code>的父类是自己，构成一个奇怪的闭环。其中，<code>type</code>本身是一个特殊的类，他是自己的实例。<pre class=language-mermaid data-lang=mermaid style=color:#fdf4c1aa;background-color:#282828><code class=language-mermaid data-lang=mermaid><span style=color:#fa5c4b>graph </span><span style=color:#d3869b>TB</span><span>;
+</span><span>	type </span><span style=color:#fe8019>--> |</span><span style=color:#b8bb26>inherite</span><span style=color:#fe8019>|</span><span>object;
+</span><span>	type </span><span style=color:#fe8019>--> |</span><span style=color:#b8bb26>instance-of</span><span style=color:#fe8019>|</span><span> type;
+</span><span>	object </span><span style=color:#fe8019>--> |</span><span style=color:#b8bb26>instance-of</span><span style=color:#fe8019>|</span><span>type;
+</span><span>	other-cls </span><span style=color:#fe8019>--> |</span><span style=color:#b8bb26>instance-of</span><span style=color:#fe8019>|</span><span> type;
+</span><span>	other-cls </span><span style=color:#fe8019>--> |</span><span style=color:#b8bb26>inherite</span><span style=color:#fe8019>|</span><span> object;
+</span><span>	other-cls-instance </span><span style=color:#fe8019>--> |</span><span style=color:#b8bb26>instance-of</span><span style=color:#fe8019>|</span><span>other-cls;
+</span></code></pre><p><code>type</code>有两种调用方式，一种是最常用的接受一个对象参数，返回该对象的类型，另一种是不怎么常用的，直接创建一个新的类型。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#928374;font-style:italic># usage with one argument
+</span><span style=color:#fabd2f>type</span><span style=color:#fdf4c1>(</span><span style=color:#fabd2f>object</span><span style=color:#fdf4c1>) </span><span style=color:#928374;font-style:italic># 返回对象的类型，这里返回的是 `type`
+</span><span>
+</span><span style=color:#928374;font-style:italic># usage with three arguments
+</span><span style=color:#fabd2f>type</span><span style=color:#fdf4c1>(name, bases, attr) </span><span style=color:#928374;font-style:italic># 返回新创建的类型
+</span></code></pre><h2 id=2-meta-class>2. meta class</h2><p>元类语法如下<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>MyClass</span><span>(</span><span style=color:#8ec07c>basecls1</span><span>, </span><span style=color:#8ec07c>basecls2</span><span>, </span><span style=color:#fdf4c1>metaclass</span><span style=color:#fe8019>=</span><span style=color:#8ec07c>MetaClass</span><span>, </span><span style=color:#fdf4c1>named1</span><span style=color:#fe8019>=</span><span style=color:#8ec07c>arg</span><span>, </span><span style=color:#fdf4c1>named2</span><span style=color:#fe8019>=</span><span style=color:#8ec07c>arg</span><span>): </span><span style=color:#d3869b>...
+</span></code></pre><p>一般的元类可以是一个真正的<code>class</code>或者一个函数。<p>以函数为例：<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>meta_f</span><span>(</span><span style=color:#fdf4c1>name</span><span>, </span><span style=color:#fdf4c1>bases</span><span>, </span><span style=color:#fdf4c1>attr</span><span>):
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#fabd2f>type</span><span style=color:#fdf4c1>(name, bases, attr)
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>A</span><span>(</span><span style=color:#fdf4c1>metaclass</span><span style=color:#fe8019>=</span><span style=color:#8ec07c>meta_f</span><span>): </span><span style=color:#d3869b>...
+</span></code></pre><p>以类为例：<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>MetaC</span><span>(</span><span style=color:#8ec07c>type</span><span>):
+</span><span>	</span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__new__</span><span>(</span><span style=color:#fdf4c1>mcs</span><span>, </span><span style=color:#fdf4c1>name</span><span>, </span><span style=color:#fdf4c1>bases</span><span>, </span><span style=color:#fdf4c1>attr</span><span>):
+</span><span>		</span><span style=color:#fa5c4b>return </span><span style=color:#fabd2f>type</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>__new__</span><span style=color:#fdf4c1>(mcs, name, bases, attr)
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>A</span><span>(</span><span style=color:#fdf4c1>metaclass</span><span style=color:#fe8019>=</span><span style=color:#8ec07c>MetaC</span><span>): </span><span style=color:#d3869b>...
+</span></code></pre><p>元类可以接受参数，参数必须是命名的，传递参数的方式是写在类声明的继承列表里。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>meta</span><span>(</span><span style=color:#fdf4c1>name</span><span>, </span><span style=color:#fdf4c1>bases</span><span>, </span><span style=color:#fdf4c1>attr</span><span>, </span><span style=color:#fdf4c1>named_arg</span><span>, </span><span style=color:#fdf4c1>optional_arg</span><span style=color:#fe8019>=</span><span style=color:#d3869b>None</span><span>):
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#fabd2f>type</span><span style=color:#fdf4c1>(name, bases, </span><span style=color:#fabd2f>dict</span><span style=color:#fdf4c1>(</span><span style=color:#fe8019>**</span><span style=color:#fdf4c1>attr, arg</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>named_arg, option</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>optional_arg))
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>A</span><span>(</span><span style=color:#fdf4c1>metaclass</span><span style=color:#fe8019>=</span><span style=color:#8ec07c>meta</span><span>, </span><span style=color:#fdf4c1>named_arg</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>"hi"</span><span>): </span><span style=color:#d3869b>...
+</span><span>
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(A.arg)  </span><span style=color:#928374;font-style:italic># output: hi
+</span></code></pre><p>位置参数都会被当成继承列表，作为<code>bases</code>参数(list)的一部分传入元类。<h2 id=3-yuan-lei-ji-cheng-gui-ze>3. 元类继承规则</h2><p>有了元类那么就有了相应继承规则，显而易见。元类用于构造一个类，两个父类分别有一个不同的元类显然会造成冲突：这个子类用哪个元类构造？<p>首先看元类的在创建类的过程中的位置，摘自 python 文档<a href=https://docs.python.org/3/reference/datamodel.html#metaclasses>3.3.3.1. Metaclasses</a><blockquote><ul><li>MRO entries are resolved<li>the appropriate metaclass is determined<li>the class namespace is prepared<li>the class body is executed<li>the class object is created</ul></blockquote><p>一旦处理完继承链（mro, method resolve order）之后，就会决定采用哪个 metaclass 作为构造这个类的元类。<p>在 python 文档的<a href=https://docs.python.org/3/reference/datamodel.html#determining-the-appropriate-metaclass>3.3.3.3 determining the appropriate metaclass</a>中描述了如何确定合适的元类，摘录如下。<blockquote><ul><li>if no bases and no explicit metaclass are given, then type() is used<li>if an explicit metaclass is given and it is not an instance of type(), then it is used directly as the metaclass<li>if an instance of type() is given as the explicit metaclass, or bases are defined, then the most derived metaclass is used</ul></blockquote><p>翻译如下<ul><li>如果没有基类也没有指定 metaclass，那么<code>type()</code>将作为元类使用。<li>如果指定了元类，并且该元类不是 type 的实例，那么直接使用这个元类。<li>如果元类是一个 type 的实例，或者存在基类，那么使用最衍生的元类。</ul><p>有一个比较难理解的点是<blockquote><p>most derived metaclass</blockquote><p>也就是所谓的<strong>最衍生的元类</strong>。惯例，先放文档解释<blockquote><p>The most derived metaclass is selected from the explicitly specified metaclass (if any) and the metaclasses (i.e. type(cls)) of all specified base classes. The most derived metaclass is one which is a subtype of all of these candidate metaclasses. If none of the candidate metaclasses meets that criterion, then the class definition will fail with TypeError.</blockquote><p>简单翻译如下<blockquote><p>最衍生的元类会从类声明中明确提供的元类，还有所有明确继承的基类的元类中选择。最衍生的元类是以上所有候选元类的子类型，如果没有类型符合这一条件，则抛出<code>TypeError</code>异常。</blockquote><p>重点在于，<strong>最衍生的元类必须是</strong>，所有继承的基类的元类和指定元类的<strong>子类型</strong>。<p>在这里提醒一下，<code>issubclass(cls, cls)</code>的结果是<code>True</code>。换句话说，必须有一个类是所有元类的子类，或者所有基类有相同的元类。<p>代码举例如下<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>MetaA</span><span>(</span><span style=color:#8ec07c>type</span><span>):
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__new__</span><span>(</span><span style=color:#fdf4c1>mcs</span><span>, </span><span style=color:#fdf4c1>name</span><span>, </span><span style=color:#fdf4c1>bases</span><span>, </span><span style=color:#fdf4c1>attr</span><span>):
+</span><span>        </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'MetaA &lt;- '</span><span style=color:#fe8019>+</span><span style=color:#fdf4c1>name)
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fabd2f>type</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>__new__</span><span style=color:#fdf4c1>(mcs, name, bases, attr)
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>MetaB</span><span>(</span><span style=color:#8ec07c>type</span><span>):
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__new__</span><span>(</span><span style=color:#fdf4c1>mcs</span><span>, </span><span style=color:#fdf4c1>name</span><span>, </span><span style=color:#fdf4c1>bases</span><span>, </span><span style=color:#fdf4c1>attr</span><span>):
+</span><span>        </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'MetaB &lt;- '</span><span style=color:#fe8019>+</span><span style=color:#fdf4c1>name)
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fabd2f>type</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>__new__</span><span style=color:#fdf4c1>(mcs, name, bases, attr)
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>BaseA</span><span>: </span><span style=color:#d3869b>...
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>BaseB</span><span>(</span><span style=color:#fdf4c1>metaclass</span><span style=color:#fe8019>=</span><span style=color:#8ec07c>MetaA</span><span>): </span><span style=color:#d3869b>...
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>BaseC</span><span>(</span><span style=color:#fdf4c1>metaclass</span><span style=color:#fe8019>=</span><span style=color:#8ec07c>MetaB</span><span>): </span><span style=color:#d3869b>...
+</span><span>
+</span><span style=color:#928374;font-style:italic># 未指定元类，基类元类分别是type和type的子类，则选择继承链底部的那个类
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>A</span><span>(</span><span style=color:#8ec07c>BaseA</span><span>, </span><span style=color:#8ec07c>BaseB</span><span>): </span><span style=color:#d3869b>...  </span><span style=color:#928374;font-style:italic># Ok,元类是 MetaA
+</span><span>
+</span><span style=color:#928374;font-style:italic># 指定元类，元类和基类元类相同的情况下，元类就是那个元类
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>C</span><span>(</span><span style=color:#8ec07c>BaseB</span><span>, </span><span style=color:#fdf4c1>metaclass</span><span style=color:#fe8019>=</span><span style=color:#8ec07c>MetaA</span><span>): </span><span style=color:#d3869b>...  </span><span style=color:#928374;font-style:italic># Ok，元类是 MetaA
+</span><span>
+</span><span style=color:#928374;font-style:italic># 指定元类，元类并不处于继承链底端的情况下，元类选择继承链底端的类
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>D</span><span>(</span><span style=color:#8ec07c>BaseB</span><span>, </span><span style=color:#fdf4c1>metaclass</span><span style=color:#fe8019>=</span><span style=color:#8ec07c>type</span><span>): </span><span style=color:#d3869b>...  </span><span style=color:#928374;font-style:italic># Ok，元类是 MetaA
+</span><span>
+</span><span style=color:#928374;font-style:italic># 指定元类，但元类和父类无父子类关系
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>E</span><span>(</span><span style=color:#8ec07c>BaseC</span><span>, </span><span style=color:#fdf4c1>metaclass</span><span style=color:#fe8019>=</span><span style=color:#8ec07c>MetaA</span><span>): </span><span style=color:#d3869b>...  </span><span style=color:#928374;font-style:italic># TypeError
+</span><span>
+</span><span style=color:#928374;font-style:italic># 不指定元类，基类具有不同的元类
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>F</span><span>(</span><span style=color:#8ec07c>BaseA</span><span>,</span><span style=color:#8ec07c>BaseB</span><span>,</span><span style=color:#8ec07c>BaseC</span><span>): </span><span style=color:#d3869b>...  </span><span style=color:#928374;font-style:italic># TypeError
+</span></code></pre><p>输出如下<pre style=color:#fdf4c1aa;background-color:#282828><code><span>MetaA &lt;- A
+</span><span>MetaA &lt;- C
+</span><span>MetaA &lt;- D
+</span><span>
+</span><span>In [71]: class E(BaseC, metaclass=MetaA): ...  # TypeError
+</span><span>---------------------------------------------------------------------------
+</span><span>TypeError                                 Traceback (most recent call last)
+</span><span>&lt;ipython-input-71-9129a36c52b2> in &lt;module>
+</span><span>----> 1 class E(BaseC, metaclass=MetaA): ...  # TypeError
+</span><span>
+</span><span>TypeError: metaclass conflict: the metaclass of a derived class must be a (non-strict) subclass of the metaclasses of all its bases
+</span><span>
+</span><span>In [72]: class F(BaseA,BaseB,BaseC): ...  # TypeError
+</span><span>---------------------------------------------------------------------------
+</span><span>TypeError                                 Traceback (most recent call last)
+</span><span>&lt;ipython-input-72-1c510edd69d1> in &lt;module>
+</span><span>----> 1 class F(BaseA,BaseB,BaseC): ...  # TypeError
+</span><span>
+</span><span>TypeError: metaclass conflict: the metaclass of a derived class must be a (non-strict) subclass of the metaclasses of all its bases
+</span></code></pre><p>但元类是函数的情况下会有比较特殊的表现，注意规则二。<blockquote><ul><li>如果指定了元类，并且该元类不是 type 的实例，那么直接使用这个元类。</ul></blockquote><p>如果函数形式的元类作为父类的元类时不会列入选择，除非指定当前类的元类为函数，才会调用函数形式的元类，而且是无条件选择这个函数形式的元类。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>MetaA</span><span>(</span><span style=color:#fdf4c1>name</span><span>, </span><span style=color:#fdf4c1>bases</span><span>, </span><span style=color:#fdf4c1>attr</span><span>):
+</span><span>    </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"MetaA &lt;- "</span><span style=color:#fe8019>+</span><span style=color:#fdf4c1>name)
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fabd2f>type</span><span style=color:#fdf4c1>(name, bases, attr)
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>MetaB</span><span>(</span><span style=color:#8ec07c>type</span><span>):
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__new__</span><span>(</span><span style=color:#fdf4c1>mcs</span><span>, </span><span style=color:#fdf4c1>name</span><span>, </span><span style=color:#fdf4c1>bases</span><span>, </span><span style=color:#fdf4c1>attr</span><span>):
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fabd2f>type</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>__new__</span><span style=color:#fdf4c1>(mcs, name, bases, attr)
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>A</span><span>(</span><span style=color:#8ec07c>MetaB</span><span>, </span><span style=color:#fdf4c1>metaclass</span><span style=color:#fe8019>=</span><span style=color:#8ec07c>MetaA</span><span>): </span><span style=color:#d3869b>...  </span><span style=color:#928374;font-style:italic># Ok，无条件选择元类 MetaA
+</span></code></pre></article><p class=tags-data><a href=/tags/python>/python/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

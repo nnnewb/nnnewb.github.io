@@ -1,0 +1,204 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>定点数三角函数：CORDIC 算法（2）</title><meta content="定点数三角函数：CORDIC 算法（2）" name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2025/fixed-point-trig-cordic-algorithm-2/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content="定点数三角函数：CORDIC 算法（2）" property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2025/fixed-point-trig-cordic-algorithm-2/ property=twitter:url><meta content="定点数三角函数：CORDIC 算法（2）" property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2025/fixed-point-trig-cordic-algorithm-2/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>定点数三角函数：CORDIC 算法（2）</h1><p class=author-line>作于：2025-08-23 18:25 ，预计阅读时间 6 分钟<article><h2 id=qian-yan>前言</h2><p>接前篇 <a href=/posts/2025/fixed-point-trig-cordic-algorithm-1>定点数三角函数：CORDIC 算法（1）</a><p>本篇聚焦于 CORDIC 的定点数推广和 go 语言实现。<h2 id=cordic-suan-fa-shi-xian>CORDIC 算法实现</h2><h3 id=die-dai-gong-shi>迭代公式</h3><p>CORDIC 算法的一个特点是迭代公式只包含移位和加减法，因此实现往往非常高效。而这个特点又非常匹配定点数实现，因为定点数移位、加减法都可以直接在int表示上进行，实现简单而且不会损失精度。<p>前文中为了计算 $\cos(\theta)$ 和 $\sin(\theta)$ ，提出了利用单位向量分量是三角函数值的性质，旋转向量逼近 $\theta$ 角来计算 $\cos(\theta)$ 和 $\sin(\theta)$ 。<p>我们先列出前文推导出的无缩放因子迭代公式<p>$$ \begin{cases} x_{i+1} = x_i - y_i \cdot d_i \cdot 2^{-i} \\ y_{i+1} = y_i + x_i \cdot d_i \cdot 2^{-i} \end{cases} $$<p>以及缩放因子<p>$$ \begin{aligned} K &= \prod_{i=0}^{N-1}\cos(a_i) \\ &\approx 0.607252935 \end{aligned} $$<p>在迭代完成后，将结果乘上缩放因子，就得到了旋转后的向量。 其分量就是 $cos(\theta)$ 和 $sin(\theta)$ 的近似。<p>$$ \begin{cases} x_r = x_N \cdot K \\ y_r = y_N \cdot K \end{cases} $$<h3 id=ding-dian-shu-tui-yan>定点数推广</h3><p>上述公式里，$d_i=\plusmn 1$ 只影响符号位，$\cdot 2^{-i}$ 可以被视作右移 $i$ 比特。 其余加减乘除法都在另一篇文章 <a href=/posts/2025/fixed-point-arithmetic>定点数算数</a> 里进行了论证。<h3 id=jiao-du-ji-xian>角度极限</h3><p>前文提到利用下面的级数来逼近原角度 $\theta$，但下面的级数是收敛的，存在一个极限。<p>$$ \sum_{i=0}^{N} \arctan(2^{-i}) $$<p>如果给定的角度 $\theta$ 超出了极限值，则我们无法将向量旋转到接近 $\theta$ 角，而只能停止在极限附近。<p>由于我们只进行有限次迭代，可以直接写 python 脚本计算出这个极限值大约是在 1.74 rad (99°) 附近。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>math
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>calc</span><span>(</span><span style=color:#fdf4c1>n</span><span>):
+</span><span>  s </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>i </span><span style=color:#fa5c4b>in </span><span style=color:#fabd2f>range</span><span style=color:#fdf4c1>(n)</span><span>:
+</span><span>      s </span><span style=color:#fe8019>+= </span><span style=color:#fdf4c1>math.atan(</span><span style=color:#d3869b>2 </span><span style=color:#fe8019>** </span><span style=color:#fdf4c1>(</span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>i))
+</span><span>
+</span><span>  </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'迭代 </span><span style=color:#fdf4c1>%d</span><span style=color:#b8bb26> 次，结果为 </span><span style=color:#fdf4c1>%.09f</span><span style=color:#b8bb26> rad (</span><span style=color:#fdf4c1>%.09f</span><span style=color:#b8bb26>°)' </span><span style=color:#fe8019>% </span><span style=color:#fdf4c1>(n, s, s </span><span style=color:#fe8019>* </span><span style=color:#d3869b>180 </span><span style=color:#fe8019>/ </span><span style=color:#fdf4c1>math.pi))
+</span><span>
+</span><span style=color:#fdf4c1>calc(</span><span style=color:#d3869b>10</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>calc(</span><span style=color:#d3869b>30</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>calc(</span><span style=color:#d3869b>100</span><span style=color:#fdf4c1>)
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>迭代 10 次，结果为 1.741333496 rad (99.771060036°)
+</span><span>迭代 30 次，结果为 1.743286619 rad (99.882965728°)
+</span><span>迭代 100 次，结果为 1.743286620 rad (99.882965835°)
+</span></code></pre><p>而 $cos$ 和 $sin$ 的周期都是 $2\pi$ ，所以我们还必须找出一个办法，让输入角大于 $\frac{\pi}{2}$ 的时候也能计算出结果。<p>我们可以利用三角函数的基本性质：<p>$$ \begin{aligned} \cos(x+\pi) = -\cos(x) \\ \sin(x+\pi) = -\sin(x) \end{aligned} $$<p>将输入归一化到 $[-\pi,\pi]$ 范围内，然后根据原角度确定符号。<h3 id=gui-yi-hua>归一化</h3><p>基于三角函数的基本性质，我们可以归一化输入角度到 $[-2\pi,2\pi]$ ：<p>$$ \begin{aligned} \cos(\theta) = \cos(\theta + 2\pi) \\ \sin(\theta) = \sin(\theta + 2\pi) \end{aligned} $$<p>然后利用 $\cos(x+\pi)=-\cos(x),\sin(x+\pi)=-\sin(x)$ 归一化到 $[-\frac{\pi}{2}, \frac{\pi}{2}]$<p>$$ \begin{aligned} \cos(\theta) &= \begin{cases} -\cos(\theta - \pi) &\text{if } \theta \gt \frac{\pi}{2} \\ -\cos(\theta + \pi) &\text{if } \theta \lt -\frac{\pi}{2} \\ \cos(\theta) &\text{if } -\frac{\pi}{2} \lt \theta \lt \frac{\pi}{2} \end{cases} \\ \sin(\theta) &= \begin{cases} -\sin(\theta - \pi) &\text{if } \theta \gt \frac{\pi}{2} \\ -\sin(\theta + \pi) &\text{if } \theta \lt -\frac{\pi}{2} \\ \sin(\theta) &\text{if } -\frac{\pi}{2} \lt \theta \lt \frac{\pi}{2} \end{cases} \\ \end{aligned} $$<h3 id=jiao-du-lei-jia>角度累加</h3><p>为了计算当前向量旋转到了什么角度，我们还需要一个累加器 $z$ 来记录角度，并确定下一迭代旋转方向。<p>由于我们每次选择的旋转角度都是确定的，即 $a_i = \arctan(2^{-i})$，我们可以预先计算出查找表以避免重复计算（还有实现 $\arctan$ 函数的麻烦）。<p>查找表也通过 python 脚本计算得到：<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>math
+</span><span>
+</span><span style=color:#fa5c4b>for </span><span>i </span><span style=color:#fa5c4b>in </span><span style=color:#fabd2f>range</span><span style=color:#fdf4c1>(</span><span style=color:#d3869b>16</span><span style=color:#fdf4c1>)</span><span>:
+</span><span>    v </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>math.atan(</span><span style=color:#d3869b>2 </span><span style=color:#fe8019>** </span><span style=color:#fdf4c1>(</span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>i))
+</span><span>    </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"</span><span style=color:#fdf4c1>%d</span><span style=color:#b8bb26>. </span><span style=color:#fdf4c1>%.09f</span><span style=color:#b8bb26>, approx </span><span style=color:#fdf4c1>%d</span><span style=color:#b8bb26>" </span><span style=color:#fe8019>% </span><span style=color:#fdf4c1>(i, v, v </span><span style=color:#fe8019>* </span><span style=color:#d3869b>65536</span><span style=color:#fdf4c1>))
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>0. 0.785398163, Q16 approx: 51471
+</span><span>1. 0.463647609, Q16 approx: 30385
+</span><span>2. 0.244978663, Q16 approx: 16054
+</span><span>3. 0.124354995, Q16 approx: 8149
+</span><span>4. 0.062418810, Q16 approx: 4090
+</span><span>5. 0.031239833, Q16 approx: 2047
+</span><span>6. 0.015623729, Q16 approx: 1023
+</span><span>7. 0.007812341, Q16 approx: 511
+</span><span>8. 0.003906230, Q16 approx: 255
+</span><span>9. 0.001953123, Q16 approx: 127
+</span><span>10. 0.000976562, Q16 approx: 63
+</span><span>11. 0.000488281, Q16 approx: 31
+</span><span>12. 0.000244141, Q16 approx: 15
+</span><span>13. 0.000122070, Q16 approx: 7
+</span><span>14. 0.000061035, Q16 approx: 3
+</span><span>15. 0.000030518, Q16 approx: 1
+</span></code></pre><h3 id=dai-ma-shi-xian>代码实现</h3><p>一个关键点在于，CORDIC 算法不能在累加器 $z$ 正好与归一化的角度相同时提前退出，因为 K 这个常数是基于 <strong>完成了所有迭代</strong> 计算出的。即使恰好第一次旋转就对齐了角度，我们依然要继续走完所有迭代。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>const </span><span>(
+</span><span>	</span><span style=color:#fdf4c1>Pi         </span><span style=color:#fa5c4b>Q16 </span><span style=color:#fe8019>= </span><span style=color:#d3869b>205887  </span><span style=color:#928374;font-style:italic>// 3.141592653
+</span><span>	</span><span style=color:#fdf4c1>twoPi      </span><span style=color:#fa5c4b>Q16 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>Pi </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#d3869b>1 </span><span style=color:#928374;font-style:italic>//
+</span><span>	</span><span style=color:#fdf4c1>halfPi     </span><span style=color:#fa5c4b>Q16 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>Pi </span><span style=color:#fe8019>>> </span><span style=color:#d3869b>1 </span><span style=color:#928374;font-style:italic>//
+</span><span>	</span><span style=color:#fdf4c1>cordicGain </span><span style=color:#fa5c4b>Q16 </span><span style=color:#fe8019>= </span><span style=color:#d3869b>39797   </span><span style=color:#928374;font-style:italic>// 0.607252935
+</span><span>)
+</span><span>
+</span><span style=color:#fa5c4b>var </span><span>(
+</span><span>	</span><span style=color:#fdf4c1>atanLookupTable </span><span style=color:#fe8019>= </span><span>[]</span><span style=color:#fa5c4b>Q16</span><span>{
+</span><span>		</span><span style=color:#d3869b>51471</span><span>, </span><span style=color:#928374;font-style:italic>// 0.78539816
+</span><span>		</span><span style=color:#d3869b>30385</span><span>, </span><span style=color:#928374;font-style:italic>// 0.46364761
+</span><span>		</span><span style=color:#d3869b>16054</span><span>, </span><span style=color:#928374;font-style:italic>// 0.24497866
+</span><span>		</span><span style=color:#d3869b>8149</span><span>,  </span><span style=color:#928374;font-style:italic>// 0.12435499
+</span><span>		</span><span style=color:#d3869b>4090</span><span>,  </span><span style=color:#928374;font-style:italic>// 0.06241881
+</span><span>		</span><span style=color:#d3869b>2047</span><span>,  </span><span style=color:#928374;font-style:italic>// 0.03123983
+</span><span>		</span><span style=color:#d3869b>1023</span><span>,  </span><span style=color:#928374;font-style:italic>// 0.01562373
+</span><span>		</span><span style=color:#d3869b>511</span><span>,   </span><span style=color:#928374;font-style:italic>// 0.00781234
+</span><span>		</span><span style=color:#d3869b>255</span><span>,   </span><span style=color:#928374;font-style:italic>// 0.00390623
+</span><span>		</span><span style=color:#d3869b>127</span><span>,   </span><span style=color:#928374;font-style:italic>// 0.00195312
+</span><span>		</span><span style=color:#d3869b>63</span><span>,    </span><span style=color:#928374;font-style:italic>// 0.00097656
+</span><span>		</span><span style=color:#d3869b>31</span><span>,    </span><span style=color:#928374;font-style:italic>// 0.00048828
+</span><span>		</span><span style=color:#d3869b>15</span><span>,    </span><span style=color:#928374;font-style:italic>// 0.00024414
+</span><span>		</span><span style=color:#d3869b>7</span><span>,     </span><span style=color:#928374;font-style:italic>// 0.00012207
+</span><span>		</span><span style=color:#d3869b>3</span><span>,     </span><span style=color:#928374;font-style:italic>// 0.00006104
+</span><span>		</span><span style=color:#d3869b>1</span><span>,     </span><span style=color:#928374;font-style:italic>// 0.00003052
+</span><span>	}
+</span><span>)
+</span><span>
+</span><span style=color:#928374;font-style:italic>// cordic computes the trigonometric functions of the given angle.
+</span><span style=color:#928374;font-style:italic>// returns the cosine, sine and error.
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>cordic</span><span>(</span><span style=color:#fdf4c1>theta </span><span style=color:#fa5c4b>Q16</span><span>) (</span><span style=color:#fa5c4b>Q16</span><span>, </span><span style=color:#fa5c4b>Q16</span><span>, </span><span style=color:#fabd2f>error</span><span>) {
+</span><span>	</span><span style=color:#fa5c4b>var </span><span>(
+</span><span>		</span><span style=color:#fdf4c1>d          </span><span style=color:#fa5c4b>Q16 </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1              </span><span style=color:#928374;font-style:italic>// rotate direction, +1 for reverse clockwise, -1 for clockwise
+</span><span>		</span><span style=color:#fdf4c1>x          </span><span style=color:#fa5c4b>Q16 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>MustFromInt</span><span>(</span><span style=color:#d3869b>1</span><span>) </span><span style=color:#928374;font-style:italic>// x component of vector
+</span><span>		</span><span style=color:#fdf4c1>y          </span><span style=color:#fa5c4b>Q16 </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0              </span><span style=color:#928374;font-style:italic>// y component of vector
+</span><span>		</span><span style=color:#fdf4c1>z          </span><span style=color:#fa5c4b>Q16 </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0              </span><span style=color:#928374;font-style:italic>// current angle in radians
+</span><span>		</span><span style=color:#fdf4c1>angle      </span><span style=color:#fa5c4b>Q16 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>theta          </span><span style=color:#928374;font-style:italic>// target angle to rotate, in between 0 and pi/2
+</span><span>		</span><span style=color:#fdf4c1>finalSignX </span><span style=color:#fabd2f>int </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1              </span><span style=color:#928374;font-style:italic>// cosine sign
+</span><span>		</span><span style=color:#fdf4c1>finalSignY </span><span style=color:#fabd2f>int </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1              </span><span style=color:#928374;font-style:italic>// sine sign
+</span><span>		</span><span style=color:#fdf4c1>err        </span><span style=color:#fabd2f>error
+</span><span>	)
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>angle </span><span style=color:#fe8019>>= </span><span style=color:#fdf4c1>twoPi </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>angle</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>Sub</span><span>(</span><span style=color:#fdf4c1>angle</span><span>, </span><span style=color:#fdf4c1>twoPi</span><span>)
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>			</span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#fdf4c1>err
+</span><span>		}
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>angle </span><span style=color:#fe8019>&lt; -</span><span style=color:#fdf4c1>twoPi </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>angle</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>Add</span><span>(</span><span style=color:#fdf4c1>angle</span><span>, </span><span style=color:#fdf4c1>twoPi</span><span>)
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>			</span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#fdf4c1>err
+</span><span>		}
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>angle </span><span style=color:#fe8019>> </span><span style=color:#fdf4c1>halfPi </span><span>{
+</span><span>		</span><span style=color:#928374;font-style:italic>// rotate from 2nd quadrant to 4th quadrant
+</span><span>		</span><span style=color:#fdf4c1>angle </span><span style=color:#fe8019>-= </span><span style=color:#fdf4c1>Pi
+</span><span>		</span><span style=color:#928374;font-style:italic>// cos(x-pi)=-cos(x)
+</span><span>		</span><span style=color:#928374;font-style:italic>// sin(x-pi)=-sin(x)
+</span><span>		</span><span style=color:#fdf4c1>finalSignX </span><span style=color:#fe8019>= -</span><span style=color:#d3869b>1
+</span><span>		</span><span style=color:#fdf4c1>finalSignY </span><span style=color:#fe8019>= -</span><span style=color:#d3869b>1
+</span><span>	} </span><span style=color:#fa5c4b>else if </span><span style=color:#fdf4c1>angle </span><span style=color:#fe8019>&lt; -</span><span style=color:#fdf4c1>halfPi </span><span>{
+</span><span>		</span><span style=color:#928374;font-style:italic>// rotate from 3rd quadrant to 1st quadrant
+</span><span>		</span><span style=color:#fdf4c1>angle </span><span style=color:#fe8019>+= </span><span style=color:#fdf4c1>Pi
+</span><span>		</span><span style=color:#928374;font-style:italic>// cos(x+pi)=-cos(x)
+</span><span>		</span><span style=color:#928374;font-style:italic>// sin(x+pi)=-sin(x)
+</span><span>		</span><span style=color:#fdf4c1>finalSignX </span><span style=color:#fe8019>= -</span><span style=color:#d3869b>1
+</span><span>		</span><span style=color:#fdf4c1>finalSignY </span><span style=color:#fe8019>= -</span><span style=color:#d3869b>1
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>angle </span><span style=color:#fe8019>> </span><span style=color:#d3869b>0 </span><span>{
+</span><span>		</span><span style=color:#928374;font-style:italic>// first rotation is reverse clockwise
+</span><span>		</span><span style=color:#fdf4c1>d </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1
+</span><span>	} </span><span style=color:#fa5c4b>else if </span><span style=color:#fdf4c1>angle </span><span style=color:#fe8019>&lt; </span><span style=color:#d3869b>0 </span><span>{
+</span><span>		</span><span style=color:#928374;font-style:italic>// first rotation is clockwise
+</span><span>		</span><span style=color:#fdf4c1>d </span><span style=color:#fe8019>= -</span><span style=color:#d3869b>1
+</span><span>	} </span><span style=color:#fa5c4b>else if </span><span style=color:#fdf4c1>angle </span><span style=color:#fe8019>== </span><span style=color:#d3869b>0 </span><span>{
+</span><span>		</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>MustFromInt</span><span>(</span><span style=color:#d3869b>1</span><span>), </span><span style=color:#fdf4c1>MustFromInt</span><span>(</span><span style=color:#d3869b>0</span><span>), </span><span style=color:#d3869b>nil
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>:= </span><span style=color:#fa5c4b>range </span><span style=color:#fabd2f>len</span><span>(</span><span style=color:#fdf4c1>atanLookupTable</span><span>) {
+</span><span>		</span><span style=color:#fa5c4b>var </span><span>(
+</span><span>			</span><span style=color:#fdf4c1>nx  </span><span style=color:#fa5c4b>Q16 </span><span style=color:#928374;font-style:italic>// new x
+</span><span>			</span><span style=color:#fdf4c1>ny  </span><span style=color:#fa5c4b>Q16 </span><span style=color:#928374;font-style:italic>// new y
+</span><span>			</span><span style=color:#fdf4c1>err </span><span style=color:#fabd2f>error
+</span><span>		)
+</span><span>
+</span><span>		</span><span style=color:#fdf4c1>intermediate </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>y </span><span style=color:#fe8019>>> </span><span style=color:#fdf4c1>i
+</span><span>		</span><span style=color:#fdf4c1>nx</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>Sub</span><span>(</span><span style=color:#fdf4c1>x</span><span>, </span><span style=color:#fdf4c1>d</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>intermediate</span><span>)
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>			</span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#fdf4c1>err
+</span><span>		}
+</span><span>
+</span><span>		</span><span style=color:#fdf4c1>intermediate </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>x </span><span style=color:#fe8019>>> </span><span style=color:#fdf4c1>i
+</span><span>		</span><span style=color:#fdf4c1>ny</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>Add</span><span>(</span><span style=color:#fdf4c1>y</span><span>, </span><span style=color:#fdf4c1>d</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>intermediate</span><span>)
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>			</span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#fdf4c1>err
+</span><span>		}
+</span><span>
+</span><span>		</span><span style=color:#fdf4c1>x </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>nx
+</span><span>		</span><span style=color:#fdf4c1>y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>ny
+</span><span>		</span><span style=color:#fdf4c1>z </span><span style=color:#fe8019>+= </span><span style=color:#fdf4c1>d </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>atanLookupTable</span><span>[</span><span style=color:#fdf4c1>i</span><span>]
+</span><span>
+</span><span>		</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>z </span><span style=color:#fe8019>> </span><span style=color:#fdf4c1>angle </span><span>{
+</span><span>			</span><span style=color:#fdf4c1>d </span><span style=color:#fe8019>= -</span><span style=color:#d3869b>1
+</span><span>		} </span><span style=color:#fa5c4b>else if </span><span style=color:#fdf4c1>z </span><span style=color:#fe8019>&lt; </span><span style=color:#fdf4c1>angle </span><span>{
+</span><span>			</span><span style=color:#fdf4c1>d </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1
+</span><span>		}
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fdf4c1>x</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>Mul</span><span>(</span><span style=color:#fdf4c1>x</span><span>, </span><span style=color:#fdf4c1>cordicGain</span><span>)
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>		</span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#fdf4c1>err
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fdf4c1>y</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>Mul</span><span>(</span><span style=color:#fdf4c1>y</span><span>, </span><span style=color:#fdf4c1>cordicGain</span><span>)
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nil </span><span>{
+</span><span>		</span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#fdf4c1>err
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>Q16</span><span>(</span><span style=color:#fdf4c1>finalSignX</span><span>) </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>x</span><span>, </span><span style=color:#fdf4c1>Q16</span><span>(</span><span style=color:#fdf4c1>finalSignY</span><span>) </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>y</span><span>, </span><span style=color:#d3869b>nil
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>Cos</span><span>(</span><span style=color:#fdf4c1>theta </span><span style=color:#fa5c4b>Q16</span><span>) (</span><span style=color:#fa5c4b>Q16</span><span>, </span><span style=color:#fabd2f>error</span><span>) {
+</span><span>	</span><span style=color:#fdf4c1>cos</span><span>, </span><span style=color:#fdf4c1>_</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>cordic</span><span>(</span><span style=color:#fdf4c1>theta</span><span>)
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>cos</span><span>, </span><span style=color:#fdf4c1>err
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>Sin</span><span>(</span><span style=color:#fdf4c1>theta </span><span style=color:#fa5c4b>Q16</span><span>) (</span><span style=color:#fa5c4b>Q16</span><span>, </span><span style=color:#fabd2f>error</span><span>) {
+</span><span>	</span><span style=color:#fdf4c1>_</span><span>, </span><span style=color:#fdf4c1>sin</span><span>, </span><span style=color:#fdf4c1>err </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>cordic</span><span>(</span><span style=color:#fdf4c1>theta</span><span>)
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>sin</span><span>, </span><span style=color:#fdf4c1>err
+</span><span>}
+</span></code></pre><h3 id=ji-lei-wu-chai>积累误差</h3><p>值得注意的是这个算法对大角度输入会有积累误差，比如原始输入是 <code>MustFromFloat(100*math.Pi+math.Pi/4)</code> 的时候，输入是从较为精确的 <code>float64</code> 得到的 Q16 值，而算法内部的归一化过程每次减去 Q16 的 $2\pi$ 都是会累积出极小的误差，使得归一化的结果与 $\frac{\pi}{4}$ 出现无法忽略的差异。<p>原因在于 Q16 版本的 $\pi$ 存在的固有误差被放大。所以使用中，最好不要使用大弧度的输入，以避免误差累积。</article><p class=tags-data><a href=/tags/ding-dian-shu>/定点数/</a> <a href=/tags/suan-fa>/算法/</a> <a href=/tags/shu-xue>/数学/</a> <a href=/tags/shu-zhi-ji-suan>/数值计算/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

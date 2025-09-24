@@ -1,0 +1,103 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>python 实现 redis 分布式锁</title><meta content="python 实现 redis 分布式锁" name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2018/redis-distributed-lock-in-python/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content="python 实现 redis 分布式锁" property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2018/redis-distributed-lock-in-python/ property=twitter:url><meta content="python 实现 redis 分布式锁" property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2018/redis-distributed-lock-in-python/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>python 实现 redis 分布式锁</h1><p class=author-line>作于：2018-12-17 14:57 ，最后更新于：2025-08-17 01:14 ，预计阅读时间 3 分钟<article><h2 id=intro>Intro</h2><p>本文概述如何借住 redis 实现一个分布式锁。<h2 id=wei-he-shi-lua>为何是 Lua</h2><p>redis 保证了 lua 解释器执行脚本的事务性，即执行结果要么不可见，要么已完成。<p>参考<a href=http://redisdoc.com/script/eval.html>这篇文档</a>。<h2 id=jian-dan-suo>简单锁</h2><p>简单锁指的是简单互斥锁，一旦锁定，则其他锁定请求都必须等待。<p>直觉的想法是通过 redis 的键来保持锁，故准备一个用于锁定互斥的名字（比如说 mutex-1）然后指定为键。<p>直接 <code>SET KEY VALUE</code> 是显然不正确的，如果临界区内程序崩溃或意外断网将导致死锁。<p>只判断是否存在也不够，临界区内程序崩溃会导致锁无法被释放。最直接的兜底措施就是设置一个超时时间，保证业务能在超时时间内完成，如果崩溃也可以在一段时间后自动释放。<p>redis 的 SET 命令提供了 <code>NX</code> 和 <code>EX seconds | PX milliseconds</code> 选项，可以实现只在不存在键的时候设置，并同时指定过期时间，有原子性保证。所以我们可以使用 <code>SET</code> 命令实现分布式锁。<p>因为有超时自动释放存在，所以还存在一个竞争：在解锁时 KEY 已经因超时释放，锁被其他人持有。这时候无条件删除就会导致意外释放他人占有的锁。我们还需要增加一个持有者的判断，决定是否释放。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>datetime
+</span><span style=color:#fa5c4b>import </span><span>logging
+</span><span style=color:#fa5c4b>import </span><span>threading
+</span><span style=color:#fa5c4b>import </span><span>time
+</span><span style=color:#fa5c4b>import </span><span>uuid
+</span><span style=color:#fa5c4b>from </span><span>contextlib </span><span style=color:#fa5c4b>import </span><span>contextmanager
+</span><span>
+</span><span style=color:#fa5c4b>import </span><span>redis
+</span><span>
+</span><span style=color:#fdf4c1>logging.basicConfig(
+</span><span style=color:#fdf4c1>    level</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>logging.DEBUG,
+</span><span style=color:#fdf4c1>    format</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>"[</span><span style=color:#fdf4c1>%(asctime)s</span><span style=color:#b8bb26>] </span><span style=color:#fdf4c1>%(levelname).1s %(name)s</span><span style=color:#b8bb26>:</span><span style=color:#fdf4c1>%(message)s</span><span style=color:#b8bb26>"</span><span style=color:#fdf4c1>,
+</span><span style=color:#fdf4c1>    datefmt</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>"</span><span style=color:#fdf4c1>%Y</span><span style=color:#b8bb26>-</span><span style=color:#fdf4c1>%m</span><span style=color:#b8bb26>-</span><span style=color:#fdf4c1>%d %H</span><span style=color:#b8bb26>:</span><span style=color:#fdf4c1>%M</span><span style=color:#b8bb26>:</span><span style=color:#fdf4c1>%S</span><span style=color:#b8bb26>"</span><span style=color:#fdf4c1>,
+</span><span style=color:#fdf4c1>)
+</span><span>logger </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>logging.getLogger(</span><span style=color:#b8bb26>"main"</span><span style=color:#fdf4c1>)
+</span><span>client </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>redis.Redis()
+</span><span>
+</span><span>
+</span><span>@</span><span style=color:#fdf4c1>contextmanager
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>lock</span><span>(</span><span style=color:#fdf4c1>client</span><span>: redis.Redis, </span><span style=color:#fdf4c1>key</span><span>: </span><span style=color:#fabd2f>str</span><span>, </span><span style=color:#fdf4c1>expire</span><span>: datetime.timedelta):
+</span><span>    wait </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0.1
+</span><span>    maximum </span><span style=color:#fe8019>= </span><span style=color:#d3869b>5
+</span><span>    owner </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>str</span><span style=color:#fdf4c1>(uuid.uuid1())
+</span><span>    </span><span style=color:#fa5c4b>while </span><span style=color:#d3869b>True</span><span>:
+</span><span>        resp </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>client.set(key, owner, ex</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>expire, nx</span><span style=color:#fe8019>=</span><span style=color:#d3869b>True</span><span style=color:#fdf4c1>)
+</span><span>        </span><span style=color:#fa5c4b>if </span><span>resp:
+</span><span>            </span><span style=color:#fa5c4b>break
+</span><span>
+</span><span>        </span><span style=color:#fdf4c1>logger.debug(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>"unable to acquire lock, retrying in </span><span style=color:#fdf4c1>{wait}</span><span style=color:#b8bb26> seconds..."</span><span style=color:#fdf4c1>)
+</span><span>        </span><span style=color:#fdf4c1>time.sleep(wait)
+</span><span>
+</span><span>        wait </span><span style=color:#fe8019>*= </span><span style=color:#d3869b>2  </span><span style=color:#928374;font-style:italic># exponential backoff
+</span><span>        </span><span style=color:#fa5c4b>if </span><span>wait </span><span style=color:#fe8019>> </span><span>maximum:
+</span><span>            wait </span><span style=color:#fe8019>= </span><span>maximum
+</span><span>
+</span><span>    </span><span style=color:#fdf4c1>logger.debug(</span><span style=color:#b8bb26>"entering critical section"</span><span style=color:#fdf4c1>)
+</span><span>    </span><span style=color:#fa5c4b>yield
+</span><span>    </span><span style=color:#fdf4c1>logger.debug(</span><span style=color:#b8bb26>"exiting critical section"</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span>    script </span><span style=color:#fe8019>= </span><span style=color:#b8bb26>"""\
+</span><span style=color:#b8bb26>if redis.call("get", KEYS[1]) == ARGV[1] then
+</span><span style=color:#b8bb26>    return redis.call("del", KEYS[1])
+</span><span style=color:#b8bb26>else
+</span><span style=color:#b8bb26>    return 0
+</span><span style=color:#b8bb26>end
+</span><span style=color:#b8bb26>"""
+</span><span>    </span><span style=color:#fdf4c1>logger.debug(</span><span style=color:#b8bb26>"releasing lock"</span><span style=color:#fdf4c1>)
+</span><span>    resp </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>client.eval(script, </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, key, owner)
+</span><span>    </span><span style=color:#fdf4c1>logger.debug(</span><span style=color:#b8bb26>"lock released"</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span style=color:#928374;font-style:italic># 验证
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>run</span><span>(</span><span style=color:#fdf4c1>client</span><span>: redis.Redis):
+</span><span>    </span><span style=color:#fa5c4b>with </span><span style=color:#fdf4c1>lock(client, </span><span style=color:#b8bb26>"run"</span><span style=color:#fdf4c1>, datetime.timedelta(seconds</span><span style=color:#fe8019>=</span><span style=color:#d3869b>10</span><span style=color:#fdf4c1>))</span><span>:
+</span><span>        </span><span style=color:#fdf4c1>logger.info(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>"thread </span><span style=color:#fdf4c1>{threading.current_thread().ident}</span><span style=color:#b8bb26> lock acquired"</span><span style=color:#fdf4c1>)
+</span><span>        </span><span style=color:#fdf4c1>time.sleep(</span><span style=color:#d3869b>3</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span>
+</span><span>threads </span><span style=color:#fe8019>= </span><span>[
+</span><span>    </span><span style=color:#fdf4c1>threading.Thread(target</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>run, args</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>(client,))</span><span>,
+</span><span>    </span><span style=color:#fdf4c1>threading.Thread(target</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>run, args</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>(client,))</span><span>,
+</span><span>]
+</span><span>
+</span><span style=color:#fa5c4b>for </span><span>thread </span><span style=color:#fa5c4b>in </span><span>threads:
+</span><span>    </span><span style=color:#fdf4c1>thread.start()
+</span><span>
+</span><span style=color:#fa5c4b>for </span><span>thread </span><span style=color:#fa5c4b>in </span><span>threads:
+</span><span>    </span><span style=color:#fdf4c1>thread.join()
+</span><span>
+</span></code></pre><blockquote><p>互斥锁不能提供事务性保证，如何在超时时保证一致性是个问题。<p>读写锁部分存在严重错误，已删除。</blockquote></article><p class=tags-data><a href=/tags/python>/python/</a> <a href=/tags/redis>/redis/</a> <a href=/tags/lua>/lua/</a> <a href=/tags/fen-bu-shi>/分布式/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

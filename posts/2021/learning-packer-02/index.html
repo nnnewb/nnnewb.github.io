@@ -1,0 +1,310 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>加壳原理02 - 简单加壳机</title><meta content="加壳原理02 - 简单加壳机" name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2021/learning-packer-02/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content="加壳原理02 - 简单加壳机" property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2021/learning-packer-02/ property=twitter:url><meta content="加壳原理02 - 简单加壳机" property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2021/learning-packer-02/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>加壳原理02 - 简单加壳机</h1><p class=author-line>作于：2021-09-28 16:57 ，预计阅读时间 4 分钟<article><h2 id=qian-yan>前言</h2><p>对 Windows 程序的加载和运行过程有了基本了解后，手动加载并运行一个PE文件并不成问题。加壳仅仅是在这上面更进一步：把加载程序和被加载的程序合并成一个文件。<p>这么说可能有点太简单化，大部分的工作其实就在这儿：如何处理被加载的程序？压缩？加密？混淆？加载器（或者叫壳程序）如何反调试？<p>这里先写一个简单的加壳机，仅仅是把被加载的PE文件作为一个 Section，添加到壳程序里，让壳程序直接从这个 Section 加载并运行。其他花里胡哨的操作都先不整，仅作为证明工作原理的案例。<h2 id=0x01-ke-cheng-xu>0x01 壳程序</h2><h3 id=1-1-si-lu>1.1 思路</h3><p>和加载一个PE文件不同，既然被加载的程序就在 Section 里，那需要做的只有定位到 Section，然后把 Section 内容当读取进内存的 PE 文件内容处理就好了。<p>壳程序应该尽量保持轻量，不在原始程序上添加太多东西（加完壳大小翻一倍还多了一堆DLL依赖那谁受得了啊），所以很多标准C库的函数也不能用了，像是<code>memcpy</code>、<code>strcmp</code> 都要自己简单实现一个。<h3 id=1-2-ke-shi-xian>1.2 壳实现</h3><p>绝大部分内容和之前文章中的 <code>load_PE</code> 一致，入口点修改为 <code>_start</code>，需要注意。<pre class=language-c data-lang=c style=color:#fdf4c1aa;background-color:#282828><code class=language-c data-lang=c><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;Windows.h>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;winnt.h>
+</span><span>
+</span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span style=color:#8ec07c>load_PE</span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>PE_data</span><span>);
+</span><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>fix_iat</span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>p_image_base</span><span>, IMAGE_NT_HEADERS </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>p_NT_headers</span><span>);
+</span><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>fix_base_reloc</span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>p_image_base</span><span>, IMAGE_NT_HEADERS </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>p_NT_headers</span><span>);
+</span><span style=color:#fa5c4b>int </span><span style=color:#8ec07c>mystrcmp</span><span>(</span><span style=color:#fa5c4b>const char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>str1</span><span>, </span><span style=color:#fa5c4b>const char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>str2</span><span>);
+</span><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>mymemcpy</span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>dest</span><span>, </span><span style=color:#fa5c4b>const char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>src</span><span>, </span><span style=color:#fabd2f>size_t </span><span style=color:#fdf4c1>length</span><span>);
+</span><span>
+</span><span style=color:#fa5c4b>int </span><span style=color:#8ec07c>_start</span><span>(</span><span style=color:#fa5c4b>void</span><span>) {
+</span><span>  </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>unpacker_VA </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>)</span><span style=color:#fdf4c1>GetModuleHandleA(</span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>
+</span><span>  IMAGE_DOS_HEADER </span><span style=color:#fe8019>*</span><span>p_DOS_header </span><span style=color:#fe8019>= </span><span>(IMAGE_DOS_HEADER </span><span style=color:#fe8019>*</span><span>)unpacker_VA;
+</span><span>  IMAGE_NT_HEADERS </span><span style=color:#fe8019>*</span><span>p_NT_headers </span><span style=color:#fe8019>= </span><span>(IMAGE_NT_HEADERS </span><span style=color:#fe8019>*</span><span>)(((</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>)unpacker_VA) </span><span style=color:#fe8019>+</span><span> p_DOS_header->e_lfanew);
+</span><span>  IMAGE_SECTION_HEADER </span><span style=color:#fe8019>*</span><span>sections </span><span style=color:#fe8019>= </span><span>(IMAGE_SECTION_HEADER </span><span style=color:#fe8019>*</span><span>)(p_NT_headers </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span>);
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>packed </span><span style=color:#fe8019>= </span><span style=color:#d3869b>NULL</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>char</span><span> packed_section_name[] </span><span style=color:#fe8019>= </span><span style=color:#b8bb26>".packed"</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; i </span><span style=color:#fe8019>&lt;</span><span> p_NT_headers->FileHeader.</span><span style=color:#fdf4c1>NumberOfSections</span><span>; i</span><span style=color:#fe8019>++</span><span>) {
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>(</span><span style=color:#fdf4c1>mystrcmp(sections[i].Name, packed_section_name) </span><span style=color:#fe8019>== </span><span style=color:#d3869b>0</span><span>) {
+</span><span>      packed </span><span style=color:#fe8019>=</span><span> unpacker_VA </span><span style=color:#fe8019>+</span><span> sections[i].</span><span style=color:#fdf4c1>VirtualAddress</span><span>;
+</span><span>      </span><span style=color:#fa5c4b>break</span><span>;
+</span><span>    }
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(packed </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>    </span><span style=color:#fa5c4b>void </span><span>(</span><span style=color:#fe8019>*</span><span>entrypoint)(</span><span style=color:#fa5c4b>void</span><span>) </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fa5c4b>void </span><span>(</span><span style=color:#fe8019>*</span><span>)(</span><span style=color:#fa5c4b>void</span><span>))</span><span style=color:#fdf4c1>load_PE(packed)</span><span>;
+</span><span>    </span><span style=color:#fdf4c1>entrypoint()</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>;
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span style=color:#8ec07c>load_PE</span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>PE_data</span><span>) {
+</span><span>  IMAGE_DOS_HEADER </span><span style=color:#fe8019>*</span><span>p_DOS_header </span><span style=color:#fe8019>= </span><span>(IMAGE_DOS_HEADER </span><span style=color:#fe8019>*</span><span>)PE_data;
+</span><span>  IMAGE_NT_HEADERS </span><span style=color:#fe8019>*</span><span>p_NT_headers </span><span style=color:#fe8019>= </span><span>(IMAGE_NT_HEADERS </span><span style=color:#fe8019>*</span><span>)(PE_data </span><span style=color:#fe8019>+</span><span> p_DOS_header->e_lfanew);
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// extract information from PE header
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> size_of_image </span><span style=color:#fe8019>=</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>SizeOfImage</span><span>;
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> entry_point_RVA </span><span style=color:#fe8019>=</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>AddressOfEntryPoint</span><span>;
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> size_of_headers </span><span style=color:#fe8019>=</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>SizeOfHeaders</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// allocate memory
+</span><span>  </span><span style=color:#928374;font-style:italic>// https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualalloc
+</span><span>  </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>p_image_base </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>)</span><span style=color:#fdf4c1>VirtualAlloc(</span><span style=color:#d3869b>NULL</span><span style=color:#fdf4c1>, size_of_image, MEM_RESERVE </span><span style=color:#fe8019>|</span><span style=color:#fdf4c1> MEM_COMMIT, PAGE_READWRITE)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(p_image_base </span><span style=color:#fe8019>== </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>NULL</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// copy PE headers in memory
+</span><span>  </span><span style=color:#fdf4c1>mymemcpy(p_image_base, PE_data, size_of_headers)</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// Section headers starts right after the IMAGE_NT_HEADERS struct, so we do some pointer arithmetic-fu here.
+</span><span>  IMAGE_SECTION_HEADER </span><span style=color:#fe8019>*</span><span>sections </span><span style=color:#fe8019>= </span><span>(IMAGE_SECTION_HEADER </span><span style=color:#fe8019>*</span><span>)(p_NT_headers </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span>);
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; i </span><span style=color:#fe8019>&lt;</span><span> p_NT_headers->FileHeader.</span><span style=color:#fdf4c1>NumberOfSections</span><span>; i</span><span style=color:#fe8019>++</span><span>) {
+</span><span>    </span><span style=color:#928374;font-style:italic>// calculate the VA we need to copy the content, from the RVA
+</span><span>    </span><span style=color:#928374;font-style:italic>// section[i].VirtualAddress is a RVA, mind it
+</span><span>    </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>dest </span><span style=color:#fe8019>=</span><span> p_image_base </span><span style=color:#fe8019>+</span><span> sections[i].</span><span style=color:#fdf4c1>VirtualAddress</span><span>;
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// check if there is Raw data to copy
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>(sections[i].</span><span style=color:#fdf4c1>SizeOfRawData </span><span style=color:#fe8019>> </span><span style=color:#d3869b>0</span><span>) {
+</span><span>      </span><span style=color:#928374;font-style:italic>// We copy SizeOfRaw data bytes, from the offset PointerToRawData in the file
+</span><span>      </span><span style=color:#fdf4c1>mymemcpy(dest, PE_data </span><span style=color:#fe8019>+</span><span style=color:#fdf4c1> sections[i].PointerToRawData, sections[i].SizeOfRawData)</span><span>;
+</span><span>    } </span><span style=color:#fa5c4b>else </span><span>{
+</span><span>      </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fabd2f>size_t</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; i </span><span style=color:#fe8019>&lt;</span><span> sections[i].</span><span style=color:#fdf4c1>Misc</span><span>.</span><span style=color:#fdf4c1>VirtualSize</span><span>; i</span><span style=color:#fe8019>++</span><span>) {
+</span><span>        dest[i] </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>;
+</span><span>      }
+</span><span>    }
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#fdf4c1>fix_iat(p_image_base, p_NT_headers)</span><span>;
+</span><span>  </span><span style=color:#fdf4c1>fix_base_reloc(p_image_base, p_NT_headers)</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// Set permission for the PE header to read only
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> oldProtect;
+</span><span>  </span><span style=color:#fdf4c1>VirtualProtect(p_image_base, p_NT_headers->OptionalHeader.SizeOfHeaders, PAGE_READONLY, </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>oldProtect)</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; i </span><span style=color:#fe8019>&lt;</span><span> p_NT_headers->FileHeader.</span><span style=color:#fdf4c1>NumberOfSections</span><span>; </span><span style=color:#fe8019>++</span><span>i) {
+</span><span>    </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>dest </span><span style=color:#fe8019>=</span><span> p_image_base </span><span style=color:#fe8019>+</span><span> sections[i].</span><span style=color:#fdf4c1>VirtualAddress</span><span>;
+</span><span>    </span><span style=color:#fabd2f>DWORD</span><span> s_perm </span><span style=color:#fe8019>=</span><span> sections[i].</span><span style=color:#fdf4c1>Characteristics</span><span>;
+</span><span>    </span><span style=color:#fabd2f>DWORD</span><span> v_perm </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#928374;font-style:italic>// flags are not the same between virtal protect and the section header
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>(s_perm </span><span style=color:#fe8019>&</span><span> IMAGE_SCN_MEM_EXECUTE) {
+</span><span>      v_perm </span><span style=color:#fe8019>= </span><span>(s_perm </span><span style=color:#fe8019>&</span><span> IMAGE_SCN_MEM_WRITE) </span><span style=color:#fe8019>?</span><span> PAGE_EXECUTE_READWRITE </span><span style=color:#fe8019>:</span><span> PAGE_EXECUTE_READ;
+</span><span>    } </span><span style=color:#fa5c4b>else </span><span>{
+</span><span>      v_perm </span><span style=color:#fe8019>= </span><span>(s_perm </span><span style=color:#fe8019>&</span><span> IMAGE_SCN_MEM_WRITE) </span><span style=color:#fe8019>?</span><span> PAGE_READWRITE </span><span style=color:#fe8019>:</span><span> PAGE_READONLY;
+</span><span>    }
+</span><span>    </span><span style=color:#fdf4c1>VirtualProtect(dest, sections[i].Misc.VirtualSize, v_perm, </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>oldProtect)</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>return </span><span>(</span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> entry_point_RVA);
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>fix_iat</span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>p_image_base</span><span>, IMAGE_NT_HEADERS </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>p_NT_headers</span><span>) {
+</span><span>  IMAGE_DATA_DIRECTORY </span><span style=color:#fe8019>*</span><span>data_directory </span><span style=color:#fe8019>=</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>DataDirectory</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// load the address of the import descriptors array
+</span><span>  IMAGE_IMPORT_DESCRIPTOR </span><span style=color:#fe8019>*</span><span>import_descriptors </span><span style=color:#fe8019>=
+</span><span>      (IMAGE_IMPORT_DESCRIPTOR </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> data_directory[IMAGE_DIRECTORY_ENTRY_IMPORT].</span><span style=color:#fdf4c1>VirtualAddress</span><span>);
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// this array is null terminated
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; import_descriptors[i].</span><span style=color:#fdf4c1>OriginalFirstThunk </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#fe8019>++</span><span>i) {
+</span><span>    </span><span style=color:#928374;font-style:italic>// Get the name of the dll, and import it
+</span><span>    </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>module_name </span><span style=color:#fe8019>=</span><span> p_image_base </span><span style=color:#fe8019>+</span><span> import_descriptors[i].</span><span style=color:#fdf4c1>Name</span><span>;
+</span><span>    </span><span style=color:#fabd2f>HMODULE</span><span> import_module </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>LoadLibraryA(module_name)</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>(import_module </span><span style=color:#fe8019>== </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>      </span><span style=color:#928374;font-style:italic>// panic!
+</span><span>      </span><span style=color:#fdf4c1>ExitProcess(</span><span style=color:#d3869b>255</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>    }
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// the lookup table points to function names or ordinals => it is the IDT
+</span><span>    IMAGE_THUNK_DATA </span><span style=color:#fe8019>*</span><span>lookup_table </span><span style=color:#fe8019>= </span><span>(IMAGE_THUNK_DATA </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> import_descriptors[i].</span><span style=color:#fdf4c1>OriginalFirstThunk</span><span>);
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// the address table is a copy of the lookup table at first
+</span><span>    </span><span style=color:#928374;font-style:italic>// but we put the addresses of the loaded function inside => that's the IAT
+</span><span>    IMAGE_THUNK_DATA </span><span style=color:#fe8019>*</span><span>address_table </span><span style=color:#fe8019>= </span><span>(IMAGE_THUNK_DATA </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> import_descriptors[i].</span><span style=color:#fdf4c1>FirstThunk</span><span>);
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// null terminated array, again
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; lookup_table[i].</span><span style=color:#fdf4c1>u1</span><span>.</span><span style=color:#fdf4c1>AddressOfData </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#fe8019>++</span><span>i) {
+</span><span>      </span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span>function_handle </span><span style=color:#fe8019>= </span><span style=color:#d3869b>NULL</span><span>;
+</span><span>
+</span><span>      </span><span style=color:#928374;font-style:italic>// Check the lookup table for the adresse of the function name to import
+</span><span>      </span><span style=color:#fabd2f>DWORD</span><span> lookup_addr </span><span style=color:#fe8019>=</span><span> lookup_table[i].</span><span style=color:#fdf4c1>u1</span><span>.</span><span style=color:#fdf4c1>AddressOfData</span><span>;
+</span><span>
+</span><span>      </span><span style=color:#fa5c4b>if </span><span>((lookup_addr </span><span style=color:#fe8019>&</span><span> IMAGE_ORDINAL_FLAG) </span><span style=color:#fe8019>== </span><span style=color:#d3869b>0</span><span>) { </span><span style=color:#928374;font-style:italic>// if first bit is not 1
+</span><span>        </span><span style=color:#928374;font-style:italic>// import by name : get the IMAGE_IMPORT_BY_NAME struct
+</span><span>        IMAGE_IMPORT_BY_NAME </span><span style=color:#fe8019>*</span><span>image_import </span><span style=color:#fe8019>= </span><span>(IMAGE_IMPORT_BY_NAME </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> lookup_addr);
+</span><span>        </span><span style=color:#928374;font-style:italic>// this struct points to the ASCII function name
+</span><span>        </span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>funct_name </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span>)</span><span style=color:#fe8019>&</span><span>(image_import->Name);
+</span><span>        </span><span style=color:#928374;font-style:italic>// get that function address from it's module and name
+</span><span>        function_handle </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span>)</span><span style=color:#fdf4c1>GetProcAddress(import_module, funct_name)</span><span>;
+</span><span>      } </span><span style=color:#fa5c4b>else </span><span>{
+</span><span>        </span><span style=color:#928374;font-style:italic>// import by ordinal, directly
+</span><span>        function_handle </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fa5c4b>void </span><span style=color:#fe8019>*</span><span>)</span><span style=color:#fdf4c1>GetProcAddress(import_module, (</span><span style=color:#fabd2f>LPSTR</span><span style=color:#fdf4c1>)lookup_addr)</span><span>;
+</span><span>      }
+</span><span>
+</span><span>      </span><span style=color:#fa5c4b>if </span><span>(function_handle </span><span style=color:#fe8019>== </span><span style=color:#d3869b>NULL</span><span>) {
+</span><span>        </span><span style=color:#fdf4c1>ExitProcess(</span><span style=color:#d3869b>255</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>      }
+</span><span>
+</span><span>      </span><span style=color:#928374;font-style:italic>// change the IAT, and put the function address inside.
+</span><span>      address_table[i].</span><span style=color:#fdf4c1>u1</span><span>.</span><span style=color:#fdf4c1>Function </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fabd2f>DWORD</span><span>)function_handle;
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>fix_base_reloc</span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>p_image_base</span><span>, IMAGE_NT_HEADERS </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>p_NT_headers</span><span>) {
+</span><span>  IMAGE_DATA_DIRECTORY </span><span style=color:#fe8019>*</span><span>data_directory </span><span style=color:#fe8019>=</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>DataDirectory</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// this is how much we shifted the ImageBase
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> delta_VA_reloc </span><span style=color:#fe8019>= </span><span>((</span><span style=color:#fabd2f>DWORD</span><span>)p_image_base) </span><span style=color:#fe8019>-</span><span> p_NT_headers->OptionalHeader.</span><span style=color:#fdf4c1>ImageBase</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// if there is a relocation table, and we actually shitfted the ImageBase
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(data_directory[IMAGE_DIRECTORY_ENTRY_BASERELOC].</span><span style=color:#fdf4c1>VirtualAddress </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0 </span><span style=color:#fe8019>&&</span><span> delta_VA_reloc </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0</span><span>) {
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// calculate the relocation table address
+</span><span>    IMAGE_BASE_RELOCATION </span><span style=color:#fe8019>*</span><span>p_reloc </span><span style=color:#fe8019>=
+</span><span>        (IMAGE_BASE_RELOCATION </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> data_directory[IMAGE_DIRECTORY_ENTRY_BASERELOC].</span><span style=color:#fdf4c1>VirtualAddress</span><span>);
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// once again, a null terminated array
+</span><span>    </span><span style=color:#fa5c4b>while </span><span>(p_reloc->VirtualAddress </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0</span><span>) {
+</span><span>
+</span><span>      </span><span style=color:#928374;font-style:italic>// how any relocation in this block
+</span><span>      </span><span style=color:#928374;font-style:italic>// ie the total size, minus the size of the "header", divided by 2 (those are words, so 2 bytes for each)
+</span><span>      </span><span style=color:#fabd2f>DWORD</span><span> size </span><span style=color:#fe8019>= </span><span>(p_reloc->SizeOfBlock </span><span style=color:#fe8019>- sizeof</span><span>(IMAGE_BASE_RELOCATION)) </span><span style=color:#fe8019>/ </span><span style=color:#d3869b>2</span><span>;
+</span><span>      </span><span style=color:#928374;font-style:italic>// the first relocation element in the block, right after the header (using pointer arithmetic again)
+</span><span>      </span><span style=color:#fabd2f>WORD </span><span style=color:#fe8019>*</span><span>fixups </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fabd2f>WORD </span><span style=color:#fe8019>*</span><span>)(p_reloc </span><span style=color:#fe8019>+ </span><span style=color:#d3869b>1</span><span>);
+</span><span>      </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fabd2f>size_t</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; i </span><span style=color:#fe8019>&lt;</span><span> size; </span><span style=color:#fe8019>++</span><span>i) {
+</span><span>        </span><span style=color:#928374;font-style:italic>// type is the first 4 bits of the relocation word
+</span><span>        </span><span style=color:#fa5c4b>int</span><span> type </span><span style=color:#fe8019>=</span><span> fixups[i] </span><span style=color:#fe8019>>> </span><span style=color:#d3869b>12</span><span>;
+</span><span>        </span><span style=color:#928374;font-style:italic>// offset is the last 12 bits
+</span><span>        </span><span style=color:#fa5c4b>int</span><span> offset </span><span style=color:#fe8019>=</span><span> fixups[i] </span><span style=color:#fe8019>& </span><span style=color:#d3869b>0x0fff</span><span>;
+</span><span>        </span><span style=color:#928374;font-style:italic>// this is the address we are going to change
+</span><span>        </span><span style=color:#fabd2f>DWORD </span><span style=color:#fe8019>*</span><span>change_addr </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fabd2f>DWORD </span><span style=color:#fe8019>*</span><span>)(p_image_base </span><span style=color:#fe8019>+</span><span> p_reloc->VirtualAddress </span><span style=color:#fe8019>+</span><span> offset);
+</span><span>
+</span><span>        </span><span style=color:#928374;font-style:italic>// there is only one type used that needs to make a change
+</span><span>        </span><span style=color:#fa5c4b>switch </span><span>(type) {
+</span><span>        </span><span style=color:#fa5c4b>case</span><span> IMAGE_REL_BASED_HIGHLOW:
+</span><span>          </span><span style=color:#fe8019>*</span><span>change_addr </span><span style=color:#fe8019>+=</span><span> delta_VA_reloc;
+</span><span>          </span><span style=color:#fa5c4b>break</span><span>;
+</span><span>        </span><span style=color:#fa5c4b>default</span><span>:
+</span><span>          </span><span style=color:#fa5c4b>break</span><span>;
+</span><span>        }
+</span><span>      }
+</span><span>
+</span><span>      </span><span style=color:#928374;font-style:italic>// switch to the next relocation block, based on the size
+</span><span>      p_reloc </span><span style=color:#fe8019>= </span><span>(IMAGE_BASE_RELOCATION </span><span style=color:#fe8019>*</span><span>)(((</span><span style=color:#fabd2f>DWORD</span><span>)p_reloc) </span><span style=color:#fe8019>+</span><span> p_reloc->SizeOfBlock);
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>int </span><span style=color:#8ec07c>mystrcmp</span><span>(</span><span style=color:#fa5c4b>const char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>str1</span><span>, </span><span style=color:#fa5c4b>const char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>str2</span><span>) {
+</span><span>  </span><span style=color:#fa5c4b>while </span><span>(</span><span style=color:#fe8019>*</span><span>str1 </span><span style=color:#fe8019>== *</span><span>str2 </span><span style=color:#fe8019>&& *</span><span>str1 </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0</span><span>) {
+</span><span>    str1</span><span style=color:#fe8019>++</span><span>;
+</span><span>    str2</span><span style=color:#fe8019>++</span><span>;
+</span><span>  }
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(</span><span style=color:#fe8019>*</span><span>str1 </span><span style=color:#fe8019>== </span><span style=color:#d3869b>0 </span><span style=color:#fe8019>&& *</span><span>str2 </span><span style=color:#fe8019>== </span><span style=color:#d3869b>0</span><span>) {
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>;
+</span><span>  }
+</span><span>  </span><span style=color:#fa5c4b>return </span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>;
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>mymemcpy</span><span>(</span><span style=color:#fa5c4b>char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>dest</span><span>, </span><span style=color:#fa5c4b>const char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>src</span><span>, </span><span style=color:#fabd2f>size_t </span><span style=color:#fdf4c1>length</span><span>) {
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fabd2f>size_t</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; i </span><span style=color:#fe8019>&lt;</span><span> length; i</span><span style=color:#fe8019>++</span><span>) {
+</span><span>    dest[i] </span><span style=color:#fe8019>=</span><span> src[i];
+</span><span>  }
+</span><span>}
+</span></code></pre><p>构建参数（CMAKE）<pre class=language-cmake data-lang=cmake style=color:#fdf4c1aa;background-color:#282828><code class=language-cmake data-lang=cmake><span style=color:#fabd2f>add_executable</span><span style=color:#fdf4c1>(loader_2 WIN32 loader_2.c)
+</span><span style=color:#fabd2f>target_compile_options</span><span style=color:#fdf4c1>(loader_2 PRIVATE /GS-)
+</span><span style=color:#fabd2f>target_link_options</span><span style=color:#fdf4c1>(loader_2 PRIVATE /NODEFAULTLIB /ENTRY:_start)
+</span></code></pre><p>参数<code>/GS-</code>是为了避免在<code>/NODEFAULTLIB</code>下出现一些缓存区安全检查代码链接错误。参考<a href="https://docs.microsoft.com/en-us/cpp/build/reference/gs-buffer-security-check?view=msvc-160">文档</a>。<h2 id=0x02-jia-ke-ji>0x02 加壳机</h2><p>相信已经发现了，上文并没有提到怎么把程序嵌入壳程序里。这是因为加壳并不是在壳程序编译时直接把文件嵌进去=，=虽然理论上来说也可以，但这里不讨论了。仅仅看加壳机加壳的场景吧。<h3 id=2-1-jia-ke-ji-yuan-li>2.1 加壳机原理</h3><p>加壳机做的事情包括：<ul><li>在 section table 里添加 section <ul><li>根据 section table 和 file_alignment 决定如何分配空间<li>根据 section_alignment 计算 virtual size<li>根据上一个 section 大小和位置计算 virtual address<li>填充 pointer_to_raw_data 和 size_of_raw_data<li>设置合适的 characteristics</ul><li>计算修改 number_of_sections<li>计算修改 size_of_image<li>计算修改 size_of_headers</ul><p>反正看起来就很麻烦，不过幸好操作 PE 文件的库不少，GitHub 搜一搜就有。这里用 <a href=https://github.com/lief-project/LIEF>LIEF</a> 这个库，操作蛮简单的。<h3 id=2-2-yuan-ma>2.2 源码</h3><pre class=language-cpp data-lang=cpp style=color:#fdf4c1aa;background-color:#282828><code class=language-cpp data-lang=cpp><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;Windows.h>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;LIEF/LIEF.hpp>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;vector>
+</span><span>
+</span><span>std::vector&lt;</span><span style=color:#fabd2f>uint8_t</span><span>> </span><span style=color:#8ec07c>read_file</span><span>(</span><span style=color:#fa5c4b>const</span><span> std::string </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>path</span><span>) {
+</span><span>  </span><span style=color:#fa5c4b>auto</span><span> h </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>CreateFile(path.c_str(), GENERIC_READ, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>nullptr</span><span style=color:#fdf4c1>, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, </span><span style=color:#d3869b>nullptr</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  </span><span style=color:#fabd2f>DWORD</span><span> readbyte </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>auto</span><span> filesize </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>GetFileSize(h, </span><span style=color:#d3869b>nullptr</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>auto</span><span> content </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>std::vector&lt;</span><span style=color:#fabd2f>uint8_t</span><span style=color:#fdf4c1>>()</span><span>;
+</span><span>  content.</span><span style=color:#fdf4c1>resize</span><span>(filesize, </span><span style=color:#d3869b>0</span><span>);
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(</span><span style=color:#fe8019>!</span><span style=color:#fdf4c1>ReadFile(h, content.data(), filesize, </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>readbyte, </span><span style=color:#d3869b>nullptr</span><span style=color:#fdf4c1>)</span><span>) {
+</span><span>    </span><span style=color:#fabd2f>abort</span><span style=color:#fdf4c1>()</span><span>;
+</span><span>  }
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(readbyte </span><span style=color:#fe8019>!=</span><span> filesize) {
+</span><span>    </span><span style=color:#fabd2f>abort</span><span style=color:#fdf4c1>()</span><span>;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#fdf4c1>CloseHandle(h)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>return</span><span> content;
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>int </span><span style=color:#8ec07c>main</span><span>(</span><span style=color:#fa5c4b>int </span><span style=color:#fdf4c1>argc</span><span>, </span><span style=color:#fa5c4b>const char </span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>argv</span><span>[]) {
+</span><span>  </span><span style=color:#fa5c4b>if </span><span>(argc </span><span style=color:#fe8019>&lt; </span><span style=color:#d3869b>3</span><span>) {
+</span><span>    </span><span style=color:#fabd2f>printf</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>"loader and program path are required"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>;
+</span><span>  }
+</span><span>  </span><span style=color:#fa5c4b>auto</span><span> loader_path </span><span style=color:#fe8019>=</span><span> argv[</span><span style=color:#d3869b>1</span><span>];
+</span><span>  </span><span style=color:#fa5c4b>auto</span><span> program_path </span><span style=color:#fe8019>=</span><span> argv[</span><span style=color:#d3869b>2</span><span>];
+</span><span>  </span><span style=color:#fa5c4b>auto</span><span> loader_binary </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>LIEF::PE::Parser::parse(loader_path)</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// LIEF 帮我们做了偏移计算之类的工作，这里就只用点逻辑，非常得银杏。
+</span><span>  </span><span style=color:#fa5c4b>auto</span><span> program_content </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>read_file(program_path)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>auto</span><span> packed_section </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>LIEF::PE::Section(</span><span style=color:#b8bb26>".packed"</span><span style=color:#fdf4c1>)</span><span>; </span><span style=color:#928374;font-style:italic>// 新建 section
+</span><span>  packed_section.</span><span style=color:#fdf4c1>content</span><span>(program_content); </span><span style=color:#928374;font-style:italic>// 把被加载程序的内容当成 section 内容
+</span><span>  loader_binary-></span><span style=color:#fdf4c1>add_section</span><span>(packed_section, LIEF::PE::PE_SECTION_TYPES::DATA); </span><span style=color:#928374;font-style:italic>// 把 section 添加到壳程序里
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// 用 lief 实现把修改后的壳程序写入硬盘
+</span><span>  </span><span style=color:#fa5c4b>auto</span><span> builder </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>LIEF::PE::Builder::Builder(loader_binary.get())</span><span>;
+</span><span>  builder.</span><span style=color:#fdf4c1>build</span><span>();
+</span><span>  builder.</span><span style=color:#fdf4c1>write</span><span>(</span><span style=color:#b8bb26>"packed.exe"</span><span>);
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>;
+</span><span>}
+</span></code></pre><p>编译指令（CMAKE）参考 <a href=https://lief-project.github.io//doc/latest/installation.html#cmake-integration>LIEF 文档</a>。<pre class=language-cmake data-lang=cmake style=color:#fdf4c1aa;background-color:#282828><code class=language-cmake data-lang=cmake><span style=color:#928374;font-style:italic># Custom path to the LIEF install directory
+</span><span style=color:#fabd2f>set</span><span style=color:#fdf4c1>(LIEF_DIR CACHE </span><span style=color:#fa5c4b>PATH </span><span style=color:#fdf4c1>${CMAKE_INSTALL_PREFIX})
+</span><span>
+</span><span style=color:#928374;font-style:italic># Directory to 'FindLIEF.cmake'
+</span><span style=color:#fabd2f>list</span><span style=color:#fdf4c1>(APPEND CMAKE_MODULE_PATH ${LIEF_DIR}/share/LIEF/cmake)
+</span><span>
+</span><span style=color:#928374;font-style:italic># include 'FindLIEF.cmake'
+</span><span style=color:#fa5c4b>include</span><span style=color:#fdf4c1>(FindLIEF)
+</span><span>
+</span><span style=color:#928374;font-style:italic># Find LIEF
+</span><span style=color:#fabd2f>find_package</span><span style=color:#fdf4c1>(LIEF REQUIRED COMPONENTS STATIC) </span><span style=color:#928374;font-style:italic># COMPONENTS: &lt;SHARED | STATIC> - Default: STATIC
+</span><span>
+</span><span style=color:#fabd2f>add_executable</span><span style=color:#fdf4c1>(packer packer.cpp)
+</span><span style=color:#fa5c4b>if</span><span style=color:#fdf4c1>(MSVC)
+</span><span>	</span><span style=color:#fabd2f>target_compile_options</span><span style=color:#fdf4c1>(packer PRIVATE /FIiso646.h /MT)
+</span><span>	</span><span style=color:#fabd2f>set_property</span><span style=color:#fdf4c1>(TARGET packer PROPERTY LINK_FLAGS /NODEFAULTLIB:MSVCRT)
+</span><span style=color:#fa5c4b>endif</span><span style=color:#fdf4c1>()
+</span><span style=color:#fabd2f>target_include_directories</span><span style=color:#fdf4c1>(packer PRIVATE ${LIEF_INCLUDE_DIRS})
+</span><span style=color:#fabd2f>set_property</span><span style=color:#fdf4c1>(TARGET packer
+</span><span style=color:#fdf4c1>			PROPERTY CXX_STANDARD 11
+</span><span style=color:#fdf4c1>			PROPERTY CXX_STANDARD_REQUIRED ON)
+</span><span style=color:#fabd2f>target_link_libraries</span><span style=color:#fdf4c1>(packer PRIVATE ${LIEF_LIBRARIES})
+</span></code></pre><p>我要顺便一提，LIEF有python包，但那玩意儿不知道为啥赋值content一直报 not supported，没解决。就干脆拿 c++ 写了。论简单快捷还是要看 python 版本的。<h2 id=jie-lun>结论</h2><p>加壳程序反而平平无奇，正印证了那句台下功夫。</article><p class=tags-data><a href=/tags/ni-xiang>/逆向/</a> <a href=/tags/hui-bian>/汇编/</a> <a href=/tags/windows>/Windows/</a> <a href=/tags/security>/security/</a> <a href=/tags/binary-analysis>/binary-analysis/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

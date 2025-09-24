@@ -1,0 +1,199 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>手搓基于 elasticlunr 索引的搜索</title><meta content="手搓基于 elasticlunr 索引的搜索" name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2024/2024-04-10-shou-cuo-ji-yu-elasticlunrsuo-yin-de-sou-suo/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content="手搓基于 elasticlunr 索引的搜索" property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2024/2024-04-10-shou-cuo-ji-yu-elasticlunrsuo-yin-de-sou-suo/ property=twitter:url><meta content="手搓基于 elasticlunr 索引的搜索" property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2024/2024-04-10-shou-cuo-ji-yu-elasticlunrsuo-yin-de-sou-suo/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>手搓基于 elasticlunr 索引的搜索</h1><p class=author-line>作于：2024-04-10 22:40 ，预计阅读时间 3 分钟<article><p>15 分钟。<p>浅尝一下字典树和倒排索引。<p>elasticlunr 是一个可以在浏览器端和 node 运行的全文搜索库，索引的基本结构就是用字典树结构保存的倒排索引。<p>复习下字典树的结构，word 和 would 两个词在字典树里这样保存：<pre class=language-json data-lang=json style=color:#fdf4c1aa;background-color:#282828><code class=language-json data-lang=json><span>{
+</span><span>  </span><span style=color:#b8bb26>"w"</span><span>: {
+</span><span>    </span><span style=color:#b8bb26>"o"</span><span>: {
+</span><span>      </span><span style=color:#b8bb26>"u"</span><span>: {
+</span><span>        </span><span style=color:#b8bb26>"l"</span><span>: {
+</span><span>          </span><span style=color:#b8bb26>"d"</span><span>: {
+</span><span>            </span><span style=color:#b8bb26>"docs"</span><span>: [</span><span style=color:#b8bb26>"would"</span><span>]
+</span><span>          }
+</span><span>        }
+</span><span>      },
+</span><span>      </span><span style=color:#b8bb26>"r"</span><span>: {
+</span><span>        </span><span style=color:#b8bb26>"d"</span><span>: {
+</span><span>          </span><span style=color:#b8bb26>"docs"</span><span>: [</span><span style=color:#b8bb26>"word"</span><span>]
+</span><span>        }
+</span><span>      }
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span></code></pre><p>应该很好理解。<p>倒排索引我个人比较愿意从朴素搜索方法讲起。<p>朴素搜索方法是指给 100 个文档，你想搜 word 这个单词，那就要把 100 个文档遍历一遍，用字符串查找算法找出这个单词。<p>再进一步就是普通索引，数据库那种。把文档内容排成一棵树然后查找。<p>但问题又来了，像数据库给字符串字段加的索引一样，前缀匹配或者后缀匹配都还算好办，但如果是包含匹配，效率就高不起来了。<p>这时候全文搜索技术的基础，倒排索引就出来了。<p>倒排索引用了一些 NLP 的方法，比如 NLP 中关于词的做法。但不需要前面看深度学习 NLP 方法中给单词做向量化表示。<p>倒排索引的结构是把待搜索的文本先拆分成一系列词，拆分成词之后，我们实际上就是对规模较小的常用词进行索引编制了。<p>最终得到的是类似这样的结构。<pre class=language-json data-lang=json style=color:#fdf4c1aa;background-color:#282828><code class=language-json data-lang=json><span>{
+</span><span>  </span><span style=color:#b8bb26>"word"</span><span>: [</span><span style=color:#b8bb26>"doc1"</span><span>, </span><span style=color:#b8bb26>"doc2"</span><span>, </span><span style=color:#b8bb26>"doc3"</span><span>, </span><span style=color:#b8bb26>"..."</span><span>],
+</span><span>  </span><span style=color:#b8bb26>"would"</span><span>: [</span><span style=color:#b8bb26>"doc1"</span><span>, </span><span style=color:#b8bb26>"doc2"</span><span>, </span><span style=color:#b8bb26>"doc3"</span><span>, </span><span style=color:#b8bb26>"..."</span><span>]
+</span><span>}
+</span></code></pre><p>在搜索时，我们对搜索的内容同样分词处理（纯浏览器场景下，可能就不分词了，用户自己打空格。因为中文分词还需要词库，成本挺高的）。<p>然后逐个关键词去查询关联的文档，简单吧？<p>我们看看 elasticlunr 实际的结构是什么样的。<pre class=language-json data-lang=json style=color:#fdf4c1aa;background-color:#282828><code class=language-json data-lang=json><span>{
+</span><span>  </span><span style=color:#b8bb26>"documentStore"</span><span>: {
+</span><span>    </span><span style=color:#b8bb26>"save"</span><span>: </span><span style=color:#d3869b>true</span><span>,
+</span><span>    </span><span style=color:#b8bb26>"docs"</span><span>: {
+</span><span>      </span><span style=color:#b8bb26>"...."</span><span>: {}
+</span><span>    }
+</span><span>  },
+</span><span>  </span><span style=color:#b8bb26>"fields"</span><span>: [</span><span style=color:#b8bb26>"title"</span><span>, </span><span style=color:#b8bb26>"body"</span><span>],
+</span><span>  </span><span style=color:#b8bb26>"index"</span><span>: {
+</span><span>    </span><span style=color:#b8bb26>"title"</span><span>: {
+</span><span>      </span><span style=color:#b8bb26>"root"</span><span>: {
+</span><span>        </span><span style=color:#b8bb26>"docs"</span><span>: {
+</span><span>          </span><span style=color:#b8bb26>"docs"</span><span>: {},
+</span><span>          </span><span style=color:#b8bb26>"df"</span><span>: </span><span style=color:#d3869b>0</span><span>,
+</span><span>          </span><span style=color:#b8bb26>"o"</span><span>: {
+</span><span>            </span><span style=color:#b8bb26>"docs"</span><span>: {},
+</span><span>            </span><span style=color:#b8bb26>"df"</span><span>: </span><span style=color:#d3869b>0</span><span>,
+</span><span>            </span><span style=color:#b8bb26>"r"</span><span>: {},
+</span><span>            </span><span style=color:#b8bb26>"u"</span><span>: {}
+</span><span>          }
+</span><span>        },
+</span><span>        </span><span style=color:#b8bb26>"df"</span><span>: </span><span style=color:#d3869b>0</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"w"</span><span>: {}
+</span><span>      }
+</span><span>    },
+</span><span>    </span><span style=color:#b8bb26>"body"</span><span>: {
+</span><span>      </span><span style=color:#b8bb26>"root"</span><span>: {
+</span><span>        </span><span style=color:#b8bb26>"docs"</span><span>: {
+</span><span>          </span><span style=color:#b8bb26>"docs"</span><span>: {},
+</span><span>          </span><span style=color:#b8bb26>"df"</span><span>: </span><span style=color:#d3869b>0</span><span>,
+</span><span>          </span><span style=color:#b8bb26>"o"</span><span>: {
+</span><span>            </span><span style=color:#b8bb26>"docs"</span><span>: {},
+</span><span>            </span><span style=color:#b8bb26>"df"</span><span>: </span><span style=color:#d3869b>0</span><span>,
+</span><span>            </span><span style=color:#b8bb26>"r"</span><span>: {},
+</span><span>            </span><span style=color:#b8bb26>"u"</span><span>: {}
+</span><span>          }
+</span><span>        },
+</span><span>        </span><span style=color:#b8bb26>"df"</span><span>: </span><span style=color:#d3869b>0</span><span>,
+</span><span>        </span><span style=color:#b8bb26>"w"</span><span>: {}
+</span><span>      }
+</span><span>    }
+</span><span>  },
+</span><span>  </span><span style=color:#b8bb26>"lang"</span><span>: </span><span style=color:#b8bb26>"Chinese"</span><span>,
+</span><span>  </span><span style=color:#b8bb26>"pipeline"</span><span>: [
+</span><span>    </span><span style=color:#928374;font-style:italic>/* ... */
+</span><span>  ],
+</span><span>  </span><span style=color:#b8bb26>"ref"</span><span>: </span><span style=color:#b8bb26>"id"</span><span>,
+</span><span>  </span><span style=color:#b8bb26>"version"</span><span>: </span><span style=color:#b8bb26>"0.9.5"
+</span><span>}
+</span></code></pre><p>核心结构就是这个 index ，root 在内，下面的节点都有 <code>docs</code> 和 <code>df</code> 属性，<code>docs</code> 表示从 <code>root</code> 出发到这个节点组成的词关联的文档。<p>所以搜索功能实现就是把关键词放这里面查找。<pre class=language-javascript data-lang=javascript style=color:#fdf4c1aa;background-color:#282828><code class=language-javascript data-lang=javascript><span style=color:#928374;font-style:italic>// 搜索字典树里所有子项
+</span><span style=color:#928374;font-style:italic>// 其实不必要，会查出无关内容。比如查铁可能查到铁木真。
+</span><span style=color:#928374;font-style:italic>// 我只是测试一下这个查法，看下在实时反馈搜索结果的表现会不会好点。
+</span><span style=color:#fa5c4b>function </span><span style=color:#8ec07c>collect_related_docs_recursively</span><span>(</span><span style=color:#fdf4c1>inverted_index_node</span><span>) {
+</span><span>  </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>result </span><span style=color:#fe8019>= </span><span>[</span><span style=color:#fe8019>...</span><span style=color:#8ec07c>Object</span><span style=color:#fdf4c1>.</span><span style=color:#8ec07c>getOwnPropertyNames</span><span>(</span><span style=color:#fdf4c1>inverted_index_node</span><span>.</span><span style=color:#fdf4c1>docs</span><span>)];
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>key </span><span style=color:#fe8019>of </span><span style=color:#8ec07c>Object</span><span style=color:#fdf4c1>.</span><span style=color:#8ec07c>getOwnPropertyNames</span><span>(</span><span style=color:#fdf4c1>inverted_index_node</span><span>)) {
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>(</span><span style=color:#fdf4c1>key </span><span style=color:#fe8019>=== </span><span style=color:#b8bb26>"docs" </span><span style=color:#fe8019>|| </span><span style=color:#fdf4c1>key </span><span style=color:#fe8019>=== </span><span style=color:#b8bb26>"df"</span><span>) {
+</span><span>      </span><span style=color:#fa5c4b>continue</span><span>;
+</span><span>    }
+</span><span>
+</span><span>    </span><span style=color:#fdf4c1>result.</span><span style=color:#fabd2f>push</span><span>(</span><span style=color:#fe8019>...</span><span style=color:#8ec07c>collect_related_docs_recursively</span><span>(</span><span style=color:#fdf4c1>inverted_index_node</span><span>[</span><span style=color:#fdf4c1>key</span><span>]));
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>result</span><span>;
+</span><span>}
+</span><span>
+</span><span style=color:#928374;font-style:italic>// 搜索字典树嵌套倒排索引的结构，返回去重后的结果
+</span><span style=color:#fa5c4b>function </span><span style=color:#8ec07c>search_inverted_index</span><span>(</span><span style=color:#fdf4c1>index</span><span>, </span><span style=color:#fdf4c1>keywords</span><span>) {
+</span><span>  </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>results </span><span style=color:#fe8019>= </span><span>[];
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>let </span><span style=color:#fdf4c1>k </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#fdf4c1>k </span><span style=color:#fe8019>&lt; </span><span style=color:#fdf4c1>keywords</span><span>.</span><span style=color:#fabd2f>length</span><span>; </span><span style=color:#fdf4c1>k</span><span style=color:#fe8019>++</span><span>) {
+</span><span>    </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>keyword </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>keywords</span><span>[</span><span style=color:#fdf4c1>k</span><span>];
+</span><span>    </span><span style=color:#fa5c4b>var </span><span style=color:#fdf4c1>current </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>index</span><span>;
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// 把传入的关键词逐个字在字典树里查询下降，找到代表这个词的节点。
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>let </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>&lt; </span><span style=color:#fdf4c1>keyword</span><span>.</span><span style=color:#fabd2f>length</span><span>; </span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>++</span><span>) {
+</span><span>      </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>char </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>keyword</span><span>[</span><span style=color:#fdf4c1>i</span><span>];
+</span><span>      </span><span style=color:#fdf4c1>current </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>current</span><span>[</span><span style=color:#fdf4c1>char</span><span>];
+</span><span>
+</span><span>      </span><span style=color:#928374;font-style:italic>// 显然这个词不存在的话我们就没法查到文档了。
+</span><span>      </span><span style=color:#928374;font-style:italic>// 中文分词全文搜索 NLP 处理比英语麻烦的多，如果搜索的关键词是 广州地铁，那就搜不出广州的地铁。
+</span><span>      </span><span style=color:#928374;font-style:italic>// 如果搜索广州的地铁，也搜不出广州地铁。
+</span><span>      </span><span style=color:#fa5c4b>if </span><span>(</span><span style=color:#fdf4c1>current </span><span style=color:#fe8019>=== </span><span style=color:#d3869b>undefined</span><span>) {
+</span><span>        </span><span style=color:#fa5c4b>break</span><span>;
+</span><span>      }
+</span><span>    }
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic>// 查到内容了，组织成渲染的数据
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>(</span><span style=color:#fdf4c1>current </span><span style=color:#fe8019>&& </span><span style=color:#fdf4c1>current</span><span>.</span><span style=color:#fdf4c1>docs</span><span>) {
+</span><span>      </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>related_docs </span><span style=color:#fe8019>= </span><span style=color:#8ec07c>collect_related_docs_recursively</span><span>(</span><span style=color:#fdf4c1>current</span><span>);
+</span><span>      </span><span style=color:#fdf4c1>results.</span><span style=color:#fabd2f>push</span><span>(</span><span style=color:#fdf4c1>related_docs</span><span>);
+</span><span>    }
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// 查询结果去重
+</span><span>  </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>final_result </span><span style=color:#fe8019>= </span><span>[];
+</span><span>  </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>let </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>&lt; </span><span style=color:#fdf4c1>results</span><span>.</span><span style=color:#fabd2f>length</span><span>; </span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>++</span><span>) {
+</span><span>    </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>result </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>results</span><span>[</span><span style=color:#fdf4c1>i</span><span>];
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>let </span><span style=color:#fdf4c1>r </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; </span><span style=color:#fdf4c1>r </span><span style=color:#fe8019>&lt; </span><span style=color:#fdf4c1>result</span><span>.</span><span style=color:#fabd2f>length</span><span>; </span><span style=color:#fdf4c1>r</span><span style=color:#fe8019>++</span><span>) {
+</span><span>      </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>result_id </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>result</span><span>[</span><span style=color:#fdf4c1>r</span><span>];
+</span><span>      </span><span style=color:#fa5c4b>if </span><span>(</span><span style=color:#fdf4c1>final_result.</span><span style=color:#fabd2f>indexOf</span><span>(</span><span style=color:#fdf4c1>result_id</span><span>) </span><span style=color:#fe8019>=== -</span><span style=color:#d3869b>1</span><span>) {
+</span><span>        </span><span style=color:#fdf4c1>final_result.</span><span style=color:#fabd2f>push</span><span>(</span><span style=color:#fdf4c1>result_id</span><span>);
+</span><span>      }
+</span><span>    }
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>final_result</span><span>;
+</span><span>}
+</span><span>
+</span><span style=color:#928374;font-style:italic>// 加载索引并绑定搜索框
+</span><span style=color:#fa5c4b>new </span><span style=color:#8ec07c>Promise</span><span>((</span><span style=color:#fdf4c1>resolve</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#fabd2f>document</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>addEventListener</span><span>(</span><span style=color:#b8bb26>"DOMContentLoaded"</span><span>, </span><span style=color:#fdf4c1>resolve</span><span>))
+</span><span>  </span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>then</span><span>(() </span><span style=color:#fa5c4b>=> </span><span style=color:#8ec07c>fetch</span><span>(</span><span style=color:#b8bb26>"/search_index.zh.json"</span><span>))
+</span><span>  </span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>then</span><span>((</span><span style=color:#fdf4c1>response</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#fdf4c1>response.</span><span style=color:#8ec07c>json</span><span>())
+</span><span>  </span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>then</span><span>((</span><span style=color:#fdf4c1>data</span><span>) </span><span style=color:#fa5c4b>=> </span><span>{
+</span><span>    </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>si </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>document</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>getElementById</span><span>(</span><span style=color:#b8bb26>"search_input"</span><span>);
+</span><span>    </span><span style=color:#fdf4c1>si.</span><span style=color:#fabd2f>removeAttribute</span><span>(</span><span style=color:#b8bb26>"disabled"</span><span>);
+</span><span>    </span><span style=color:#fdf4c1>si.</span><span style=color:#fabd2f>setAttribute</span><span>(</span><span style=color:#b8bb26>"placeholder"</span><span>, </span><span style=color:#b8bb26>"输入关键词以开始搜索..."</span><span>);
+</span><span>    </span><span style=color:#fdf4c1>si.</span><span style=color:#fabd2f>addEventListener</span><span>(</span><span style=color:#b8bb26>"input"</span><span>, </span><span style=color:#fa5c4b>function </span><span>(</span><span style=color:#fdf4c1>event</span><span>) {
+</span><span>      </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>keyword </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>event</span><span>.</span><span style=color:#fabd2f>target</span><span>.</span><span style=color:#fabd2f>value</span><span>;
+</span><span>      </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>search_result </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>document</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>getElementById</span><span>(</span><span style=color:#b8bb26>"search-results"</span><span>);
+</span><span>
+</span><span>      </span><span style=color:#fa5c4b>if </span><span>(</span><span style=color:#fdf4c1>keyword.</span><span style=color:#8ec07c>trim</span><span>().</span><span style=color:#fabd2f>length </span><span style=color:#fe8019>=== </span><span style=color:#d3869b>0</span><span>) {
+</span><span>        </span><span style=color:#fdf4c1>search_result</span><span>.</span><span style=color:#fdf4c1>innerHTML </span><span style=color:#fe8019>= </span><span style=color:#b8bb26>""</span><span>;
+</span><span>        </span><span style=color:#fa5c4b>return</span><span>;
+</span><span>      }
+</span><span>
+</span><span>      </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>result </span><span style=color:#fe8019>= </span><span style=color:#8ec07c>search_inverted_index</span><span>(
+</span><span>        </span><span style=color:#fdf4c1>data</span><span>.</span><span style=color:#fabd2f>index</span><span>.</span><span style=color:#fabd2f>body</span><span>.</span><span style=color:#fdf4c1>root</span><span>,
+</span><span>        </span><span style=color:#fdf4c1>keyword.</span><span style=color:#fabd2f>split</span><span>(</span><span style=color:#b8bb26>" "</span><span>)
+</span><span>      );
+</span><span>      </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>html_results </span><span style=color:#fe8019>= </span><span>[];
+</span><span>      </span><span style=color:#fdf4c1>result
+</span><span>        </span><span style=color:#fdf4c1>.</span><span style=color:#8ec07c>map</span><span>((</span><span style=color:#fdf4c1>id</span><span>) </span><span style=color:#fa5c4b>=> </span><span style=color:#fdf4c1>data</span><span>.</span><span style=color:#fdf4c1>documentStore</span><span>.</span><span style=color:#fdf4c1>docs</span><span>[</span><span style=color:#fdf4c1>id</span><span>])
+</span><span>        </span><span style=color:#fdf4c1>.</span><span style=color:#8ec07c>map</span><span>((</span><span style=color:#fdf4c1>doc</span><span>) </span><span style=color:#fa5c4b>=> </span><span>{
+</span><span>          </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>item </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>document</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>createElement</span><span>(</span><span style=color:#b8bb26>"li"</span><span>);
+</span><span>          </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>link </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>document</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>createElement</span><span>(</span><span style=color:#b8bb26>"a"</span><span>);
+</span><span>          </span><span style=color:#fdf4c1>link.</span><span style=color:#fabd2f>setAttribute</span><span>(</span><span style=color:#b8bb26>"href"</span><span>, </span><span style=color:#fdf4c1>doc</span><span>.</span><span style=color:#fabd2f>id</span><span>);
+</span><span>          </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>link_title </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>document</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>createTextNode</span><span>(</span><span style=color:#fdf4c1>doc</span><span>.</span><span style=color:#fabd2f>title</span><span>);
+</span><span>          </span><span style=color:#fdf4c1>link.</span><span style=color:#fabd2f>appendChild</span><span>(</span><span style=color:#fdf4c1>link_title</span><span>);
+</span><span>          </span><span style=color:#fdf4c1>item.</span><span style=color:#fabd2f>appendChild</span><span>(</span><span style=color:#fdf4c1>link</span><span>);
+</span><span>          </span><span style=color:#fdf4c1>html_results.</span><span style=color:#fabd2f>push</span><span>(</span><span style=color:#fdf4c1>item</span><span>);
+</span><span>        });
+</span><span>      </span><span style=color:#fdf4c1>search_result.</span><span style=color:#8ec07c>replaceChildren</span><span>(</span><span style=color:#fe8019>...</span><span style=color:#fdf4c1>html_results</span><span>);
+</span><span>    });
+</span><span>  });
+</span></code></pre><p>ok 结束。<p>超时18分钟。</article><p class=tags-data><a href=/tags/bo-ke>/博客/</a> <a href=/tags/elasticlunr-js>/elasticlunr.js/</a> <a href=/tags/lunr-js>/lunr.js/</a> <a href=/tags/dao-pai-suo-yin>/倒排索引/</a> <a href=/tags/zi-dian-shu>/字典树/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

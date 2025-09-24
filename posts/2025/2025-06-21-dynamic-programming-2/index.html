@@ -1,0 +1,269 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>动态规划2</title><meta content=动态规划2 name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2025/2025-06-21-dynamic-programming-2/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=动态规划2 property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2025/2025-06-21-dynamic-programming-2/ property=twitter:url><meta content=动态规划2 property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2025/2025-06-21-dynamic-programming-2/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>动态规划2</h1><p class=author-line>作于：2025-06-21 23:42 ，最后更新于：2025-06-22 02:00 ，预计阅读时间 7 分钟<article><p>凌晨1点刚躺下快睡着的时候忽然想到了 01 背包问题的子问题是怎么拆分的，好像有点搞明白了动态规划的底层逻辑。<p>今天记录下。<h2 id=01-bei-bao-wen-ti>01 背包问题</h2><blockquote><p><strong>题目：</strong><p>你有一个载重上限为 $W$ 的背包。现在有 $N$ 件物品，每件物品都有其重量 $w_i$ 和价值 $v_i$。你希望在不超过背包载重上限的前提下，选择一些物品放入背包，使得放入背包的物品总价值最大。每件物品只能选择放入或不放入一次。<p><strong>请计算在给定背包容量下，能够获得的最大总价值。</strong><hr><p><strong>输入参数：</strong><p><strong>背包容量 $W = 10$</strong><p><strong>物品列表：</strong><table><thead><tr><th style=text-align:left>物品<th style=text-align:left>重量 (w)<th style=text-align:left>价值 (v)<tbody><tr><td style=text-align:left>物品A<td style=text-align:left>2<td style=text-align:left>6<tr><td style=text-align:left>物品B<td style=text-align:left>3<td style=text-align:left>3<tr><td style=text-align:left>物品C<td style=text-align:left>4<td style=text-align:left>10<tr><td style=text-align:left>物品D<td style=text-align:left>5<td style=text-align:left>7</table><p><strong>题解函数签名</strong>：<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>SolveKnapsack</span><span>(</span><span style=color:#fdf4c1>weights </span><span>[]</span><span style=color:#fabd2f>int</span><span>, </span><span style=color:#fdf4c1>values </span><span>[]</span><span style=color:#fabd2f>int</span><span>, </span><span style=color:#fdf4c1>capacity </span><span style=color:#fabd2f>int</span><span>) </span><span style=color:#fabd2f>int </span><span>{
+</span><span>	</span><span style=color:#928374;font-style:italic>// 实现代码
+</span><span>}
+</span></code></pre></blockquote><p>使用自顶向下法分析 01 背包问题时，最关键的问题是 <strong>如何构造、遍历决策树</strong> 。知道了怎么遍历决策树，就能很自然地推导出问题的递归解。<h2 id=jue-ce-shu-gou-jian-he-bian-li>决策树构建和遍历</h2><p>先判断如何构建决策树，决策树实际就是 <strong>怎么遍历所有可能的组合</strong>。<pre class=language-mermaid data-lang=mermaid style=color:#fdf4c1aa;background-color:#282828><code class=language-mermaid data-lang=mermaid><span style=color:#fa5c4b>graph </span><span style=color:#d3869b>TD
+</span><span>    </span><span style=color:#8ec07c>S</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"容量10"</span><span style=color:#fe8019>]
+</span><span>
+</span><span>    %% Item A (Weight: 2, Value: 6)
+</span><span>    S </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"放入物品A" </span><span style=color:#fe8019>--></span><span> A_T_8[</span><span style=color:#b8bb26>"容量8"</span><span>]
+</span><span>    S </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"不放入物品A" </span><span style=color:#fe8019>--></span><span> A_NT_10[</span><span style=color:#b8bb26>"容量10"</span><span>]
+</span><span>
+</span><span>    %% Item B (Weight: 3, Value: 3)
+</span><span>    A_T_8 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"放入物品B" </span><span style=color:#fe8019>--></span><span> B_T_5[</span><span style=color:#b8bb26>"容量5"</span><span>]
+</span><span>    A_T_8 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"不放入物品B" </span><span style=color:#fe8019>--></span><span> B_NT_8[</span><span style=color:#b8bb26>"容量8"</span><span>]
+</span><span>
+</span><span>    A_NT_10 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"放入物品B" </span><span style=color:#fe8019>--></span><span> B_T_7[</span><span style=color:#b8bb26>"容量7"</span><span>]
+</span><span>    A_NT_10 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"不放入物品B" </span><span style=color:#fe8019>--></span><span> B_NT_10[</span><span style=color:#b8bb26>"容量10"</span><span>]
+</span><span>
+</span><span>    %% Item C (Weight: 4, Value: 10)
+</span><span>    B_T_5 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"放入物品C" </span><span style=color:#fe8019>--></span><span> C_T_1[</span><span style=color:#b8bb26>"容量1"</span><span>]
+</span><span>    B_T_5 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"不放入物品C" </span><span style=color:#fe8019>--></span><span> C_NT_5[</span><span style=color:#b8bb26>"容量5"</span><span>]
+</span><span>
+</span><span>    B_NT_8 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"放入物品C" </span><span style=color:#fe8019>--></span><span> C_T_4[</span><span style=color:#b8bb26>"容量4"</span><span>]
+</span><span>    B_NT_8 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"不放入物品C" </span><span style=color:#fe8019>--></span><span> C_NT_8[</span><span style=color:#b8bb26>"容量8"</span><span>]
+</span><span>
+</span><span>    B_T_7 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"放入物品C" </span><span style=color:#fe8019>--></span><span> C_T_3[</span><span style=color:#b8bb26>"容量3"</span><span>]
+</span><span>    B_T_7 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"不放入物品C" </span><span style=color:#fe8019>--></span><span> C_NT_7[</span><span style=color:#b8bb26>"容量7"</span><span>]
+</span><span>
+</span><span>    B_NT_10 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"放入物品C" </span><span style=color:#fe8019>--></span><span> C_T_6[</span><span style=color:#b8bb26>"容量6"</span><span>]
+</span><span>    B_NT_10 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"不放入物品C" </span><span style=color:#fe8019>--></span><span> C_NT_10[</span><span style=color:#b8bb26>"容量10"</span><span>]
+</span><span>
+</span><span>    %% Item D (Weight: 5, Value: 7)
+</span><span>    C_T_1 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"放入物品D" </span><span style=color:#fe8019>--></span><span> D_T_neg4[</span><span style=color:#b8bb26>"容量-4"</span><span>]
+</span><span>    C_T_1 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"不放入物品D" </span><span style=color:#fe8019>--></span><span> D_NT_1[</span><span style=color:#b8bb26>"容量1"</span><span>]
+</span><span>
+</span><span>    C_NT_5 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"放入物品D" </span><span style=color:#fe8019>--></span><span> D_T_0[</span><span style=color:#b8bb26>"容量0"</span><span>]
+</span><span>    C_NT_5 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"不放入物品D" </span><span style=color:#fe8019>--></span><span> D_NT_5[</span><span style=color:#b8bb26>"容量5"</span><span>]
+</span><span>
+</span><span>    C_T_4 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"放入物品D" </span><span style=color:#fe8019>--></span><span> D_T_neg1[</span><span style=color:#b8bb26>"容量-1"</span><span>]
+</span><span>    C_T_4 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"不放入物品D" </span><span style=color:#fe8019>--></span><span> D_NT_4[</span><span style=color:#b8bb26>"容量4"</span><span>]
+</span><span>
+</span><span>    C_NT_8 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"放入物品D" </span><span style=color:#fe8019>--></span><span> D_T_3[</span><span style=color:#b8bb26>"容量3"</span><span>]
+</span><span>    C_NT_8 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"不放入物品D" </span><span style=color:#fe8019>--></span><span> D_NT_8[</span><span style=color:#b8bb26>"容量8"</span><span>]
+</span><span>
+</span><span>    C_T_3 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"放入物品D" </span><span style=color:#fe8019>--></span><span> D_T_neg2[</span><span style=color:#b8bb26>"容量-2"</span><span>]
+</span><span>    C_T_3 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"不放入物品D" </span><span style=color:#fe8019>--></span><span> D_NT_3[</span><span style=color:#b8bb26>"容量3"</span><span>]
+</span><span>
+</span><span>    C_NT_7 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"放入物品D" </span><span style=color:#fe8019>--></span><span> D_T_2[</span><span style=color:#b8bb26>"容量2"</span><span>]
+</span><span>    C_NT_7 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"不放入物品D" </span><span style=color:#fe8019>--></span><span> D_NT_7[</span><span style=color:#b8bb26>"容量7"</span><span>]
+</span><span>
+</span><span>    C_T_6 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"放入物品D" </span><span style=color:#fe8019>--></span><span> D_T_1[</span><span style=color:#b8bb26>"容量1"</span><span>]
+</span><span>    C_T_6 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"不放入物品D" </span><span style=color:#fe8019>--></span><span> D_NT_6[</span><span style=color:#b8bb26>"容量6"</span><span>]
+</span><span>
+</span><span>    C_NT_10 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"放入物品D" </span><span style=color:#fe8019>--></span><span> D_T_5[</span><span style=color:#b8bb26>"容量5"</span><span>]
+</span><span>    C_NT_10 </span><span style=color:#fe8019>-- </span><span style=color:#b8bb26>"不放入物品D" </span><span style=color:#fe8019>--></span><span> D_NT_10[</span><span style=color:#b8bb26>"容量10"</span><span>]
+</span><span>
+</span><span>    %% Styles for negative capacity nodes
+</span><span>    style D_T_neg4 stroke:red,stroke-width:1px
+</span><span>    style D_T_neg1 stroke:red,stroke-width:1px
+</span><span>    style D_T_neg2 stroke:red,stroke-width:1px
+</span><span>
+</span></code></pre><p>语言描述就是：先访问放入不物品i的子节点；如果剩余空间足够放入物品i，再访问放入物品i的子节点。<p>可以很直观地写一个 traversal 实现这个决策树的遍历过程<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>var </span><span style=color:#fdf4c1>w </span><span>[]</span><span style=color:#fabd2f>int </span><span style=color:#928374;font-style:italic>// 物品占据的容量
+</span><span>
+</span><span style=color:#928374;font-style:italic>// i 为物品下标，c 是背包剩余容量
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>traversal</span><span>(</span><span style=color:#fdf4c1>i</span><span>,</span><span style=color:#fdf4c1>c </span><span style=color:#fabd2f>int</span><span>) {
+</span><span>  </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>>= </span><span style=color:#fabd2f>len</span><span>(</span><span style=color:#fdf4c1>w</span><span>) {
+</span><span>    </span><span style=color:#fa5c4b>return
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// 不放物品i的分支
+</span><span>  </span><span style=color:#fdf4c1>traversal</span><span>(</span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>+</span><span style=color:#d3869b>1</span><span>,</span><span style=color:#fdf4c1>c</span><span>)
+</span><span>  </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>c</span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>w</span><span>[</span><span style=color:#fdf4c1>i</span><span>]</span><span style=color:#fe8019>>=</span><span style=color:#d3869b>0</span><span>{
+</span><span>    </span><span style=color:#928374;font-style:italic>// 放物品i的分支
+</span><span>    </span><span style=color:#fdf4c1>traversal</span><span>(</span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>+</span><span style=color:#d3869b>1</span><span>,</span><span style=color:#fdf4c1>c</span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>w</span><span>[</span><span style=color:#fdf4c1>i</span><span>])
+</span><span>  }
+</span><span>}
+</span></code></pre><p>这样一个 traversal 什么也没做，但是是动态规划递归解的一个很好的开始。<h2 id=bao-li-sou-suo>暴力搜索</h2><p>原问题是让我们找出所有可能的排列组合中，价值最大的组合。<p>其实仔细看决策树就会发现，每个叶子节点代表了一种排列组合方式。在dfs到达一个叶子节点时，我们就得到了一个可行的物品组合，可以计算出一个物品组合的总价值。dfs遍历了所有叶子，也就是遍历了所有的物品组合。<p>这样一来，找最大价值的物品组合，就可以被描述为在这棵树里找到价值最大的那个叶子节点。我们就有了暴力搜索的解法。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>var </span><span style=color:#fdf4c1>w </span><span>[]</span><span style=color:#fabd2f>int </span><span style=color:#928374;font-style:italic>// 物品占据的容量
+</span><span style=color:#fa5c4b>var </span><span style=color:#fdf4c1>v </span><span>[]</span><span style=color:#fabd2f>int </span><span style=color:#928374;font-style:italic>// 物品价值
+</span><span>
+</span><span style=color:#928374;font-style:italic>// 此函数任务是找出价值最大的叶子节点
+</span><span style=color:#928374;font-style:italic>// i 为物品下标，c 是剩余容量，selected 是选择的物品清单
+</span><span style=color:#928374;font-style:italic>// 返回考虑i件物品，剩余容量c 时能得到的最大价值
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>dfs</span><span>(</span><span style=color:#fdf4c1>i</span><span>, </span><span style=color:#fdf4c1>c </span><span style=color:#fabd2f>int</span><span>, </span><span style=color:#fdf4c1>selected </span><span>[]</span><span style=color:#fabd2f>int</span><span>) </span><span style=color:#fabd2f>int </span><span>{
+</span><span>  </span><span style=color:#928374;font-style:italic>// 叶子节点，所有的物品都决策完毕，计算物品组合的总价值
+</span><span>  </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>== </span><span style=color:#fabd2f>len</span><span>(</span><span style=color:#fdf4c1>w</span><span>) {
+</span><span>    </span><span style=color:#fa5c4b>var </span><span style=color:#fdf4c1>sum </span><span style=color:#fabd2f>int
+</span><span>    </span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>_</span><span>, </span><span style=color:#fdf4c1>item </span><span style=color:#fe8019>:= </span><span style=color:#fa5c4b>range </span><span style=color:#fdf4c1>selected </span><span>{
+</span><span>      </span><span style=color:#fdf4c1>sum </span><span style=color:#fe8019>+= </span><span style=color:#fdf4c1>v</span><span>[</span><span style=color:#fdf4c1>item</span><span>]
+</span><span>    }
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>sum
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// 放/不放 物品i 分支的最大价值
+</span><span>  </span><span style=color:#fa5c4b>var </span><span style=color:#fdf4c1>a</span><span>, </span><span style=color:#fdf4c1>b </span><span style=color:#fabd2f>int
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// 不放物品i的分支
+</span><span>  </span><span style=color:#fdf4c1>a </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>dfs</span><span>(</span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>+</span><span style=color:#d3869b>1</span><span>, </span><span style=color:#fdf4c1>c</span><span>, </span><span style=color:#fdf4c1>selected</span><span>)
+</span><span>  </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>w</span><span>[</span><span style=color:#fdf4c1>i</span><span>] </span><span style=color:#fe8019>&lt;= </span><span style=color:#fdf4c1>c</span><span>{
+</span><span>    </span><span style=color:#928374;font-style:italic>// 放物品i的分支
+</span><span>    </span><span style=color:#fdf4c1>b </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>dfs</span><span>(</span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>+</span><span style=color:#d3869b>1</span><span>, </span><span style=color:#fdf4c1>c</span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>w</span><span>[</span><span style=color:#fdf4c1>i</span><span>], </span><span style=color:#fabd2f>append</span><span>(</span><span style=color:#fdf4c1>selected</span><span>, </span><span style=color:#fdf4c1>i</span><span>))
+</span><span>  }
+</span><span>  </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>max</span><span>(</span><span style=color:#fdf4c1>a</span><span>, </span><span style=color:#fdf4c1>b</span><span>)
+</span><span>}
+</span></code></pre><p>这个搜索过程会这样判断，比较两颗子树的最大价值，取较大者返回上一层，直到回到根节点，此时得到的最大价值就是整颗决策树里最大的那个叶子。<pre class=language-mermaid data-lang=mermaid style=color:#fdf4c1aa;background-color:#282828><code class=language-mermaid data-lang=mermaid><span style=color:#fa5c4b>graph </span><span style=color:#d3869b>TD
+</span><span>    %% Define the final value of each path (leaf nodes)
+</span><span>    </span><span style=color:#8ec07c>D_T_neg4</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"价值: 负无穷 (不可达)"</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>D_NT_1</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"价值: 16 (A+C)"</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>D_T_0</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"价值: 13 (A+B+D)"</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>D_NT_5</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"价值: 19 (A+B+C)"</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>D_T_neg1</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"价值: 负无穷 (不可达)"</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>D_NT_4</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"价值: 9 (A+D)"</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>D_T_3</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"价值: 13 (A+C+D)"</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>D_NT_8</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"价值: 9 (A)"</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>D_T_neg2</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"价值: 负无穷 (不可达)"</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>D_NT_3</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"价值: 10 (B+C)"</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>D_T_2</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"价值: 16 (B+D)"</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>D_NT_7</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"价值: 3 (B)"</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>D_T_1</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"价值: 17 (C+D)"</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>D_NT_6</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"价值: 10 (C)"</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>D_T_5</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"价值: 7 (D)"</span><span style=color:#fe8019>]
+</span><span>    </span><span style=color:#8ec07c>D_NT_10</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"价值: 0"</span><span style=color:#fe8019>]
+</span><span>
+</span><span>    %% Styles for unreachable paths
+</span><span>    style D_T_neg4 stroke:red,stroke-width:1px
+</span><span>    style D_T_neg1 stroke:red,stroke-width:1px
+</span><span>    style D_T_neg2 stroke:red,stroke-width:1px
+</span><span>
+</span><span>    %% Define the maximum value propagated upwards
+</span><span>    </span><span style=color:#8ec07c>C_T_1</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 16"</span><span style=color:#fe8019>] </span><span>--> D_T_neg4
+</span><span>    </span><span style=color:#8ec07c>C_T_1</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 16"</span><span style=color:#fe8019>] </span><span>--> D_NT_1
+</span><span>
+</span><span>    </span><span style=color:#8ec07c>C_NT_5</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 19"</span><span style=color:#fe8019>] </span><span>--> D_T_0
+</span><span>    </span><span style=color:#8ec07c>C_NT_5</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 19"</span><span style=color:#fe8019>] </span><span>--> D_NT_5
+</span><span>
+</span><span>    </span><span style=color:#8ec07c>C_T_4</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 9"</span><span style=color:#fe8019>] </span><span>--> D_T_neg1
+</span><span>    </span><span style=color:#8ec07c>C_T_4</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 9"</span><span style=color:#fe8019>] </span><span>--> D_NT_4
+</span><span>
+</span><span>    </span><span style=color:#8ec07c>C_NT_8</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 13"</span><span style=color:#fe8019>] </span><span>--> D_T_3
+</span><span>    </span><span style=color:#8ec07c>C_NT_8</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 13"</span><span style=color:#fe8019>] </span><span>--> D_NT_8
+</span><span>
+</span><span>    </span><span style=color:#8ec07c>C_T_3</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 10"</span><span style=color:#fe8019>] </span><span>--> D_T_neg2
+</span><span>    </span><span style=color:#8ec07c>C_T_3</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 10"</span><span style=color:#fe8019>] </span><span>--> D_NT_3
+</span><span>
+</span><span>    </span><span style=color:#8ec07c>C_NT_7</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 16"</span><span style=color:#fe8019>] </span><span>--> D_T_2
+</span><span>    </span><span style=color:#8ec07c>C_NT_7</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 16"</span><span style=color:#fe8019>] </span><span>--> D_NT_7
+</span><span>
+</span><span>    </span><span style=color:#8ec07c>C_T_6</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 17"</span><span style=color:#fe8019>] </span><span>--> D_T_1
+</span><span>    </span><span style=color:#8ec07c>C_T_6</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 17"</span><span style=color:#fe8019>] </span><span>--> D_NT_6
+</span><span>
+</span><span>    </span><span style=color:#8ec07c>C_NT_10</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 7"</span><span style=color:#fe8019>] </span><span>--> D_T_5
+</span><span>    </span><span style=color:#8ec07c>C_NT_10</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 7"</span><span style=color:#fe8019>] </span><span>--> D_NT_10
+</span><span>
+</span><span>    </span><span style=color:#8ec07c>B_T_5</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 19"</span><span style=color:#fe8019>] </span><span>--> C_T_1
+</span><span>    </span><span style=color:#8ec07c>B_T_5</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 19"</span><span style=color:#fe8019>] </span><span>--> C_NT_5
+</span><span>
+</span><span>    </span><span style=color:#8ec07c>B_NT_8</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 13"</span><span style=color:#fe8019>] </span><span>--> C_T_4
+</span><span>    </span><span style=color:#8ec07c>B_NT_8</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 13"</span><span style=color:#fe8019>] </span><span>--> C_NT_8
+</span><span>
+</span><span>    </span><span style=color:#8ec07c>B_T_7</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 16"</span><span style=color:#fe8019>] </span><span>--> C_T_3
+</span><span>    </span><span style=color:#8ec07c>B_T_7</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 16"</span><span style=color:#fe8019>] </span><span>--> C_NT_7
+</span><span>
+</span><span>    </span><span style=color:#8ec07c>B_NT_10</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 17"</span><span style=color:#fe8019>] </span><span>--> C_T_6
+</span><span>    </span><span style=color:#8ec07c>B_NT_10</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 17"</span><span style=color:#fe8019>] </span><span>--> C_NT_10
+</span><span>
+</span><span>    </span><span style=color:#8ec07c>A_T_8</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 19"</span><span style=color:#fe8019>] </span><span>--> B_T_5
+</span><span>    </span><span style=color:#8ec07c>A_T_8</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 19"</span><span style=color:#fe8019>] </span><span>--> B_NT_8
+</span><span>
+</span><span>    </span><span style=color:#8ec07c>A_NT_10</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 17"</span><span style=color:#fe8019>] </span><span>--> B_T_7
+</span><span>    </span><span style=color:#8ec07c>A_NT_10</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"决策出最大价值: 17"</span><span style=color:#fe8019>] </span><span>--> B_NT_10
+</span><span>
+</span><span>    </span><span style=color:#8ec07c>S</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"最大总价值: 19"</span><span style=color:#fe8019>] </span><span>--> A_T_8
+</span><span>    </span><span style=color:#8ec07c>S</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>"最大总价值: 19"</span><span style=color:#fe8019>] </span><span>--> A_NT_10
+</span></code></pre><p>但这还不是动态规划，因为我们没利用上它的最优子结构性质，也没有处理过程中的重叠子问题（决策树里包含很多重复的子组合，比如abcd,bcd,acd这样都包含cd物品的组合）。<h2 id=dong-tai-gui-hua-ji-yi-hua-sou-suo-fa>动态规划(记忆化搜索法)</h2><p>如果再仔细观察下，不难发现，任何层级中任何一个中间节点 N 的，它的最大价值只取决于自己的后继结点，它的前驱都是确定、不变的。<p>对于每个中间节点 N ，可以套用一个简化版本的公式： <code>f(N) = max(f(left_child), f(right_child))</code>，包括根节点。<p>这体现了 01 背包问题的 <strong>无后效性</strong> 和 <strong>最优子结构</strong>。<p>从这条简化的式子能很明显看出，<strong>如果一个全局最优路径（从根到最优叶子的路径）经过了某个中间节点，那么从这个中间节点到最优叶子的那段子路径，一定是该子问题（由中间节点定义）的最优解。</strong>。<p>由于这个最优子结构的性质，我们实际上不需要累计整个路径的决策价值，只需要逐级求解局部最优（已考虑i件物品，背包容量为c时的最大价值）返回即可：<p><code>f(i,c) = max(w[i] &lt;= c ? v[i] + f(i+1, c-w[i]) : 0, f(i+1, c))</code><p>其中 i 是物品下标，c 是剩余容量。当 i 不存在时，<code>f(i,c)=0</code>。<p>这样我们就得到了一个看起来比较 dp 递归解。而 dp 递归解还要处理重叠子问题，也就是搜索过程会遍历到一模一样的子树时。<p>我们再加上 memo，就得到了动态规划的记忆化搜索算法（递归解）<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>var </span><span style=color:#fdf4c1>memo </span><span style=color:#fa5c4b>map</span><span>[</span><span style=color:#fabd2f>int</span><span>]</span><span style=color:#fa5c4b>map</span><span>[</span><span style=color:#fabd2f>int</span><span>]</span><span style=color:#fabd2f>int
+</span><span style=color:#fa5c4b>var </span><span style=color:#fdf4c1>w </span><span>[]</span><span style=color:#fabd2f>int </span><span style=color:#928374;font-style:italic>// 物品占据的容量
+</span><span style=color:#fa5c4b>var </span><span style=color:#fdf4c1>v </span><span>[]</span><span style=color:#fabd2f>int </span><span style=color:#928374;font-style:italic>// 物品价值
+</span><span>
+</span><span style=color:#928374;font-style:italic>// 此函数递归计算局部价值最大化路径，汇总成全局价值最大化路径。
+</span><span style=color:#928374;font-style:italic>// i 为物品下标，c 是背包剩余容量
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>dfs</span><span>(</span><span style=color:#fdf4c1>i</span><span>, </span><span style=color:#fdf4c1>c </span><span style=color:#fabd2f>int</span><span>) </span><span style=color:#fabd2f>int </span><span>{
+</span><span>  </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>>= </span><span style=color:#fabd2f>len</span><span>(</span><span style=color:#fdf4c1>w</span><span>) {
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>memo</span><span>[</span><span style=color:#fdf4c1>i</span><span>][</span><span style=color:#fdf4c1>c</span><span>] </span><span style=color:#fe8019>> </span><span style=color:#d3869b>0 </span><span>{
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>memo</span><span>[</span><span style=color:#fdf4c1>i</span><span>][</span><span style=color:#fdf4c1>c</span><span>]
+</span><span>  }
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>var </span><span style=color:#fdf4c1>a</span><span>, </span><span style=color:#fdf4c1>b </span><span style=color:#fabd2f>int
+</span><span>  </span><span style=color:#fdf4c1>a </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>dfs</span><span>(</span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>+</span><span style=color:#d3869b>1</span><span>, </span><span style=color:#fdf4c1>c</span><span>)
+</span><span>  </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>w</span><span>[</span><span style=color:#fdf4c1>i</span><span>] </span><span style=color:#fe8019>&lt;= </span><span style=color:#fdf4c1>c </span><span>{
+</span><span>    </span><span style=color:#fdf4c1>b </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>v</span><span>[</span><span style=color:#fdf4c1>i</span><span>] </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>dfs</span><span>(</span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>+</span><span style=color:#d3869b>1</span><span>,</span><span style=color:#fdf4c1>c</span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>w</span><span>[</span><span style=color:#fdf4c1>i</span><span>])
+</span><span>  }
+</span><span>  </span><span style=color:#fdf4c1>memo</span><span>[</span><span style=color:#fdf4c1>i</span><span>][</span><span style=color:#fdf4c1>c</span><span>] </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>max</span><span>(</span><span style=color:#fdf4c1>a</span><span>, </span><span style=color:#fdf4c1>b</span><span>)
+</span><span>  </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>memo</span><span>[</span><span style=color:#fdf4c1>i</span><span>][</span><span style=color:#fdf4c1>c</span><span>]
+</span><span>}
+</span></code></pre><h2 id=dong-tai-gui-hua-tian-biao-fa>动态规划（填表法）</h2><pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>var </span><span style=color:#fdf4c1>w </span><span>[]</span><span style=color:#fabd2f>int
+</span><span style=color:#fa5c4b>var </span><span style=color:#fdf4c1>v </span><span>[]</span><span style=color:#fabd2f>int
+</span><span>
+</span><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>solve</span><span>() </span><span style=color:#fabd2f>int </span><span>{
+</span><span>	</span><span style=color:#fdf4c1>numItems </span><span style=color:#fe8019>:= </span><span style=color:#fabd2f>len</span><span>(</span><span style=color:#fdf4c1>weights</span><span>)
+</span><span>	</span><span style=color:#928374;font-style:italic>// dp[i][j] 表示：考虑前i件物品，背包容量为j时，能够获得的最大价值
+</span><span>	</span><span style=color:#928374;font-style:italic>// dp 数组的大小为 (numItems + 1) x (capacity + 1)
+</span><span>	</span><span style=color:#928374;font-style:italic>// 额外的一行一列用于处理“0件物品”或“0容量”的边界情况
+</span><span>	</span><span style=color:#fdf4c1>dp </span><span style=color:#fe8019>:= </span><span style=color:#fabd2f>make</span><span>([][]</span><span style=color:#fabd2f>int</span><span>, </span><span style=color:#fdf4c1>numItems</span><span style=color:#fe8019>+</span><span style=color:#d3869b>1</span><span>)
+</span><span>	</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>:= </span><span style=color:#fa5c4b>range </span><span style=color:#fdf4c1>dp </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>dp</span><span>[</span><span style=color:#fdf4c1>i</span><span>] </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>make</span><span>([]</span><span style=color:#fabd2f>int</span><span>, </span><span style=color:#fdf4c1>capacity</span><span style=color:#fe8019>+</span><span style=color:#d3869b>1</span><span>)
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#928374;font-style:italic>// 无需初始化，go 默认初始化为 0 了。
+</span><span>
+</span><span>	</span><span style=color:#928374;font-style:italic>// 填充DP表
+</span><span>	</span><span style=color:#928374;font-style:italic>// i 从 1 到 numItems，表示当前考虑的是第 i 件物品 (对应 weights[i-1] 和 values[i-1])
+</span><span>	</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>:= </span><span style=color:#d3869b>1</span><span>; </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>&lt;= </span><span style=color:#fdf4c1>numItems</span><span>; </span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>++ </span><span>{
+</span><span>		</span><span style=color:#928374;font-style:italic>// j 从 1 到 capacity，表示当前背包的容量
+</span><span>		</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>j </span><span style=color:#fe8019>:= </span><span style=color:#d3869b>1</span><span>; </span><span style=color:#fdf4c1>j </span><span style=color:#fe8019>&lt;= </span><span style=color:#fdf4c1>capacity</span><span>; </span><span style=color:#fdf4c1>j</span><span style=color:#fe8019>++ </span><span>{
+</span><span>			</span><span style=color:#928374;font-style:italic>// 当前物品的重量和价值 (注意索引偏移：dp表中的i对应物品数组中的i-1)
+</span><span>			</span><span style=color:#fdf4c1>currentWeight </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>weights</span><span>[</span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>]
+</span><span>			</span><span style=color:#fdf4c1>currentValue </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>values</span><span>[</span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>]
+</span><span>			</span><span style=color:#928374;font-style:italic>// 情况1: 当前物品i无法放入背包 (重量超过当前容量)
+</span><span>			</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>currentWeight </span><span style=color:#fe8019>> </span><span style=color:#fdf4c1>j </span><span>{
+</span><span>				</span><span style=color:#fdf4c1>dp</span><span>[</span><span style=color:#fdf4c1>i</span><span>][</span><span style=color:#fdf4c1>j</span><span>] </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>dp</span><span>[</span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>][</span><span style=color:#fdf4c1>j</span><span>] </span><span style=color:#928374;font-style:italic>// 价值等于不放这件物品的价值
+</span><span>			} </span><span style=color:#fa5c4b>else </span><span>{
+</span><span>				</span><span style=color:#928374;font-style:italic>// 情况2: 当前物品i可以放入背包
+</span><span>				</span><span style=color:#928374;font-style:italic>// 选项A: 不放当前物品i
+</span><span>				</span><span style=color:#fdf4c1>a </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>dp</span><span>[</span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>][</span><span style=color:#fdf4c1>j</span><span>]
+</span><span>				</span><span style=color:#928374;font-style:italic>// 选项B: 放当前物品i
+</span><span>				</span><span style=color:#928374;font-style:italic>// 价值 = 当前物品的价值 + 剩余容量下（前i-1件物品）能获得的最大价值
+</span><span>				</span><span style=color:#fdf4c1>b </span><span style=color:#fe8019>:= </span><span style=color:#fdf4c1>currentValue </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>dp</span><span>[</span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>][</span><span style=color:#fdf4c1>j</span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>currentWeight</span><span>]
+</span><span>				</span><span style=color:#928374;font-style:italic>// 取这两种情况的最大值
+</span><span>				</span><span style=color:#fdf4c1>dp</span><span>[</span><span style=color:#fdf4c1>i</span><span>][</span><span style=color:#fdf4c1>j</span><span>] </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>max</span><span>(</span><span style=color:#fdf4c1>a</span><span>, </span><span style=color:#fdf4c1>b</span><span>)
+</span><span>			}
+</span><span>		}
+</span><span>	}
+</span><span>	</span><span style=color:#928374;font-style:italic>// 最终结果存储在 dp[numItems][capacity]
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>dp</span><span>[</span><span style=color:#fdf4c1>numItems</span><span>][</span><span style=color:#fdf4c1>capacity</span><span>]
+</span><span>}
+</span></code></pre><p>填表法其实也挺暴力的，它不会管实际决策树里在叶子节点会遇到哪些剩余背包容量，而是直接从0到最大容量全部填完，对每一种可能的剩余背包容量情况都做了判断。<p>填表法内部是模拟了递归的栈，<code>dp[i-1][j-currentWeight]</code> 就是递归法代码对应 <code>dfs</code> 的参数返回的值。<p>再观察下就会发现这个问题只依赖上一级的最优解，所以 dp 数组是可以优化成一个一维数组的。就不展开了。<h2 id=zong-jie>总结</h2><p>01 背包其实搞懂构建决策树和怎么深度优先遍历就解决一半问题了。剩下一半明确局部最优的解法也差不多了。<p>遗憾的是还是不明白怎么证明决策树中间节点N到最大价值的叶子L一定是局部最优。</article><p class=tags-data><a href=/tags/go>/go/</a> <a href=/tags/dong-tai-gui-hua>/动态规划/</a> <a href=/tags/01bei-bao-wen-ti>/01背包问题/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

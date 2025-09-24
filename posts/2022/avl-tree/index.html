@@ -1,0 +1,246 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>AVL树</title><meta content=AVL树 name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2022/avl-tree/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=AVL树 property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2022/avl-tree/ property=twitter:url><meta content=AVL树 property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2022/avl-tree/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>AVL树</h1><p class=author-line>作于：2022-02-11 15:07 ，预计阅读时间 9 分钟<article><h2 id=qian-yan>前言</h2><p>还记得很久以前学数据结构只看到二叉树，讲到平衡，但平衡方法当时看纸质书手头也没有实验环境，后来就没继续学下去。现在有闲就重新捡起来学一下。先从AVL树继续看。<h2 id=avlshu>AVL树</h2><p>AVL 树是以提出者名字命名的，Adelson-Velskii & Landis，俄国人，后来移居以色列。人怎么样不管啦。<p>AVL 树是一种平衡二叉树，左右子树高度差不超过1。保持平衡的方法是每次插入数据的时候发现子树不平衡，就把较高的子树提升为根，把根变成新的根的子树，把较高的子树变矮，较矮的子树变高，实现平衡。这个过程被叫做旋转，下面介绍旋转。<h2 id=zuo-xuan-zhuan-you-xuan-zhuan>左旋转/右旋转</h2><p><img alt=右旋转 src=https://nnnewb.github.io/posts/2022/avl-tree/640.webp><p><img alt=左旋转 src=https://nnnewb.github.io/posts/2022/avl-tree/640-16445510501782.webp><p>左旋转和右旋转的逻辑是一样的。如果右子树比左子树高，就把右子树提升成根。如果左子树比右子树高，就把左子树提升成根。提升右子树叫左旋转，提升左子树叫右旋转。<p>把子树提升成根会有点麻烦。比如右子树提升为根，原来的根和左子树怎么办？我们并不想重新平衡树的时候把整个左子树都删掉，那原来的根和左子树就必须插回新的树里。<p>我们知道右子树的 key 肯定比根和左子树所有节点大，所以根要插回树的话，一个很直接的想法就是把旧的根接到右子树左下角的叶子节点。<p><img alt=旧的根插回新根 src=https://nnnewb.github.io/posts/2022/avl-tree/image-20220211115435552.webp><p>的确，这样保持了二叉搜索树的特征，但新的树依然不平衡：节点5的左子树高度2，右子树高度0，高度差超过了1。稍微想想就知道，旧的根和左子树直接接到左下角叶子节点的话，会让原本平衡的新树左子树高度增加，进而失去平衡。<p>解决方法也很简单，不要把旧的树接到新的树最小值上，而是把新树的左子树，移植成旧树的右子树，再把旧树移植成新树的左子树。这样一来，右子树的左子树和左子树的右子树不管怎么旋转，高度都一样。<p><img alt=image-20220211135807095 src=https://nnnewb.github.io/posts/2022/avl-tree/image-20220211135807095.webp><p>为什么这样可以保持平衡呢？首先AVL树的子树也是AVL树，所以子树的子树之间高度差也不超过1。左旋转、右旋转的的作用是让子树高度一侧升高，一侧降低——注意，左旋转只能降低右儿子的右子树高度，右儿子的左子树高度不变。右旋转只能降低左儿子的左子树高度，左儿子的右子树高度不变。<p>举例来说，上图中右儿子的右子树（4-6-7-8）较高，旋转后变成了（6-7-8），而原本的（4-6-5）变成了（6-4-5），高度不变。<p>这个规律很好理解，因为原来的右子树变成了根，整个右子树剩下的节点高度都降低了。而右子树的左子树变成了现在的左子树的右子树，和根的距离一样，所以高度不变。<p><strong>左旋转让右子树的右子树高度-1，左子树的左子树高度+1。左子树的右子树高度等于右子树的左子树，旋转后新树的左右子树的高度相等。</strong><h2 id=shuang-xuan-zhuan>双旋转</h2><p>对于往左儿子的左子树插入节点造成的不平衡，右旋转可以实现降低左儿子的左子树高度，再次平衡。往右儿子的右子树插入节点造成的不平衡，左旋转可以降低右儿子的右子树高度，再次平衡。但对于左儿子的右子树或右儿子的左子树插入节点造成的不平衡，一次左、右旋转无法实现再平衡。<p>再看一个例子。<p><img alt=image-20220211141652944 src=https://nnnewb.github.io/posts/2022/avl-tree/image-20220211141652944.webp><p>旋转前，右儿子的左子树（4-7-6-5）高度是4，旋转后（7-4-6-5）高度不变，依然是4，树仍然不平衡。解决办法也很简单，先把右子树（7）右旋，让右儿子的左子树高度低于右子树，再对整棵树左旋，也就是AVL树的双旋转。<p>一步一步看双旋转是怎么解决这个问题的。<p>第一步，右儿子的左子树比右儿子右子树高，所以将右儿子右旋，使得右儿子的右子树高于右儿子的左子树。<p><img alt=image-20220211142847329 src=https://nnnewb.github.io/posts/2022/avl-tree/image-20220211142847329.webp><p>我们知道的左旋转时右儿子的左子树高度不变，右儿子的右子树高度-1。这一步前，直接对整棵树左旋时，最高的那颗子树（右儿子的左子树）高度没有变化，树依然不平衡，只是变成了右子树更矮，左子树更高而已。<p>而这一步之后，最高的子树变成了右子树的右子树。现在对整棵树左旋，右子树的右子树高度下降了，和原本右子树的左子树高度一致，达成平衡。<p><img alt=image-20220211151253277 src=https://nnnewb.github.io/posts/2022/avl-tree/image-20220211151253277.webp><p>这个原则简单地说，就是左子树下最高的子树应该是左子树，右子树下最高的子树应该是右子树。如果新增节点后不满足这个条件，就要先对左子树左旋，或者对右子树右旋，来满足这个条件。<h2 id=dai-ma-shi-xian>代码实现</h2><pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>from </span><span>typing </span><span style=color:#fa5c4b>import </span><span>Optional
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>AVLTreeNode</span><span>:
+</span><span>    </span><span style=color:#928374;font-style:italic>"""树节点
+</span><span style=color:#928374;font-style:italic>    """
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__init__</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>value</span><span>: </span><span style=color:#fabd2f>int</span><span>, </span><span style=color:#fdf4c1>parent</span><span>: </span><span style=color:#b8bb26>'AVLTreeNode'</span><span>) -> </span><span style=color:#d3869b>None</span><span>:
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.value </span><span style=color:#fe8019>= </span><span>value
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.parent </span><span style=color:#fe8019>= </span><span>parent
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.left: Optional[</span><span style=color:#b8bb26>'AVLTreeNode'</span><span>] </span><span style=color:#fe8019>= </span><span style=color:#d3869b>None
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.right: Optional[</span><span style=color:#b8bb26>'AVLTreeNode'</span><span>] </span><span style=color:#fe8019>= </span><span style=color:#d3869b>None
+</span><span>
+</span><span>    @</span><span style=color:#fabd2f>property
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>height</span><span>(</span><span style=color:#fdf4c1>self</span><span>) -> </span><span style=color:#fabd2f>int</span><span>:
+</span><span>        </span><span style=color:#928374;font-style:italic>"""子树高度
+</span><span style=color:#928374;font-style:italic>
+</span><span style=color:#928374;font-style:italic>        Returns:
+</span><span style=color:#928374;font-style:italic>            int: 子树高度
+</span><span style=color:#928374;font-style:italic>        """
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fabd2f>max</span><span style=color:#fdf4c1>(self._left_height, self._right_height)</span><span style=color:#fe8019>+</span><span style=color:#d3869b>1
+</span><span>
+</span><span>    @</span><span style=color:#fabd2f>property
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>_left_height</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>self</span><span>.left.height </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>self</span><span>.left </span><span style=color:#fe8019>is not </span><span style=color:#d3869b>None </span><span style=color:#fa5c4b>else </span><span style=color:#d3869b>0
+</span><span>
+</span><span>    @</span><span style=color:#fabd2f>property
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>_right_height</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>self</span><span>.right.height </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>self</span><span>.right </span><span style=color:#fe8019>is not </span><span style=color:#d3869b>None </span><span style=color:#fa5c4b>else </span><span style=color:#d3869b>0
+</span><span>
+</span><span>    @</span><span style=color:#fabd2f>property
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>balance</span><span>(</span><span style=color:#fdf4c1>self</span><span>) -> </span><span style=color:#fabd2f>bool</span><span>:
+</span><span>        </span><span style=color:#928374;font-style:italic>"""是否平衡
+</span><span style=color:#928374;font-style:italic>
+</span><span style=color:#928374;font-style:italic>        Returns:
+</span><span style=color:#928374;font-style:italic>            bool: 是否平衡
+</span><span style=color:#928374;font-style:italic>        """
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fabd2f>abs</span><span style=color:#fdf4c1>(self._left_height</span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>self._right_height) </span><span style=color:#fe8019>&lt;= </span><span style=color:#d3869b>1
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>right_rotate</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        </span><span style=color:#928374;font-style:italic>"""节点右旋
+</span><span style=color:#928374;font-style:italic>        """
+</span><span>        </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>self</span><span>.left </span><span style=color:#fe8019>is </span><span style=color:#d3869b>None</span><span>:
+</span><span>            </span><span style=color:#fa5c4b>raise </span><span style=color:#fabd2f>Exception</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'can not rotate tree with empty left node'</span><span style=color:#fdf4c1>)
+</span><span>        </span><span style=color:#928374;font-style:italic># 旧的根成为右节点
+</span><span>        </span><span style=color:#928374;font-style:italic># 旧的根的左节点成为新的根
+</span><span>        </span><span style=color:#928374;font-style:italic># 新的根的右节点变成旧的根的左节点
+</span><span>        </span><span style=color:#928374;font-style:italic># 旧的根变成新的根的右节点
+</span><span>        old_root </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self
+</span><span>        new_root </span><span style=color:#fe8019>= </span><span>old_root.left
+</span><span>
+</span><span>        old_root.left </span><span style=color:#fe8019>= </span><span>new_root.right
+</span><span>        new_root.right </span><span style=color:#fe8019>= </span><span>old_root
+</span><span>
+</span><span>        </span><span style=color:#928374;font-style:italic># 新根替换旧根
+</span><span>        </span><span style=color:#fa5c4b>if </span><span>old_root.parent </span><span style=color:#fe8019>is not </span><span style=color:#d3869b>None</span><span>:
+</span><span>            </span><span style=color:#fa5c4b>if </span><span>old_root.parent.left </span><span style=color:#fe8019>== </span><span>old_root:
+</span><span>                old_root.parent.left </span><span style=color:#fe8019>= </span><span>new_root
+</span><span>            </span><span style=color:#fa5c4b>else</span><span>:
+</span><span>                old_root.parent.right </span><span style=color:#fe8019>= </span><span>new_root
+</span><span>
+</span><span>        new_root.parent </span><span style=color:#fe8019>= </span><span>old_root.parent
+</span><span>        old_root.parent </span><span style=color:#fe8019>= </span><span>new_root
+</span><span>        </span><span style=color:#fa5c4b>if </span><span>old_root.left </span><span style=color:#fe8019>is not </span><span style=color:#d3869b>None</span><span>:
+</span><span>            old_root.left.parent </span><span style=color:#fe8019>= </span><span>old_root
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>left_rotate</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        </span><span style=color:#928374;font-style:italic>"""节点左旋
+</span><span style=color:#928374;font-style:italic>        """
+</span><span>        </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>self</span><span>.right </span><span style=color:#fe8019>is </span><span style=color:#d3869b>None</span><span>:
+</span><span>            </span><span style=color:#fa5c4b>raise </span><span style=color:#fabd2f>Exception</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'can not rotate tree with empty right node'</span><span style=color:#fdf4c1>)
+</span><span>        </span><span style=color:#928374;font-style:italic># 旧的根成为左节点
+</span><span>        </span><span style=color:#928374;font-style:italic># 旧的根的右节点成为新的根
+</span><span>        </span><span style=color:#928374;font-style:italic># 新的根的左节点作为旧的根的右子树
+</span><span>        </span><span style=color:#928374;font-style:italic># 旧的根变成新的根的左子树
+</span><span>        old_root </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self
+</span><span>        new_root </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self</span><span>.right
+</span><span>
+</span><span>        old_root.right </span><span style=color:#fe8019>= </span><span>new_root.left
+</span><span>        new_root.left </span><span style=color:#fe8019>= </span><span>old_root
+</span><span>
+</span><span>        </span><span style=color:#928374;font-style:italic># 新根替换旧根
+</span><span>        </span><span style=color:#fa5c4b>if </span><span>old_root.parent </span><span style=color:#fe8019>is not </span><span style=color:#d3869b>None</span><span>:
+</span><span>            </span><span style=color:#fa5c4b>if </span><span>old_root.parent.left </span><span style=color:#fe8019>== </span><span>old_root:
+</span><span>                old_root.parent.left </span><span style=color:#fe8019>= </span><span>new_root
+</span><span>            </span><span style=color:#fa5c4b>else</span><span>:
+</span><span>                old_root.parent.right </span><span style=color:#fe8019>= </span><span>new_root
+</span><span>
+</span><span>        new_root.parent </span><span style=color:#fe8019>= </span><span>old_root.parent
+</span><span>        old_root.parent </span><span style=color:#fe8019>= </span><span>new_root
+</span><span>        </span><span style=color:#fa5c4b>if </span><span>old_root.right </span><span style=color:#fe8019>is not </span><span style=color:#d3869b>None</span><span>:
+</span><span>            old_root.right.parent </span><span style=color:#fe8019>= </span><span>old_root
+</span><span>
+</span><span>        </span><span style=color:#fa5c4b>assert </span><span>new_root.right.value </span><span style=color:#fe8019>> </span><span>new_root.value
+</span><span>        </span><span style=color:#fa5c4b>assert </span><span>new_root.left.value </span><span style=color:#fe8019>&lt; </span><span>new_root.value
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>_rebalance</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>self</span><span>.balance:
+</span><span>            </span><span style=color:#fa5c4b>return
+</span><span>
+</span><span>        </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>self</span><span>._left_height </span><span style=color:#fe8019>> </span><span style=color:#fdf4c1>self</span><span>._right_height:
+</span><span>            </span><span style=color:#928374;font-style:italic># 如果最高的子树是左子树的右子树，先对左子树左旋
+</span><span>            </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>self</span><span>.left.left </span><span style=color:#fe8019>is not </span><span style=color:#d3869b>None </span><span>\
+</span><span>                    </span><span style=color:#fe8019>and </span><span style=color:#fdf4c1>self</span><span>.left.right </span><span style=color:#fe8019>is not </span><span style=color:#d3869b>None </span><span>\
+</span><span>                    </span><span style=color:#fe8019>and </span><span style=color:#fdf4c1>self</span><span>.left.left.height </span><span style=color:#fe8019>&lt; </span><span style=color:#fdf4c1>self</span><span>.left.right.height:
+</span><span>                </span><span style=color:#fdf4c1>self.left.left_rotate()
+</span><span>            </span><span style=color:#fdf4c1>self.right_rotate()
+</span><span>        </span><span style=color:#fa5c4b>else</span><span>:
+</span><span>            </span><span style=color:#928374;font-style:italic># 如果最高的子树是右子树的左子树，先对右子树右旋
+</span><span>            </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>self</span><span>.right.right </span><span style=color:#fe8019>is not </span><span style=color:#d3869b>None </span><span>\
+</span><span>                    </span><span style=color:#fe8019>and </span><span style=color:#fdf4c1>self</span><span>.right.left </span><span style=color:#fe8019>is not </span><span style=color:#d3869b>None </span><span>\
+</span><span>                    </span><span style=color:#fe8019>and </span><span style=color:#fdf4c1>self</span><span>.right.right.height </span><span style=color:#fe8019>&lt; </span><span style=color:#fdf4c1>self</span><span>.right.left.height:
+</span><span>                </span><span style=color:#fdf4c1>self.right.right_rotate()
+</span><span>            </span><span style=color:#fdf4c1>self.left_rotate()
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>insert</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>value</span><span>: </span><span style=color:#fabd2f>int</span><span>) -> </span><span style=color:#d3869b>None</span><span>:
+</span><span>        </span><span style=color:#928374;font-style:italic>"""插入新节点
+</span><span style=color:#928374;font-style:italic>
+</span><span style=color:#928374;font-style:italic>        Args:
+</span><span style=color:#928374;font-style:italic>            value (int): 要插入的数据
+</span><span style=color:#928374;font-style:italic>        """
+</span><span>        </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>self</span><span>.value </span><span style=color:#fe8019>> </span><span>value:
+</span><span>            </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>self</span><span>.left </span><span style=color:#fe8019>is </span><span style=color:#d3869b>None</span><span>:
+</span><span>                </span><span style=color:#fdf4c1>self</span><span>.left </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>AVLTreeNode(value, self)
+</span><span>            </span><span style=color:#fa5c4b>else</span><span>:
+</span><span>                </span><span style=color:#fdf4c1>self.left.insert(value)
+</span><span>        </span><span style=color:#fa5c4b>elif </span><span style=color:#fdf4c1>self</span><span>.value </span><span style=color:#fe8019>&lt; </span><span>value:
+</span><span>            </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>self</span><span>.right </span><span style=color:#fe8019>is </span><span style=color:#d3869b>None</span><span>:
+</span><span>                </span><span style=color:#fdf4c1>self</span><span>.right </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>AVLTreeNode(value, self)
+</span><span>            </span><span style=color:#fa5c4b>else</span><span>:
+</span><span>                </span><span style=color:#fdf4c1>self.right.insert(value)
+</span><span>        </span><span style=color:#fa5c4b>else</span><span>:
+</span><span>            </span><span style=color:#fa5c4b>return
+</span><span>
+</span><span>        </span><span style=color:#fdf4c1>self._rebalance()
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>search</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>value</span><span>: </span><span style=color:#fabd2f>int</span><span>) -> </span><span style=color:#fabd2f>bool</span><span>:
+</span><span>        </span><span style=color:#928374;font-style:italic>"""搜索值
+</span><span style=color:#928374;font-style:italic>
+</span><span style=color:#928374;font-style:italic>        Args:
+</span><span style=color:#928374;font-style:italic>            value (int): 待搜索的值
+</span><span style=color:#928374;font-style:italic>
+</span><span style=color:#928374;font-style:italic>        Returns:
+</span><span style=color:#928374;font-style:italic>            bool: 值是否存在
+</span><span style=color:#928374;font-style:italic>        """
+</span><span>        </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>self</span><span>.value </span><span style=color:#fe8019>== </span><span>value:
+</span><span>            </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>True
+</span><span>        </span><span style=color:#fa5c4b>elif </span><span style=color:#fdf4c1>self</span><span>.value </span><span style=color:#fe8019>> </span><span>value </span><span style=color:#fe8019>and </span><span style=color:#fdf4c1>self</span><span>.left </span><span style=color:#fe8019>is not </span><span style=color:#d3869b>None</span><span>:
+</span><span>            </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>self.left.search(value)
+</span><span>        </span><span style=color:#fa5c4b>elif </span><span style=color:#fdf4c1>self</span><span>.value </span><span style=color:#fe8019>&lt; </span><span>value </span><span style=color:#fe8019>and </span><span style=color:#fdf4c1>self</span><span>.right </span><span style=color:#fe8019>is not </span><span style=color:#d3869b>None</span><span>:
+</span><span>            </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>self.right.search(value)
+</span><span>        </span><span style=color:#fa5c4b>else</span><span>:
+</span><span>            </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>False
+</span><span>
+</span><span>
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>AVLTree</span><span>:
+</span><span>    </span><span style=color:#928374;font-style:italic>"""AVL tree
+</span><span style=color:#928374;font-style:italic>    """
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__init__</span><span>(</span><span style=color:#fdf4c1>self</span><span>) -> </span><span style=color:#d3869b>None</span><span>:
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.root: Optional[AVLTreeNode] </span><span style=color:#fe8019>= </span><span style=color:#d3869b>None
+</span><span>
+</span><span>    @</span><span style=color:#fabd2f>property
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>height</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        </span><span style=color:#928374;font-style:italic>"""AVL树高度
+</span><span style=color:#928374;font-style:italic>
+</span><span style=color:#928374;font-style:italic>        Returns:
+</span><span style=color:#928374;font-style:italic>            int: 树高度
+</span><span style=color:#928374;font-style:italic>        """
+</span><span>        </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>self</span><span>.root </span><span style=color:#fe8019>is not </span><span style=color:#d3869b>None</span><span>:
+</span><span>            </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>self</span><span>.root.height
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0
+</span><span>
+</span><span>    @</span><span style=color:#fabd2f>property
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>balance</span><span>(</span><span style=color:#fdf4c1>self</span><span>) -> </span><span style=color:#fabd2f>bool</span><span>:
+</span><span>        </span><span style=color:#928374;font-style:italic>"""树是否平衡
+</span><span style=color:#928374;font-style:italic>
+</span><span style=color:#928374;font-style:italic>        Returns:
+</span><span style=color:#928374;font-style:italic>            bool: 树是否平衡
+</span><span style=color:#928374;font-style:italic>        """
+</span><span>        </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>self</span><span>.root </span><span style=color:#fe8019>is not </span><span style=color:#d3869b>None</span><span>:
+</span><span>            </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>self</span><span>.root.balance
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>True
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>insert</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>value</span><span>: </span><span style=color:#fabd2f>int</span><span>):
+</span><span>        </span><span style=color:#928374;font-style:italic>"""insert new value
+</span><span style=color:#928374;font-style:italic>
+</span><span style=color:#928374;font-style:italic>        Args:
+</span><span style=color:#928374;font-style:italic>            value (int): new value
+</span><span style=color:#928374;font-style:italic>        """
+</span><span>        </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>self</span><span>.root </span><span style=color:#fe8019>is </span><span style=color:#d3869b>None</span><span>:
+</span><span>            </span><span style=color:#fdf4c1>self</span><span>.root </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>AVLTreeNode(value, </span><span style=color:#d3869b>None</span><span style=color:#fdf4c1>)
+</span><span>        </span><span style=color:#fa5c4b>else</span><span>:
+</span><span>            </span><span style=color:#fdf4c1>self.root.insert(value)
+</span><span>
+</span><span>        </span><span style=color:#928374;font-style:italic># AVL 树旋转后根节点可能不再是现在这个节点，需要重新寻找根节点
+</span><span>        top </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self</span><span>.root
+</span><span>        </span><span style=color:#fa5c4b>while </span><span>top.parent </span><span style=color:#fe8019>is not </span><span style=color:#d3869b>None</span><span>:
+</span><span>            top </span><span style=color:#fe8019>= </span><span>top.parent
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.root </span><span style=color:#fe8019>= </span><span>top
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>search</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>value</span><span>: </span><span style=color:#fabd2f>int</span><span>) -> </span><span style=color:#fabd2f>bool</span><span>:
+</span><span>        </span><span style=color:#928374;font-style:italic>"""search a value
+</span><span style=color:#928374;font-style:italic>
+</span><span style=color:#928374;font-style:italic>        Args:
+</span><span style=color:#928374;font-style:italic>            value (int): searching value
+</span><span style=color:#928374;font-style:italic>        """
+</span><span>        </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>self</span><span>.root </span><span style=color:#fe8019>is </span><span style=color:#d3869b>None</span><span>:
+</span><span>            </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>False
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>self.root.search(value)
+</span><span>
+</span></code></pre><h2 id=zong-jie>总结</h2><p>AVL树只要理解和左右旋转的方法和作用，就不难理解左右旋转与双旋转的意义了。<p>单次旋转的目的都是将两侧子树，一颗子树高度+1，一颗子树高度-1，将高度相差2的两颗子树重新平衡。<p>单次旋转的限制是只能降低子树中一颗子树的高度，左子树的左子树或右子树的右子树，所以一旦出现左右子树中最高的子树不是左-左或右-右，单次旋转就不能重新平衡。对这种情况，先旋转子树，令左-左或右-右成为最高的子树后，再对根节点旋转，就能重新平衡了。</article><p class=tags-data><a href=/tags/shu-ju-jie-gou>/数据结构/</a> <a href=/tags/python>/python/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

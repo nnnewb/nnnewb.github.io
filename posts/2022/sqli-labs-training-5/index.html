@@ -1,0 +1,112 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>sqli-labs 实验记录 #5</title><meta content="sqli-labs 实验记录 #5" name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2022/sqli-labs-training-5/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content="sqli-labs 实验记录 #5" property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2022/sqli-labs-training-5/ property=twitter:url><meta content="sqli-labs 实验记录 #5" property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2022/sqli-labs-training-5/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>sqli-labs 实验记录 #5</h1><p class=author-line>作于：2022-05-13 15:04 ，预计阅读时间 8 分钟<article><h2 id=qian-yan>前言</h2><p>惯例。<p>随便刷两题。<h2 id=less-28>Less-28</h2><p>没有错误回显，有查询结果。提示 all your 'union' and 'select' belongs to us ，和 27 一样的提示，不同的是 union 和 select 加了引号。不知道想表达什么。<p>验证注入类型 <code>?id=1' and '1'='1</code> + <code>?id=1' and '1'='0</code> 确定是字符型注入，单引号。注意服务端可能有个类型转换导致 <code>1 and 1=1</code> 这样的 payload 也有回显，通过构造为假的条件可以发现并不是数字型注入。<p>从提示看是过滤了 union 和 select 但不知道怎么过滤的，尝试双写 bypass，发现空格被过滤了。<p><img alt=image-20220513094655242 src=https://nnnewb.github.io/posts/2022/sqli-labs-training-5/image-20220513094655242.webp><p>尝试<code>/**/</code>替换空格 bypass ，发现依然无效。<p><img alt=image-20220513094741744 src=https://nnnewb.github.io/posts/2022/sqli-labs-training-5/image-20220513094741744.webp><p>尝试 <code>0xa0</code> 替换空格。<p><img alt=image-20220513095047414 src=https://nnnewb.github.io/posts/2022/sqli-labs-training-5/image-20220513095047414.webp><p>看起来ok了，但看起来完全没过滤 union 和 select ，把双写去除后重试，依然没有回显，茫然。<p>好吧，重新整理思路。先测试下过滤了什么东西 <code>?id=0'";--%23/**/union,select</code><p><img alt=image-20220513095828806 src=https://nnnewb.github.io/posts/2022/sqli-labs-training-5/image-20220513095828806.webp><p>注意到只剩下了 <code>'";</code> 幸存，前面有个双写和<code>%a0union%a0</code>没被替换，所以初步怀疑正则可能是<code>\b(union|select)\b</code>。尝试大小写也被过滤了，所以正则匹配应该还有个 <code>i</code> 标志。<p>这种情况我有个思路是走盲注，用<code>AND IF(...)</code>爆破。尝试<code>?id=1'%a0and%a0if(ascii(substring(password,1,1))>0,true,false)%a0and%a0'1'='1</code> 有回显，条件改成<code>&lt;0</code>则无回显。继续爆破即可。<p>再给其他人的思路参考：<ul><li>审阅代码可知正则并不是我猜测的<code>\b(union|select)\b</code>，而是<code>union\s+select</code>，因此可以被<code>%a0</code>绕过，正常<code>union select</code> 或者 <code>union all select</code> 可破。</ul><h2 id=less-29>Less-29</h2><p>提示 protection with WAF, this site protected by world's best firewall.<p>测试过滤了什么东西。<code>?id=1'";--%23/**/%20select,union,and,or,SeLect,UniOn,seselectlect,uniunionon</code><p><img alt=image-20220513103434746 src=https://nnnewb.github.io/posts/2022/sqli-labs-training-5/image-20220513103434746.webp><p>发现什么都没过滤，看起来是单引号字符型注入。尝试 Less-28 的盲注 payload 发现成功。什么鬼？<p>尝试 <code>?id=0' union select 1,version(),database() --%20</code> 发现也直接成功。<p>WAF，看看你都保护了个啥。<h3 id=wafshe-zhi>WAF设置</h3><p>经查，原来是我挑的这个分支 docker-compose 部署有问题=。=<p>WAF 并不属于 PHP，而是 jsp 的，在仓库目录下有个 <code>tomcat.zip</code> 保存了 WAF 的内容，需要单独部署。<p>参考<a href=https://www.jianshu.com/p/46cb6c354de5>sqli-labs: Less-29 - Less-31</a> 这篇文章了解到架构大体上就是 tomcat 过滤参数后反代 apache 服务，但仔细看了下 WAF 内容发现没有对 Less-29~Less-32 之外的页面反代，导致把 tomcat 挂在 80 端口的话就访问不到其他没设置 WAF 的页面。<p>合理的架构应该是这样。<p><img alt=image-20220513135801459 src=https://nnnewb.github.io/posts/2022/sqli-labs-training-5/image-20220513135801459.webp><p>修改 <code>docker-compose.yaml</code> 如下<pre class=language-yaml data-lang=yaml style=color:#fdf4c1aa;background-color:#282828><code class=language-yaml data-lang=yaml><span style=color:#8ec07c;font-weight:700>version</span><span>: </span><span style=color:#b8bb26>'3'
+</span><span style=color:#8ec07c;font-weight:700>services</span><span>:
+</span><span>  </span><span style=color:#8ec07c;font-weight:700>reverseproxy</span><span>:
+</span><span>    </span><span style=color:#8ec07c;font-weight:700>image</span><span>: </span><span style=color:#b8bb26>"nginx:mainline"
+</span><span>    </span><span style=color:#8ec07c;font-weight:700>depends_on</span><span>:
+</span><span>      - </span><span style=color:#b8bb26>web
+</span><span>      - </span><span style=color:#b8bb26>waf
+</span><span>    </span><span style=color:#8ec07c;font-weight:700>ports</span><span>:
+</span><span>      - </span><span style=color:#b8bb26>80:80
+</span><span>    </span><span style=color:#8ec07c;font-weight:700>links</span><span>:
+</span><span>      - </span><span style=color:#b8bb26>web:web
+</span><span>      - </span><span style=color:#b8bb26>waf:waf
+</span><span>    </span><span style=color:#8ec07c;font-weight:700>volumes</span><span>:
+</span><span>      - </span><span style=color:#b8bb26>"./etc/nginx_default.conf:/etc/nginx/conf.d/default.conf"
+</span><span>  </span><span style=color:#8ec07c;font-weight:700>db</span><span>:
+</span><span>    </span><span style=color:#8ec07c;font-weight:700>image</span><span>: </span><span style=color:#b8bb26>"mysql:5.7.33"
+</span><span>    </span><span style=color:#8ec07c;font-weight:700>environment</span><span>:
+</span><span>      </span><span style=color:#8ec07c;font-weight:700>MYSQL_ROOT_PASSWORD</span><span>: </span><span style=color:#b8bb26>toor
+</span><span>      </span><span style=color:#8ec07c;font-weight:700>MYSQL_ROOT_HOST</span><span>: </span><span style=color:#b8bb26>"%"
+</span><span>    </span><span style=color:#8ec07c;font-weight:700>ports</span><span>:
+</span><span>      - </span><span style=color:#b8bb26>3306:3306
+</span><span>  </span><span style=color:#8ec07c;font-weight:700>web</span><span>:
+</span><span>    </span><span style=color:#8ec07c;font-weight:700>depends_on</span><span>:
+</span><span>      - </span><span style=color:#b8bb26>db
+</span><span>    </span><span style=color:#8ec07c;font-weight:700>image</span><span>: </span><span style=color:#b8bb26>"php:5.3-apache"
+</span><span>    </span><span style=color:#8ec07c;font-weight:700>volumes</span><span>:
+</span><span>      - </span><span style=color:#b8bb26>".:/var/www/html"
+</span><span>      - </span><span style=color:#b8bb26>"./etc/apache_default:/etc/apache2/sites-available/000-default.conf"
+</span><span>      - </span><span style=color:#b8bb26>"./etc/htaccess:/var/www/html/.htaccess"
+</span><span>    </span><span style=color:#8ec07c;font-weight:700>environment</span><span>:
+</span><span>      </span><span style=color:#8ec07c;font-weight:700>DB_HOST</span><span>: </span><span style=color:#b8bb26>"db"
+</span><span>      </span><span style=color:#8ec07c;font-weight:700>DB_PASS</span><span>: </span><span style=color:#b8bb26>"toor"
+</span><span>    </span><span style=color:#8ec07c;font-weight:700>links</span><span>:
+</span><span>      - </span><span style=color:#b8bb26>db:db
+</span><span>  </span><span style=color:#8ec07c;font-weight:700>waf</span><span>:
+</span><span>    </span><span style=color:#8ec07c;font-weight:700>depends_on</span><span>:
+</span><span>      - </span><span style=color:#b8bb26>db
+</span><span>    </span><span style=color:#8ec07c;font-weight:700>image</span><span>: </span><span style=color:#b8bb26>'tomcat:jre8-openjdk-bullseye'
+</span><span>    </span><span style=color:#8ec07c;font-weight:700>volumes</span><span>:
+</span><span>      - </span><span style=color:#b8bb26>"./WAF/sqli-labs:/usr/local/tomcat/webapps"
+</span><span>      - </span><span style=color:#b8bb26>"./mysql-connector-java.jar:/usr/local/tomcat/lib/mysql-connector-java.jar"
+</span><span>    </span><span style=color:#8ec07c;font-weight:700>links</span><span>:
+</span><span>      - </span><span style=color:#b8bb26>db:db
+</span><span>      - </span><span style=color:#b8bb26>web:web
+</span></code></pre><p>添加<code>waf</code>和<code>reverseproxy</code>，<code>waf</code>用<code>tomcat</code>官方容器不需要配置，但源码<code>index.jsp</code>里请求地址要改。还要从 MySQL 官网单独下载一个 <code>mysql-connector-java</code> 的 jar 包挂载进去。<p><code>reverseproxy</code> 用 <code>nginx:mainline</code>，简单配一下反代规则。<pre style=color:#fdf4c1aa;background-color:#282828><code><span>upstream lab {
+</span><span>    server web;
+</span><span>}
+</span><span>
+</span><span>upstream tomcat {
+</span><span>    server waf:8080;
+</span><span>}
+</span><span>
+</span><span>server {
+</span><span>    listen       80;
+</span><span>    listen  [::]:80;
+</span><span>    server_name  localhost;
+</span><span>
+</span><span>    location / {
+</span><span>        proxy_pass http://lab;
+</span><span>        proxy_set_header Host $http_host;
+</span><span>        proxy_set_header X-Real-IP $remote_addr;
+</span><span>    }
+</span><span>
+</span><span>    location ~ ^/Less-(29|30|31|32)[a-zA-Z]?/ {
+</span><span>        proxy_pass http://tomcat;
+</span><span>        proxy_set_header Host $http_host;
+</span><span>        proxy_set_header X-Real-IP $remote_addr;
+</span><span>    }
+</span><span>}
+</span></code></pre><p>到这一步就应该能同时访问 WAF 和其他题目了。<p><img alt=image-20220513140140027 src=https://nnnewb.github.io/posts/2022/sqli-labs-training-5/image-20220513140140027.webp><p><img alt=image-20220513140239000 src=https://nnnewb.github.io/posts/2022/sqli-labs-training-5/image-20220513140239000.webp><h3 id=zhong-xin-jie-ti>重新解题</h3><p>审阅下WAF代码。<pre class=language-jsp data-lang=jsp style=color:#fdf4c1aa;background-color:#282828><code class=language-jsp data-lang=jsp><span>&lt;%
+</span><span style=color:#928374;font-style:italic>// ... 略
+</span><span style=color:#8ec07c>String</span><span style=color:#fdf4c1> rex </span><span style=color:#fe8019>= </span><span style=color:#b8bb26>"^\\d+$"</span><span style=color:#fdf4c1>;
+</span><span style=color:#8ec07c>Boolean</span><span style=color:#fdf4c1> match </span><span style=color:#fe8019>=</span><span style=color:#fdf4c1> id.matches(rex);
+</span><span style=color:#fa5c4b>if</span><span style=color:#fdf4c1>(match</span><span style=color:#fe8019>==</span><span style=color:#d3869b>true</span><span style=color:#fdf4c1>) </span><span>{
+</span><span>    </span><span style=color:#928374;font-style:italic>// ... 请求 web 服务
+</span><span>} </span><span style=color:#fa5c4b>else </span><span>{
+</span><span>    response.</span><span style=color:#fdf4c1>sendRedirect(</span><span style=color:#b8bb26>"hacked.jsp"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>}
+</span></code></pre><p>看起来无懈可击，正则匹配整个<code>id</code>参数必须是纯数字。再看下 Less-29 原题代码，<code>select * from users where id='$id' limit 0,1</code>，好了这题我确实不懂了，知识盲区。看别的大佬的题解：<blockquote><p><strong>问：</strong><code>index.php?id=1&id=2</code>，这时回显是<code>id=1</code>还是<code>id=2</code>呢？<p>**答：**apache (php) 解析最后一个参数，即回显<code>id=2</code>；tomcat (jsp) 解析第 一个参数，即回显<code>id=1</code>。<p>作者：Hyafinthus 链接：https://www.jianshu.com/p/46cb6c354de5</blockquote><p>这是一个利用 <code>apache+php</code> 和 <code>tomcat+jsp</code> 对重名 query string 参数解析结果的绕过。我们尝试下 <code>?id=1&id=2'</code>，成功绕过。<p><img alt=image-20220513143042849 src=https://nnnewb.github.io/posts/2022/sqli-labs-training-5/image-20220513143042849.webp><p>剩下就不多谈了，把注入的 payload 放到第二个参数里就可以绕过 WAF 的防御。<p>最后补充一点如何判断服务器类型。一个主要的办法就是看 HTTP 响应里的 <code>Server</code> 头——但一般多个服务器后端的情况下，更可能出现的是一个大反代服务去代理其他所有服务，根据 url 来匹配转发。这种情况下 <code>Server</code> 头一般就固定是反代服务器了。在这题里是<code>nginx/1.21.6</code>，我们看不到<code>apache</code>和<code>tomcat</code>。<p>另一种方法是靠经验判断=。=一般来说，写 php 的喜欢配 apache 或者 nginx，写 jsp 的会优先考虑java的容器比如<code>tomcat</code>。写 go 的一般裸奔或者配个 nginx 反代，Python 就可能是 uwsgi 或者别的实现 WSGI 协议的服务器或者裸奔，现在也可能有 ASGI 的服务器。这些只能靠对后端生态的了解来猜测了。如果是前后端分离架构的话，后端开发语言和环境的特征就更难找了。<h2 id=less-30>Less-30</h2><p>WAF，无错误回显，有正确回显，字符型注入双引号。<p>可以考虑用 <code>union select</code> 解决，WAF 绕过方法和 Less-29 一样。<h2 id=less-31>Less-31</h2><p>和 Less-30 一样。 WTF ？看了眼源码发现就多了一个右括号。<h2 id=zong-jie>总结</h2><p>时间有限，还得抓紧开始看自考的课程。今天就先这样意思意思，没别的意思。<p>sqli-labs 的 WAF 感觉怪怪的，不像是之前见过的 php 的 WAF，绕过的思路感觉还是比较有趣的，反代形式的WAF如果不注意可能会被这个问题坑到。<p>28题审阅源码才发现过滤方法有漏洞，测 SQL 注入问题的时候还得多准备点各种 payload。我感觉是有很大自动测的空间，可以自己写个测试脚本啥的，但 sqlmap 珠玉在前=。= 或许有机会看看 sqlmap 源码会有更多启发。<p>今天就这样，辛苦我自己啦。</article><p class=tags-data><a href=/tags/security>/security/</a> <a href=/tags/sqli>/sqli/</a> <a href=/tags/sqli-labs>/sqli-labs/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

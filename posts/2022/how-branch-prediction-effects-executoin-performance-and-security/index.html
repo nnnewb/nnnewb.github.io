@@ -1,0 +1,237 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>分支预测对执行效率和安全的影响</title><meta content=分支预测对执行效率和安全的影响 name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2022/how-branch-prediction-effects-executoin-performance-and-security/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=分支预测对执行效率和安全的影响 property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2022/how-branch-prediction-effects-executoin-performance-and-security/ property=twitter:url><meta content=分支预测对执行效率和安全的影响 property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2022/how-branch-prediction-effects-executoin-performance-and-security/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>分支预测对执行效率和安全的影响</h1><p class=author-line>作于：2022-02-16 16:00 ，预计阅读时间 15 分钟<article><h2 id=qian-yan>前言</h2><p>还是从 <em>Igor Ostrvsky</em> 的博客里发现的一篇有意思的文章，<a href=http://igoro.com/archive/fast-and-slow-if-statements-branch-prediction-in-modern-processors/>Fast and slow if-statements: branch prediction in modern processors</a> 开始。<h2 id=fen-zhi-yu-ce-dui-xing-neng-de-ying-xiang>分支预测对性能的影响</h2><h3 id=jie-shao>介绍</h3><p><a href=https://zh.wikipedia.org/wiki/%E5%88%86%E6%94%AF%E9%A0%90%E6%B8%AC%E5%99%A8>分支预测器 - Wikipedia</a> 我直接抄一段。<blockquote><p>在<a href=https://zh.wikipedia.org/wiki/%E9%9B%BB%E8%85%A6%E6%9E%B6%E6%A7%8B>计算机体系结构</a>中，<strong>分支预测器</strong>（英语：Branch predictor）是一种<a href=https://zh.wikipedia.org/wiki/%E6%95%B8%E4%BD%8D%E9%9B%BB%E8%B7%AF>数字电路</a>，在分支指令执行结束之前猜测哪一路<a href=https://zh.wikipedia.org/wiki/%E5%88%86%E6%94%AF_(%E8%A8%88%E7%AE%97%E6%A9%9F%E7%A7%91%E5%AD%B8)>分支</a>将会被执行，以提高处理器的<a href=https://zh.wikipedia.org/wiki/%E6%8C%87%E4%BB%A4%E6%B5%81%E6%B0%B4%E7%BA%BF>指令流水线</a>的性能。使用分支预测器的目的，在于改善<a href=https://zh.wikipedia.org/wiki/%E6%8C%87%E4%BB%A4%E7%AE%A1%E7%B7%9A%E5%8C%96>指令流水线</a>的流程，就像一家公司的员工提前预测公司所需要的东西，即交付不同单位进行准备工作，而那各个部门之间的等待交办的时间大大地缩短，整个公司的效率就会提高了。现代使用<a href=https://zh.wikipedia.org/wiki/%E6%8C%87%E4%BB%A4%E7%AE%A1%E7%B7%9A%E5%8C%96>指令流水线</a>处理器的性能能够提高，分支预测器对于现今的指令流水线微处理器获得高性能是非常关键的技术。</blockquote><p>现代 CPU 的分支预测没有 <em>Igor Ostrvsky</em> 的博客里写的分支预测器那么傻了，实际上，那篇博客里的代码在 i5-6600 的环境下跑起来，<code>TTFF</code>或者<code>TTTTFFFF</code>甚至比<code>TTTT</code>还要快。那篇博客创作于 2010 年， 而 Skylake 架构在 2015 年替代 Broadwell 架构，而现在是 2022年， Intel 已经发布了 GoldenCove ，AMD 也要发 Zen 4了。内容过时不可避免。<p>所以这篇博客主要还是聊一下分支预测对性能的影响，但大概总结不出 Igor Ostrvsky 的博客里的规律。顺带一提，不要随便针对分支预测优化，要是有人看了 Igor Ostrvsky 那篇博客费了老大功夫优化成连续 T/F 分支，换上新 CPU 之后性能还倒退这能找谁说理去。针对微架构分支预测失败回退做优化我还在爆栈上看到个回答很有意思，<a href=https://stackoverflow.com/questions/49932119/avoid-stalling-pipeline-by-calculating-conditional-early>avoid stalling pipeline by calculating conditional early</a> ，很难想到还能用这种办法榨干 CPU 的每一滴性能。<h3 id=ji-zhun-ce-shi>基准测试</h3><p>这个基准测试的主要目的是体现出分支预测失败对执行时间的影响，测试方法是喂 10MB 的随机 T/F ，为 T 时计数器 +1。除了输入数据外测试代码一样。<pre class=language-c++ data-lang=c++ style=color:#fdf4c1aa;background-color:#282828><code class=language-c++ data-lang=c++><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;iostream>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;functional>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;chrono>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;stdlib.h>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;vector>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;cstdlib>
+</span><span>
+</span><span style=color:#fa5c4b>using namespace</span><span> std;
+</span><span style=color:#fa5c4b>using namespace</span><span> std::chrono;
+</span><span>
+</span><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>benchmark</span><span>(</span><span style=color:#fa5c4b>const</span><span> string </span><span style=color:#fdf4c1>name</span><span>, </span><span style=color:#fabd2f>uint32_t </span><span style=color:#fdf4c1>loops</span><span>, function&lt;</span><span style=color:#fa5c4b>void</span><span>(</span><span style=color:#fa5c4b>void</span><span>)> </span><span style=color:#fdf4c1>fn</span><span>) {
+</span><span>    milliseconds sum </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span style=color:#fa5c4b>ms</span><span>, lowest </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span style=color:#fa5c4b>ms</span><span>, highest </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span style=color:#fa5c4b>ms</span><span>;
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; i </span><span style=color:#fe8019>&lt;</span><span> loops; i</span><span style=color:#fe8019>++</span><span>) {
+</span><span>        </span><span style=color:#fa5c4b>auto</span><span> start </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>system_clock::now()</span><span>;
+</span><span>        </span><span style=color:#fdf4c1>fn()</span><span>;
+</span><span>        </span><span style=color:#fa5c4b>auto</span><span> stop </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>system_clock::now()</span><span>;
+</span><span>
+</span><span>        </span><span style=color:#fa5c4b>auto</span><span> d </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>duration_cast&lt;milliseconds>(stop </span><span style=color:#fe8019>-</span><span style=color:#fdf4c1> start)</span><span>;
+</span><span>        sum </span><span style=color:#fe8019>+=</span><span> d;
+</span><span>        lowest </span><span style=color:#fe8019>=</span><span> lowest </span><span style=color:#fe8019>== </span><span style=color:#d3869b>0</span><span style=color:#fa5c4b>ms </span><span style=color:#fe8019>?</span><span> d </span><span style=color:#fe8019>: </span><span style=color:#fdf4c1>min(lowest, d)</span><span>;
+</span><span>        highest </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>max(highest, d)</span><span>;
+</span><span>    }
+</span><span>
+</span><span>    cout </span><span style=color:#fe8019>&lt;&lt;</span><span> name;
+</span><span>    cout </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>" avg: " </span><span style=color:#fe8019>&lt;&lt;</span><span> sum.</span><span style=color:#fdf4c1>count</span><span>() </span><span style=color:#fe8019>/</span><span> loops </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>"ms"</span><span>;
+</span><span>    cout </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>" best: " </span><span style=color:#fe8019>&lt;&lt;</span><span> lowest.</span><span style=color:#fdf4c1>count</span><span>() </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>"ms"</span><span>;
+</span><span>    cout </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>" worst: " </span><span style=color:#fe8019>&lt;&lt;</span><span> highest.</span><span style=color:#fdf4c1>count</span><span>() </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>"ms"</span><span>;
+</span><span>    cout </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>" total: " </span><span style=color:#fe8019>&lt;&lt;</span><span> sum.</span><span style=color:#fdf4c1>count</span><span>() </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>"ms"</span><span>;
+</span><span>    cout </span><span style=color:#fe8019>&lt;&lt;</span><span> endl;
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>int </span><span style=color:#8ec07c>main</span><span>(</span><span style=color:#fa5c4b>void</span><span>) {
+</span><span>    </span><span style=color:#fabd2f>srand</span><span style=color:#fdf4c1>(duration_cast&lt;seconds>(system_clock::now().time_since_epoch()).count())</span><span>;
+</span><span>    vector&lt;</span><span style=color:#fa5c4b>int</span><span>> always_true, unpredictable;
+</span><span>    always_true.</span><span style=color:#fdf4c1>resize</span><span>(</span><span style=color:#d3869b>1024 </span><span style=color:#fe8019>* </span><span style=color:#d3869b>1024 </span><span style=color:#fe8019>* </span><span style=color:#d3869b>10</span><span>, </span><span style=color:#d3869b>1</span><span>);
+</span><span>    unpredictable.</span><span style=color:#fdf4c1>resize</span><span>(</span><span style=color:#d3869b>1024 </span><span style=color:#fe8019>* </span><span style=color:#d3869b>1024 </span><span style=color:#fe8019>* </span><span style=color:#d3869b>10</span><span>, </span><span style=color:#d3869b>1</span><span>);
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>auto </span><span style=color:#fe8019>&</span><span>i </span><span style=color:#fe8019>:</span><span> unpredictable) {
+</span><span>        i </span><span style=color:#fe8019>= </span><span style=color:#fabd2f>rand</span><span style=color:#fdf4c1>() </span><span style=color:#fe8019>% </span><span style=color:#d3869b>2</span><span>;
+</span><span>    }
+</span><span>
+</span><span>    </span><span style=color:#fdf4c1>benchmark(</span><span style=color:#b8bb26>"always true"</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>100</span><span style=color:#fdf4c1>, [</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>always_true]() {
+</span><span style=color:#fdf4c1>        </span><span style=color:#fa5c4b>int</span><span style=color:#fdf4c1> sum </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>;
+</span><span style=color:#fdf4c1>        </span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>auto</span><span style=color:#fdf4c1> i </span><span style=color:#fe8019>:</span><span style=color:#fdf4c1> always_true) {
+</span><span style=color:#fdf4c1>            </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>(i) {
+</span><span style=color:#fdf4c1>                sum</span><span style=color:#fe8019>++</span><span style=color:#fdf4c1>;
+</span><span style=color:#fdf4c1>            }
+</span><span style=color:#fdf4c1>        }
+</span><span style=color:#fdf4c1>    })</span><span>;
+</span><span>
+</span><span>    </span><span style=color:#fdf4c1>benchmark(</span><span style=color:#b8bb26>"unpredictable"</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>100</span><span style=color:#fdf4c1>, [</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>unpredictable]() {
+</span><span style=color:#fdf4c1>        </span><span style=color:#fa5c4b>int</span><span style=color:#fdf4c1> sum </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>;
+</span><span style=color:#fdf4c1>        </span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>auto</span><span style=color:#fdf4c1> i </span><span style=color:#fe8019>:</span><span style=color:#fdf4c1> unpredictable) {
+</span><span style=color:#fdf4c1>            </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>(i) {
+</span><span style=color:#fdf4c1>                sum</span><span style=color:#fe8019>++</span><span style=color:#fdf4c1>;
+</span><span style=color:#fdf4c1>            }
+</span><span style=color:#fdf4c1>        }
+</span><span style=color:#fdf4c1>    })</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>;
+</span><span>}
+</span></code></pre><p>使用 clang++ 编译<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#928374;font-style:italic># clang version 13.0.0
+</span><span style=color:#928374;font-style:italic># Target: x86_64-pc-windows-msvc
+</span><span style=color:#928374;font-style:italic># Thread model: posix
+</span><span style=color:#928374;font-style:italic># InstalledDir: C:\Program Files\LLVM\bin
+</span><span style=color:#fdf4c1>clang++.exe -m32 -O0 -g -std</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>c++20 .</span><span style=color:#b8bb26>\b</span><span style=color:#fdf4c1>ranch-prediction-1.cpp -o branch-prediction-1.exe
+</span></code></pre><p>统计平均、最佳、最差耗时，输出结果如下。<pre style=color:#fdf4c1aa;background-color:#282828><code><span>always true avg: 120ms best: 116ms worst: 246ms total: 12056ms
+</span><span>unpredictable avg: 191ms best: 184ms worst: 265ms total: 19115ms
+</span></code></pre><p>可以看到，数据量相同的情况下，输入数据是随机 T/F 的平均耗时比总为真的耗时高出 50%，总耗时多出 7 秒左右（差不多也是50%多一点）。可想而知，如果输入数据更有规律（比如前半段都是T后半段都是F），数据量不变的情况下，性能也会有相当不错的提高。<p>顺便我还要说一下这个基准测试不够好，应该每个测试循环都生成一次随机数输入的。<h3 id=fen-zhi-yu-ce-ban-yan-de-jiao-se>分支预测扮演的角色</h3><p>这还得从CPU执行指令的过程说起。这里聊的 CPU 执行一条指令需要经过下面的步骤，称作流水线。计算机组成原理课应该有说。<ul><li>取指 (fetch)<li>译码 (decode)<li>执行 (算数指令走 ALU)<li>访问主存 (Load/Store)<li>写回</ul><p><img alt=单周期处理器和流水线处理器 src=https://nnnewb.github.io/posts/2022/how-branch-prediction-effects-executoin-performance-and-security/1365470-20181201231438070-1210623531.webp><p>更简化一点的话可以把ALU算数运算和访存都算作指令的“执行”阶段，CPU就是在不断循环执行这四个动作。<p><img alt=4阶段流水线 src=https://nnnewb.github.io/posts/2022/how-branch-prediction-effects-executoin-performance-and-security/500pxPipeline_4_stage_svg.webp><p>流水线处理器为了充分利用硬件，在译码上一条指令时，就开始取指下一条指令了，执行速度可以是单周期处理器的很多倍。显然流水线越长，每个阶段的耗时越短，整体执行的效率就越高。<p>如果指令一直按顺序执行，流水线只要不断加长加快就能获得更高的性能，但“分支”打破了这个美梦。一个简短的例子如下。<pre class=language-asm data-lang=asm style=color:#fdf4c1aa;background-color:#282828><code class=language-asm data-lang=asm><span style=color:#fa5c4b>loop</span><span style=color:#8ec07c>:
+</span><span style=color:#fa5c4b>inc </span><span style=color:#fdf4c1>eax
+</span><span style=color:#fa5c4b>cmp </span><span style=color:#fdf4c1>eax,ebx
+</span><span style=color:#fa5c4b>jne loop
+</span><span style=color:#fa5c4b>call </span><span style=color:#8ec07c>exit
+</span></code></pre><p>CPU 从 <code>cmp eax,ebx</code> 开始，取指 <code>jne loop</code>。译码 <code>jne loop</code> 时，问题来了，接下来是取指 <code>call exit</code> 还是 <code>inc eax</code>？<p>此时我们还不知道 <code>cmp eax,ebx</code> 的结果，CPU 能做的事情只有：傻等(stall)，或者猜测下一条要执行的指令是什么(predict)。<p>现代处理器的流水线长度可以达到几十，如果 CPU 遇到需要上一条指令的结果来继续下一条指令就开始等，那么流水线就不得不闲置到上一条指令完成，结果就是分支指令的代价会是其他指令的几十倍，对循环语句来说是个噩耗。<p>影响流水线效率的还有其他元素，比如说上面的 取值-译码-执行-写回 过程里，四个阶段的执行速度也是不同的。通常取值和译码的速度更慢，执行写回更快。如何尽可能让每个执行单元都不浪费时间等待，也是个难题。<p>关于流水线，<a href=https://plantegg.github.io/2021/05/16/Perf_IPC%E4%BB%A5%E5%8F%8ACPU%E5%88%A9%E7%94%A8%E7%8E%87/>Perf IPC 以及 CPU 利用率</a> 这篇文章感觉不错。<p>继续说。既然让流水线退化到单周期不可取，那就瞎猜一个，先把流水线填满再说呗，反正不会比傻等更差了。于是就有了分支预测器：虽然是瞎猜，但尽可能猜得准一点总没坏处。<h3 id=jian-shao-fen-zhi-yu-ce-shi-bai-de-sun-shi>减少分支预测失败的损失</h3><p>实话说我不确定这个代价有多大，因为没法控制失败率，不知道现在正在用的 CPU 的分支预测器是怎么工作的。<p>直接构造随机的 T/F 序列是一种办法，前面的基准测试已经验证了随机 T/F 干扰分支预测会产生接近 50% 的多余开销。那么有没有办法降低分支预测失败的损失呢？怎么让 CPU 更早发现到分支预测失败，减少要抛弃、清空的流水线长度？<p>参考前面爆栈的链接 <a href=https://stackoverflow.com/questions/49932119/avoid-stalling-pipeline-by-calculating-conditional-early>avoid stalling pipeline by calculating conditional early</a> ，我简单写一个基准测试看看。<pre class=language-c++ data-lang=c++ style=color:#fdf4c1aa;background-color:#282828><code class=language-c++ data-lang=c++><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;iostream>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;functional>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;chrono>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;vector>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;cstdlib>
+</span><span style=color:#fa5c4b>#include </span><span style=color:#b8bb26>&lt;random>
+</span><span>
+</span><span style=color:#fa5c4b>using namespace</span><span> std;
+</span><span style=color:#fa5c4b>using namespace</span><span> std::chrono;
+</span><span>
+</span><span>milliseconds </span><span style=color:#8ec07c>time_it</span><span>(function&lt;</span><span style=color:#fa5c4b>void</span><span>(</span><span style=color:#fa5c4b>void</span><span>)> </span><span style=color:#fdf4c1>fn</span><span>) {
+</span><span>    </span><span style=color:#fa5c4b>auto</span><span> start </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>system_clock::now()</span><span>;
+</span><span>    </span><span style=color:#fdf4c1>fn()</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>auto</span><span> stop </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>system_clock::now()</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>duration_cast&lt;milliseconds>(stop </span><span style=color:#fe8019>-</span><span style=color:#fdf4c1> start)</span><span>;
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>benchmark</span><span>(</span><span style=color:#fa5c4b>const</span><span> string </span><span style=color:#fdf4c1>name</span><span>, </span><span style=color:#fabd2f>uint32_t </span><span style=color:#fdf4c1>loops</span><span>, function&lt;</span><span style=color:#fa5c4b>void</span><span>(</span><span style=color:#fa5c4b>void</span><span>)> </span><span style=color:#fdf4c1>fn</span><span>) {
+</span><span>    milliseconds sum </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span style=color:#fa5c4b>ms</span><span>, lowest </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span style=color:#fa5c4b>ms</span><span>, highest </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span style=color:#fa5c4b>ms</span><span>;
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; i </span><span style=color:#fe8019>&lt;</span><span> loops; i</span><span style=color:#fe8019>++</span><span>) {
+</span><span>        </span><span style=color:#fa5c4b>auto</span><span> d </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>time_it(fn)</span><span>;
+</span><span>        sum </span><span style=color:#fe8019>+=</span><span> d;
+</span><span>        lowest </span><span style=color:#fe8019>=</span><span> lowest </span><span style=color:#fe8019>== </span><span style=color:#d3869b>0</span><span style=color:#fa5c4b>ms </span><span style=color:#fe8019>?</span><span> d </span><span style=color:#fe8019>: </span><span style=color:#fdf4c1>min(lowest, d)</span><span>;
+</span><span>        highest </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>max(highest, d)</span><span>;
+</span><span>    }
+</span><span>
+</span><span>    cout </span><span style=color:#fe8019>&lt;&lt;</span><span> name;
+</span><span>    cout </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>" avg: " </span><span style=color:#fe8019>&lt;&lt;</span><span> sum.</span><span style=color:#fdf4c1>count</span><span>() </span><span style=color:#fe8019>/</span><span> loops </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>"ms"</span><span>;
+</span><span>    cout </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>" best: " </span><span style=color:#fe8019>&lt;&lt;</span><span> lowest.</span><span style=color:#fdf4c1>count</span><span>() </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>"ms"</span><span>;
+</span><span>    cout </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>" worst: " </span><span style=color:#fe8019>&lt;&lt;</span><span> highest.</span><span style=color:#fdf4c1>count</span><span>() </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>"ms"</span><span>;
+</span><span>    cout </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>" total: " </span><span style=color:#fe8019>&lt;&lt;</span><span> sum.</span><span style=color:#fdf4c1>count</span><span>() </span><span style=color:#fe8019>&lt;&lt; </span><span style=color:#b8bb26>"ms"</span><span>;
+</span><span>    cout </span><span style=color:#fe8019>&lt;&lt;</span><span> endl;
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>typedef struct</span><span> my_node {
+</span><span>    </span><span style=color:#fa5c4b>int</span><span> value;
+</span><span>    my_node </span><span style=color:#fe8019>*</span><span>next;
+</span><span>
+</span><span>    </span><span style=color:#fdf4c1>my_node() </span><span style=color:#fe8019>: </span><span style=color:#fdf4c1>value(</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>)</span><span>, </span><span style=color:#fdf4c1>next(</span><span style=color:#d3869b>nullptr</span><span style=color:#fdf4c1>) </span><span>{}
+</span><span>} </span><span style=color:#8ec07c>my_node</span><span>;
+</span><span>
+</span><span style=color:#fa5c4b>typedef struct</span><span> my_list {
+</span><span>    </span><span style=color:#fa5c4b>int</span><span> length;
+</span><span>    my_node </span><span style=color:#fe8019>*</span><span>head;
+</span><span>    my_node </span><span style=color:#fe8019>*</span><span>last;
+</span><span>
+</span><span>    </span><span style=color:#fdf4c1>my_list() </span><span style=color:#fe8019>: </span><span style=color:#fdf4c1>length(</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>)</span><span>, </span><span style=color:#fdf4c1>head(</span><span style=color:#d3869b>nullptr</span><span style=color:#fdf4c1>)</span><span>, </span><span style=color:#fdf4c1>last(</span><span style=color:#d3869b>nullptr</span><span style=color:#fdf4c1>) </span><span>{}
+</span><span>    </span><span style=color:#fa5c4b>void </span><span style=color:#fdf4c1>append() </span><span>{
+</span><span>        </span><span style=color:#fa5c4b>if </span><span>(head </span><span style=color:#fe8019>== </span><span style=color:#d3869b>nullptr</span><span>) {
+</span><span>            head </span><span style=color:#fe8019>= </span><span style=color:#fa5c4b>new </span><span style=color:#fdf4c1>my_node()</span><span>;
+</span><span>            last </span><span style=color:#fe8019>=</span><span> head;
+</span><span>        } </span><span style=color:#fa5c4b>else </span><span>{
+</span><span>            last-></span><span style=color:#fdf4c1>next </span><span style=color:#fe8019>= </span><span style=color:#fa5c4b>new </span><span style=color:#fdf4c1>my_node()</span><span>;
+</span><span>            last </span><span style=color:#fe8019>=</span><span> last-></span><span style=color:#fdf4c1>next</span><span>;
+</span><span>        }
+</span><span>        length</span><span style=color:#fe8019>++</span><span>;
+</span><span>    }
+</span><span>} </span><span style=color:#8ec07c>my_list</span><span>;
+</span><span>
+</span><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>sum_sentinel</span><span>(my_list </span><span style=color:#fdf4c1>list</span><span>) {
+</span><span>    </span><span style=color:#fa5c4b>int</span><span> sum </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>auto</span><span> cur </span><span style=color:#fe8019>=</span><span> list.</span><span style=color:#fdf4c1>head</span><span>; cur </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>nullptr</span><span>; cur </span><span style=color:#fe8019>=</span><span> cur-></span><span style=color:#fdf4c1>next</span><span>) {
+</span><span>        sum </span><span style=color:#fe8019>+=</span><span> cur-></span><span style=color:#fdf4c1>value</span><span>;
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>void </span><span style=color:#8ec07c>sum_counter</span><span>(my_list </span><span style=color:#fdf4c1>list</span><span>) {
+</span><span>    </span><span style=color:#fa5c4b>int</span><span> sum </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>;
+</span><span>    my_node </span><span style=color:#fe8019>*</span><span>cur </span><span style=color:#fe8019>=</span><span> list.</span><span style=color:#fdf4c1>head</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; i </span><span style=color:#fe8019>&lt;</span><span> list.</span><span style=color:#fdf4c1>length</span><span>; cur </span><span style=color:#fe8019>=</span><span> cur-></span><span style=color:#fdf4c1>next</span><span>, i</span><span style=color:#fe8019>++</span><span>) {
+</span><span>        sum </span><span style=color:#fe8019>+=</span><span> cur-></span><span style=color:#fdf4c1>value</span><span>;
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span style=color:#fa5c4b>int </span><span style=color:#8ec07c>main</span><span>(</span><span style=color:#fa5c4b>void</span><span>) {
+</span><span>    vector&lt;my_list> lists;
+</span><span>    lists.</span><span style=color:#fdf4c1>resize</span><span>(</span><span style=color:#d3869b>10000000</span><span>);
+</span><span>
+</span><span>    random_device rd;
+</span><span>    mt19937 </span><span style=color:#fdf4c1>gen(rd())</span><span>;
+</span><span>    uniform_int_distribution&lt;</span><span style=color:#fa5c4b>int</span><span>> </span><span style=color:#fdf4c1>dist(</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>10</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>auto </span><span style=color:#fe8019>&</span><span>list </span><span style=color:#fe8019>:</span><span> lists) {
+</span><span>        </span><span style=color:#fa5c4b>auto</span><span> node_count </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>dist(gen)</span><span>;
+</span><span>        </span><span style=color:#fa5c4b>for </span><span>(</span><span style=color:#fa5c4b>int</span><span> i </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0</span><span>; i </span><span style=color:#fe8019>&lt;</span><span> node_count; i</span><span style=color:#fe8019>++</span><span>) {
+</span><span>            list.</span><span style=color:#fdf4c1>append</span><span>();
+</span><span>        }
+</span><span>    }
+</span><span>
+</span><span>    </span><span style=color:#fdf4c1>benchmark(</span><span style=color:#b8bb26>"sentinel"</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>100</span><span style=color:#fdf4c1>, [</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>lists]() {
+</span><span style=color:#fdf4c1>        </span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>auto</span><span style=color:#fdf4c1> list </span><span style=color:#fe8019>:</span><span style=color:#fdf4c1> lists) {
+</span><span style=color:#fdf4c1>            sum_sentinel(list);
+</span><span style=color:#fdf4c1>        }
+</span><span style=color:#fdf4c1>    })</span><span>;
+</span><span>
+</span><span>    </span><span style=color:#fdf4c1>benchmark(</span><span style=color:#b8bb26>"counter"</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>100</span><span style=color:#fdf4c1>, [</span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>lists]() {
+</span><span style=color:#fdf4c1>        </span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>auto</span><span style=color:#fdf4c1> list </span><span style=color:#fe8019>:</span><span style=color:#fdf4c1> lists) {
+</span><span style=color:#fdf4c1>            sum_counter(list);
+</span><span style=color:#fdf4c1>        }
+</span><span style=color:#fdf4c1>    })</span><span>;
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0</span><span>;
+</span><span>}
+</span></code></pre><p>输出结果<pre style=color:#fdf4c1aa;background-color:#282828><code><span>sentinel avg: 471ms best: 470ms worst: 502ms total: 47178ms
+</span><span>counter avg: 407ms best: 402ms worst: 512ms total: 40726ms
+</span></code></pre><p>这简直是黑魔法！<code>sum_counter</code>明显需要执行更多的指令，但执行速度比指令更少的<code>sum_sentinel</code>平均快70ms！<p>造成慢的原因是一样的，因为分支预测失败，我们以上面的4阶段流水线来分析，假设每个阶段要一个时钟周期，等CPU发现取错了指令（比如译码完了<code>add</code>，发现<code>cur!=nullptr</code>是F），于是浪费了两个时钟周期。这被称为 <em>front end bubble</em> 。参考 cloud flare 的这篇博客，<a href=https://blog.cloudflare.com/branch-predictor/>branch predictor</a> 。这个 <em>front end</em> 指的是 CPU 微架构中流水线的前端，形象地看，流水线就像是一节一节的水管，指令填满每一节水管，流向下一节。分支预测失败就像是中间一节水管突然空了，后面的指令继续推着空气（预测错误的指令）往前走，就成了水管里的一个泡泡。<p>但 <code>sum_counter</code> 快的原因更神奇：因为指令排列的顺序，让分支预测依赖的指令更早进入流水线，因此分支指令进入流水线后，分支预测会更快发现预测错误。见下面的汇编代码。<pre class=language-asm data-lang=asm style=color:#fdf4c1aa;background-color:#282828><code class=language-asm data-lang=asm><span style=color:#8ec07c>&lt;sum_sentinel(list_head)>:
+</span><span style=color:#fa5c4b>test   </span><span style=color:#fdf4c1>rsi,rsi
+</span><span style=color:#fa5c4b>je     </span><span style=color:#8ec07c>1fe &lt;sum_sentinel(list_head)</span><span style=color:#fdf4c1>+</span><span style=color:#d3869b>0x1e</span><span style=color:#8ec07c>>
+</span><span style=color:#fa5c4b>xor    </span><span style=color:#fdf4c1>eax,eax
+</span><span style=color:#fa5c4b>loop</span><span style=color:#8ec07c>:
+</span><span style=color:#fa5c4b>add    </span><span style=color:#fdf4c1>eax,</span><span style=color:#fabd2f>DWORD PTR </span><span style=color:#fdf4c1>[rsi]</span><span style=color:#928374;font-style:italic> ; --- 1
+</span><span style=color:#fa5c4b>mov    </span><span style=color:#fdf4c1>rsi,</span><span style=color:#fabd2f>QWORD PTR </span><span style=color:#fdf4c1>[rsi+</span><span style=color:#d3869b>0x8</span><span style=color:#fdf4c1>]</span><span style=color:#928374;font-style:italic> ; --- 2
+</span><span style=color:#fa5c4b>test   </span><span style=color:#fdf4c1>rsi,rsi</span><span style=color:#928374;font-style:italic> ; --- 3
+</span><span style=color:#fa5c4b>jne    loop</span><span style=color:#928374;font-style:italic> ; --- 4
+</span><span style=color:#fa5c4b>cdqe</span><span style=color:#928374;font-style:italic>   ; --- 5
+</span><span style=color:#fa5c4b>ret</span><span style=color:#928374;font-style:italic>    ; --- 6
+</span><span>
+</span><span>
+</span><span style=color:#8ec07c>&lt;sum_counter(list_head)>:
+</span><span style=color:#fa5c4b>test   </span><span style=color:#fdf4c1>edi,edi
+</span><span style=color:#fa5c4b>jle    </span><span style=color:#8ec07c>1d0 &lt;sum_counter(list_head)</span><span style=color:#fdf4c1>+</span><span style=color:#d3869b>0x20</span><span style=color:#8ec07c>>
+</span><span style=color:#fa5c4b>xor    </span><span style=color:#fdf4c1>edx,edx
+</span><span style=color:#fa5c4b>xor    </span><span style=color:#fdf4c1>eax,eax
+</span><span style=color:#fa5c4b>loop</span><span style=color:#8ec07c>:
+</span><span style=color:#fa5c4b>add    </span><span style=color:#fdf4c1>edx,</span><span style=color:#d3869b>0x1</span><span style=color:#928374;font-style:italic> ; --- 1
+</span><span style=color:#fa5c4b>add    </span><span style=color:#fdf4c1>eax,</span><span style=color:#fabd2f>DWORD PTR </span><span style=color:#fdf4c1>[rsi]</span><span style=color:#928374;font-style:italic> ; --- 2
+</span><span style=color:#fa5c4b>mov    </span><span style=color:#fdf4c1>rsi,</span><span style=color:#fabd2f>QWORD PTR </span><span style=color:#fdf4c1>[rsi+</span><span style=color:#d3869b>0x8</span><span style=color:#fdf4c1>]</span><span style=color:#928374;font-style:italic> ; --- 3
+</span><span style=color:#fa5c4b>cmp    </span><span style=color:#fdf4c1>edi,edx</span><span style=color:#928374;font-style:italic> ; --- 4
+</span><span style=color:#fa5c4b>jne    loop</span><span style=color:#8ec07c>:</span><span style=color:#928374;font-style:italic> ; --- 5
+</span><span style=color:#fa5c4b>cdqe</span><span style=color:#928374;font-style:italic>   ; --- 6
+</span><span style=color:#fa5c4b>ret    
+</span></code></pre><p>想象有一颗 CPU 有 5 级流水线（<code>IF</code>、<code>ID</code>、<code>EX</code>、<code>MEM</code>、<code>WB</code>），如上标注的顺序执行。<p>在 <code>sum_sentinel</code> 中，开始对 (5) 取指时，(1)才完成写回。对(6)取指时，(2)才写回。等到(3)写回，CPU才发现错误，于是从(4)往后的4级流水线全部作废清空，空泡形成。按每一级1周期算的话，就浪费了4个周期。<p>在<code>sum_counter</code>中，对(5)取指时，(1)已经写回。(4)依赖的寄存器数据就绪，立刻就能确定分支预测结果正确与否，没有浪费时钟周期。<p>——以上都是想象中的 CPU ，想象中的流水线，实际上的流水线在哪个阶段才能发现分支预测错误，清空流水线，我也不知道。这里能提出的一个论点就是：尽早让分支依赖的数据就绪，尽快让 CPU 发现预测结果不正确，<strong>可能可以</strong>降低分支预测失败的损失。话不能说满。而且针对分支预测器做优化不值得，Igor Ostrvsky 的博客前车之鉴在那里，过几年新架构 CPU 分支预测器说不定就不是这个规律了也不一定。<h2 id=fen-zhi-yu-ce-dui-an-quan-de-ying-xiang>分支预测对安全的影响</h2><h3 id=spectre>spectre</h3><p>也许有人会想CPU和安全有什么关系，这不是搞笑吗。但实际上对 CPU 漏洞的利用早已有之，对现代 CPU 高效运行的重要特性：缓存、乱序执行、分支预测进行攻击。近些年最著名的就有 <a href=https://meltdownattack.com/meltdown.pdf>Meltdown</a> 和 <a href=https://spectreattack.com/spectre.pdf>Spectre</a> 。<p>在 <a href=https://spectreattack.com/spectre.pdf>Spectre Attacks: Exploiting Speculative Execution</a> 论文里这样写道：<blockquote><p>Modern processors use branch prediction and speculative execution to maximize performance. For example, if the destination of a branch depends on a memory value that is in the process of being read, CPUs will try to guess the destination and attempt to execute ahead. When the memory value finally arrives, the CPU either discards or commits the speculative computation. Speculative logic is unfaithful in how it executes, can access the victim’s memory and registers, and can perform operations with measurable side effects.</blockquote><p>现代处理器使用分支预测和推测执行来最大化性能。举例来说，如果确定目标分支依赖于读取内存里的值，CPU会在执行前猜测其目标。当内存里的值抵达CPU，CPU要么抛弃，要么提交推测执行的结果。而推测执行的逻辑是不安全的，可能访问到受害程序的内存和寄存器，执行有明显副作用的操作。<p>Meltdown 和 Spectre 的利用方式很类似，利用乱序执行或分支预测让 CPU 加载一块不属于自己的内存到缓存，而 CPU 发现分支预测失败或乱序执行无效时，并不会抛弃这块缓存。之后再通过瞬态指令创建一个旁路，取得缓存里的数据，就成功利用CPU绕开了隔离机制，非法读取到了任意一块内存。<p><a href=https://razorpay.com/blog/meltdown-paper-summary/>meltdown paper summary</a> 可以读一下。<h2 id=zong-jie>总结</h2><p>就是聊天，我也不敢说写得有多少对，写博客的过程里东查西找，最后写完有个基本映像就很开心了。<p>分支预测对性能有影响，比起 cache line 的影响更小，而且优化价值不大，特意做优化反而可能在未来砸自己脚趾头。但分支预测又确实在现代cpu里起到了相当重要的作用，流水线造得再长，分支预测次次都错，那再长的流水线也和单周期没啥区别。<p>这篇感觉没啥好总结的，反正写完是对计算机了解更深了一点就对啦。</article><p class=tags-data><a href=/tags/c>/c++/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

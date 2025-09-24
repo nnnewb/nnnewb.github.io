@@ -1,0 +1,162 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>动态规划</title><meta content=动态规划 name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2025/2025-06-20-dynamic-programming/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=动态规划 property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2025/2025-06-20-dynamic-programming/ property=twitter:url><meta content=动态规划 property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2025/2025-06-20-dynamic-programming/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>动态规划</h1><p class=author-line>作于：2025-06-20 20:49 ，预计阅读时间 5 分钟<article><p>周三的面试被问了动态规划，明天要二面所以再临场补一下课。<p>动态规划的基本理念是把大问题分解成小的子问题进行计算，重新汇总成大问题的解。区别于一般的分治法，动态规划面对的问题往往存在重复的子问题。<h2 id=di-gui-sou-suo>递归搜索</h2><p>以上周面试的那个题为例，一次跨1级或2级台阶，n级台阶有几种爬法。暴力法是递归搜索：<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>solution</span><span>(</span><span style=color:#fdf4c1>n </span><span style=color:#fabd2f>int</span><span>) </span><span style=color:#fabd2f>int </span><span>{
+</span><span>  </span><span style=color:#928374;font-style:italic>// 只剩1级的时候只有一种方案，剩2级时只有两种方案：2,1-1
+</span><span>  </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>n </span><span style=color:#fe8019>== </span><span style=color:#d3869b>1 </span><span style=color:#fe8019>|| </span><span style=color:#fdf4c1>n </span><span style=color:#fe8019>== </span><span style=color:#d3869b>2 </span><span>{
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>n
+</span><span>  }
+</span><span>  </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>solution</span><span>(</span><span style=color:#fdf4c1>n</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>)</span><span style=color:#fe8019>+</span><span style=color:#fdf4c1>solution</span><span>(</span><span style=color:#fdf4c1>n</span><span style=color:#fe8019>-</span><span style=color:#d3869b>2</span><span>)
+</span><span>}
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>89
+</span></code></pre><p>如果我们打印出每次递归的n值，会发现有重复的n被计算。我添加一个全局map来记录n被计算的次数。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>solution</span><span>(</span><span style=color:#fdf4c1>n </span><span style=color:#fabd2f>int</span><span>) </span><span style=color:#fabd2f>int </span><span>{
+</span><span>	</span><span style=color:#928374;font-style:italic>// 统计n被计算的次数
+</span><span>	</span><span style=color:#fdf4c1>counter</span><span>[</span><span style=color:#fdf4c1>n</span><span>] </span><span style=color:#fe8019>+= </span><span style=color:#d3869b>1
+</span><span>
+</span><span>  </span><span style=color:#928374;font-style:italic>// 只剩1级的时候只有一种方案，剩2级时只有两种方案：2,1-1
+</span><span>  </span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>n </span><span style=color:#fe8019>== </span><span style=color:#d3869b>1 </span><span style=color:#fe8019>|| </span><span style=color:#fdf4c1>n </span><span style=color:#fe8019>== </span><span style=color:#d3869b>2 </span><span>{
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>n
+</span><span>  }
+</span><span>  </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>solution</span><span>(</span><span style=color:#fdf4c1>n</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>)</span><span style=color:#fe8019>+</span><span style=color:#fdf4c1>solution</span><span>(</span><span style=color:#fdf4c1>n</span><span style=color:#fe8019>-</span><span style=color:#d3869b>2</span><span>)
+</span><span>}
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>10: 1
+</span><span>8: 2
+</span><span>7: 3
+</span><span>6: 5
+</span><span>5: 8
+</span><span>4: 13
+</span><span>3: 21
+</span><span>2: 34
+</span><span>9: 1
+</span><span>1: 21
+</span></code></pre><p>暴力搜索的策略实际是遍历了这样一棵树，数出有效节点数量。<pre class=language-mermaid data-lang=mermaid style=color:#fdf4c1aa;background-color:#282828><code class=language-mermaid data-lang=mermaid><span style=color:#fa5c4b>graph </span><span style=color:#d3869b>TD
+</span><span>    </span><span style=color:#8ec07c>A</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>3</span><span style=color:#fe8019>] </span><span>--</span><span style=color:#b8bb26>"跨1级"</span><span>--> B[2]
+</span><span>    A </span><span style=color:#fe8019>--</span><span style=color:#b8bb26>"跨2级"</span><span style=color:#fe8019>--></span><span> C[1]
+</span><span>    B </span><span style=color:#fe8019>--</span><span style=color:#b8bb26>"跨1级"</span><span style=color:#fe8019>--></span><span> D[1]
+</span></code></pre><h2 id=bei-wang-lu>备忘录</h2><p>显然暴力搜索会计算大量重复子问题，一个最直观的策略就是引入一个小备忘本，在计算过一次问题后记录下来，下次遇到时就不需要再递归计算一遍。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>solution2</span><span>(</span><span style=color:#fdf4c1>n </span><span style=color:#fabd2f>int</span><span>, </span><span style=color:#fdf4c1>memo </span><span style=color:#fa5c4b>map</span><span>[</span><span style=color:#fabd2f>int</span><span>]</span><span style=color:#fabd2f>int</span><span>) </span><span style=color:#fabd2f>int </span><span>{
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>memo</span><span>[</span><span style=color:#fdf4c1>n</span><span>] </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0 </span><span>{
+</span><span>		</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>memo</span><span>[</span><span style=color:#fdf4c1>n</span><span>]
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fdf4c1>counter</span><span>[</span><span style=color:#fdf4c1>n</span><span>] </span><span style=color:#fe8019>+= </span><span style=color:#d3869b>1
+</span><span>	</span><span style=color:#928374;font-style:italic>// 只剩1级的时候只有一种方案，剩2级时只有两种方案：2,1-1
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>n </span><span style=color:#fe8019>== </span><span style=color:#d3869b>1 </span><span style=color:#fe8019>|| </span><span style=color:#fdf4c1>n </span><span style=color:#fe8019>== </span><span style=color:#d3869b>2 </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>memo</span><span>[</span><span style=color:#fdf4c1>n</span><span>] </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>n
+</span><span>		</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>n
+</span><span>	}
+</span><span>	</span><span style=color:#fdf4c1>memo</span><span>[</span><span style=color:#fdf4c1>n</span><span>] </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>solution2</span><span>(</span><span style=color:#fdf4c1>n</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>, </span><span style=color:#fdf4c1>memo</span><span>) </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>solution2</span><span>(</span><span style=color:#fdf4c1>n</span><span style=color:#fe8019>-</span><span style=color:#d3869b>2</span><span>, </span><span style=color:#fdf4c1>memo</span><span>)
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>memo</span><span>[</span><span style=color:#fdf4c1>n</span><span>]
+</span><span>}
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>89
+</span><span>3: 1
+</span><span>8: 1
+</span><span>6: 1
+</span><span>4: 1
+</span><span>2: 1
+</span><span>1: 1
+</span><span>10: 1
+</span><span>9: 1
+</span><span>7: 1
+</span><span>5: 1
+</span></code></pre><p>就是这样。暴力法的内核是分治，将大问题拆分成小问题直到能被容易的解决。<h2 id=dong-tai-gui-hua>动态规划</h2><p>上面的备忘录法也有叫做自顶向下的动态规划的。自顶向下的方法从原问题 n 出发，把问题逐步拆分到最小单元，求解顺序是 <code>f(n)</code>,<code>f(n-1)</code>,...,<code>f(2)</code>,<code>f(1)</code>。<p>另一种叫做制表法的动态规划算法则是自底向上，从较小规模的问题开始，求解顺序是 <code>f(1),f(2),...,f(n)</code> 。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>solution3</span><span>(</span><span style=color:#fdf4c1>n </span><span style=color:#fabd2f>int</span><span>) </span><span style=color:#fabd2f>int </span><span>{
+</span><span>	</span><span style=color:#928374;font-style:italic>// 对最小已知问题，选择短路返回
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>n </span><span style=color:#fe8019>== </span><span style=color:#d3869b>1 </span><span style=color:#fe8019>|| </span><span style=color:#fdf4c1>n </span><span style=color:#fe8019>== </span><span style=color:#d3869b>2 </span><span>{
+</span><span>		</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>n
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#928374;font-style:italic>// 每个子问题解的数组
+</span><span>	</span><span style=color:#fdf4c1>dp </span><span style=color:#fe8019>:= </span><span style=color:#fabd2f>make</span><span>([]</span><span style=color:#fabd2f>int</span><span>, </span><span style=color:#fdf4c1>n</span><span style=color:#fe8019>+</span><span style=color:#d3869b>1</span><span>)
+</span><span>	</span><span style=color:#928374;font-style:italic>// 初始化最小已知问题
+</span><span>	</span><span style=color:#fdf4c1>dp</span><span>[</span><span style=color:#d3869b>0</span><span>] </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0
+</span><span>	</span><span style=color:#fdf4c1>dp</span><span>[</span><span style=color:#d3869b>1</span><span>] </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1
+</span><span>	</span><span style=color:#fdf4c1>dp</span><span>[</span><span style=color:#d3869b>2</span><span>] </span><span style=color:#fe8019>= </span><span style=color:#d3869b>2
+</span><span>	</span><span style=color:#928374;font-style:italic>// 迭代计算稍大规模的子问题，直到求解出原问题 f(n)
+</span><span>	</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>:= </span><span style=color:#d3869b>3</span><span>; </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>&lt;= </span><span style=color:#fdf4c1>n</span><span>; </span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>++ </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>dp</span><span>[</span><span style=color:#fdf4c1>i</span><span>] </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>dp</span><span>[</span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>] </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>dp</span><span>[</span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>-</span><span style=color:#d3869b>2</span><span>]
+</span><span>	}
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>dp</span><span>[</span><span style=color:#fdf4c1>n</span><span>]
+</span><span>}
+</span></code></pre><p>针对这个爬台阶问题，每个<code>f(n)</code>其实都只依赖<code>f(n-1)</code>和<code>f(n-2)</code>的解，所以<code>dp</code>实际上只需要2格就够用了。<p>最终可以优化为这样：<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>solution3</span><span>(</span><span style=color:#fdf4c1>n </span><span style=color:#fabd2f>int</span><span>) </span><span style=color:#fabd2f>int </span><span>{
+</span><span>	</span><span style=color:#928374;font-style:italic>// 对最小已知问题，选择短路返回
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>n </span><span style=color:#fe8019>== </span><span style=color:#d3869b>1 </span><span style=color:#fe8019>|| </span><span style=color:#fdf4c1>n </span><span style=color:#fe8019>== </span><span style=color:#d3869b>2 </span><span>{
+</span><span>		</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>n
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#928374;font-style:italic>// 每一步计算依赖的子问题解，初始化为最小子问题解
+</span><span>	</span><span style=color:#fa5c4b>var </span><span>(
+</span><span>		</span><span style=color:#fdf4c1>a </span><span style=color:#fabd2f>int </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1 </span><span style=color:#928374;font-style:italic>// f(1)
+</span><span>		</span><span style=color:#fdf4c1>b </span><span style=color:#fabd2f>int </span><span style=color:#fe8019>= </span><span style=color:#d3869b>2 </span><span style=color:#928374;font-style:italic>// f(2)
+</span><span>	)
+</span><span>	</span><span style=color:#928374;font-style:italic>// 迭代计算
+</span><span>	</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>:= </span><span style=color:#d3869b>3</span><span>; </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>&lt;= </span><span style=color:#fdf4c1>n</span><span>; </span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>++ </span><span>{
+</span><span>		</span><span style=color:#928374;font-style:italic>// 迭代前，a=f(i-2),b=f(i-1)
+</span><span>		</span><span style=color:#fdf4c1>a</span><span>, </span><span style=color:#fdf4c1>b </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>b</span><span>, </span><span style=color:#fdf4c1>a</span><span style=color:#fe8019>+</span><span style=color:#fdf4c1>b
+</span><span>		</span><span style=color:#928374;font-style:italic>// 迭代后，a=f(i-1),b=f(i)
+</span><span>	}
+</span><span>  </span><span style=color:#928374;font-style:italic>// 迭代结束后，b=f(n)
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>b
+</span><span>}
+</span></code></pre><h2 id=zui-you-zi-jie-gou>最优子结构</h2><p>动态规划算法还可以进一步延伸为求解最优子结构。修改之前的问题：<blockquote><p>现在有 n 级台阶，你可以一次跨1级台阶或2级台阶，每级台阶要付出不同的代价 <code>cost[n]</code>，求解踩上第n级台阶的最小代价。</blockquote><p>同样的，我们先自顶向下去拆分子问题，在第 n 级台阶需要付出的总代价是 <code>previous_minimum_cost + cost[n]</code>，在第 n 级台阶求解最小化代价，我们只能从两种上一步决策里选择，也就是从 <code>n-1</code> 和 <code>n-2</code> 的总代价里取较小的那个。<p>也就是设<code>f(n)</code>是上到第n级台阶的最小总代价，<code>f</code>可以定义为<code>f(n) = min(f(n-1), f(n-2)) + cost[n]</code>。<p><code>f(n)</code> 的最小子问题是 <code>f(1)=cost[1]</code>，<code>f(2)=cost[2]</code> 。为什么 <code>f(2)=cost[2]</code>，是因为另一个策略（1级+1级）的cost是<code>cost[1]+cost[2]</code>，肯定是小于<code>cost[2]</code>的。<pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>solution1</span><span>(</span><span style=color:#fdf4c1>cost </span><span>[]</span><span style=color:#fabd2f>int</span><span>,</span><span style=color:#fdf4c1>memo </span><span style=color:#fa5c4b>map</span><span>[</span><span style=color:#fabd2f>int</span><span>]</span><span style=color:#fabd2f>int</span><span>) </span><span style=color:#fabd2f>int </span><span>{
+</span><span>	</span><span style=color:#fdf4c1>n </span><span style=color:#fe8019>:= </span><span style=color:#fabd2f>len</span><span>(</span><span style=color:#fdf4c1>cost</span><span>)
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>n </span><span style=color:#fe8019>== </span><span style=color:#d3869b>0 </span><span>{
+</span><span>		</span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0
+</span><span>	} </span><span style=color:#fa5c4b>else if </span><span style=color:#fdf4c1>n </span><span style=color:#fe8019>== </span><span style=color:#d3869b>1 </span><span style=color:#fe8019>|| </span><span style=color:#fdf4c1>n </span><span style=color:#fe8019>== </span><span style=color:#d3869b>2 </span><span>{
+</span><span>		</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>cost</span><span>[</span><span style=color:#fdf4c1>n</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>]
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>memo</span><span>[</span><span style=color:#fdf4c1>n</span><span>] </span><span style=color:#fe8019>!= </span><span style=color:#d3869b>0 </span><span>{
+</span><span>		</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>memo</span><span>[</span><span style=color:#fdf4c1>n</span><span>]
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>min</span><span>(</span><span style=color:#fdf4c1>solution1</span><span>(</span><span style=color:#fdf4c1>cost</span><span>[:</span><span style=color:#fdf4c1>n</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>]), </span><span style=color:#fdf4c1>solution1</span><span>(</span><span style=color:#fdf4c1>cost</span><span>[:</span><span style=color:#fdf4c1>n</span><span style=color:#fe8019>-</span><span style=color:#d3869b>2</span><span>])) </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>cost</span><span>[</span><span style=color:#fdf4c1>n</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>]
+</span><span>}
+</span><span>
+</span></code></pre><p>反过来用自底向上分析就是：<ul><li>1：只有1级台阶的情况下没得选<li>2：级台阶的时候直接跳到2级<li>3：可以选择1+2或者2+1，因为3的代价是一定的， 所以只要考虑1和2哪个代价更低，也就是最低代价是 <code>min(cost[1],cost[2])+cost[3]</code><li>4：同理，我们已经求解了前两级的最低代价，只要选择较低的那个就行。<li>n: 一直计算到原问题的解为止。</ul><pre class=language-go data-lang=go style=color:#fdf4c1aa;background-color:#282828><code class=language-go data-lang=go><span style=color:#fa5c4b>func </span><span style=color:#8ec07c>solution2</span><span>(</span><span style=color:#fdf4c1>cost </span><span>[]</span><span style=color:#fabd2f>int</span><span>) </span><span style=color:#fabd2f>int </span><span>{
+</span><span>	</span><span style=color:#fdf4c1>n </span><span style=color:#fe8019>:= </span><span style=color:#fabd2f>len</span><span>(</span><span style=color:#fdf4c1>cost</span><span>)
+</span><span>	</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>n </span><span style=color:#fe8019>== </span><span style=color:#d3869b>0 </span><span>{
+</span><span>		</span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0
+</span><span>	} </span><span style=color:#fa5c4b>else if </span><span style=color:#fdf4c1>n </span><span style=color:#fe8019>== </span><span style=color:#d3869b>1 </span><span style=color:#fe8019>|| </span><span style=color:#fdf4c1>n </span><span style=color:#fe8019>== </span><span style=color:#d3869b>2 </span><span>{
+</span><span>		</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>cost</span><span>[</span><span style=color:#fdf4c1>n</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>]
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fdf4c1>dp </span><span style=color:#fe8019>:= </span><span style=color:#fabd2f>make</span><span>([]</span><span style=color:#fabd2f>int</span><span>, </span><span style=color:#fdf4c1>n</span><span>)
+</span><span>	</span><span style=color:#fdf4c1>dp</span><span>[</span><span style=color:#d3869b>0</span><span>] </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>cost</span><span>[</span><span style=color:#d3869b>0</span><span>]
+</span><span>	</span><span style=color:#fdf4c1>dp</span><span>[</span><span style=color:#d3869b>1</span><span>] </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>cost</span><span>[</span><span style=color:#d3869b>1</span><span>]
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>:= </span><span style=color:#d3869b>2</span><span>; </span><span style=color:#fdf4c1>i </span><span style=color:#fe8019>&lt; </span><span style=color:#fdf4c1>n</span><span>; </span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>++ </span><span>{
+</span><span>		</span><span style=color:#fdf4c1>dp</span><span>[</span><span style=color:#fdf4c1>i</span><span>] </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>min</span><span>(</span><span style=color:#fdf4c1>dp</span><span>[</span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>], </span><span style=color:#fdf4c1>dp</span><span>[</span><span style=color:#fdf4c1>i</span><span style=color:#fe8019>-</span><span style=color:#d3869b>2</span><span>]) </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>cost</span><span>[</span><span style=color:#fdf4c1>i</span><span>]
+</span><span>	}
+</span><span>
+</span><span>	</span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>dp</span><span>[</span><span style=color:#fdf4c1>n</span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>]
+</span><span>}
+</span></code></pre><p>同样的，因为问题只依赖前两个子问题的解，dp也可以被优化成两格。<h2 id=zong-jie>总结</h2><p>动态规划适合的领域是问题可以被拆分为更小的子问题求解，原问题依赖于子问题的解，拆分中会出现重叠子问题的场合。<p>听起来简单，但是考虑的条件变多的时候拆子问题就会比较头大，0/1背包一时还啃不下来，已经花了2小时20分了。<p>明天面试完再看看。</article><p class=tags-data><a href=/tags/go>/go/</a> <a href=/tags/dong-tai-gui-hua>/动态规划/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

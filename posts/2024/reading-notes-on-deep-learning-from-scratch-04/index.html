@@ -1,0 +1,513 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>《深度学习入门》读书笔记04</title><meta content=《深度学习入门》读书笔记04 name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-04/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=《深度学习入门》读书笔记04 property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-04/ property=twitter:url><meta content=《深度学习入门》读书笔记04 property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-04/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>《深度学习入门》读书笔记04</h1><p class=author-line>作于：2024-01-08 21:13 ，预计阅读时间 19 分钟<article><h1 id=shen-jing-wang-luo-de-xue-xi>神经网络的学习</h1><h2 id=gai-nian>概念</h2><h3 id=shen-du-xue-xi>深度学习</h3><p>神经网络的特征是<strong>从数据中学习</strong>。<p>显然稍有规模的神经网络，一个一个神经元去设置权重是非常困难的事情。<p>又好又快地学习到权重就是深度学习的重头戏啦。<p>然后，学习需要海量的数据，所以数据是深度学习的命根子。<p>深度学习和传统机器学习技术的区别是传统机器学习过程，需要先由人发现规律（特征），然后用合适的机器学习技术（SVM 支持向量机、KNN 等）学习识别特征。<p>深度学习则是由神经网络直接吃数据，找出潜在的特征或规律。<h3 id=shu-ju-ji>数据集</h3><p>机器学习中一般把数据分为训练集和测试集，训练集就像是靶场专门用来练习改进的，测试集则是考核评估训练结果。训练数据也称为<strong>监督数据</strong>。<p>处理未被观察过的数据的能力叫<strong>泛化能力</strong>。对特定输入集合表现很好但在未知的输入上表现不好叫<strong>过拟合</strong>。<h3 id=one-hot-biao-shi>one-hot 表示</h3><p>例如识别手写数字的神经网络输出是 10 个浮点数，表示数字 0-9 的概率。<p>对正确数字的标签我们可以记为下标，即正确数字是 0-9 之间的一个整数。<p>用 one-hot 表示正确数字的标签，即把正确数字的标签记为 0，其他数字记为 1，这样神经网络的输出就是 10 个浮点数，只有正确数字的那个位置是 1，其他都是 0。<p>例如正确数字是 2 ，则 one-hot 表示为 <code>[0,0,1,0,0,0,0,0,0,0]</code>。<h2 id=sun-shi-han-shu>损失函数</h2><p>**损失函数 (loss function)**是表示神经网络性能恶劣程度的指标，即神经网络的结果和监督数据有多不拟合。<h3 id=jun-fang-wu-chai>均方误差</h3><p>均方误差 (Mean Squared Error, MSE) 就是常用的损失函数。<p>$$ MSE = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y_i})^2 $$<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>mean_squared_error</span><span>(</span><span style=color:#fdf4c1>y</span><span>, </span><span style=color:#fdf4c1>t</span><span>):
+</span><span>    </span><span style=color:#928374;font-style:italic>""" 均方误差损失函数 """
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0.5</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>np.sum((y </span><span style=color:#fe8019>- </span><span style=color:#fdf4c1>t) </span><span style=color:#fe8019>** </span><span style=color:#d3869b>2</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span>
+</span><span style=color:#928374;font-style:italic># softmax 输出
+</span><span>y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([</span><span style=color:#d3869b>0.1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.05</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.6</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.05</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>])
+</span><span style=color:#928374;font-style:italic># one-hot 表示的正确标签
+</span><span>t </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>])
+</span><span>
+</span><span style=color:#928374;font-style:italic># 计算均方误差
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(mean_squared_error(y, t))
+</span><span>
+</span><span style=color:#928374;font-style:italic># softmax 输出
+</span><span>y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([</span><span style=color:#d3869b>0.1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.05</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.6</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.05</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>])
+</span><span style=color:#928374;font-style:italic># one-hot 表示的正确标签
+</span><span>t </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>])
+</span><span>
+</span><span style=color:#928374;font-style:italic># 计算均方误差，注意 softmax 在正解位置输出的概率是0.6，更接近 1 了，相应的均方误差也降低了
+</span><span style=color:#928374;font-style:italic># 说明和监督数据更接近了
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(mean_squared_error(y, t))
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>0.6475
+</span><span>0.09750000000000003
+</span></code></pre><h3 id=jiao-cha-shang-wu-chai>交叉熵误差</h3><p>交叉熵误差公式如下：<p>$$ E=-\sum_{k} t_k \log_e y_k $$<p>和均方误差一样，下标 k 表示输出维度，$t_k$ 表示正确解标签(one-hot 表示)，$y_k$ 表示预测值。<p>因为 $t_k$ 在非正确解下标上都是 0，所以实际交叉熵可以化简为下面这样：<p>$$ E=-log_e y_k $$<p>其中 k 表示正确解的下标。<p>交叉熵函数定义和函数图像如下。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>matplotlib.pyplot </span><span style=color:#fa5c4b>as </span><span>plt
+</span><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>cross_entropy_error</span><span>(</span><span style=color:#fdf4c1>y</span><span>, </span><span style=color:#fdf4c1>t</span><span>):
+</span><span>    _delta </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1e-7
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>np.sum(np.log(y</span><span style=color:#fe8019>+</span><span style=color:#fdf4c1>_delta)</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>t)
+</span><span>
+</span><span>
+</span><span>y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([</span><span style=color:#d3869b>0.1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.05</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.6</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.05</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>])
+</span><span>t </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([</span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>])
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'交叉熵误差'</span><span style=color:#fdf4c1>, cross_entropy_error(y, t))
+</span><span>
+</span><span>x </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.arange(</span><span style=color:#d3869b>0.01</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.01</span><span style=color:#fdf4c1>)
+</span><span>y </span><span style=color:#fe8019>= -</span><span style=color:#fdf4c1>np.log(x)
+</span><span style=color:#fdf4c1>plt.plot(x, y)
+</span><span style=color:#fdf4c1>plt.show()
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>交叉熵误差 0.510825457099338
+</span></code></pre><p><img alt=png src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-04/index_files/index_3_1.webp><p>很容易看出来当预测值越接近 0，也就是偏差越大，交叉熵误差的结果就越大。预测值越接近 1，偏差越小，则交叉熵误差结果越小。<h3 id=mini-batch>mini-batch</h3><p>因为训练的目的是在整个训练集上表现更好，所以评估损失自然也是基于整个训练集的。<p>上文的损失函数仅评估了单个样本的损失，实际训练中评估的应该是在训练集上的损失总和。<p>以交叉熵误差为例，训练集的损失函数应该这样定义：<p>$$ E=-\frac{1}{n} \sum_{n} \sum_{k}t_{nk} \log_e y_{nk} $$<p>其中 <code>n</code> 定义为训练集的样本数，下标 <code>nk</code> 表示第 <code>n</code> 个样本输出的第 <code>k</code> 个维度。<p>$y_{nk}$ 表示第 <code>n</code> 个样本的神经网络输出，$t_{nk}$ 表示第 <code>n</code> 个样本的真实标签。<p>但也要意识到，以整个训练集的评估结果计算损失成本是比较高的，仅 <code>MNIST</code> 训练集就有 60000 个样本，计算量很大。<p>mini-batch 的设想是将训练集分成若干个小批量，每个小批量的大小可以根据实际情况调整。<p>在每个小批量上计算损失，然后将这些损失求和，这样可以大大减小计算量。<blockquote><p>注：个人看法，如果训练集很大而且内部的样本差异非常大，mini-batch 抽取的批量 可能很难代表整个训练集，想要保证效果可能就要增加多轮 epoch 迭代才行。选择样本 构造合适的 mini-batch 应该在有些场景下也很重要。</blockquote><p>下面是从训练集随机抽取一定数量的样本形成 mini-batch 的方法。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>os
+</span><span style=color:#fa5c4b>import </span><span>sys
+</span><span>
+</span><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>load_mnist</span><span>(</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>args</span><span>, </span><span style=color:#fe8019>**</span><span style=color:#fdf4c1>kwargs</span><span>):
+</span><span>    repo_root </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>os.path.abspath(os.path.pardir)
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>repo_root </span><span style=color:#fe8019>not in </span><span>sys.path:
+</span><span>        </span><span style=color:#fdf4c1>sys.path.append(repo_root)
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>from </span><span>dataset.mnist </span><span style=color:#fa5c4b>import </span><span>load_mnist
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>load_mnist(</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>args,</span><span style=color:#fe8019>**</span><span style=color:#fdf4c1>kwargs)
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>mini_batch</span><span>(</span><span style=color:#fdf4c1>training_data</span><span>, </span><span style=color:#fdf4c1>labels</span><span>, </span><span style=color:#fdf4c1>batch_size</span><span>):
+</span><span>    </span><span style=color:#928374;font-style:italic>""" 在数据集中随机抽取 mini-batch 
+</span><span style=color:#928374;font-style:italic>    """
+</span><span>    </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(training_data.shape)
+</span><span>    mask </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.random.choice(training_data.shape[</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>], batch_size)
+</span><span>    </span><span style=color:#fa5c4b>return </span><span>training_data[mask], labels[mask]
+</span><span>
+</span><span>
+</span><span style=color:#928374;font-style:italic># mini-batch 大小
+</span><span>batch_size </span><span style=color:#fe8019>= </span><span style=color:#d3869b>100
+</span><span style=color:#928374;font-style:italic># 总训练集和测试集
+</span><span>(x_train, t_train), (x_test, t_test) </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>load_mnist(one_hot_label</span><span style=color:#fe8019>=</span><span style=color:#d3869b>True</span><span style=color:#fdf4c1>)
+</span><span style=color:#928374;font-style:italic># 抽取 mini-batch
+</span><span>x_batch, t_batch </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>mini_batch(x_train, t_train, batch_size)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'训练集 </span><span style=color:#fdf4c1>{x_batch.shape}</span><span style=color:#b8bb26> 标签 </span><span style=color:#fdf4c1>{t_batch.shape}</span><span style=color:#b8bb26>'</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>cross_entropy_error</span><span>(</span><span style=color:#fdf4c1>y</span><span>, </span><span style=color:#fdf4c1>t</span><span>):
+</span><span>    </span><span style=color:#928374;font-style:italic># 对于单个样本输入（即输入 y 是个向量）则先转成一维的矩阵，再按公式计算交叉熵损失。
+</span><span>    </span><span style=color:#928374;font-style:italic>""" 交叉熵损失函数 """
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>y.ndim </span><span style=color:#fe8019>== </span><span style=color:#d3869b>1 </span><span style=color:#fe8019>and </span><span>t.ndim </span><span style=color:#fe8019>== </span><span style=color:#d3869b>1</span><span>:
+</span><span>        t </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>t.reshape(</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, t.size)
+</span><span>        y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>y.reshape(</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, y.size)
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic># 计算这个 mini-batch 的交叉熵损失
+</span><span>    </span><span style=color:#928374;font-style:italic>#
+</span><span>    </span><span style=color:#928374;font-style:italic># 按照第三章批量计算的公式，输入是二维矩阵的时候，输出也是二维矩阵，输出的行表示样本，列表示类别。
+</span><span>    </span><span style=color:#928374;font-style:italic>#
+</span><span>    </span><span style=color:#928374;font-style:italic># 因此可以得知 y 和 t 应该都是 (batch_size, 10) 的矩阵，用 element-wise 方式计算 t - log(y) 得到
+</span><span>    </span><span style=color:#928374;font-style:italic># (batch_size, 10) 的交叉熵结果矩阵。理解的重点在 t * np.log(y + delta) 的参数计算过程是 element-wise 的。
+</span><span>    </span><span style=color:#928374;font-style:italic>#
+</span><span>    </span><span style=color:#928374;font-style:italic># 理解了这一点，-np.sum()/y.shape[0] 就很好理解了。
+</span><span>    </span><span style=color:#928374;font-style:italic># 矩阵所有元素求和得到 mini-batch 的综合损失，除以样本数得到平均每个样本的交叉熵损失。
+</span><span>    delta </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1e-7
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>np.sum(t </span><span style=color:#fe8019>* </span><span style=color:#fdf4c1>np.log(y </span><span style=color:#fe8019>+ </span><span style=color:#fdf4c1>delta)) </span><span style=color:#fe8019>/ </span><span>y.shape[</span><span style=color:#d3869b>0</span><span>]
+</span><span>
+</span><span>
+</span><span style=color:#928374;font-style:italic># 测试计算单个样本的交叉熵损失
+</span><span>p </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([</span><span style=color:#d3869b>0.1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.05</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.6</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.05</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>])
+</span><span>t </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>])
+</span><span>loss </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>cross_entropy_error(p, t)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(loss)
+</span><span>
+</span><span>
+</span><span style=color:#928374;font-style:italic># 测试计算 mini-batch 的交叉熵损失
+</span><span>p </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>0.1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.05</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.6</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.05</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>              [</span><span style=color:#d3869b>0.1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.05</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.6</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.05</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.0</span><span style=color:#fdf4c1>]])
+</span><span>t </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>],
+</span><span style=color:#fdf4c1>              [</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>]])
+</span><span>
+</span><span>loss </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>cross_entropy_error(p, t)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(loss)
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>(60000, 784)
+</span><span>训练集 (100, 784) 标签 (100, 10)
+</span><span>0.510825457099338
+</span><span>1.7532778653276644
+</span></code></pre><p>此处解释一下 mini_batch 函数的原理。<p><code>np.random.choice</code> 作用是从指定的数组随机抽取 n 个元素，首个参数是待抽取的数组，第二个参数是抽取的数量。 但这里传递的首参数 <code>a</code> 是一个 <code>int</code> 型整数，这个情况下 <code>np.random.choice</code> 的行为会变成在 <code>np.arange(0, a)</code> 范围内抽取 n 个元素。 所以，这里实际抽取到的是小批量样本的下标。<p>然后就是 <code>numpy</code> 数组的另一个特性，支持数组下标索引。 换言之，我们可以以序列类型传递多个下标给 <code>__getitem__</code> 魔术方法，传递下标序列时会返回多个元素。<p>书中另一种小批量交叉熵损失计算方式仅仅是另一种形式获取预测结果以计算 $\sum_{k} \log_e y_k$ ，并没有太大差异，就不赘述了。<p>下面简单演示下 <code>numpy</code> 数组的下标特性用法。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span>
+</span><span>arr </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>2</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>3</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>4</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>5</span><span style=color:#fdf4c1>])
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'数组是 </span><span style=color:#fdf4c1>{arr}</span><span style=color:#b8bb26>'</span><span style=color:#fdf4c1>)
+</span><span>idx </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'通常下标 arr[</span><span style=color:#fdf4c1>{idx}</span><span style=color:#b8bb26>] 访问: </span><span style=color:#fdf4c1>{arr[</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>]}</span><span style=color:#b8bb26>'</span><span style=color:#fdf4c1>)
+</span><span>idx </span><span style=color:#fe8019>= </span><span>[</span><span style=color:#d3869b>0</span><span>, </span><span style=color:#d3869b>1</span><span>, </span><span style=color:#d3869b>2</span><span>]
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'多个下标 arr[</span><span style=color:#fdf4c1>{idx}</span><span style=color:#b8bb26>] 访问: </span><span style=color:#fdf4c1>{arr[idx]}</span><span style=color:#b8bb26>'</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span style=color:#928374;font-style:italic># 多维数组也支持这个用法，多维数组指定多个下标的时候索引序列的元素是被索引的元素下标序列
+</span><span>arr </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([[</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>,</span><span style=color:#d3869b>2</span><span style=color:#fdf4c1>,</span><span style=color:#d3869b>3</span><span style=color:#fdf4c1>,</span><span style=color:#d3869b>4</span><span style=color:#fdf4c1>,</span><span style=color:#d3869b>5</span><span style=color:#fdf4c1>],[</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>,</span><span style=color:#d3869b>2</span><span style=color:#fdf4c1>,</span><span style=color:#d3869b>3</span><span style=color:#fdf4c1>,</span><span style=color:#d3869b>4</span><span style=color:#fdf4c1>,</span><span style=color:#d3869b>5</span><span style=color:#fdf4c1>],[</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>,</span><span style=color:#d3869b>2</span><span style=color:#fdf4c1>,</span><span style=color:#d3869b>3</span><span style=color:#fdf4c1>,</span><span style=color:#d3869b>4</span><span style=color:#fdf4c1>,</span><span style=color:#d3869b>5</span><span style=color:#fdf4c1>]])
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'数组是 </span><span style=color:#fdf4c1>{arr}</span><span style=color:#b8bb26>'</span><span style=color:#fdf4c1>)
+</span><span style=color:#928374;font-style:italic># 多维数组下标有个特点是需要用 tuple 作为索引类型，索引语法是 arr[dim1,dim2,...,dimN]，每个 dim 都是待索引元素在该维度的下标序列
+</span><span>idx </span><span style=color:#fe8019>= </span><span>([</span><span style=color:#d3869b>0</span><span>, </span><span style=color:#d3869b>0</span><span>, </span><span style=color:#d3869b>0</span><span>], [</span><span style=color:#d3869b>0</span><span>, </span><span style=color:#d3869b>1</span><span>, </span><span style=color:#d3869b>2</span><span>])
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'多维数组多个下标 arr[</span><span style=color:#fdf4c1>{idx}</span><span style=color:#b8bb26>] 访问: </span><span style=color:#fdf4c1>{arr[idx]}</span><span style=color:#b8bb26>'</span><span style=color:#fdf4c1>)
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>数组是 [1 2 3 4 5]
+</span><span>通常下标 arr[0] 访问: 1
+</span><span>多个下标 arr[[0, 1, 2]] 访问: [1 2 3]
+</span><span>数组是 [[1 2 3 4 5]
+</span><span> [1 2 3 4 5]
+</span><span> [1 2 3 4 5]]
+</span><span>多维数组多个下标 arr[([0, 0, 0], [0, 1, 2])] 访问: [1 2 3]
+</span></code></pre><h3 id=sun-shi-han-shu-de-yi-yi>损失函数的意义</h3><p>损失函数的作用是衡量预测结果与真实结果的差距，从而得到模型的预测结果。<p>在书中，作者说不能使用识别精度为依据进行训练，其实原因和阶跃函数那一节差不多。<p>作者书中举例的精度定义是 <em>精确度=正确数/总样本数</em>，因为正确数和样本数都是整数，精确度其实是离散的点。 换句话说，用精确度来计算就像是问你猜猜看我脑子里在想的是哪个数，你说 1，我说不对，你说 2，我说不对...神经网络无法从训练反馈的结果得知调整有没有作用，就像是在一个无限大的无序集合里搜索一个数，什么时候能找到全看运气。 而损失函数在这个游戏里就是，我问你我在想哪个数，你说 1，我说大概 30%正确；你说 2，我说大概 50%正确；你说 3，我说大概 70%正确...训练神经网络时就知道往这个方向调整是在逼近正确答案了。<p>上面这个例子换成数学概念就是导数，即略微改变输入参数，函数输出会产生多大的改变。放到函数图形里就是斜率，得到斜率也就知道了往哪个方向调整可以降低损失。<blockquote><p>注：如果发现权重往大或者往小微调都会增加损失，并不一定代表权重已经处于最优，也可能卡在半山腰呢。</blockquote><p>如果以精确度计，那函数图像里大部分地方都是平行于 x 轴的，斜率为 0。精确度函数是个阶跃函数。微调参数很难直接影响精确度。当然非要杠一下把精确度定义成接近正确的程度（就是$-loss()$嘛）也行，就是给损失函数换了个说法而已。<h3 id=shu-zhi-wei-fen>数值微分</h3><p>又到了考验我可怜的数学水平的时候了，别人是半桶水我大概是个空瓶。<p>这一节主要讲导数的概念，导数定义如下：<p>$$ \frac{d}{dx} f(x) = \lim_{h \to 0} \frac{f(x + h) - f(x)}{h} $$<p>公式中 $h$ 表示一个小的变化量，$f(x)$ 表示函数在 $x$ 处的值，$f(x + h)$ 表示函数在 $x$ 处加上 $h$ 后的值，$\frac{f(x + h) - f(x)}{h}$ 表示这个小变化量对函数值的影响。。<p>加上 $\lim_{h \to 0}$ 之后，这个公式表示的就是一个极小的变化量对函数值的影响。<blockquote><p>注：高中知识，函数图像上一点的切线斜率就是导数。</blockquote><p>导数在数学公式里可以写成一撇，比如 $(e^x)'=e^x$ 。<p>导数公式不能直接套用到 python 实现：<ol><li>显然你没有一个标量 h 可以代入。<li>即使选择一个足够小的 h 值，避免了舍入误差，实际计算的也是 $f(x + h)$ 和 $f(x)$ 之间的导数，而不是 $f(x)$ 这一点的导数。</ol><p>只能求近似，方法是计算 $\frac{f(x+h)-(x-h)}{2h}$，也就是 $f(x+h)$ 到 $f(x-h)$ 之间的导数均值。书中叫 <strong>中心差分</strong>。$f(x+h)-f(x)$ 叫<strong>前向差分</strong>。<blockquote><p>利用微小的差分求导数的过程称为数值微分（numerical  differentiation），求得的导数是对解析解的近似，也叫<strong>数值解</strong>。<p>基于数学式推导求导数的过程叫 <strong>解析性求导</strong>，求得的导数是无误差的 <strong>解析解</strong>。</blockquote><p>数值微分求导的 python 代码实现如下：<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>from </span><span>typing </span><span style=color:#fa5c4b>import </span><span>Callable, Union
+</span><span>
+</span><span style=color:#fa5c4b>import </span><span>matplotlib.pyplot </span><span style=color:#fa5c4b>as </span><span>plt
+</span><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>numerical_diff</span><span>(</span><span style=color:#fdf4c1>f</span><span>: Callable[[</span><span style=color:#fabd2f>float</span><span>], </span><span style=color:#fabd2f>float</span><span>], </span><span style=color:#fdf4c1>x</span><span>: </span><span style=color:#fabd2f>float</span><span>):
+</span><span>    h </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1e-4  </span><span style=color:#928374;font-style:italic># 0.0001
+</span><span>    </span><span style=color:#fa5c4b>return </span><span>(</span><span style=color:#fdf4c1>f(x</span><span style=color:#fe8019>+</span><span style=color:#fdf4c1>h) </span><span style=color:#fe8019>- </span><span style=color:#fdf4c1>f(x</span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>h)</span><span>) </span><span style=color:#fe8019>/ </span><span>(</span><span style=color:#d3869b>2</span><span style=color:#fe8019>*</span><span>h)
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>f</span><span>(</span><span style=color:#fdf4c1>x</span><span>: Union[</span><span style=color:#fabd2f>float</span><span>, np.ndarray]) -> Union[np.ndarray, </span><span style=color:#fabd2f>float</span><span>]:
+</span><span>    </span><span style=color:#928374;font-style:italic>""" 测试求导的函数 """
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>0.01</span><span style=color:#fe8019>*</span><span>x</span><span style=color:#fe8019>**</span><span style=color:#d3869b>2</span><span style=color:#fe8019>+</span><span style=color:#d3869b>0.1</span><span style=color:#fe8019>*</span><span>x
+</span><span>
+</span><span>
+</span><span style=color:#928374;font-style:italic># 绘制函数图像
+</span><span>x </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.arange(</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>20</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.1</span><span style=color:#fdf4c1>)
+</span><span>y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>f(x)
+</span><span style=color:#fdf4c1>plt.xlabel(</span><span style=color:#b8bb26>'x'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>plt.ylabel(</span><span style=color:#b8bb26>'f(x)'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>plt.plot(x, y)
+</span><span style=color:#fdf4c1>plt.show()
+</span><span>
+</span><span style=color:#928374;font-style:italic># 求导 x=5 和 x=10
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'x=5 时 f 的导数近似为'</span><span style=color:#fdf4c1>, numerical_diff(f, </span><span style=color:#d3869b>5</span><span style=color:#fdf4c1>))
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'x=5 时 f 的导数近似为'</span><span style=color:#fdf4c1>, numerical_diff(f, </span><span style=color:#d3869b>10</span><span style=color:#fdf4c1>))
+</span></code></pre><p><img alt=png src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-04/index_files/index_10_0.webp><pre style=color:#fdf4c1aa;background-color:#282828><code><span>x=5 时 f 的导数近似为 0.1999999999990898
+</span><span>x=5 时 f 的导数近似为 0.2999999999986347
+</span></code></pre><p>多个参数的函数的导数称为 <strong>偏导数</strong> 。<p>然后是对于有多个参数的函数求导，比如 $f(x,y)=x^2+y^2$ 在 $x=4,y=5$ 处的导数， 做法是先求 $f(x,y)$ 在 $x$ 处的偏导数，然后求 $f(x,y)$ 在 $y$ 处的偏导数（先后无关）。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>f2</span><span>(</span><span style=color:#fdf4c1>x</span><span>,</span><span style=color:#fdf4c1>y</span><span>):
+</span><span>    </span><span style=color:#fa5c4b>return </span><span>x</span><span style=color:#fe8019>**</span><span style=color:#d3869b>2</span><span style=color:#fe8019>+</span><span>y</span><span style=color:#fe8019>**</span><span style=color:#d3869b>2
+</span><span>
+</span><span style=color:#928374;font-style:italic># d1,d2 就是 f2 的偏导数了
+</span><span>d1 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>numerical_diff(</span><span style=color:#fa5c4b>lambda </span><span style=color:#fdf4c1>x:f2(x,</span><span style=color:#d3869b>4</span><span style=color:#fdf4c1>),</span><span style=color:#d3869b>3</span><span style=color:#fdf4c1>)
+</span><span>d2 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>numerical_diff(</span><span style=color:#fa5c4b>lambda </span><span style=color:#fdf4c1>y:f2(</span><span style=color:#d3869b>3</span><span style=color:#fdf4c1>,y),</span><span style=color:#d3869b>4</span><span style=color:#fdf4c1>)
+</span></code></pre><p>偏导数的数学表达：$\frac{\partial f}{\partial x}$ 表示 $f(x,y)$ 函数关于 $x$ 的偏导数。<p>此外还有一些常见基本初等函数的求导公式找本高数书应该都有写。<h3 id=ti-du>梯度</h3><p>由全部变量的偏导数汇总而成的向量叫梯度，以 $f(x,y)=x^2+y^2$ 为例，梯度公式为：$(\frac{\partial f}{\partial x},\frac{\partial f}{\partial y})$<p>梯度计算的 python 实现如下。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>from </span><span>typing </span><span style=color:#fa5c4b>import </span><span>Callable
+</span><span>
+</span><span style=color:#fa5c4b>import </span><span>matplotlib.pyplot </span><span style=color:#fa5c4b>as </span><span>plt
+</span><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span style=color:#fa5c4b>from </span><span>matplotlib </span><span style=color:#fa5c4b>import </span><span>cm
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>f</span><span>(</span><span style=color:#fdf4c1>x</span><span>):
+</span><span>    </span><span style=color:#fa5c4b>return </span><span>x[</span><span style=color:#d3869b>0</span><span>]</span><span style=color:#fe8019>**</span><span style=color:#d3869b>2 </span><span style=color:#fe8019>+ </span><span>x[</span><span style=color:#d3869b>1</span><span>]</span><span style=color:#fe8019>**</span><span style=color:#d3869b>2
+</span><span>
+</span><span>
+</span><span style=color:#928374;font-style:italic># 绘制函数图像
+</span><span>fig, ax </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>plt.subplots(subplot_kw</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>{</span><span style=color:#b8bb26>"projection"</span><span style=color:#fdf4c1>: </span><span style=color:#b8bb26>"3d"</span><span style=color:#fdf4c1>})
+</span><span>
+</span><span>x1 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.arange(</span><span style=color:#fe8019>-</span><span style=color:#d3869b>5</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>5</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.1</span><span style=color:#fdf4c1>)
+</span><span>x2 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>x1.copy()
+</span><span>x1, x2 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.meshgrid(x1, x2)
+</span><span>y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>f(np.array([x1, x2]))
+</span><span style=color:#fdf4c1>ax.plot_surface(x1, x2, y, cmap</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>cm.Blues)
+</span><span style=color:#fdf4c1>ax.set_xlabel(</span><span style=color:#b8bb26>'x1'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>ax.set_ylabel(</span><span style=color:#b8bb26>'x2'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>ax.set_zlabel(</span><span style=color:#b8bb26>'y'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>plt.show()
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>numerical_gradient</span><span>(</span><span style=color:#fdf4c1>f</span><span>: Callable[[np.ndarray], np.ndarray], </span><span style=color:#fdf4c1>x</span><span>: np.ndarray):
+</span><span>    </span><span style=color:#928374;font-style:italic>""" 数值微分法计算梯度
+</span><span style=color:#928374;font-style:italic>
+</span><span style=color:#928374;font-style:italic>    注意输入的 np.ndarray 输入的维度是一维，但也可以是多维。函数实现中基本是 element-wise 的运算
+</span><span style=color:#928374;font-style:italic>    """
+</span><span>    h </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1e-4  </span><span style=color:#928374;font-style:italic># 0.0001
+</span><span>    grad </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.zeros_like(x)  </span><span style=color:#928374;font-style:italic># 生成和输入参数形状一致的数组
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>idx </span><span style=color:#fa5c4b>in </span><span style=color:#fabd2f>range</span><span style=color:#fdf4c1>(x.size)</span><span>:
+</span><span>        tmp_val </span><span style=color:#fe8019>= </span><span>x[idx]
+</span><span>
+</span><span>        </span><span style=color:#928374;font-style:italic># 公式中 f(x+h) 的部分
+</span><span>        x[idx] </span><span style=color:#fe8019>= </span><span>tmp_val</span><span style=color:#fe8019>+</span><span>h
+</span><span>        fxh1 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>f(x)
+</span><span>
+</span><span>        </span><span style=color:#928374;font-style:italic># 公式中 f(x-h) 的部分
+</span><span>        x[idx] </span><span style=color:#fe8019>= </span><span>tmp_val</span><span style=color:#fe8019>-</span><span>h
+</span><span>        fxh2 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>f(x)
+</span><span>
+</span><span>        </span><span style=color:#928374;font-style:italic># 公式主体部分 f(x+h)-f(x-h)/2h
+</span><span>        grad[idx] </span><span style=color:#fe8019>= </span><span>(fxh1</span><span style=color:#fe8019>-</span><span>fxh2)</span><span style=color:#fe8019>/</span><span>(h</span><span style=color:#fe8019>*</span><span style=color:#d3869b>2</span><span>)
+</span><span>
+</span><span>        </span><span style=color:#928374;font-style:italic># 还原输入 x，计算下一个维度的偏导数
+</span><span>        x[idx] </span><span style=color:#fe8019>= </span><span>tmp_val
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>return </span><span>grad
+</span><span>
+</span><span>
+</span><span style=color:#928374;font-style:italic># 单个点的梯度
+</span><span>grad </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>numerical_gradient(f, np.array([</span><span style=color:#d3869b>3.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>4.0</span><span style=color:#fdf4c1>]))
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'单个点的梯度：</span><span style=color:#fdf4c1>{grad}</span><span style=color:#b8bb26>'</span><span style=color:#fdf4c1>)
+</span></code></pre><p><img alt=png src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-04/index_files/index_12_0.webp><pre style=color:#fdf4c1aa;background-color:#282828><code><span>单个点的梯度：[6. 8.]
+</span></code></pre><p>接着尝试将梯度图形化绘制。<p>基本思路是：<ol><li>取 x1,x2 范围为 -5 到 5 之间<li>网格化 x1,x2，获得两个二维数组 x1', x2'，分别表示 x 轴坐标和 y 轴坐标，形成一个网格。<li>扁平化二维数组，得到两个一维数组。<li>以两个一维数组组成输入，计算梯度，得到网格上每个点的梯度。<li>绘制梯度向量。</ol><pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#928374;font-style:italic># 计算区间 0-5,0-5 区间的梯度，绘制网格
+</span><span>x1 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.arange(</span><span style=color:#fe8019>-</span><span style=color:#d3869b>5</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>5</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>)
+</span><span>x2 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.arange(</span><span style=color:#fe8019>-</span><span style=color:#d3869b>5</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>5</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1.0</span><span style=color:#fdf4c1>)
+</span><span>m1, m2 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.meshgrid(x1, x2)
+</span><span>x1 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>m1.flatten()
+</span><span>x2 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>m2.flatten()
+</span><span>grad </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>numerical_gradient(f, np.array([x1, x2]))
+</span><span style=color:#928374;font-style:italic># 绘制图
+</span><span style=color:#fdf4c1>plt.quiver(x1, x2, </span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>grad[</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>], </span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>grad[</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>])
+</span><span style=color:#fdf4c1>plt.show()
+</span><span>
+</span><span style=color:#928374;font-style:italic># 梯度向量图
+</span><span>fig, ax </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>plt.subplots(subplot_kw</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>{</span><span style=color:#b8bb26>"projection"</span><span style=color:#fdf4c1>: </span><span style=color:#b8bb26>"3d"</span><span style=color:#fdf4c1>})
+</span><span>y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>f(np.array([x1, x2]))
+</span><span>y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.reshape(y, m1.shape)
+</span><span style=color:#fdf4c1>ax.plot_surface(m1, m2, y, cmap</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'coolwarm'</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span style=color:#928374;font-style:italic># 梯度和源函数图像的关系
+</span><span>mod </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.sqrt(grad[</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>]</span><span style=color:#fe8019>**</span><span style=color:#d3869b>2</span><span style=color:#fe8019>+</span><span style=color:#fdf4c1>grad[</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>]</span><span style=color:#fe8019>**</span><span style=color:#d3869b>2</span><span style=color:#fdf4c1>)
+</span><span>mod </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.reshape(mod, m1.shape)
+</span><span style=color:#fdf4c1>ax.plot_surface(m1, m2, mod)
+</span><span style=color:#fdf4c1>ax.set_xlabel(</span><span style=color:#b8bb26>'x1'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>ax.set_ylabel(</span><span style=color:#b8bb26>'x2'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>ax.set_zlabel(</span><span style=color:#b8bb26>'f([x1,x2])'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>plt.show()
+</span></code></pre><p><img alt=png src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-04/index_files/index_14_0.webp><p><img alt=png src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-04/index_files/index_14_1.webp><p>上图非常直观地显示了梯度向量和原函数之间的关系，负梯度向量指示的方向是原函数图像的最低处，离最低点越远则梯度向量的模越大。<p>书中讲，梯度指示的方向是各点处的函数值减小最多的方向。<h2 id=ti-du-fa>梯度法</h2><p>引用书中原文，<blockquote><p>机器学习的主要任务是在学习时寻找最优参数。同样地，神经网络也必须 在学习时找到最优参数（权重和偏置）。这里所说的最优参数是指损失函数 取最小值时的参数。 一般而言，损失函数很复杂，参数空间庞大，我们不 知道它在何处能取得最小值。而通过巧妙地使用梯度来寻找函数最小值 （或者尽可能小的值）的方法就是梯度法。<p>...实际上，在复杂的函数中，梯度指示的方向基本上都不是函数值最小处。<p>...函数的极小值、最小值以及被称为鞍点（saddle point）的地方，梯度为 0。 极小值是局部最小值，也就是限定在某个范围内的最小值。 鞍点是从某个方向上看是极大值，从另一个方向上看则是极小值的点。 此外，当函数很复杂且呈扁平状时，学习可能会进入一个（几乎）平坦的地区， 陷入被称为“学习高原”的无法前进的停滞期。</blockquote><p>利用梯度寻找使损失函数最小的参数的方法叫梯度下降法 (gradient descent method)， 反之求最大就是梯度上升法 (gradient ascent method)。深度学习说梯度法一般指 梯度下降法。<p>上面写的函数 $f(x_1, x_2)=x_1^2+x_2^2$ 梯度下降法数学表达式：<p>$$ x_0 = x_0 - \eta \frac{\partial f}{\partial x_0} \ x_1 = x_1 - \eta \frac{\partial f}{\partial x_1} $$<p>其中 $\eta$ 是学习率，个人理解梯度向量乘上学习率，就是每次梯度下降法调整参数的方向和大小。<p>用 python 实现如下：<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span style=color:#fa5c4b>import </span><span>matplotlib.pyplot </span><span style=color:#fa5c4b>as </span><span>plt
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>f</span><span>(</span><span style=color:#fdf4c1>x</span><span>):
+</span><span>    </span><span style=color:#fa5c4b>return </span><span>x[</span><span style=color:#d3869b>0</span><span>]</span><span style=color:#fe8019>**</span><span style=color:#d3869b>2</span><span style=color:#fe8019>+</span><span>x[</span><span style=color:#d3869b>1</span><span>]</span><span style=color:#fe8019>**</span><span style=color:#d3869b>2
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>numerical_gradient</span><span>(</span><span style=color:#fdf4c1>f</span><span>, </span><span style=color:#fdf4c1>x</span><span>):
+</span><span>    h </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1e-4
+</span><span>    grad </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.zeros_like(x)
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>idx </span><span style=color:#fa5c4b>in </span><span style=color:#fabd2f>range</span><span style=color:#fdf4c1>(x.size)</span><span>:
+</span><span>        tmp_val </span><span style=color:#fe8019>= </span><span>x[idx]
+</span><span>        </span><span style=color:#928374;font-style:italic># f(x+h)
+</span><span>        x[idx] </span><span style=color:#fe8019>= </span><span>tmp_val </span><span style=color:#fe8019>+ </span><span>h
+</span><span>        fxh1 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>f(x)
+</span><span>
+</span><span>        </span><span style=color:#928374;font-style:italic># f(x-h)
+</span><span>        x[idx] </span><span style=color:#fe8019>= </span><span>tmp_val </span><span style=color:#fe8019>- </span><span>h
+</span><span>        fxh2 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>f(x)
+</span><span>
+</span><span>        grad[idx] </span><span style=color:#fe8019>= </span><span>(fxh1 </span><span style=color:#fe8019>- </span><span>fxh2) </span><span style=color:#fe8019>/ </span><span>(</span><span style=color:#d3869b>2</span><span style=color:#fe8019>*</span><span>h)
+</span><span>        x[idx] </span><span style=color:#fe8019>= </span><span>tmp_val
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>return </span><span>grad
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>gradient_descent</span><span>(</span><span style=color:#fdf4c1>f</span><span>, </span><span style=color:#fdf4c1>init_x</span><span>, </span><span style=color:#fdf4c1>learning_rate</span><span>, </span><span style=color:#fdf4c1>steps</span><span style=color:#fe8019>=</span><span style=color:#d3869b>100</span><span>, </span><span style=color:#fdf4c1>optimize_history</span><span style=color:#fe8019>=</span><span style=color:#d3869b>False</span><span>):
+</span><span>    x </span><span style=color:#fe8019>= </span><span>init_x
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>optimize_history:
+</span><span>        history </span><span style=color:#fe8019>= </span><span>[]
+</span><span>        </span><span style=color:#fdf4c1>history.append(init_x.copy())
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>for </span><span style=color:#fdf4c1>_ </span><span style=color:#fa5c4b>in </span><span style=color:#fabd2f>range</span><span style=color:#fdf4c1>(steps)</span><span>:
+</span><span>        grad </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>numerical_gradient(f, x)
+</span><span>
+</span><span>        </span><span style=color:#928374;font-style:italic># x1 - \eta \frac{\partial f}{\partial x1}
+</span><span>        x </span><span style=color:#fe8019>-= </span><span>learning_rate </span><span style=color:#fe8019>* </span><span>grad
+</span><span>
+</span><span>        </span><span style=color:#fa5c4b>if </span><span>optimize_history:
+</span><span>            </span><span style=color:#fdf4c1>history.append(x.copy())
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>optimize_history:
+</span><span>        </span><span style=color:#fa5c4b>return </span><span>x, </span><span style=color:#fdf4c1>np.array(history)
+</span><span>    </span><span style=color:#fa5c4b>return </span><span>x
+</span><span>
+</span><span>
+</span><span>init_x </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([</span><span style=color:#fe8019>-</span><span style=color:#d3869b>3.0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>4.0</span><span style=color:#fdf4c1>])
+</span><span>lr </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0.1
+</span><span>step_num </span><span style=color:#fe8019>= </span><span style=color:#d3869b>20
+</span><span>
+</span><span style=color:#fdf4c1>plt.axhline(</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, linestyle</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>':'</span><span style=color:#fdf4c1>, color</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'black'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>plt.axvline(</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, linestyle</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>':'</span><span style=color:#fdf4c1>, color</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'black'</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span>x, x_history </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>gradient_descent(f, init_x, lr, step_num, </span><span style=color:#d3869b>True</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>plt.plot(x[</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>], x[</span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>], </span><span style=color:#b8bb26>'*'</span><span style=color:#fdf4c1>, color</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'cyan'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>plt.plot(x_history[:, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>], x_history[:, </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>], </span><span style=color:#b8bb26>'o'</span><span style=color:#fdf4c1>, color</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>'blue'</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>plt.xlim(</span><span style=color:#fe8019>-</span><span style=color:#d3869b>3.5</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>3.5</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>plt.ylim(</span><span style=color:#fe8019>-</span><span style=color:#d3869b>4.5</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>4.5</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>plt.xlabel(</span><span style=color:#b8bb26>"X0"</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>plt.ylabel(</span><span style=color:#b8bb26>"X1"</span><span style=color:#fdf4c1>)
+</span><span style=color:#fdf4c1>plt.show()
+</span></code></pre><p><img alt=png src=https://nnnewb.github.io/posts/2024/reading-notes-on-deep-learning-from-scratch-04/index_files/index_16_0.webp><p>学习率过高，函数结果可能发散，书上配图很清楚了，也可以百度一下相关 loss 函数在不同学习率下结果的变化。<p>学习率这样的参数叫做<strong>超参数</strong>，不同于神经网络的权重，学习率这样的超参数则是人工设定的。一般超参数需要尝试多个值找到可以使学习顺利进行的设定。<h2 id=shen-jing-wang-luo-xue-xi>神经网络学习</h2><p>对神经网络采取梯度下降法优化时，梯度下降法公式这样表示：<p>$$ W = \begin{bmatrix} w_{11} & w_{12} & w_{13} \ w_{21} & w_{22} & w_{23} \end{bmatrix} \ \frac{\partial L}{\partial W} = \begin{bmatrix} \frac{\partial L}{\partial w_{11}} & \frac{\partial L}{\partial w_{12}} & \frac{\partial L}{\partial w_{13}} \ \frac{\partial L}{\partial w_{21}} & \frac{\partial L}{\partial w_{22}} & \frac{\partial L}{\partial w_{23}} \end{bmatrix} $$<p>对应的 python 实现如下：<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>from </span><span>common </span><span style=color:#fa5c4b>import </span><span>gradient, loss, activation
+</span><span style=color:#fa5c4b>import </span><span>sys
+</span><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span style=color:#fa5c4b>import </span><span>matplotlib.pyplot </span><span style=color:#fa5c4b>as </span><span>plt
+</span><span>
+</span><span style=color:#fdf4c1>sys.path.append(</span><span style=color:#b8bb26>'..'</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>class </span><span style=color:#8ec07c>simpleNet</span><span>:
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#fabd2f>__init__</span><span>(</span><span style=color:#fdf4c1>self</span><span>):
+</span><span>        </span><span style=color:#fdf4c1>self</span><span>.W </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.random.randn(</span><span style=color:#d3869b>2</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>3</span><span style=color:#fdf4c1>)  </span><span style=color:#928374;font-style:italic># 用高斯分布进行初始化
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>predict</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>x</span><span>):
+</span><span>        </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>activation.softmax(np.dot(x, self.W))
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>loss</span><span>(</span><span style=color:#fdf4c1>self</span><span>, </span><span style=color:#fdf4c1>x</span><span>, </span><span style=color:#fdf4c1>t</span><span>):
+</span><span>        y </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>self.predict(x)
+</span><span>        l </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>loss.cross_entropy_error(y, t)
+</span><span>        </span><span style=color:#fa5c4b>return </span><span>l
+</span><span>
+</span><span>
+</span><span>net </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>simpleNet()
+</span><span style=color:#928374;font-style:italic># 输出权重
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'权重\n'</span><span style=color:#fdf4c1>, net.W)
+</span><span style=color:#928374;font-style:italic># 预测
+</span><span>x </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([</span><span style=color:#d3869b>0.6</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0.9</span><span style=color:#fdf4c1>])
+</span><span>p </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>net.predict(x)
+</span><span>t </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.array([</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>1</span><span style=color:#fdf4c1>])
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'预测\n'</span><span style=color:#fdf4c1>, p)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'正解\n'</span><span style=color:#fdf4c1>, t)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'预测结果\n'</span><span style=color:#fdf4c1>, np.argmax(p))
+</span><span style=color:#928374;font-style:italic># 计算损失
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'损失\n'</span><span style=color:#fdf4c1>, net.loss(x, t))
+</span><span style=color:#928374;font-style:italic># 计算梯度
+</span><span>g </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>gradient.numerical_gradient(</span><span style=color:#fa5c4b>lambda </span><span style=color:#fdf4c1>w: net.loss(x, t), net.W)
+</span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'梯度\n'</span><span style=color:#fdf4c1>, g)
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>权重
+</span><span> [[ 0.05909374 -0.8483816  -0.16256387]
+</span><span> [-0.08178002  0.42475819  0.90001489]]
+</span><span>预测
+</span><span> [0.24792207 0.22690096 0.52517697]
+</span><span>正解
+</span><span> [0 0 1]
+</span><span>预测结果
+</span><span> 2
+</span><span>损失
+</span><span> 0.6440197935129427
+</span><span>梯度
+</span><span> [[ 0.14875321  0.13614055 -0.28489376]
+</span><span> [ 0.22312982  0.20421083 -0.42734064]]
+</span></code></pre><p>至此，对梯度下降法有了基本了解，可以开始训练一个神经网络了。<p>对上文中 <code>from common import </code> 进来的几个模块，都是前面章节实现过的内容。只有 <code>numerical_gradient</code> 做了一些修改，主要是用了 <code>np.nditer</code> 多维迭代器 实现多维数组参数中迭代计算每个参数的梯度值。<h2 id=2-ceng-mnist-shou-xie-shu-zi-shi-bie-shen-jing-wang-luo-xun-lian>2 层 MNIST 手写数字识别神经网络训练</h2><p>接下来设计并训练一个具有输入层、隐藏层、输出层的神经网络用于识别手写数字。<ul><li>输入层：100x786，batch size 设置为 100 ，输入信号 786 (28x28)<li>隐藏层：100个神经元，786个输入信号<li>输出层：10个神经元，100个输入信号</ul><p>这个神经网络会参考书中这一节的例子，但主要还是根据本书前四章的内容自行编写实现。<pre class=language-python data-lang=python style=color:#fdf4c1aa;background-color:#282828><code class=language-python data-lang=python><span style=color:#fa5c4b>import </span><span>os
+</span><span style=color:#fa5c4b>import </span><span>sys
+</span><span style=color:#fa5c4b>import </span><span>time
+</span><span style=color:#fa5c4b>from </span><span>typing </span><span style=color:#fa5c4b>import </span><span>Any, Callable, List, Sequence, Tuple
+</span><span>
+</span><span style=color:#fa5c4b>import </span><span>numpy </span><span style=color:#fa5c4b>as </span><span>np
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>load_train</span><span>() -> Tuple[Any, Any]:
+</span><span>    repo_root </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>os.path.abspath(os.path.pardir)
+</span><span>    </span><span style=color:#fa5c4b>if </span><span>repo_root </span><span style=color:#fe8019>not in </span><span>sys.path:
+</span><span>        </span><span style=color:#fdf4c1>sys.path.append(repo_root)
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>from </span><span>dataset.mnist </span><span style=color:#fa5c4b>import </span><span>load_mnist
+</span><span>    training_data, </span><span style=color:#fdf4c1>_ </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>load_mnist(one_hot_label</span><span style=color:#fe8019>=</span><span style=color:#d3869b>True</span><span style=color:#fdf4c1>)
+</span><span>    </span><span style=color:#fa5c4b>return </span><span>training_data
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>sigmoid</span><span>(</span><span style=color:#fdf4c1>a</span><span>: np.ndarray) -> np.ndarray:
+</span><span>    </span><span style=color:#928374;font-style:italic>""" sigmoid 激活函数
+</span><span style=color:#928374;font-style:italic>    """
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#d3869b>1</span><span style=color:#fe8019>/</span><span>(</span><span style=color:#d3869b>1</span><span style=color:#fe8019>+</span><span style=color:#fdf4c1>np.exp(</span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>a)</span><span>)
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>softmax</span><span>(</span><span style=color:#fdf4c1>a</span><span>: np.ndarray) -> np.ndarray:
+</span><span>    </span><span style=color:#928374;font-style:italic>""" softmax 激活函数
+</span><span style=color:#928374;font-style:italic>    """
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>np.exp(a)</span><span style=color:#fe8019>/</span><span style=color:#fdf4c1>np.sum(np.exp(a))
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>cross_entropy_error</span><span>(</span><span style=color:#fdf4c1>y</span><span>: np.ndarray, </span><span style=color:#fdf4c1>t</span><span>: np.ndarray) -> np.ndarray:
+</span><span>    </span><span style=color:#928374;font-style:italic>""" 交叉熵误差
+</span><span style=color:#928374;font-style:italic>    """
+</span><span>    _delta </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0e-7  </span><span style=color:#928374;font-style:italic># 避免 np.log(0) 得到 -inf
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>np.sum(t</span><span style=color:#fe8019>*</span><span style=color:#fdf4c1>np.log(y</span><span style=color:#fe8019>+</span><span style=color:#fdf4c1>_delta))
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>layered_numerical_gradient</span><span>(</span><span style=color:#fdf4c1>f</span><span>: Callable[[np.ndarray], np.ndarray], </span><span style=color:#fdf4c1>x</span><span>: Sequence[np.ndarray]) -> List[np.ndarray]:
+</span><span>    </span><span style=color:#928374;font-style:italic>""" 分层的数值微分法计算梯度
+</span><span style=color:#928374;font-style:italic>    """
+</span><span>    h </span><span style=color:#fe8019>= </span><span style=color:#d3869b>1e-5
+</span><span>    all_g </span><span style=color:#fe8019>= </span><span>[]
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>layer </span><span style=color:#fa5c4b>in </span><span>x:
+</span><span>        g </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.zeros_like(layer)
+</span><span>        it </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.nditer(layer, flags</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>[</span><span style=color:#b8bb26>'multi_index'</span><span style=color:#fdf4c1>], op_flags</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>[</span><span style=color:#b8bb26>'readwrite'</span><span style=color:#fdf4c1>])
+</span><span>        </span><span style=color:#fa5c4b>while </span><span style=color:#fe8019>not </span><span>it.finished:
+</span><span>            i </span><span style=color:#fe8019>= </span><span>it.multi_index
+</span><span>            tmp </span><span style=color:#fe8019>= </span><span>layer[i]
+</span><span>            layer[i] </span><span style=color:#fe8019>= </span><span>tmp</span><span style=color:#fe8019>+</span><span>h
+</span><span>            fxh1 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>f(layer)
+</span><span>            layer[i] </span><span style=color:#fe8019>= </span><span>tmp</span><span style=color:#fe8019>-</span><span>h
+</span><span>            fxh2 </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>f(layer)
+</span><span>            g[i] </span><span style=color:#fe8019>= </span><span>(fxh1</span><span style=color:#fe8019>-</span><span>fxh2)</span><span style=color:#fe8019>/</span><span>(</span><span style=color:#d3869b>2</span><span style=color:#fe8019>*</span><span>h)
+</span><span>            layer[i] </span><span style=color:#fe8019>= </span><span>tmp
+</span><span>            </span><span style=color:#fdf4c1>it.iternext()
+</span><span>        </span><span style=color:#fdf4c1>all_g.append(g)
+</span><span>    </span><span style=color:#fa5c4b>return </span><span>all_g
+</span><span>
+</span><span>
+</span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>predict</span><span>(</span><span style=color:#fdf4c1>x</span><span>: np.ndarray, </span><span style=color:#fdf4c1>w</span><span>: np.ndarray, </span><span style=color:#fdf4c1>b</span><span>: np.ndarray, </span><span style=color:#fdf4c1>activation</span><span>: Sequence[Callable[[np.ndarray], np.ndarray]]):
+</span><span>    </span><span style=color:#928374;font-style:italic>""" 计算整个神经网络的输出信号
+</span><span style=color:#928374;font-style:italic>    """
+</span><span>    </span><span style=color:#fa5c4b>if </span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(w) </span><span style=color:#fe8019>!= </span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(b)</span><span>:
+</span><span>        </span><span style=color:#fa5c4b>raise </span><span style=color:#fabd2f>Exception</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'weights/biases shape not match: </span><span style=color:#fdf4c1>{</span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(w)}</span><span style=color:#b8bb26>!=</span><span style=color:#fdf4c1>{</span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(b)}</span><span style=color:#b8bb26>'</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>if </span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(activation) </span><span style=color:#fe8019>!= </span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(w)</span><span>:
+</span><span>        </span><span style=color:#fa5c4b>raise </span><span style=color:#fabd2f>Exception</span><span style=color:#fdf4c1>(</span><span style=color:#b8bb26>'activation function not match layer size'</span><span style=color:#fdf4c1>)
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>i </span><span style=color:#fa5c4b>in </span><span style=color:#fabd2f>range</span><span style=color:#fdf4c1>(</span><span style=color:#fabd2f>len</span><span style=color:#fdf4c1>(w))</span><span>:
+</span><span>        x </span><span style=color:#fe8019>= </span><span>activation[i]</span><span style=color:#fdf4c1>(x.dot(w[i])</span><span style=color:#fe8019>+</span><span style=color:#fdf4c1>b[i])
+</span><span>
+</span><span>    </span><span style=color:#fa5c4b>return </span><span>x
+</span><span>
+</span><span>
+</span><span style=color:#928374;font-style:italic># 神经网络参数
+</span><span>w </span><span style=color:#fe8019>= </span><span>[</span><span style=color:#fdf4c1>np.random.randn(</span><span style=color:#d3869b>784</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>50</span><span style=color:#fdf4c1>)</span><span>, </span><span style=color:#fdf4c1>np.random.randn(</span><span style=color:#d3869b>50</span><span style=color:#fdf4c1>, </span><span style=color:#d3869b>10</span><span style=color:#fdf4c1>)</span><span>]
+</span><span>b </span><span style=color:#fe8019>= </span><span>[</span><span style=color:#fdf4c1>np.zeros(</span><span style=color:#d3869b>50</span><span style=color:#fdf4c1>)</span><span>, </span><span style=color:#fdf4c1>np.zeros_like(</span><span style=color:#d3869b>10</span><span style=color:#fdf4c1>)</span><span>]
+</span><span>a </span><span style=color:#fe8019>= </span><span>[sigmoid, softmax]
+</span><span>
+</span><span style=color:#928374;font-style:italic># 超参数
+</span><span>lr </span><span style=color:#fe8019>= </span><span style=color:#d3869b>0.01
+</span><span>epoch </span><span style=color:#fe8019>= </span><span style=color:#d3869b>10
+</span><span>batch_size </span><span style=color:#fe8019>= </span><span style=color:#d3869b>100
+</span><span>
+</span><span style=color:#928374;font-style:italic># 样本和标签
+</span><span>x_train, t_train </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>load_train()
+</span><span>
+</span><span>
+</span><span>iter_num </span><span style=color:#fe8019>= </span><span style=color:#d3869b>5
+</span><span style=color:#fa5c4b>for </span><span>i </span><span style=color:#fa5c4b>in </span><span style=color:#fabd2f>range</span><span style=color:#fdf4c1>(iter_num)</span><span>:
+</span><span>    _start </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>time.time()
+</span><span>    </span><span style=color:#928374;font-style:italic># 取小批量样本
+</span><span>    batch_mask </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>np.random.choice(x_train.shape[</span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>], batch_size)
+</span><span>    samples, labels </span><span style=color:#fe8019>= </span><span>x_train[batch_mask], t_train[batch_mask]
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic># 定义预测和损失函数
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>pred</span><span>(</span><span style=color:#fdf4c1>_</span><span>): </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>predict(samples, w, b, a)
+</span><span>    </span><span style=color:#fa5c4b>def </span><span style=color:#8ec07c>loss_w</span><span>(</span><span style=color:#fdf4c1>_</span><span>): </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>cross_entropy_error(pred(w), labels)
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic># 逐层计算梯度
+</span><span>    g </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>layered_numerical_gradient(loss_w, w)
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic># 逐层微调权重参数
+</span><span>    </span><span style=color:#fa5c4b>for </span><span>layer, grad </span><span style=color:#fa5c4b>in </span><span style=color:#fabd2f>enumerate</span><span style=color:#fdf4c1>(g)</span><span>:
+</span><span>        w[layer] </span><span style=color:#fe8019>-= </span><span>grad</span><span style=color:#fe8019>*</span><span>lr
+</span><span>
+</span><span>    </span><span style=color:#fabd2f>print</span><span style=color:#fdf4c1>(</span><span style=color:#fa5c4b>f</span><span style=color:#b8bb26>'iter </span><span style=color:#fdf4c1>{i}</span><span style=color:#b8bb26>, elapsed: </span><span style=color:#fdf4c1>{time.time()</span><span style=color:#fe8019>-</span><span style=color:#fdf4c1>_start}</span><span style=color:#b8bb26>, loss: </span><span style=color:#fdf4c1>{loss_w(</span><span style=color:#d3869b>None</span><span style=color:#fdf4c1>)}</span><span style=color:#b8bb26>'</span><span style=color:#fdf4c1>)
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>iter 0, elapsed: 12.719797372817993, loss: 1195.7995518433572
+</span><span>iter 1, elapsed: 12.671370267868042, loss: 1047.1394625639487
+</span><span>iter 2, elapsed: 12.680177688598633, loss: 1031.436962952565
+</span><span>iter 3, elapsed: 12.836873292922974, loss: 852.8958334219432
+</span><span>iter 4, elapsed: 12.996968746185303, loss: 878.8646665014905
+</span></code></pre></article><p class=tags-data><a href=/tags/python>/python/</a> <a href=/tags/numpy>/numpy/</a> <a href=/tags/matplotlib>/matplotlib/</a> <a href=/tags/shen-du-xue-xi>/深度学习/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

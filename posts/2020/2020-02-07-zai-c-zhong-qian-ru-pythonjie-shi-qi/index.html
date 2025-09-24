@@ -1,0 +1,124 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>在C++中嵌入Python解释器</title><meta content=在C++中嵌入Python解释器 name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2020/2020-02-07-zai-c-zhong-qian-ru-pythonjie-shi-qi/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=在C++中嵌入Python解释器 property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2020/2020-02-07-zai-c-zhong-qian-ru-pythonjie-shi-qi/ property=twitter:url><meta content=在C++中嵌入Python解释器 property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2020/2020-02-07-zai-c-zhong-qian-ru-pythonjie-shi-qi/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>在C++中嵌入Python解释器</h1><p class=author-line>作于：2020-02-07 21:59 ，预计阅读时间 5 分钟<article><p>先不说废话，项目地址：<a href=https://github.com/nnnewb/CQPy>nnnewb/CQPy</a> 。欢迎给个 Star 什么的。</p><span id=continue-reading></span><h2 id=bei-jing>背景</h2><p>想给最近在玩的酷 Q 写个插件，发现没有合适的直接使用 Python 的解决方案。<p>Richard Chien 提供了一个比较通用的插件，<code>CQHttp</code>。<code>CQHttp</code>本体是用 C++ 编写的插件，将酷 Q 的回调包装成 HTTP 请求转发至指定的地址，支持<code>http</code>和<code>websocket</code>两种协议。<p>不过由于个人想折腾折腾的想法，打算试试把 Python 解释器直接嵌入到 C++ 里得了。<p>整个思路如下。<pre class=language-mermaid data-lang=mermaid style=color:#fdf4c1aa;background-color:#282828><code class=language-mermaid data-lang=mermaid><span style=color:#fa5c4b>graph </span><span style=color:#d3869b>LR</span><span>;
+</span><span>    </span><span style=color:#8ec07c>CQP</span><span style=color:#fe8019>[</span><span style=color:#b8bb26>酷Q</span><span style=color:#fe8019>] </span><span>--事件回调--> dll[插件DLL];
+</span><span>    dll </span><span style=color:#fe8019>--</span><span style=color:#b8bb26>事件回调</span><span style=color:#fe8019>--></span><span> python[Python脚本];
+</span><span>    python </span><span style=color:#fe8019>--</span><span style=color:#b8bb26>调用API</span><span style=color:#fe8019>--></span><span> dll;
+</span><span>    dll </span><span style=color:#fe8019>--</span><span style=color:#b8bb26>调用API</span><span style=color:#fe8019>--></span><span> CQP;
+</span></code></pre><h2 id=yi-lai>依赖</h2><p>为了简化操作 Python 接口，我没有使用 Python 自带的 C API，而是<code>pybind11</code>，使用<code>vcpkg</code>管理依赖。<p>安装命令：<pre class=language-bat data-lang=bat style=color:#fdf4c1aa;background-color:#282828><code class=language-bat data-lang=bat><span>vcpkg install pybind11:x86-windows
+</span></code></pre><h2 id=0x1-bian-yi-dll>0x1 编译 DLL</h2><p>我使用 CMake 作为编译系统，因此可以很简单地写一个编译出 DLL 的 <code>CMakeLists.txt</code><pre class=language-cmake data-lang=cmake style=color:#fdf4c1aa;background-color:#282828><code class=language-cmake data-lang=cmake><span style=color:#fabd2f>cmake_minimum_required</span><span style=color:#fdf4c1>(VERSION 3.15)
+</span><span style=color:#fabd2f>project</span><span style=color:#fdf4c1>(top.weak-ptr.cqpy LANGUAGES CXX VERSION 0.1.0)
+</span><span>
+</span><span style=color:#fabd2f>include_directories</span><span style=color:#fdf4c1>(src)
+</span><span style=color:#fabd2f>aux_source_directory</span><span style=color:#fdf4c1>(src SOURCES)
+</span><span style=color:#fabd2f>set</span><span style=color:#fdf4c1>(CMAKE_CXX_STANDARD 17)
+</span><span>
+</span><span style=color:#928374;font-style:italic># 引入 pybind11
+</span><span style=color:#fabd2f>find_package</span><span style=color:#fdf4c1>(pybind11 CONFIG REQUIRED)
+</span><span>
+</span><span style=color:#928374;font-style:italic># 添加 target
+</span><span style=color:#fabd2f>set</span><span style=color:#fdf4c1>(OUT_NAME </span><span style=color:#b8bb26>"app"</span><span style=color:#fdf4c1>)
+</span><span style=color:#fabd2f>add_library</span><span style=color:#fdf4c1>(${OUT_NAME} SHARED ${SOURCES})
+</span><span style=color:#fabd2f>set_target_properties</span><span style=color:#fdf4c1>(${OUT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+</span><span style=color:#fabd2f>target_link_libraries</span><span style=color:#fdf4c1>(${OUT_NAME} PRIVATE pybind11::embed)
+</span></code></pre><p>源代码使用 MSVC 和 MinGW 编译，另外再处理下源码编码的问题和宏。<p>主要涉及的几个问题：<ol><li>MSVC 编译时通过<code>/utf-8</code>编译参数指定源码文件的编码。<li>MSVC 编译<code>pybind11</code>时需要指定 <code>-DNOMINMAX</code>，这是<code>pybind11</code>要求的。<li>因为使用 VCPKG 管理依赖，MSVC 编译时还需要设置链接属性。<li>MinGW 编译时，指定 <code>-static</code> 避免依赖 <code>libgcc</code> 之类的 dll，最终编译结果只依赖于 <code>libpython3.7.dll</code>。<li>MinGW 编译时，指定 <code>-Wl,--kill-at,--enable-stdcall-fixup</code>，来确保导出的 DLL API 名字没有下划线开头和<code>@&lt;参数大小></code>的后缀。</ol><pre class=language-cmake data-lang=cmake style=color:#fdf4c1aa;background-color:#282828><code class=language-cmake data-lang=cmake><span style=color:#928374;font-style:italic># 添加编译参数
+</span><span style=color:#fdf4c1>add_compile_definitions(APP_ID=</span><span style=color:#b8bb26>"${</span><span style=color:#fdf4c1>PROJECT_NAME</span><span style=color:#b8bb26>}"</span><span style=color:#fdf4c1>)
+</span><span style=color:#fabd2f>add_definitions</span><span style=color:#fdf4c1>(-DAPP_ID=</span><span style=color:#b8bb26>"top.weak-ptr.cqpy"</span><span style=color:#fdf4c1>)
+</span><span style=color:#fa5c4b>if </span><span style=color:#fdf4c1>(MSVC)
+</span><span>    </span><span style=color:#fabd2f>add_compile_options</span><span style=color:#fdf4c1>(/utf-8)
+</span><span>    </span><span style=color:#fabd2f>add_definitions</span><span style=color:#fdf4c1>(-DNOMINMAX)
+</span><span>
+</span><span>    </span><span style=color:#928374;font-style:italic># 设置静态链接
+</span><span>    </span><span style=color:#fabd2f>set</span><span style=color:#fdf4c1>(VCPKG_CRT_LINKAGE STATIC)
+</span><span>    </span><span style=color:#fabd2f>set</span><span style=color:#fdf4c1>(VCPKG_LIBRARY_LINKAGE STATIC)
+</span><span style=color:#fa5c4b>else </span><span style=color:#fdf4c1>()
+</span><span>    </span><span style=color:#fdf4c1>add_link_options(-static -Wl,--kill-at,--enable-stdcall-fixup)
+</span><span style=color:#fa5c4b>endif </span><span style=color:#fdf4c1>(MSVC)
+</span></code></pre><p>最后的构建命令：<pre class=language-bat data-lang=bat style=color:#fdf4c1aa;background-color:#282828><code class=language-bat data-lang=bat><span style=color:#fa5c4b>mkdir</span><span> build
+</span><span style=color:#fa5c4b>cd</span><span> build
+</span><span>cmake .. \
+</span><span>    </span><span style=color:#b8bb26>"-GVisual Studio 16 2019"</span><span> \
+</span><span>    -AWin32 \
+</span><span>    -DCMAKE_TOOLCHAIN_FILE=/</span><span style=color:#fa5c4b>path</span><span>/to/your/vcpkg/scripts/buildsystems/vcpkg.cmake \
+</span><span>cmake --build .
+</span><span>cmake install
+</span></code></pre><p>MinGW 对应改下 Generator，去掉<code>-AWin32</code>和后面的<code>-DCMAKE_TOOLCHAIN_FILE=/path/to/your/vcpkg/scripts/buildsystems/vcpkg.cmake</code>即可。<h2 id=0x2-msvc-bian-yi-dao-chu-dll-de-wen-ti>0x2 MSVC 编译导出 DLL 的问题</h2><p>参考 MSDN 的文档，使用下面的方式无法正确导出 DLL 接口。<pre class=language-c++ data-lang=c++ style=color:#fdf4c1aa;background-color:#282828><code class=language-c++ data-lang=c++><span style=color:#fa5c4b>extern </span><span style=color:#b8bb26>"C" </span><span style=color:#fa5c4b>__declspec</span><span>(</span><span style=color:#fdf4c1>dllexport</span><span>) </span><span style=color:#fa5c4b>int</span><span> __stdcall </span><span style=color:#8ec07c>test</span><span>() {}
+</span></code></pre><p>最终采用的是<code>__pragma</code>的方式指定导出名，如下。<pre class=language-c++ data-lang=c++ style=color:#fdf4c1aa;background-color:#282828><code class=language-c++ data-lang=c++><span style=color:#fa5c4b>#define </span><span style=color:#8ec07c>DLL_EXPORT </span><span style=color:#fa5c4b>extern </span><span style=color:#b8bb26>"C" </span><span style=color:#fa5c4b>__declspec</span><span>(</span><span style=color:#fdf4c1>dllexport</span><span>)
+</span><span>
+</span><span style=color:#fa5c4b>#define </span><span style=color:#8ec07c>CQ_EXPORT</span><span>(</span><span style=color:#fdf4c1>ReturnType</span><span>, </span><span style=color:#fdf4c1>FuncName</span><span>, </span><span style=color:#fdf4c1>ParamsSize</span><span>, </span><span style=color:#fe8019>...</span><span>)                       \
+</span><span>  </span><span style=color:#fdf4c1>__pragma(                                                                    \
+</span><span style=color:#fdf4c1>      comment(linker, </span><span style=color:#b8bb26>"/EXPORT:"</span><span style=color:#fdf4c1> #FuncName </span><span style=color:#b8bb26>"=_"</span><span style=color:#fdf4c1> #FuncName </span><span style=color:#b8bb26>"@"</span><span style=color:#fdf4c1> #ParamsSize))    </span><span>\
+</span><span>      DLL_EXPORT ReturnType __stdcall </span><span style=color:#fdf4c1>FuncName(__VA_ARGS__)
+</span></code></pre><p>注意<code>__pragma</code>只能在 MSVC 中使用，所以要加上条件判断。<pre class=language-c++ data-lang=c++ style=color:#fdf4c1aa;background-color:#282828><code class=language-c++ data-lang=c++><span style=color:#fa5c4b>#define </span><span style=color:#8ec07c>DLL_EXPORT </span><span style=color:#fa5c4b>extern </span><span style=color:#b8bb26>"C" </span><span style=color:#fa5c4b>__declspec</span><span>(</span><span style=color:#fdf4c1>dllexport</span><span>)
+</span><span>
+</span><span style=color:#fa5c4b>#if defined</span><span>(_MSC_VER)
+</span><span style=color:#fa5c4b>#define </span><span style=color:#8ec07c>CQ_EXPORT</span><span>(</span><span style=color:#fdf4c1>ReturnType</span><span>, </span><span style=color:#fdf4c1>FuncName</span><span>, </span><span style=color:#fdf4c1>ParamsSize</span><span>, </span><span style=color:#fe8019>...</span><span>)                       \
+</span><span>  </span><span style=color:#fdf4c1>__pragma(                                                                    \
+</span><span style=color:#fdf4c1>      comment(linker, </span><span style=color:#b8bb26>"/EXPORT:"</span><span style=color:#fdf4c1> #FuncName </span><span style=color:#b8bb26>"=_"</span><span style=color:#fdf4c1> #FuncName </span><span style=color:#b8bb26>"@"</span><span style=color:#fdf4c1> #ParamsSize))    </span><span>\
+</span><span>      DLL_EXPORT ReturnType __stdcall </span><span style=color:#fdf4c1>FuncName(__VA_ARGS__)
+</span><span style=color:#fa5c4b>#else
+</span><span style=color:#fa5c4b>#define </span><span style=color:#8ec07c>CQ_EXPORT</span><span>(</span><span style=color:#fdf4c1>ReturnType</span><span>, </span><span style=color:#fdf4c1>FuncName</span><span>, </span><span style=color:#fdf4c1>ParamsSize</span><span>, </span><span style=color:#fe8019>...</span><span>)                       \
+</span><span>  DLL_EXPORT ReturnType __stdcall </span><span style=color:#fdf4c1>FuncName(__VA_ARGS__)
+</span><span style=color:#fa5c4b>#endif
+</span></code></pre><p>理论上也能用<code>.def</code>文件来定义导出表，可以自行尝试下。<h2 id=0x3-dao-ru-cqp-dll-de-api-de-wen-ti>0x3 导入 CQP.dll 的 API 的问题</h2><p>首先要知道<code>CQP.dll</code>也会加载到<code>CQP.exe</code>中，插件也会加载到<code>CQP.exe</code>中，所以我们需要的就是使用 Windows API 获取到<code>CQP.dll</code>的 Handle 再进行操作。<p>大致代码如下。<pre class=language-c++ data-lang=c++ style=color:#fdf4c1aa;background-color:#282828><code class=language-c++ data-lang=c++><span style=color:#fa5c4b>const auto</span><span> dll </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>GetModuleHandleW(</span><span style=color:#fa5c4b>L</span><span style=color:#b8bb26>"CQP.dll"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span style=color:#fa5c4b>const auto</span><span> CQ_addLog </span><span style=color:#fe8019>= reinterpret_cast</span><span>&lt;</span><span style=color:#fabd2f>int32_t </span><span>(__stdcall </span><span style=color:#fe8019>*</span><span>)(</span><span style=color:#fabd2f>int32_t</span><span>,</span><span style=color:#fabd2f>int32_t</span><span>,</span><span style=color:#fa5c4b>const char</span><span style=color:#fe8019>*</span><span>,</span><span style=color:#fa5c4b>const char</span><span style=color:#fe8019>*</span><span>)>(</span><span style=color:#fdf4c1>GetProcAddress(dll, </span><span style=color:#b8bb26>"CQ_addLog"</span><span style=color:#fdf4c1>)</span><span>);
+</span></code></pre><p>通过两个 API 调用即可获得需要的函数指针了。<h2 id=0x4-qian-ru-python-jie-shi-qi>0x4 嵌入 Python 解释器</h2><p>到了这一步已经非常简单了，<code>pybind11</code>提供了高度封装的 C++ API。可以直接参考<a href=https://pybind11.readthedocs.io/en/stable/advanced/embedding.html>这个文档</a>。<p>再给个简单的例子代码：<pre class=language-c++ data-lang=c++ style=color:#fdf4c1aa;background-color:#282828><code class=language-c++ data-lang=c++><span style=color:#fa5c4b>template </span><span>&lt;</span><span style=color:#fa5c4b>typename</span><span style=color:#fe8019>...</span><span> Args>
+</span><span style=color:#fa5c4b>inline </span><span style=color:#fabd2f>int32_t </span><span style=color:#8ec07c>py_callback</span><span>(</span><span style=color:#fa5c4b>const</span><span> std::string </span><span style=color:#fe8019>&</span><span style=color:#fdf4c1>py_func</span><span>, Args</span><span style=color:#fe8019>... </span><span style=color:#fdf4c1>args</span><span>) {
+</span><span>  </span><span style=color:#fa5c4b>auto</span><span> guard </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>std::lock_guard(lock)</span><span>;
+</span><span>
+</span><span>  </span><span style=color:#fa5c4b>try </span><span>{
+</span><span>    </span><span style=color:#fa5c4b>auto</span><span> m </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>py::module::import(</span><span style=color:#b8bb26>"cqpy._callback"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>    </span><span style=color:#fa5c4b>return</span><span> m.</span><span style=color:#fdf4c1>attr</span><span>(py_func.</span><span style=color:#fdf4c1>c_str</span><span>())(args</span><span style=color:#fe8019>...</span><span>).</span><span style=color:#fa5c4b>template </span><span style=color:#fdf4c1>cast</span><span>&lt;</span><span style=color:#fabd2f>int32_t</span><span>>();
+</span><span>  } </span><span style=color:#fa5c4b>catch </span><span>(</span><span style=color:#fa5c4b>const</span><span> py::error_already_set </span><span style=color:#fe8019>&</span><span>e) {
+</span><span>    </span><span style=color:#fdf4c1>logging::error(e.what())</span><span>; </span><span style=color:#928374;font-style:italic>// 记录 python 错误到日志
+</span><span>    </span><span style=color:#fa5c4b>return </span><span style=color:#fe8019>-</span><span style=color:#d3869b>1</span><span>;
+</span><span>  }
+</span><span>}
+</span><span>
+</span><span style=color:#928374;font-style:italic>// 启用插件
+</span><span style=color:#fdf4c1>CQ_EXPORT(</span><span style=color:#fabd2f>int32_t</span><span style=color:#fdf4c1>, cq_event_enable, </span><span style=color:#d3869b>0</span><span style=color:#fdf4c1>) </span><span>{
+</span><span>  </span><span style=color:#fdf4c1>py::initialize_interpreter()</span><span>;
+</span><span>  </span><span style=color:#928374;font-style:italic>// 设置 AUTH_CODE，但是暂时还不能使用酷Q的API
+</span><span>  </span><span style=color:#fa5c4b>auto</span><span> _embed </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>py::module::import(</span><span style=color:#b8bb26>"_embed"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  _embed.</span><span style=color:#fdf4c1>attr</span><span>(</span><span style=color:#b8bb26>"AUTH_CODE"</span><span>) </span><span style=color:#fe8019>=</span><span> AUTH_CODE;
+</span><span>  </span><span style=color:#928374;font-style:italic>// 初始化 Python 解释器环境，把数据目录加入 python path
+</span><span>  </span><span style=color:#fa5c4b>auto</span><span> raw_app_dir </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>std::string(CQ_getAppDirectory(AUTH_CODE))</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>auto</span><span> app_dir </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>py::bytes(raw_app_dir)</span><span>.</span><span style=color:#fdf4c1>attr</span><span>(</span><span style=color:#b8bb26>"decode"</span><span>)(</span><span style=color:#b8bb26>"gb18030"</span><span>).</span><span style=color:#fdf4c1>cast</span><span>&lt;py::str>();
+</span><span>  </span><span style=color:#fa5c4b>auto</span><span> sys </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>py::module::import(</span><span style=color:#b8bb26>"sys"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  sys.</span><span style=color:#fdf4c1>attr</span><span>(</span><span style=color:#b8bb26>"path"</span><span>).</span><span style=color:#fdf4c1>attr</span><span>(</span><span style=color:#b8bb26>"append"</span><span>)(app_dir);
+</span><span>  </span><span style=color:#928374;font-style:italic>// 初始化完成
+</span><span>  </span><span style=color:#fdf4c1>logging::info(</span><span style=color:#b8bb26>"Python interpreter initialized."</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>  </span><span style=color:#fa5c4b>return </span><span style=color:#fdf4c1>py_callback(</span><span style=color:#b8bb26>"on_enable"</span><span style=color:#fdf4c1>)</span><span>;
+</span><span>}
+</span></code></pre><p>需要注意的是，虽然在前面通过相关参数指定了静态链接，但实际<code>Python3.7.dll</code>还是动态链接上去的。<p>所以分发这样编译出来的 dll，依然需要用户先安装一个 <code>Python3.7</code>，或者把 <code>Python3.7.dll</code> 也一起分发出去。<p>如果要完全的静态链接，可能要自行编译 Python 源代码。实在太麻烦，就懒得弄了。<h2 id=0x5-cai-de-keng>0x5 踩的坑</h2><p>通过 Python 调用 C++ 端提供的 API 时，特别注意参数一定要一一对应，特别是数据类型，一旦不匹配或传入数据有误（例如 None），可能造成 C++ 端内存异常，需要挂调试器才能发现原因，非常麻烦。<p><code>sys</code>是<code>builtin</code>的库，和<code>os</code>不同，如果分发的用户没有安装 Python，只有一个 <code>Python3.7.dll</code>的话，很多 Python 自带的库是用不了的。例如说<code>json</code>、<code>logging</code>、甚至<code>os</code>。这个应该算是常识，但最好一开始就意识到：你的用户还是要装一个 Python 才行。<p>关于 VirtualEnv 支持，建议直接参考<a href=https://www.python.org/dev/peps/pep-0405/>PEP 405</a>。不多赘述。比较简单的处理就是把<code>VENV\Lib\site-packages</code>加入到<code>sys.path</code>里。<p>能不能把所有 Python 代码和 dll 都打包进 dll 里？大致原理就是丢进<code>rc</code>里，但实际很麻烦，看<code>py2exe</code>迄今为止还有一大堆坑就知道有多麻烦了。</article><p class=tags-data><a href=/tags/c>/c++/</a> <a href=/tags/python>/python/</a> <a href=/tags/ku-q>/酷Q/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

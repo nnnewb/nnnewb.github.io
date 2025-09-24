@@ -1,0 +1,105 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>AudioContext技术和音乐可视化（1）</title><meta content=AudioContext技术和音乐可视化（1） name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2018/2018-11-07-audiocontexthe-yin-le-ke-shi-hua-1/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=AudioContext技术和音乐可视化（1） property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2018/2018-11-07-audiocontexthe-yin-le-ke-shi-hua-1/ property=twitter:url><meta content=AudioContext技术和音乐可视化（1） property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2018/2018-11-07-audiocontexthe-yin-le-ke-shi-hua-1/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>AudioContext技术和音乐可视化（1）</h1><p class=author-line>作于：2018-11-07 02:48 ，预计阅读时间 5 分钟<article><h2 id=intro>Intro</h2><p>因为自己搭了个博客，一时兴起，就想写个动态的博客背景。毕竟用 django 后端渲染，前端只有 jquery 和 bootstrap 已经够 low 了，虽说极简风格也很棒，但是多少有点亮眼的东西才好办不是吗。<p>转载注明来源。<p>为了方便讲解，整个思路分为两个部分：音乐播放和背景绘制。<h2 id=yi-yin-le-bo-fang>一、音乐播放</h2><h3 id=1-1-audiocontext>1.1 AudioContext</h3><p>概述部分懒得自己写，参考 MDN 的描述。<blockquote><p><strong>AudioContext</strong>接口表示由音频模块连接而成的音频处理图，每个模块对应一个<a href=https://developer.mozilla.org/zh-CN/docs/Web/API/AudioNode><code>AudioNode</code></a>。<strong>AudioContext</strong>可以控制它所包含的节点的创建，以及音频处理、解码操作的执行。做任何事情之前都要先创建<strong>AudioContext</strong>对象，因为一切都发生在这个环境之中。</blockquote><h3 id=1-2-liu-lan-qi-zhi-chi-zhuang-kuang>1.2 浏览器支持状况</h3><p><code>AudioContext标准</code>目前还是草案，不过新 chrome 已经实现了。我使用的 chrome 版本如下。<pre style=color:#fdf4c1aa;background-color:#282828><code><span>版本 70.0.3538.77（正式版本） （64 位）
+</span></code></pre><p>如果发现 console 报错或者其他问题请检查浏览器版本，所有支持的浏览器可以在这个<a href=https://developer.mozilla.org/en-US/docs/Web/API/AudioContext>链接</a>查看。<h3 id=1-3-audiocontext-he-yin-pin-chu-li-tu>1.3 AudioContext 和音频处理图</h3><p>关于<code>AudioContext</code>我的了解不是很深入，所以只在需要用到的部分进行概述。<p>首先，关于<strong>音频处理图</strong>的概念。<p>这个名词不甚直观，我用过虚幻，所以用虚幻的<code>Blueprint</code>来类比理解。音频处理图，其实是一系列音频处理的模块，连接构成一张数据结构中的“图”，从一般使用的角度来讲，一个播放音频的图，就是<code>AudioSource -> AudioContext.destination</code>，两个节点构成的图。其中有很多特殊的节点可以对音频进行处理，比如音频增益节点<code>GainNode</code>。<p>对于音频处理的部分介绍就到这里为止，毕竟真的了解不多，不过从 MDN 的文档看，可用的处理节点还是非常多的，就等标准制订完成了。<h3 id=1-4-jia-zai-yin-pin-wen-jian-bing-bo-fang>1.4 加载音频文件并播放</h3><p>音频文件加载使用典型的<code>JavaScript</code>接口<code>FileReader</code>实现。<p>一个非常简单的实例是这样<p>首先是 html 里写上 input<pre class=language-html data-lang=html style=color:#fdf4c1aa;background-color:#282828><code class=language-html data-lang=html><span style=color:#83a598>&lt;</span><span style=color:#8ec07c;font-weight:700>html</span><span style=color:#83a598>>
+</span><span>  </span><span style=color:#83a598>&lt;</span><span style=color:#8ec07c;font-weight:700>body</span><span style=color:#83a598>>
+</span><span>    </span><span style=color:#83a598>&lt;</span><span style=color:#8ec07c;font-weight:700>input </span><span style=color:#8ec07c>type=</span><span style=color:#b8bb26>"file" </span><span style=color:#8ec07c>accept=</span><span style=color:#b8bb26>"audio/*" </span><span style=color:#8ec07c>onchange=</span><span style=color:#b8bb26>"</span><span style=color:#fdf4c1>onInputChange</span><span style=color:#b8bb26>" </span><span style=color:#83a598>/>
+</span><span>  </span><span style=color:#83a598>&lt;/</span><span style=color:#8ec07c;font-weight:700>body</span><span style=color:#83a598>>
+</span><span style=color:#83a598>&lt;/</span><span style=color:#8ec07c;font-weight:700>html</span><span style=color:#83a598>>
+</span></code></pre><p>然后在 javascript 里读文件内容。<pre class=language-javascript data-lang=javascript style=color:#fdf4c1aa;background-color:#282828><code class=language-javascript data-lang=javascript><span style=color:#fa5c4b>function </span><span style=color:#8ec07c>onInputChange</span><span>(</span><span style=color:#fdf4c1>files</span><span>) {
+</span><span>  </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>reader </span><span style=color:#fe8019>= </span><span style=color:#fa5c4b>new </span><span style=color:#8ec07c>FileReader</span><span>();
+</span><span>  </span><span style=color:#fdf4c1>reader</span><span>.</span><span style=color:#8ec07c>onload </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fdf4c1>event</span><span>) </span><span style=color:#fa5c4b>=> </span><span>{
+</span><span>    </span><span style=color:#928374;font-style:italic>// event.target.result 就是我们的文件内容了
+</span><span>  };
+</span><span>  </span><span style=color:#fdf4c1>reader.</span><span style=color:#8ec07c>readAsArrayBuffer</span><span>(</span><span style=color:#fdf4c1>files</span><span>[</span><span style=color:#d3869b>0</span><span>]);
+</span><span>}
+</span></code></pre><p>文件读取就是这么简单，所以回到那个问题：说了那么多，音乐到底怎么放？<p>答案是用<code>AudioContext</code>的<code>decodeAudioData</code>方法。<p>所以从上面的 js 里做少许修改——<pre class=language-javascript data-lang=javascript style=color:#fdf4c1aa;background-color:#282828><code class=language-javascript data-lang=javascript><span style=color:#928374;font-style:italic>// 创建一个新的 AudioContext
+</span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>ctx </span><span style=color:#fe8019>= </span><span style=color:#fa5c4b>new </span><span style=color:#8ec07c>AudioContext</span><span>();
+</span><span>
+</span><span style=color:#fa5c4b>function </span><span style=color:#8ec07c>onInputChange</span><span>(</span><span style=color:#fdf4c1>files</span><span>) {
+</span><span>  </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>reader </span><span style=color:#fe8019>= </span><span style=color:#fa5c4b>new </span><span style=color:#8ec07c>FileReader</span><span>();
+</span><span>  </span><span style=color:#fdf4c1>reader</span><span>.</span><span style=color:#8ec07c>onload </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fdf4c1>event</span><span>) </span><span style=color:#fa5c4b>=> </span><span>{
+</span><span>    </span><span style=color:#928374;font-style:italic>// event.target.result 就是我们的文件内容了
+</span><span>    </span><span style=color:#928374;font-style:italic>// 解码它
+</span><span>    </span><span style=color:#fdf4c1>ctx.</span><span style=color:#8ec07c>decodeAudioData</span><span>(</span><span style=color:#fabd2f>event</span><span>.</span><span style=color:#fabd2f>target</span><span>.</span><span style=color:#fdf4c1>result</span><span>)</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>then</span><span>((</span><span style=color:#fdf4c1>decoded</span><span>) </span><span style=color:#fa5c4b>=> </span><span>{
+</span><span>      </span><span style=color:#928374;font-style:italic>// 解码后的音频数据作为音频源
+</span><span>      </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>audioBufferSourceNode </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>ctx.</span><span style=color:#8ec07c>createBufferSource</span><span>();
+</span><span>      </span><span style=color:#fdf4c1>audioBufferSourceNode</span><span>.</span><span style=color:#fdf4c1>buffer </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>decoded</span><span>;
+</span><span>      </span><span style=color:#928374;font-style:italic>// 把音源 node 和输出 node 连接，boom——
+</span><span>      </span><span style=color:#fdf4c1>audioBufferSourceNode.</span><span style=color:#8ec07c>connect</span><span>(</span><span style=color:#fdf4c1>ctx</span><span>.</span><span style=color:#fdf4c1>destination</span><span>);
+</span><span>      </span><span style=color:#fdf4c1>audioBufferSourceNode.</span><span style=color:#8ec07c>start</span><span>(</span><span style=color:#d3869b>0</span><span>);
+</span><span>      </span><span style=color:#928374;font-style:italic>// 收工。
+</span><span>    });
+</span><span>  };
+</span><span>  </span><span style=color:#fdf4c1>reader.</span><span style=color:#8ec07c>readAsArrayBuffer</span><span>(</span><span style=color:#fdf4c1>files</span><span>[</span><span style=color:#d3869b>0</span><span>]);
+</span><span>}
+</span></code></pre><h3 id=1-5-fen-xi-pin-pu>1.5 分析频谱</h3><p>频谱的概念我建议搜一下<strong>傅里叶变换</strong>，关于时域和频域转换的计算过程和数学原理直接略（因为不懂），至今我还只理解到时域和频域的概念以及傅里叶变换的实现接受采样返回采样数一半长的频域数据......<p>不班门弄斧了。<p>以前写<code>python</code>的时候用的<code>numpy</code>来进行傅里叶变换取得频域数据，现在在浏览器上用 js 着实有些难受。不过幸好，<code>AudioContext</code>直接支持了一个音频分析的 node，叫做<code>AudioAnalyserNode</code>。<p>这个 Node 处于音源 Node 和播放输出 Node 之间，想象一道数据流，音源 Node 把离散的采样数据交给 Analyser，Analyser 再交给输出 Node。<p>直接看代码实例。<pre class=language-javascript data-lang=javascript style=color:#fdf4c1aa;background-color:#282828><code class=language-javascript data-lang=javascript><span style=color:#928374;font-style:italic>// 创建一个新的 AudioContext
+</span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>ctx </span><span style=color:#fe8019>= </span><span style=color:#fa5c4b>new </span><span style=color:#8ec07c>AudioContext</span><span>();
+</span><span style=color:#928374;font-style:italic>// 解码后的音频数据作为音频源
+</span><span style=color:#928374;font-style:italic>// 为了方便管理，将这些Node都放置在回调函数外部
+</span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>audioBufferSourceNode </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>ctx.</span><span style=color:#8ec07c>createBufferSource</span><span>();
+</span><span>
+</span><span style=color:#928374;font-style:italic>// 创建音频分析Node!
+</span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>audioAnalyser </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>ctx.</span><span style=color:#8ec07c>createAnalyser</span><span>();
+</span><span style=color:#928374;font-style:italic>// 注意注意！这里配置傅里叶变换使用的采样窗口大小！比如说，我们要256个频域数据，那么采样就应该是512。
+</span><span style=color:#928374;font-style:italic>// 具体对应频率请自行搜傅里叶变换相关博文。
+</span><span style=color:#fdf4c1>audioAnalyser</span><span>.</span><span style=color:#fdf4c1>fftSize </span><span style=color:#fe8019>= </span><span style=color:#d3869b>512</span><span>;
+</span><span>
+</span><span style=color:#fa5c4b>function </span><span style=color:#8ec07c>onInputChange</span><span>(</span><span style=color:#fdf4c1>files</span><span>) {
+</span><span>  </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>reader </span><span style=color:#fe8019>= </span><span style=color:#fa5c4b>new </span><span style=color:#8ec07c>FileReader</span><span>();
+</span><span>  </span><span style=color:#fdf4c1>reader</span><span>.</span><span style=color:#8ec07c>onload </span><span style=color:#fe8019>= </span><span>(</span><span style=color:#fdf4c1>event</span><span>) </span><span style=color:#fa5c4b>=> </span><span>{
+</span><span>    </span><span style=color:#928374;font-style:italic>// event.target.result 就是我们的文件内容了
+</span><span>    </span><span style=color:#928374;font-style:italic>// 解码它
+</span><span>    </span><span style=color:#fdf4c1>ctx.</span><span style=color:#8ec07c>decodeAudioData</span><span>(</span><span style=color:#fabd2f>event</span><span>.</span><span style=color:#fabd2f>target</span><span>.</span><span style=color:#fdf4c1>result</span><span>)</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>then</span><span>((</span><span style=color:#fdf4c1>decoded</span><span>) </span><span style=color:#fa5c4b>=> </span><span>{
+</span><span>      </span><span style=color:#928374;font-style:italic>// 停止原先的音频源
+</span><span>      </span><span style=color:#fdf4c1>audioBufferSourceNode.</span><span style=color:#fabd2f>stop</span><span>();
+</span><span>      </span><span style=color:#928374;font-style:italic>// 先把音频源Node和Analyser连接。
+</span><span>      </span><span style=color:#fdf4c1>audioBufferSourceNode.</span><span style=color:#8ec07c>connect</span><span>(</span><span style=color:#fdf4c1>audioAnalyser</span><span>);
+</span><span>      </span><span style=color:#928374;font-style:italic>// 然后把Analyser和destination连接。
+</span><span>      </span><span style=color:#fdf4c1>audioAnalyser.</span><span style=color:#8ec07c>connect</span><span>(</span><span style=color:#fdf4c1>ctx</span><span>.</span><span style=color:#fdf4c1>destination</span><span>);
+</span><span>      </span><span style=color:#928374;font-style:italic>// 修改音频源数据
+</span><span>      </span><span style=color:#fdf4c1>audioBufferSourceNode</span><span>.</span><span style=color:#fdf4c1>buffer </span><span style=color:#fe8019>= </span><span style=color:#fdf4c1>decoded</span><span>;
+</span><span>      </span><span style=color:#fdf4c1>audioBufferSourceNode.</span><span style=color:#8ec07c>start</span><span>(</span><span style=color:#d3869b>0</span><span>);
+</span><span>      </span><span style=color:#928374;font-style:italic>// 收工。
+</span><span>    });
+</span><span>  };
+</span><span>  </span><span style=color:#fdf4c1>reader.</span><span style=color:#8ec07c>readAsArrayBuffer</span><span>(</span><span style=color:#fdf4c1>files</span><span>[</span><span style=color:#d3869b>0</span><span>]);
+</span><span>}
+</span><span>
+</span><span style=color:#fabd2f>window</span><span style=color:#fdf4c1>.</span><span style=color:#8ec07c>requestAnimationFrame</span><span>(</span><span style=color:#fa5c4b>function </span><span>() {
+</span><span>  </span><span style=color:#928374;font-style:italic>// 读取频域数据
+</span><span>  </span><span style=color:#fa5c4b>const </span><span style=color:#fdf4c1>freqData </span><span style=color:#fe8019>= </span><span style=color:#fa5c4b>new </span><span style=color:#8ec07c>Uint8Array</span><span>(</span><span style=color:#fdf4c1>audioAnalyser</span><span>.</span><span style=color:#fdf4c1>frequencyBinCount</span><span>);
+</span><span>  </span><span style=color:#8ec07c>console</span><span style=color:#fdf4c1>.</span><span style=color:#fabd2f>log</span><span>(</span><span style=color:#fdf4c1>freqData</span><span>);
+</span><span>});
+</span></code></pre><p>频域数据是二维的，频率（数组下标）和能量（下标对应值）。悄悄补一句，数学上应该说是该频率函数图像的振幅？<p>其实获得了这个频域数据，继续画出我们常见的条状频域图就很容易了。参考我一朋友的博客。<a href=https://misuzu.moe/music/index.html>misuzu.moe</a>，可以看看效果。<p>关于<code>AudioContext</code>的介绍先到此为止，等我找时间继续写。<blockquote><p>PS：代码不保证复制粘贴就能运行，领会精神，遇到问题查查文档。MDN 比我这博客详细多了。</blockquote></article><p class=tags-data><a href=/tags/javascript>/javascript/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

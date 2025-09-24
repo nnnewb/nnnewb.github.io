@@ -1,0 +1,64 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>储存过程、函数和触发器</title><meta content=储存过程、函数和触发器 name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2022/stored-procedure-function-and-triggers/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content=储存过程、函数和触发器 property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2022/stored-procedure-function-and-triggers/ property=twitter:url><meta content=储存过程、函数和触发器 property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2022/stored-procedure-function-and-triggers/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>储存过程、函数和触发器</h1><p class=author-line>作于：2022-06-16 10:34 ，预计阅读时间 5 分钟<article><h2 id=qian-yan>前言</h2><p>工作里很少用到这些功能，备考数据库系统的时候发现这几个不是考点的地方确实还得现查文档才能写。<p>因为不考又不怎么用，所以本篇只是简短地记一下储存过程、函数和触发器写法，没深度，也不适用于做备考资料。仅仅是给自己扫盲。<h2 id=chu-cun-guo-cheng>储存过程</h2><h3 id=shi-shen-me>是什么？</h3><p>这是个很容易引起误解的名字，英文是 <em>Stored Procedure</em>，也就是被储存的（Stored）过程（Procedure）。一翻译感觉像是说储存这个动作的过程一样。<h3 id=shen-me-shi-hou-yong>什么时候用？</h3><p>参考一个爆栈的回答 <a href=https://stackoverflow.com/questions/6368985/mysql-stored-procedures-use-them-or-not-to-use-them>MySQL stored procedures use them or not to use them</a> ，储存过程本身不像一般的编程语言中所谓的过程，它有很多缺陷。<ol><li>不可移植。这意味着可能出现 <em>vendor lock-in</em> 的风险。<li>难以测试、更新、维护，缺乏支持，没有日志、跟踪、调试信息。甚至很难和 VCS 工具打配合。<li>不容易和其他技术整合。<li>参考文档，发现在开启binlog时创建储存过程还需要高特权。</ol><p>而储存过程常被鼓吹的优势：高性能，就是个谜。老话说提前优化是万恶之源，储存过程的“高性能”本身也不是免费午餐，除非真的 <strong>真的</strong> 需要，非它不可，没有替代方案，而且充分考虑过开发、管理、维护储存过程带来的额外复杂性，再选择用储存过程也不迟。<h3 id=zen-me-yong>怎么用？</h3><p>定义储存过程的语法<pre class=language-sql data-lang=sql style=color:#fdf4c1aa;background-color:#282828><code class=language-sql data-lang=sql><span style=color:#928374;font-style:italic>-- CREATE PROCEDURE &lt;proc>([parameters[, ...]])
+</span><span style=color:#fa5c4b>CREATE PROCEDURE </span><span style=color:#8ec07c>proc</span><span>(uid </span><span style=color:#fa5c4b>INT</span><span>)
+</span><span style=color:#fa5c4b>BEGIN
+</span><span style=color:#928374;font-style:italic>-- PROCEDURE BODY
+</span><span style=color:#928374;font-style:italic>-- ordinary SQL query
+</span><span style=color:#fa5c4b>UPDATE</span><span> customer </span><span style=color:#fa5c4b>SET</span><span> goodie</span><span style=color:#fe8019>=</span><span style=color:#d3869b>1 </span><span style=color:#fa5c4b>WHERE</span><span> cuid</span><span style=color:#fe8019>=</span><span>uid;
+</span><span style=color:#fa5c4b>END
+</span></code></pre><p>对，储存过程没有返回值。所以必要的时候可以用关键字<code>IN</code>和<code>OUT</code>修饰参数，来传递变量。类似 C# 的 <code>out</code>、<code>ref</code> 关键字。微软文档也喜欢在函数签名里加 <code>IN</code> 或 <code>OUT</code> 的宏来标识参数会不会被覆写。不过其他编程语言里就少见了，更提倡用返回值显式传递。<pre class=language-sql data-lang=sql style=color:#fdf4c1aa;background-color:#282828><code class=language-sql data-lang=sql><span style=color:#fa5c4b>CREATE PROCEDURE </span><span style=color:#8ec07c>proc</span><span>(</span><span style=color:#fe8019>IN</span><span> uid </span><span style=color:#fa5c4b>INT</span><span>, OUT goodie </span><span style=color:#fa5c4b>INT</span><span>)
+</span><span style=color:#fa5c4b>BEGIN
+</span><span style=color:#fa5c4b>SELECT</span><span> goodie INTO goodie </span><span style=color:#fa5c4b>FROM</span><span> customer </span><span style=color:#fa5c4b>WHERE</span><span> cuid</span><span style=color:#fe8019>=</span><span>uid;
+</span><span style=color:#fa5c4b>END
+</span><span>
+</span><span>CALL proc(@goodie);
+</span><span style=color:#fa5c4b>SELECT</span><span> @goodie;
+</span><span>
+</span><span style=color:#fa5c4b>DROP PROCEDURE</span><span> IF </span><span style=color:#fe8019>EXISTS</span><span> proc;
+</span></code></pre><p>在<code>BEGIN</code>前面还可以加一些修饰，比如<code>COMMENT</code>。常见的是<code>DETERMINISTIC</code>，这个关键字表示过程输出是稳定的，对同一个参数总是输出同样的结果，对数据库内部优化查询有用，大概。默认是<code>NOT DETERMINISTIC</code>。<h2 id=han-shu>函数</h2><h3 id=shi-shen-me-1>是什么？</h3><p>类似储存过程，但有返回值。<h3 id=shen-me-shi-hou-yong-1>什么时候用？</h3><p>问题和储存过程类似，不再赘述。<h3 id=zen-me-yong-1>怎么用？</h3><pre class=language-sql data-lang=sql style=color:#fdf4c1aa;background-color:#282828><code class=language-sql data-lang=sql><span style=color:#fa5c4b>CREATE FUNCTION </span><span style=color:#8ec07c>func</span><span>([</span><span style=color:#fe8019>IN</span><span>|OUT] param type)
+</span><span>RETURNS type
+</span><span style=color:#fa5c4b>BEGIN
+</span><span>body
+</span><span style=color:#fa5c4b>END
+</span><span>
+</span><span style=color:#fa5c4b>SELECT</span><span> func(cuid) </span><span style=color:#fa5c4b>FROM</span><span> customers;
+</span><span>
+</span><span style=color:#fa5c4b>DROP FUNCTION</span><span> IF </span><span style=color:#fe8019>EXISTS</span><span> func;
+</span></code></pre><p>创建语法和储存过程类似，使用时不需要 <code>CALL</code>，而是和普通 SQL 函数一样。<h2 id=hong-fa-qi>触发器</h2><h3 id=shi-shen-me-2>是什么？</h3><p>触发器是一个和表关联的数据库对象，在特定事件发生时激活。不能在临时表（使用<code>TEMPORARY</code>关键字的<code>CREATE TABLE</code>语句创建的表）上创建触发器。<h3 id=shen-me-shi-hou-yong-2>什么时候用？</h3><p>如果按数据库系统原理这门课上的考点来说，触发器可以帮助保持数据完整性。但现实世界很少有这么干的，除了上面提到的储存过程和函数都存在的缺陷之外，设计不好的触发器也可能造成性能问题。<p>所以老样子，除非真的非它不可，不然敬而远之就是了。<h3 id=zen-me-yong-2>怎么用？</h3><pre class=language-sql data-lang=sql style=color:#fdf4c1aa;background-color:#282828><code class=language-sql data-lang=sql><span style=color:#fa5c4b>CREATE TRIGGER </span><span style=color:#8ec07c>trigger_name
+</span><span>{BEFORE|AFTER} {</span><span style=color:#fa5c4b>INSERT</span><span>|</span><span style=color:#fa5c4b>UPDATE</span><span>|</span><span style=color:#fa5c4b>DELETE</span><span>} ON tbl_name
+</span><span>FOR EACH ROW
+</span><span>[{FOLLOWS|PRECEDES} other_trigger_name]
+</span><span>body
+</span></code></pre><p>一个考点是触发器只能对DML中增删改事件做出反应。<h2 id=zong-jie>总结</h2><p>水了将近1000字。<p>SQL知识里一块空白给填上了，强迫症一本满足。</article><p class=tags-data><a href=/tags/mysql>/mysql/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

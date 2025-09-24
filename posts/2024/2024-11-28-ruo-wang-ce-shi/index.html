@@ -1,0 +1,275 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>Linux 弱网测试</title><meta content="Linux 弱网测试" name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2024/2024-11-28-ruo-wang-ce-shi/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content="Linux 弱网测试" property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2024/2024-11-28-ruo-wang-ce-shi/ property=twitter:url><meta content="Linux 弱网测试" property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2024/2024-11-28-ruo-wang-ce-shi/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>Linux 弱网测试</h1><p class=author-line>作于：2024-12-11 00:00 ，预计阅读时间 5 分钟<article><h2 id=mu-de>目的</h2><p>工作需要写了一个数据传输工具需要尽可能利用完带宽，同时因为场景存在跨地域传输（东西或南北跨半个中国这种），所以还要准备对抗弱网场景。<p>至少得先把弱网测试模拟的方法摸通。<h2 id=gong-ju>工具</h2><p><code>tc</code> 工具，<em>tc</em> stands for <em>Traffic Control</em> ，利用 <strong>qdisc</strong>(<a href=https://man7.org/linux/man-pages/man8/tc.8.html#QDISCS><em>Queuing Discipline</em>，tc (8)</a>) 模拟不同网络环境。<blockquote><p>qdisc is short for 'queueing discipline' and it is elementary to understanding traffic control. Whenever the kernel needs to send a packet to an interface, it is enqueued to the qdisc configured for that interface. Immediately afterwards, the kernel tries to get as many packets as possible from the qdisc, for giving them to the network adaptor driver.<p>A simple QDISC is the 'pfifo' one, which does no processing at all and is a pure First In, First Out queue. It does however store traffic when the network interface can't handle it momentarily.</blockquote><p><code>qdisc</code> 分 <em>classful</em> 和 <em>classless</em> 两类。<p><em>classful qdisc</em> 会构造一个树状结构，每个 <em>class</em> 有一个唯一的 <em>parent</em>。 一个 <em>class</em> 可以包含多个 <em>children</em>。<p>模拟网络环境使用的 <a href=https://man7.org/linux/man-pages/man8/tc-netem.8.html>tc-netem(8)</a> 是 <em>classless qdisc</em>，只能附加在设备根节点上。 一个设备只能附加一个<em>classless qdisc</em>。<p>给设备附加 <em>classless qdisc</em> 的基本命令是 <code>tc qdisc add dev DEV root QDISC QDISC-PARAMETERS</code>， 删除 <em>classless qdisc</em> 的基本命令是 <code>tc qdisc del dev DEV root</code><p>以网卡名为 <code>ens192</code> 为例，附加 <code>netem</code> 的命令是：<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>tc qdisc add dev ens192 root netem
+</span></code></pre><p>附加之后，使用命令查看各网卡的 qdisc 配置。<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>tc qdisc show
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>qdisc noqueue 0: dev lo root refcnt 2 
+</span><span>qdisc netem 8002: dev ens192 root refcnt 9 limit 1000
+</span></code></pre><h3 id=ji-zhun>基准</h3><p>测试正常情况下的连接情况。<pre class=language-cmd data-lang=cmd style=color:#fdf4c1aa;background-color:#282828><code class=language-cmd data-lang=cmd><span>iperf3 -c </span><span style=color:#d3869b>192</span><span>.</span><span style=color:#d3869b>168</span><span>.</span><span style=color:#d3869b>2</span><span>.</span><span style=color:#d3869b>9
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>Connecting to host 192.168.2.9, port 5201
+</span><span>[  5] local 192.168.7.220 port 60344 connected to 192.168.2.9 port 5201
+</span><span>[ ID] Interval           Transfer     Bitrate
+</span><span>[  5]   0.00-1.01   sec   116 MBytes   964 Mbits/sec
+</span><span>[  5]   1.01-2.01   sec   113 MBytes   949 Mbits/sec
+</span><span>[  5]   2.01-3.01   sec   113 MBytes   950 Mbits/sec
+</span><span>[  5]   3.01-4.00   sec   112 MBytes   949 Mbits/sec
+</span><span>[  5]   4.00-5.00   sec   114 MBytes   949 Mbits/sec
+</span><span>[  5]   5.00-6.01   sec   113 MBytes   949 Mbits/sec
+</span><span>[  5]   6.01-7.01   sec   114 MBytes   949 Mbits/sec
+</span><span>[  5]   7.01-8.01   sec   112 MBytes   949 Mbits/sec
+</span><span>[  5]   8.01-9.01   sec   114 MBytes   950 Mbits/sec
+</span><span>[  5]   9.01-10.00  sec   112 MBytes   949 Mbits/sec
+</span><span>- - - - - - - - - - - - - - - - - - - - - - - - -
+</span><span>[ ID] Interval           Transfer     Bitrate
+</span><span>[  5]   0.00-10.00  sec  1.11 GBytes   951 Mbits/sec                  sender  
+</span><span>[  5]   0.00-10.02  sec  1.11 GBytes   949 Mbits/sec                  receiver
+</span><span>
+</span><span>iperf Done.
+</span></code></pre><h3 id=yan-chi>延迟</h3><p>manpage 文档的命令概要如下。<pre style=color:#fdf4c1aa;background-color:#282828><code><span># SYNOPSIS
+</span><span>DELAY := delay TIME [ JITTER [ CORRELATION ]] 
+</span><span>  [ distribution { uniform | normal | pareto | paretonormal }]
+</span></code></pre><p>使用 <code>tc qdisc change dev DEV root netem delay ...</code> 来修改 qdisc netem 的参数。<p>实例，为 <code>ens192</code> 网卡添加 10±5ms 的延迟。<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>tc qdisc change dev ens192 root netem delay 10ms 5ms
+</span><span style=color:#fdf4c1>tc qdisc show dev ens192
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>qdisc netem 8002: root refcnt 9 limit 1000 delay 10ms  5ms
+</span></code></pre><p>在另一台机器上去 ping 这台设置了延迟的机器，可以看到出现了延迟。<pre class=language-cmd data-lang=cmd style=color:#fdf4c1aa;background-color:#282828><code class=language-cmd data-lang=cmd><span style=color:#fa5c4b>ping </span><span style=color:#d3869b>192</span><span>.</span><span style=color:#d3869b>168</span><span>.</span><span style=color:#d3869b>2</span><span>.</span><span style=color:#d3869b>9
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>正在 Ping 192.168.2.9 具有 32 字节的数据:       
+</span><span>来自 192.168.2.9 的回复: 字节=32 时间=6ms TTL=64
+</span><span>来自 192.168.2.9 的回复: 字节=32 时间=14ms TTL=64
+</span><span>来自 192.168.2.9 的回复: 字节=32 时间=7ms TTL=64
+</span><span>来自 192.168.2.9 的回复: 字节=32 时间=8ms TTL=64
+</span><span>
+</span><span>192.168.2.9 的 Ping 统计信息:
+</span><span>    数据包: 已发送 = 4，已接收 = 4，丢失 = 0 (0% 丢失)，
+</span><span>往返行程的估计时间(以毫秒为单位):
+</span><span>    最短 = 6ms，最长 = 14ms，平均 = 8ms
+</span></code></pre><p>测试高延迟场景下的 TCP 带宽利用，配置了 300±50ms 的延迟，然后使用 iperf3 测试。<pre class=language-cmd data-lang=cmd style=color:#fdf4c1aa;background-color:#282828><code class=language-cmd data-lang=cmd><span>iperf3 -c </span><span style=color:#d3869b>192</span><span>.</span><span style=color:#d3869b>168</span><span>.</span><span style=color:#d3869b>2</span><span>.</span><span style=color:#d3869b>9
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>Connecting to host 192.168.2.9, port 5201
+</span><span>[  5] local 192.168.7.220 port 60280 connected to 192.168.2.9 port 5201
+</span><span>[ ID] Interval           Transfer     Bitrate
+</span><span>[  5]   0.00-1.00   sec   256 KBytes  2.09 Mbits/sec
+</span><span>[  5]   1.00-2.00   sec   640 KBytes  5.25 Mbits/sec
+</span><span>[  5]   2.00-3.01   sec  1.75 MBytes  14.6 Mbits/sec
+</span><span>[  5]   3.01-4.01   sec  3.38 MBytes  28.4 Mbits/sec
+</span><span>[  5]   4.01-5.01   sec  8.12 MBytes  68.0 Mbits/sec
+</span><span>[  5]   5.01-6.00   sec  10.0 MBytes  84.5 Mbits/sec
+</span><span>[  5]   6.00-7.01   sec  11.6 MBytes  96.6 Mbits/sec
+</span><span>[  5]   7.01-8.01   sec  11.9 MBytes  99.7 Mbits/sec
+</span><span>[  5]   8.01-9.01   sec  11.6 MBytes  97.9 Mbits/sec
+</span><span>[  5]   9.01-10.00  sec  11.8 MBytes  98.8 Mbits/sec
+</span><span>- - - - - - - - - - - - - - - - - - - - - - - - -
+</span><span>[ ID] Interval           Transfer     Bitrate
+</span><span>[  5]   0.00-10.00  sec  71.0 MBytes  59.5 Mbits/sec                  sender
+</span><span>[  5]   0.00-10.33  sec  70.0 MBytes  56.8 Mbits/sec                  receiver
+</span><span>
+</span><span>iperf Done.
+</span></code></pre><h3 id=diu-bao>丢包</h3><p>manpage 文档命令概要如下。<pre style=color:#fdf4c1aa;background-color:#282828><code><span># SYNOPSIS
+</span><span>LOSS := loss { random PERCENT [ CORRELATION ]  |
+</span><span>                      state p13 [ p31 [ p32 [ p23 [ p14]]]] |
+</span><span>                      gemodel p [ r [ 1-h [ 1-k ]]] }  [ ecn ]
+</span></code></pre><p>尝试为<code>ens192</code>网卡附加20%丢包策略。<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>tc qdisc add dev ens192 root netem loss 20%
+</span><span style=color:#fdf4c1>tc qdisc show dev
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>qdisc noqueue 0: dev lo root refcnt 2 
+</span><span>qdisc netem 8004: dev ens192 root refcnt 9 limit 1000 loss 20%
+</span><span>qdisc noqueue 0: dev docker0 root refcnt 2
+</span></code></pre><p>ping测试<pre class=language-cmd data-lang=cmd style=color:#fdf4c1aa;background-color:#282828><code class=language-cmd data-lang=cmd><span style=color:#fa5c4b>ping </span><span style=color:#d3869b>192</span><span>.</span><span style=color:#d3869b>168</span><span>.</span><span style=color:#d3869b>2</span><span>.</span><span style=color:#d3869b>9</span><span> -t
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>正在 Ping 192.168.2.9 具有 32 字节的数据:
+</span><span>来自 192.168.2.9 的回复: 字节=32 时间&lt;1ms TTL=64
+</span><span>来自 192.168.2.9 的回复: 字节=32 时间&lt;1ms TTL=64
+</span><span>请求超时。
+</span><span>来自 192.168.2.9 的回复: 字节=32 时间&lt;1ms TTL=64
+</span><span>来自 192.168.2.9 的回复: 字节=32 时间&lt;1ms TTL=64
+</span><span>来自 192.168.2.9 的回复: 字节=32 时间&lt;1ms TTL=64
+</span><span>来自 192.168.2.9 的回复: 字节=32 时间&lt;1ms TTL=64
+</span><span>来自 192.168.2.9 的回复: 字节=32 时间&lt;1ms TTL=64
+</span><span>来自 192.168.2.9 的回复: 字节=32 时间&lt;1ms TTL=64
+</span><span>来自 192.168.2.9 的回复: 字节=32 时间&lt;1ms TTL=64
+</span><span>来自 192.168.2.9 的回复: 字节=32 时间&lt;1ms TTL=64
+</span><span>来自 192.168.2.9 的回复: 字节=32 时间&lt;1ms TTL=64
+</span><span>请求超时。
+</span><span>来自 192.168.2.9 的回复: 字节=32 时间&lt;1ms TTL=64
+</span><span>来自 192.168.2.9 的回复: 字节=32 时间&lt;1ms TTL=64
+</span><span>来自 192.168.2.9 的回复: 字节=32 时间&lt;1ms TTL=64
+</span><span>来自 192.168.2.9 的回复: 字节=32 时间&lt;1ms TTL=64
+</span><span>来自 192.168.2.9 的回复: 字节=32 时间&lt;1ms TTL=64
+</span><span>来自 192.168.2.9 的回复: 字节=32 时间&lt;1ms TTL=64
+</span><span>来自 192.168.2.9 的回复: 字节=32 时间&lt;1ms TTL=64
+</span><span>来自 192.168.2.9 的回复: 字节=32 时间&lt;1ms TTL=64
+</span><span>来自 192.168.2.9 的回复: 字节=32 时间&lt;1ms TTL=64
+</span><span>请求超时。
+</span></code></pre><p>iperf3 TCP 测试<pre class=language-cmd data-lang=cmd style=color:#fdf4c1aa;background-color:#282828><code class=language-cmd data-lang=cmd><span>iperf3 -c </span><span style=color:#d3869b>192</span><span>.</span><span style=color:#d3869b>168</span><span>.</span><span style=color:#d3869b>2</span><span>.</span><span style=color:#d3869b>9
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>Connecting to host 192.168.2.9, port 5201
+</span><span>[  5] local 192.168.7.220 port 52329 connected to 192.168.2.9 port 5201
+</span><span>[ ID] Interval           Transfer     Bitrate
+</span><span>[  5]   0.00-1.00   sec   115 MBytes   964 Mbits/sec
+</span><span>[  5]   1.00-2.01   sec   114 MBytes   949 Mbits/sec
+</span><span>[  5]   2.01-3.01   sec   113 MBytes   948 Mbits/sec
+</span><span>[  5]   3.01-4.00   sec   112 MBytes   949 Mbits/sec
+</span><span>[  5]   4.00-5.00   sec   113 MBytes   949 Mbits/sec
+</span><span>[  5]   5.00-6.01   sec   114 MBytes   949 Mbits/sec
+</span><span>[  5]   6.01-7.01   sec   114 MBytes   949 Mbits/sec
+</span><span>[  5]   7.01-8.01   sec   113 MBytes   949 Mbits/sec
+</span><span>[  5]   8.01-9.01   sec   114 MBytes   948 Mbits/sec
+</span><span>[  5]   9.01-10.01  sec   113 MBytes   950 Mbits/sec
+</span><span>- - - - - - - - - - - - - - - - - - - - - - - - -
+</span><span>[ ID] Interval           Transfer     Bitrate
+</span><span>[  5]   0.00-10.01  sec  1.11 GBytes   950 Mbits/sec                  sender
+</span><span>[  5]   0.00-10.03  sec  1.11 GBytes   949 Mbits/sec                  receiver
+</span><span>
+</span><span>iperf Done.
+</span></code></pre><p>查看拥塞控制算法<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>sysctl net.ipv4.tcp_congestion_control
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>net.ipv4.tcp_congestion_control = cubic
+</span></code></pre><p>拥塞控制算法是 cubic，20%的高丢包场景 TCP 带宽利用率居然还可以保持这么高。<h3 id=sun-pi>损坏</h3><p>manpage 文档<pre style=color:#fdf4c1aa;background-color:#282828><code><span>corrupt PERCENT [CORRELATION]
+</span></code></pre><p>同样给 ens192 附加随机 10% 的损坏包<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>tc qdisc add dev DEV root netem corrupt 1%
+</span><span style=color:#fdf4c1>tc qdisc show
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>qdisc noqueue 0: dev lo root refcnt 2 
+</span><span>qdisc netem 8005: dev ens192 root refcnt 9 limit 1000 corrupt 10%
+</span><span>qdisc noqueue 0: dev docker0 root refcnt 2
+</span></code></pre><p>iperf3 测试<pre class=language-cmd data-lang=cmd style=color:#fdf4c1aa;background-color:#282828><code class=language-cmd data-lang=cmd><span>iperf3 -c </span><span style=color:#d3869b>192</span><span>.</span><span style=color:#d3869b>168</span><span>.</span><span style=color:#d3869b>2</span><span>.</span><span style=color:#d3869b>9
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>Connecting to host 192.168.2.9, port 5201
+</span><span>[  5] local 192.168.7.220 port 50825 connected to 192.168.2.9 port 5201
+</span><span>[ ID] Interval           Transfer     Bitrate
+</span><span>[  5]   0.00-1.01   sec   116 MBytes   964 Mbits/sec
+</span><span>[  5]   1.01-2.01   sec   112 MBytes   949 Mbits/sec
+</span><span>[  5]   2.01-3.01   sec   112 MBytes   937 Mbits/sec
+</span><span>[  5]   3.01-4.00   sec   113 MBytes   949 Mbits/sec
+</span><span>[  5]   4.00-5.00   sec   113 MBytes   949 Mbits/sec
+</span><span>[  5]   5.00-6.01   sec   114 MBytes   949 Mbits/sec
+</span><span>[  5]   6.01-7.00   sec   113 MBytes   949 Mbits/sec
+</span><span>[  5]   7.00-8.00   sec   111 MBytes   935 Mbits/sec
+</span><span>[  5]   8.00-9.01   sec   114 MBytes   949 Mbits/sec
+</span><span>[  5]   9.01-10.01  sec   113 MBytes   949 Mbits/sec
+</span><span>- - - - - - - - - - - - - - - - - - - - - - - - -
+</span><span>[ ID] Interval           Transfer     Bitrate
+</span><span>[  5]   0.00-10.01  sec  1.10 GBytes   948 Mbits/sec                  sender
+</span><span>[  5]   0.00-10.03  sec  1.10 GBytes   946 Mbits/sec                  receiver
+</span><span>
+</span><span>iperf Done.
+</span></code></pre><p>这个 corrupt 测试有点不符合我的期望，我想要的是正好突破反码求和校验算法的损坏包，实测传输中的 crc32 校验和最终 md5 校验发现损坏。<p>然而这个 corrupt 实测里感觉体验和丢包差不多。1GByte 文件反复测试了六七次也没有撞到一次突破校验和的情况。<p>怀疑是 netem corrupt 的实现就不会制造突破校验和的场景。<h3 id=xian-su>限速</h3><p>manpage 文档<pre style=color:#fdf4c1aa;background-color:#282828><code><span>rate RATE [PACKETOVERHEAD] [CELLSIZE] [CELLOVERHEAD]
+</span></code></pre><p>案例，给 ens192 添加 10Mbps 的限速。<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>tc qdisc add dev ens192 root netem rate 10Mbit
+</span></code></pre><p>iperf3 测试<pre class=language-cmd data-lang=cmd style=color:#fdf4c1aa;background-color:#282828><code class=language-cmd data-lang=cmd><span>iperf3 -c </span><span style=color:#d3869b>192</span><span>.</span><span style=color:#d3869b>168</span><span>.</span><span style=color:#d3869b>2</span><span>.</span><span style=color:#d3869b>9</span><span> -t </span><span style=color:#d3869b>30
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>Connecting to host 192.168.2.9, port 5201
+</span><span>[  5] local 192.168.7.220 port 56559 connected to 192.168.2.9 port 5201
+</span><span>[ ID] Interval           Transfer     Bitrate
+</span><span>[  5]   0.00-1.00   sec  10.1 MBytes  84.7 Mbits/sec
+</span><span>[  5]   1.00-2.00   sec  8.50 MBytes  71.5 Mbits/sec
+</span><span>[  5]   2.00-3.00   sec  10.0 MBytes  83.8 Mbits/sec
+</span><span>[  5]   3.00-4.01   sec  10.4 MBytes  86.0 Mbits/sec
+</span><span>[  5]   4.01-5.01   sec  10.2 MBytes  86.0 Mbits/sec
+</span><span>[  5]   5.01-6.01   sec  7.38 MBytes  61.9 Mbits/sec
+</span><span>[  5]   6.01-7.01   sec  7.50 MBytes  63.1 Mbits/sec
+</span><span>[  5]   7.01-8.00   sec  7.75 MBytes  65.5 Mbits/sec
+</span><span>[  5]   8.00-9.01   sec  7.38 MBytes  61.1 Mbits/sec
+</span><span>[  5]   9.01-10.01  sec  7.62 MBytes  64.2 Mbits/sec
+</span><span>[  5]  10.01-11.01  sec  7.88 MBytes  66.1 Mbits/sec
+</span><span>[  5]  11.01-12.01  sec  7.62 MBytes  64.4 Mbits/sec
+</span><span>[  5]  12.01-13.02  sec  7.75 MBytes  64.4 Mbits/sec
+</span><span>[  5]  13.02-14.01  sec  7.75 MBytes  65.1 Mbits/sec
+</span><span>[  5]  14.01-15.01  sec  7.50 MBytes  62.9 Mbits/sec
+</span><span>[  5]  15.01-16.01  sec  7.62 MBytes  64.4 Mbits/sec
+</span><span>[  5]  16.01-17.00  sec  7.88 MBytes  66.4 Mbits/sec
+</span><span>[  5]  17.00-18.01  sec  8.62 MBytes  71.9 Mbits/sec
+</span><span>[  5]  18.01-19.00  sec  8.38 MBytes  70.8 Mbits/sec
+</span><span>[  5]  19.00-20.02  sec  8.25 MBytes  68.2 Mbits/sec
+</span><span>[  5]  20.02-21.01  sec  8.25 MBytes  69.7 Mbits/sec
+</span><span>[  5]  21.01-22.00  sec  8.38 MBytes  70.6 Mbits/sec
+</span><span>[  5]  22.00-23.01  sec  8.38 MBytes  69.4 Mbits/sec
+</span><span>[  5]  23.01-24.00  sec  7.75 MBytes  65.8 Mbits/sec
+</span><span>[  5]  24.00-25.01  sec  7.62 MBytes  63.8 Mbits/sec
+</span><span>[  5]  25.01-26.01  sec  7.75 MBytes  65.0 Mbits/sec
+</span><span>[  5]  26.01-27.01  sec  7.88 MBytes  65.8 Mbits/sec
+</span><span>[  5]  27.01-28.01  sec  8.12 MBytes  68.3 Mbits/sec
+</span><span>[  5]  28.01-29.01  sec  7.88 MBytes  66.1 Mbits/sec
+</span><span>[  5]  29.01-30.00  sec  7.75 MBytes  65.3 Mbits/sec
+</span><span>- - - - - - - - - - - - - - - - - - - - - - - - -
+</span><span>[ ID] Interval           Transfer     Bitrate
+</span><span>[  5]   0.00-30.00  sec   246 MBytes  68.8 Mbits/sec                  sender
+</span><span>[  5]   0.00-30.00  sec   246 MBytes  68.6 Mbits/sec                  receiver
+</span><span>
+</span><span>iperf Done.
+</span></code></pre><p>比较烦人的是，rate 限速结果基本没法稳定。 rate 1Mbit 配置实测带宽远高于 1Mbps。<p>另一个限速相关的配置 limit 暂时没有测试。<p>把限速拉低到 10kbit 之后 iperf3 测试还出现了 reset 的情况，没有 reset 时的报告如下。<pre class=language-cmd data-lang=cmd style=color:#fdf4c1aa;background-color:#282828><code class=language-cmd data-lang=cmd><span>iperf3 -c </span><span style=color:#d3869b>192</span><span>.</span><span style=color:#d3869b>168</span><span>.</span><span style=color:#d3869b>2</span><span>.</span><span style=color:#d3869b>9</span><span> -t </span><span style=color:#d3869b>15
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>Connecting to host 192.168.2.9, port 5201
+</span><span>[  5] local 192.168.7.220 port 63087 connected to 192.168.2.9 port 5201
+</span><span>[ ID] Interval           Transfer     Bitrate
+</span><span>[  5]   0.00-1.00   sec   256 KBytes  2.09 Mbits/sec
+</span><span>[  5]   1.00-2.00   sec  0.00 Bytes  0.00 bits/sec
+</span><span>[  5]   2.00-3.00   sec  0.00 Bytes  0.00 bits/sec
+</span><span>[  5]   3.00-4.00   sec  0.00 Bytes  0.00 bits/sec
+</span><span>[  5]   4.00-5.00   sec   128 KBytes  1.05 Mbits/sec
+</span><span>[  5]   5.00-6.01   sec  0.00 Bytes  0.00 bits/sec
+</span><span>[  5]   6.01-7.00   sec   128 KBytes  1.06 Mbits/sec
+</span><span>[  5]   7.00-8.00   sec  0.00 Bytes  0.00 bits/sec
+</span><span>[  5]   8.00-9.01   sec  0.00 Bytes  0.00 bits/sec
+</span><span>[  5]   9.01-10.01  sec   128 KBytes  1.05 Mbits/sec
+</span><span>[  5]  10.01-11.01  sec  0.00 Bytes  0.00 bits/sec
+</span><span>[  5]  11.01-12.01  sec  0.00 Bytes  0.00 bits/sec
+</span><span>[  5]  12.01-13.01  sec   128 KBytes  1.05 Mbits/sec
+</span><span>[  5]  13.01-14.00  sec  0.00 Bytes  0.00 bits/sec
+</span><span>[  5]  14.00-15.01  sec   128 KBytes  1.04 Mbits/sec
+</span><span>- - - - - - - - - - - - - - - - - - - - - - - - -
+</span><span>[ ID] Interval           Transfer     Bitrate
+</span><span>[  5]   0.00-15.01  sec   896 KBytes   489 Kbits/sec                  sender  
+</span><span>[  5]   0.00-15.83  sec   768 KBytes   397 Kbits/sec                  receiver
+</span><span>
+</span><span>iperf Done.
+</span></code></pre><h3 id=man-io>慢io</h3><p>模拟慢 io 就不能靠 tc netem 了，参考 serverfault 上的一篇文章，使用 device mapper 制造一个慢设备。<p>所需的工具包括 <code>losetup</code>、<code>blockdev</code>、<code>dmsetup</code> ，可以用 <code>dnf provides NAME</code> 查找哪个包提供了对应命令。<p>在 openEuler 上需要的包分别是 <code>util-linux</code> 和 <code>device-mapper</code>。<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>delay</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>100
+</span><span style=color:#fdf4c1>devfile</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>/tmp/slow-disk-100M
+</span><span style=color:#fdf4c1>dd if=/dev/zero of=$devfile bs=1024k count=100
+</span><span style=color:#fdf4c1>device</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>`losetup --show --find /tmp/slow-disk-100M`
+</span><span style=color:#928374;font-style:italic># 注意后面的 blockdev 参数是 losetup 输出的
+</span><span style=color:#fdf4c1>size</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>`blockdev --getsize $device`
+</span><span style=color:#fdf4c1>dmsetup create --table </span><span style=color:#b8bb26>"0 $</span><span style=color:#fdf4c1>size</span><span style=color:#b8bb26> delay $</span><span style=color:#fdf4c1>device</span><span style=color:#b8bb26> 0 $</span><span style=color:#fdf4c1>delay</span><span style=color:#b8bb26>"
+</span><span style=color:#fdf4c1>ls /dev/mapper/dm-slow
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>/dev/mapper/dm-slow
+</span></code></pre><p>格式化并挂载这个设备<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>mkfs.ext4 /dev/mapper/dm-slow
+</span><span style=color:#fdf4c1>mkdir /mnt/slow
+</span><span style=color:#fdf4c1>mount /dev/mapper/dm-slow /mnt/slow
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>mke2fs 1.46.4 (18-Aug-2021)
+</span><span>Discarding device blocks: done                            
+</span><span>Creating filesystem with 102400 1k blocks and 25584 inodes
+</span><span>Filesystem UUID: a640fab2-49e4-4135-967f-cc486efd7e68
+</span><span>Superblock backups stored on blocks: 
+</span><span>        8193, 24577, 40961, 57345, 73729
+</span><span>
+</span><span>Allocating group tables: done                            
+</span><span>Writing inode tables: done                            
+</span><span>Creating journal (4096 blocks): done
+</span><span>Writing superblocks and filesystem accounting information: done
+</span></code></pre><p>实测下写入速度。<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>dd if=/dev/random of=/mnt/slow/testdata.bin bs=1KB count=1024
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>1024+0 records in
+</span><span>1024+0 records out
+</span><span>1024000 bytes (1.0 MB, 1000 KiB) copied, 0.00664252 s, 154 MB/s
+</span></code></pre><p>对比基准速度<pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#fdf4c1>dd if=/dev/random of=/tmp/testdata.bin bs=1KB count=1024
+</span></code></pre><pre style=color:#fdf4c1aa;background-color:#282828><code><span>1024+0 records in
+</span><span>1024+0 records out
+</span><span>1024000 bytes (1.0 MB, 1000 KiB) copied, 0.00613006 s, 167 MB/s
+</span></code></pre><p>好我受够了，这个不行。完全达咩。 这个场景放弃。</article><hr><blockquote class=reference-links><strong>参考链接</strong><ul><li><a href=https://www.cnblogs.com/buttercup/p/13812221.html>跨境tcp传输优化实录-使用bbr解决lfn问题</a><li><a href=https://serverfault.com/questions/523509/linux-how-to-simulate-hard-disk-latency-i-want-to-increase-iowait-value-withou>linux: how to simulate hard disk latency? I want to increase iowait value without using a cpu power</a></ul></blockquote><p class=tags-data><a href=/tags/linux>/Linux/</a> <a href=/tags/tc>/tc/</a> <a href=/tags/netem>/netem/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>

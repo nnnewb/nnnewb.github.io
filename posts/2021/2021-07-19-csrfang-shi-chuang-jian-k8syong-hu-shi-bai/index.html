@@ -1,0 +1,86 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>csr 方式创建 kubernetes 用户出了点差错</title><meta content="csr 方式创建 kubernetes 用户出了点差错" name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2021/2021-07-19-csrfang-shi-chuang-jian-k8syong-hu-shi-bai/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content="csr 方式创建 kubernetes 用户出了点差错" property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2021/2021-07-19-csrfang-shi-chuang-jian-k8syong-hu-shi-bai/ property=twitter:url><meta content="csr 方式创建 kubernetes 用户出了点差错" property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2021/2021-07-19-csrfang-shi-chuang-jian-k8syong-hu-shi-bai/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+        // 查找所有具有 'pre' 标签且类名为 'language-mermaid' 的元素
+        const mermaidElements = document.getElementsByClassName('language-mermaid');
+        for (let i = 0; i < mermaidElements.length; i++) {
+            const el = mermaidElements.item(i);
+            if (el.tagName === "PRE" && !el.classList.contains('mermaid')) {
+                el.innerHTML = el.textContent;
+                el.classList.add('mermaid');
+            }
+        }
+
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+    })</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>csr 方式创建 kubernetes 用户出了点差错</h1><p class=author-line>作于：2021-07-19 09:52 ，预计阅读时间 1 分钟<article><p>越是在 kubernetes 的浑水里摸索，越是发现这就是个不顺手的锤子。</p><span id=continue-reading></span><h2 id=wan-zheng-jiao-ben>完整脚本</h2><pre class=language-bash data-lang=bash style=color:#fdf4c1aa;background-color:#282828><code class=language-bash data-lang=bash><span style=color:#928374;font-style:italic>#!/bin/bash -e
+</span><span style=color:#928374;font-style:italic>#
+</span><span style=color:#928374;font-style:italic># 创建用户 gitlab 并授予权限
+</span><span style=color:#928374;font-style:italic>#
+</span><span style=color:#928374;font-style:italic># reference:
+</span><span style=color:#928374;font-style:italic># https://kubernetes.io/zh/docs/reference/access-authn-authz/certificate-signing-requests/#normal-user
+</span><span>
+</span><span style=color:#928374;font-style:italic># if `gitlab` does not exists,
+</span><span style=color:#928374;font-style:italic># create csr and approve
+</span><span style=color:#fa5c4b>if </span><span style=color:#fe8019>! </span><span style=color:#fdf4c1>kubectl get csr gitlab </span><span style=color:#fe8019>></span><span style=color:#fdf4c1>/dev/null</span><span style=color:#fe8019>; </span><span style=color:#fa5c4b>then
+</span><span>    </span><span style=color:#928374;font-style:italic># create credential
+</span><span>    </span><span style=color:#fa5c4b>if </span><span style=color:#fabd2f>[ </span><span style=color:#fe8019>! </span><span style=color:#fdf4c1>-f gitlab.csr </span><span style=color:#fabd2f>]</span><span style=color:#fe8019>; </span><span style=color:#fa5c4b>then
+</span><span>        </span><span style=color:#fdf4c1>openssl genrsa -out gitlab.key 2048
+</span><span>        </span><span style=color:#fdf4c1>openssl req -new -key gitlab.key -out gitlab.csr
+</span><span>    </span><span style=color:#fa5c4b>fi
+</span><span>
+</span><span>    </span><span style=color:#fdf4c1>csr</span><span style=color:#fe8019>=</span><span style=color:#b8bb26>$(</span><span style=color:#fdf4c1>cat gitlab.csr </span><span style=color:#fe8019>| </span><span style=color:#fdf4c1>base64 </span><span style=color:#fe8019>| </span><span style=color:#fdf4c1>tr -d </span><span style=color:#b8bb26>"\n")
+</span><span>    </span><span style=color:#fdf4c1>cat </span><span style=color:#fe8019>&lt;&lt;</span><span style=color:#fa5c4b>EOF </span><span style=color:#fe8019>| </span><span style=color:#fdf4c1>tee gitlab-csr.yaml
+</span><span style=color:#fdf4c1>apiVersion: certificates.k8s.io/v1beta1
+</span><span style=color:#fdf4c1>kind: CertificateSigningRequest
+</span><span style=color:#fdf4c1>metadata:
+</span><span style=color:#fdf4c1>  name: gitlab
+</span><span style=color:#fdf4c1>spec:
+</span><span style=color:#fdf4c1>  groups:
+</span><span style=color:#fdf4c1>  - system:authenticated
+</span><span style=color:#fdf4c1>  request: $csr
+</span><span style=color:#fdf4c1>  signerName: kubernetes.io/kube-apiserver-client
+</span><span style=color:#fdf4c1>  usages:
+</span><span style=color:#fdf4c1>  - client auth
+</span><span style=color:#fa5c4b>EOF
+</span><span>    </span><span style=color:#fdf4c1>kubectl create -f gitlab-csr.yaml
+</span><span>    </span><span style=color:#fdf4c1>kubectl certificate approve gitlab
+</span><span style=color:#fa5c4b>fi
+</span><span>
+</span><span style=color:#928374;font-style:italic># get signed credential
+</span><span style=color:#fdf4c1>kubectl get csr gitlab -o jsonpath=</span><span style=color:#b8bb26>'{.status.certificate}'</span><span style=color:#fe8019>| </span><span style=color:#fdf4c1>base64 -d </span><span style=color:#fe8019>></span><span style=color:#fdf4c1> gitlab.crt
+</span><span>
+</span><span style=color:#928374;font-style:italic># create role and rolebinding
+</span><span style=color:#fdf4c1>kubectl create role gitlab-ci \
+</span><span style=color:#fdf4c1>    --verb</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>create \
+</span><span style=color:#fdf4c1>    --verb</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>git \
+</span><span style=color:#fdf4c1>    --verb</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>list \
+</span><span style=color:#fdf4c1>    --verb</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>update \
+</span><span style=color:#fdf4c1>    --verb</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>delete \
+</span><span style=color:#fdf4c1>    --resource</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>pods \
+</span><span style=color:#fdf4c1>    --resource</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>deployment \
+</span><span style=color:#fdf4c1>    --resource</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>statefulset \
+</span><span style=color:#fdf4c1>    --resource</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>service \
+</span><span style=color:#fdf4c1>    --resource</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>configmap
+</span><span style=color:#fdf4c1>kubectl create rolebinding gitlab-ci-binding-gitlab --role</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>gitlab-ci --user</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>gitlab
+</span><span style=color:#fdf4c1>kubectl config set-credentials gitlab --client-key</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>gitlab.key --client-certificate</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>gitlab.crt --embed-certs</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>true
+</span><span style=color:#fdf4c1>kubectl config set-context ci --cluster</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>office --user</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>gitlab --namespace</span><span style=color:#fe8019>=</span><span style=color:#fdf4c1>version4
+</span></code></pre><h2 id=cun-zai-de-wen-ti>存在的问题</h2><p>脚本跑完后发现还不能使用 <code>kubectl get pods</code>，错误 Unauthorized。<p>再看了一遍文档，发现有这么一句。<blockquote><p>下面的脚本展示了如何生成 PKI 私钥和 CSR。 设置 CSR 的 CN 和 O 属性很重要。CN 是用户名，O 是该用户归属的组。 你可以参考 RBAC 了解标准组的信息。</blockquote><p>顺着链接去看了下 RBAC，结果也没找到什么“标准组”。<p>对于文中说的两个“很重要”的字段，CN 我猜测是 Common Name，O 就是 Organization。现在就不知道怎么填 O，行吧。<p>等啥时候搞清楚了再补一篇。</article><p class=tags-data><a href=/tags/kubernetes>/kubernetes/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>
