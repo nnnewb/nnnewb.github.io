@@ -1,0 +1,162 @@
+:root,
+::backdrop {
+  /* set sans-serif & mono fonts */
+  /* prettier-ignore */
+  --suCSS-sans-font:
+    /* preferred 中文网字计划 */ 'LXGW Bright Medium',
+    /* for Mac*/      'Helvetica Neue', Helvetica,
+    /* fallback */    Tahoma, Arial,
+    /* for Windows */ 'Microsoft YaHei',
+    /* for Mac */     'PingFang SC', 'Hiragino Sans GB', 'Heiti SC',
+    /* for Android */ 'Droid Sans',
+    /* for Linux */   'WenQuanYi MicroHei',
+    /* fallback */    sans-serif;
+
+  /* prettier-ignore */
+  --suCSS-mono-font:
+    /* preferred */   'Maple Mono CN', 'Cascadia Code', 'Cascadia Mono', 'CaskaydiaCove NF',
+    /* for Windows */ Consolas,
+    /* for Mac */     Menlo, Monaco, 'Andale Mono',
+    /* for Android */ 'Droid Sans Mono',
+    /* for Linux */   'Ubuntu Mono',
+    /* fallback */    monospace;
+
+  /* color pallete veqev */
+  --veqev-light-bg: #eeeeee;
+  --veqev-light-bg-light: #CBCDCD;
+  --veqev-light-text: #41474E;
+  --veqev-light-text-light: #646868;
+  --veqev-light-accent: #D26878;
+  --veqev-light-accent-light: #e08f67;
+  --veqev-light-link: #5690AF;
+  --veqev-light-fg: #41474e;
+	--veqev-light-red: #D26878;
+	--veqev-light-dimRed: #623039;
+	--veqev-light-orange: #e08f67;
+	--veqev-light-dimOrange: #926048;
+	--veqev-light-yellow: #FFFAE1;
+	--veqev-light-dimYellow: #D5C5A1;
+	--veqev-light-green: #56AFA0;
+	--veqev-light-dimGreen: #22453F;
+	--veqev-light-blue: #5690AF;
+	--veqev-light-dimBlue: #223844;
+	--veqev-light-purple: #9271D6;
+	--veqev-light-dimPurple: #47356C;
+	--veqev-light-grey: #CBCDCD;
+	--veqev-light-dimGrey: #646868;
+
+  --veqev-dark-bg: #222529;
+  --veqev-dark-bg-light: #464949;
+  --veqev-dark-text: #D6D6D6;
+  --veqev-dark-text-light: #DBD5BC;
+  --veqev-dark-accent: #78B6AD;
+  --veqev-dark-accent-light: #87C9E5;
+  --veqev-dark-link: #E2AEA2;
+  --veqev-dark-fg: #d6d6d6;
+	--veqev-dark-red: #CD909B;
+	--veqev-dark-dimRed: #684249;
+	--veqev-dark-orange: #E2AEA2;
+	--veqev-dark-dimOrange: #704941;
+	--veqev-dark-yellow: #DBD5BC;
+	--veqev-dark-dimYellow: #6F6847;
+	--veqev-dark-green: #78B6AD;
+	--veqev-dark-dimGreen: #3E615C;
+	--veqev-dark-blue: #87C9E5;
+	--veqev-dark-dimBlue: #38494F;
+	--veqev-dark-purple: #B07CF3;
+	--veqev-dark-dimPurple: #5E406A;
+	--veqev-dark-grey: #CBCDCD;
+	--veqev-dark-dimGrey: #464949;
+
+  /* light theme color pallete */
+  --suCSS-pallete-light-bg: var(--veqev-light-bg);
+  --suCSS-pallete-light-bg-light: var(--veqev-light-bg-light);
+  --suCSS-pallete-light-text: var(--veqev-light-text);
+  --suCSS-pallete-light-text-light: var(--veqev-light-text-light);
+  --suCSS-pallete-light-accent: var(--veqev-light-accent);
+  --suCSS-pallete-light-accent-light: var(--veqev-light-accent-light);
+  --suCSS-pallete-light-accent-text: var(--veqev-light-text);
+  --suCSS-pallete-light-border: var(--veqev-light-dimGrey);
+  --suCSS-pallete-light-link: var(--veqev-light-link);
+
+  /* dark theme color pallete */
+  --suCSS-pallete-dark-bg: var(--veqev-dark-bg);
+  --suCSS-pallete-dark-bg-light: var(--veqev-dark-bg-light);
+  --suCSS-pallete-dark-text: var(--veqev-dark-text);
+  --suCSS-pallete-dark-text-light: var(--veqev-dark-text-light);
+  --suCSS-pallete-dark-accent: var(--veqev-dark-accent);
+  --suCSS-pallete-dark-accent-light: var(--veqev-dark-accent-light);
+  --suCSS-pallete-dark-accent-text: var(--veqev-dark-text);
+  --suCSS-pallete-dark-border: var(--veqev-dark-dimGrey);
+  --suCSS-pallete-dark-link: var(--veqev-dark-link);
+
+  --suCSS-standard-border-radius: 5px;
+}
+
+html {
+  color-scheme: dark light;
+}
+
+/* theme media queries */
+@media (prefers-color-scheme: dark) {
+  :root,
+  ::backdrop {
+    color-scheme: dark;
+    --suCSS-pallete-bg: var(--suCSS-pallete-dark-bg);
+    --suCSS-pallete-bg-light: var(--suCSS-pallete-dark-bg-light);
+    --suCSS-pallete-text: var(--suCSS-pallete-dark-text);
+    --suCSS-pallete-text-light: var(--suCSS-pallete-dark-text-light);
+    --suCSS-pallete-accent: var(--suCSS-pallete-dark-accent);
+    --suCSS-pallete-accent-light: var(--suCSS-pallete-dark-accent-light);
+    --suCSS-pallete-accent-text: var(--suCSS-pallete-dark-accent-text);
+    --suCSS-pallete-border: var(--suCSS-pallete-dark-border);
+    --suCSS-pallete-link: var(--suCSS-pallete-dark-link);
+  }
+  img,
+  video {
+    opacity: 0.8;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root,
+  ::backdrop {
+    color-scheme: light;
+    --suCSS-pallete-bg: var(--suCSS-pallete-light-bg);
+    --suCSS-pallete-bg-light: var(--suCSS-pallete-light-bg-light);
+    --suCSS-pallete-text: var(--suCSS-pallete-light-text);
+    --suCSS-pallete-text-light: var(--suCSS-pallete-light-text-light);
+    --suCSS-pallete-accent: var(--suCSS-pallete-light-accent);
+    --suCSS-pallete-accent-light: var(--suCSS-pallete-light-accent-light);
+    --suCSS-pallete-accent-text: var(--suCSS-pallete-light-accent-text);
+    --suCSS-pallete-border: var(--suCSS-pallete-light-border);
+    --suCSS-pallete-link: var(--suCSS-pallete-light-link);
+  }
+}
+
+[data-theme='light'] {
+  /* default (light) theme */
+  color-scheme: light;
+  --suCSS-pallete-bg: var(--suCSS-pallete-light-bg);
+  --suCSS-pallete-bg-light: var(--suCSS-pallete-light-bg-light);
+  --suCSS-pallete-text: var(--suCSS-pallete-light-text);
+  --suCSS-pallete-text-light: var(--suCSS-pallete-light-text-light);
+  --suCSS-pallete-accent: var(--suCSS-pallete-light-accent);
+  --suCSS-pallete-accent-light: var(--suCSS-pallete-light-accent-light);
+  --suCSS-pallete-accent-text: var(--suCSS-pallete-light-accent-text);
+  --suCSS-pallete-border: var(--suCSS-pallete-light-border);
+  --suCSS-pallete-link: var(--suCSS-pallete-light-link);
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+  --suCSS-pallete-bg: var(--suCSS-pallete-dark-bg);
+  --suCSS-pallete-bg-light: var(--suCSS-pallete-dark-bg-light);
+  --suCSS-pallete-text: var(--suCSS-pallete-dark-text);
+  --suCSS-pallete-text-light: var(--suCSS-pallete-dark-text-light);
+  --suCSS-pallete-accent: var(--suCSS-pallete-dark-accent);
+  --suCSS-pallete-accent-light: var(--suCSS-pallete-dark-accent-light);
+  --suCSS-pallete-accent-text: var(--suCSS-pallete-dark-accent-text);
+  --suCSS-pallete-border: var(--suCSS-pallete-dark-border);
+  --suCSS-pallete-link: var(--suCSS-pallete-dark-link);
+}

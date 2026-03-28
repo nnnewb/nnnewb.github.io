@@ -1,0 +1,89 @@
+<!doctype html><html lang=zh><head><meta charset=UTF-8><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=UTF-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><meta content="index, follow" name=robots><title>csr 方式创建 kubernetes 用户出了点差错</title><meta content="csr 方式创建 kubernetes 用户出了点差错" name=title><meta content=一点点从这个世界上消失。 name=description><meta content=website property=og:type><meta content=https://nnnewb.github.io/posts/2021/2021-07-19-csrfang-shi-chuang-jian-k8syong-hu-shi-bai/ property=og:url><meta content="weakptr's blog" property=og:site_name><meta content="csr 方式创建 kubernetes 用户出了点差错" property=og:title><meta content=一点点从这个世界上消失。 property=og:description><meta content=https://nnnewb.github.io/image/favicon.ico property=og:image><meta content=summary_large_image property=twitter:card><meta content=https://nnnewb.github.io/posts/2021/2021-07-19-csrfang-shi-chuang-jian-k8syong-hu-shi-bai/ property=twitter:url><meta content="csr 方式创建 kubernetes 用户出了点差错" property=twitter:title><meta content=一点点从这个世界上消失。 property=twitter:description><meta content=https://nnnewb.github.io/image/favicon.ico property=twitter:image><link href=https://nnnewb.github.io/posts/2021/2021-07-19-csrfang-shi-chuang-jian-k8syong-hu-shi-bai/ rel=canonical><link rel="shortcut icon" href=https://nnnewb.github.io/image/favicon.ico type=image/x-icon><link href=https://nnnewb.github.io/giallo.css rel=stylesheet><link href=https://nnnewb.github.io/css/reset.css rel=stylesheet><link href=https://nnnewb.github.io/css/pallete.css rel=stylesheet><link href=https://nnnewb.github.io/css/suCSS.css rel=stylesheet><link href=https://nnnewb.github.io/archive.css rel=stylesheet><link href=https://nnnewb.github.io/style.css rel=stylesheet><script defer src=https://nnnewb.github.io/js/script.js></script><link crossorigin href=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y rel=stylesheet><script crossorigin defer integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js></script><script crossorigin defer integrity=sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js></script><script crossorigin defer integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe src=https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js></script><script>document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            // customised options
+            // • auto-render specific keys, e.g.:
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: false }
+            ],
+            // • rendering keys, e.g.:
+            throwOnError: true
+        });
+    });</script><script src=https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js></script><script>document.addEventListener('DOMContentLoaded', function () {
+    // 查找所有 data-lang="mermaid" 的 code 元素
+    // 使用 querySelectorAll 和属性选择器
+    const mermaidElements = document.querySelectorAll('code[data-lang="mermaid"]');
+
+    for (let i = 0; i < mermaidElements.length; i++) {
+        const el = mermaidElements.item(i);
+
+        // 判断标签名是否为 CODE (注意 HTML 标签名通常是大写)
+        if (el.tagName === "CODE" && !el.classList.contains('mermaid')) {
+            el.innerHTML = el.textContent;
+            el.classList.add('mermaid');
+        }
+    }
+
+    mermaid.initialize({ startOnLoad: true, theme: 'dark', });
+})</script><script>if (window.location.hostname.toLowerCase() !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?dbb9df33a2de52aede8bccd84a7493ad";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    }</script><link href=https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkaibright/dist/LXGWBright-Medium/result.css rel=stylesheet><link href=https://chinese-fonts-cdn.deno.dev/packages/maple-mono-cn/dist/MapleMono-CN-Regular/result.css rel=stylesheet><body><header><nav id=nav-bar><a href=/> 首页 </a>  /  <a href=/posts/> 文章 </a>  /  <a href=/categories/> 分类 </a>  /  <a href=/tags/> 标签 </a>  /  <a href=/search/> 搜索 </a>  /  <div><input id=theme-toggle style=display:none type=checkbox><label for=theme-toggle id=theme-toggle-label><svg class=icons id=theme-icon><use href=https://nnnewb.github.io/icons.svg#lightMode></use></svg></label><audio id=theme-sound><source src=https://nnnewb.github.io/click.ogg type=audio/ogg></audio></div></nav></header><main><h1>csr 方式创建 kubernetes 用户出了点差错</h1><p class=author-line>作于：2021-07-19 09:52 ，预计阅读时间 1 分钟<article><p>越是在 kubernetes 的浑水里摸索，越是发现这就是个不顺手的锤子。</p><span id=continue-reading></span><h2 id=wan-zheng-jiao-ben>完整脚本</h2><pre class="giallo z-code"><code data-lang=shellscript><span class=giallo-l><span class="z-punctuation z-definition z-comment z-shebang z-shell z-meta z-shebang z-shell">#!/bin/bash -e</span></span>
+<span class=giallo-l><span class="z-punctuation z-definition z-comment">#</span></span>
+<span class=giallo-l><span class="z-punctuation z-definition z-comment z-comment"># 创建用户 gitlab 并授予权限</span></span>
+<span class=giallo-l><span class="z-punctuation z-definition z-comment">#</span></span>
+<span class=giallo-l><span class="z-punctuation z-definition z-comment z-comment"># reference:</span></span>
+<span class=giallo-l><span class="z-punctuation z-definition z-comment z-comment"># https://kubernetes.io/zh/docs/reference/access-authn-authz/certificate-signing-requests/#normal-user</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span class="z-punctuation z-definition z-comment z-comment"># if `gitlab` does not exists,</span></span>
+<span class=giallo-l><span class="z-punctuation z-definition z-comment z-comment"># create csr and approve</span></span>
+<span class=giallo-l><span class=z-keyword>if</span><span class="z-keyword z-operator"> !</span><span class="z-entity z-name z-function"> kubectl</span><span class=z-string> get csr gitlab</span><span class="z-keyword z-operator"> ></span><span class=z-string>/dev/null</span><span class=z-punctuation>;</span><span class=z-keyword> then</span></span>
+<span class=giallo-l><span class="z-punctuation z-definition z-comment z-comment">    # create credential</span></span>
+<span class=giallo-l><span class=z-keyword>    if</span><span class=z-punctuation> [</span><span class="z-keyword z-operator"> ! -f</span><span class=z-source> gitlab.csr </span><span class=z-punctuation>];</span><span class=z-keyword> then</span></span>
+<span class=giallo-l><span class="z-entity z-name z-function">        openssl</span><span class=z-string> genrsa -out gitlab.key</span><span class="z-constant z-numeric"> 2048</span></span>
+<span class=giallo-l><span class="z-entity z-name z-function">        openssl</span><span class=z-string> req -new -key gitlab.key -out gitlab.csr</span></span>
+<span class=giallo-l><span class=z-keyword>    fi</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span class=z-source>    csr</span><span class="z-keyword z-operator">=</span><span class=z-punctuation>$(</span><span class="z-entity z-name z-function">cat</span><span class=z-string> gitlab.csr</span><span class="z-keyword z-operator"> |</span><span class="z-entity z-name z-function"> base64</span><span class="z-keyword z-operator"> |</span><span class="z-entity z-name z-function"> tr</span><span class="z-string z-punctuation z-definition z-string"> -d "\n"</span><span class=z-punctuation>)</span></span>
+<span class=giallo-l><span class="z-entity z-name z-function">    cat</span><span class="z-keyword z-operator"> &lt;&lt;</span><span class="z-punctuation z-definition z-string">EOF</span><span class="z-keyword z-operator"> |</span><span class="z-entity z-name z-function"> tee</span><span class=z-string> gitlab-csr.yaml</span></span>
+<span class=giallo-l><span class=z-string>apiVersion: certificates.k8s.io/v1beta1</span></span>
+<span class=giallo-l><span class=z-string>kind: CertificateSigningRequest</span></span>
+<span class=giallo-l><span class=z-string>metadata:</span></span>
+<span class=giallo-l><span class=z-string>  name: gitlab</span></span>
+<span class=giallo-l><span class=z-string>spec:</span></span>
+<span class=giallo-l><span class=z-string>  groups:</span></span>
+<span class=giallo-l><span class=z-string>  - system:authenticated</span></span>
+<span class=giallo-l><span class=z-string>  request: </span><span class=z-variable>$csr</span></span>
+<span class=giallo-l><span class=z-string>  signerName: kubernetes.io/kube-apiserver-client</span></span>
+<span class=giallo-l><span class=z-string>  usages:</span></span>
+<span class=giallo-l><span class=z-string>  - client auth</span></span>
+<span class=giallo-l><span class="z-punctuation z-definition z-string">EOF</span></span>
+<span class=giallo-l><span class="z-entity z-name z-function">    kubectl</span><span class=z-string> create -f gitlab-csr.yaml</span></span>
+<span class=giallo-l><span class="z-entity z-name z-function">    kubectl</span><span class=z-string> certificate approve gitlab</span></span>
+<span class=giallo-l><span class=z-keyword>fi</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span class="z-punctuation z-definition z-comment z-comment"># get signed credential</span></span>
+<span class=giallo-l><span class="z-entity z-name z-function">kubectl</span><span class="z-string z-punctuation z-definition z-string"> get csr gitlab -o jsonpath='{.status.certificate}'</span><span class="z-keyword z-operator">|</span><span class="z-entity z-name z-function"> base64</span><span class=z-string> -d</span><span class="z-keyword z-operator"> ></span><span class=z-string> gitlab.crt</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span class="z-punctuation z-definition z-comment z-comment"># create role and rolebinding</span></span>
+<span class=giallo-l><span class="z-entity z-name z-function">kubectl</span><span class=z-string> create role gitlab-ci</span><span class="z-constant z-character z-escape"> \</span></span>
+<span class=giallo-l><span class=z-string>    --verb=create</span><span class="z-constant z-character z-escape"> \</span></span>
+<span class=giallo-l><span class=z-string>    --verb=git</span><span class="z-constant z-character z-escape"> \</span></span>
+<span class=giallo-l><span class=z-string>    --verb=list</span><span class="z-constant z-character z-escape"> \</span></span>
+<span class=giallo-l><span class=z-string>    --verb=update</span><span class="z-constant z-character z-escape"> \</span></span>
+<span class=giallo-l><span class=z-string>    --verb=delete</span><span class="z-constant z-character z-escape"> \</span></span>
+<span class=giallo-l><span class=z-string>    --resource=pods</span><span class="z-constant z-character z-escape"> \</span></span>
+<span class=giallo-l><span class=z-string>    --resource=deployment</span><span class="z-constant z-character z-escape"> \</span></span>
+<span class=giallo-l><span class=z-string>    --resource=statefulset</span><span class="z-constant z-character z-escape"> \</span></span>
+<span class=giallo-l><span class=z-string>    --resource=service</span><span class="z-constant z-character z-escape"> \</span></span>
+<span class=giallo-l><span class=z-string>    --resource=configmap</span></span>
+<span class=giallo-l><span class="z-entity z-name z-function">kubectl</span><span class=z-string> create rolebinding gitlab-ci-binding-gitlab --role=gitlab-ci --user=gitlab</span></span>
+<span class=giallo-l><span class="z-entity z-name z-function">kubectl</span><span class=z-string> config set-credentials gitlab --client-key=gitlab.key --client-certificate=gitlab.crt --embed-certs=true</span></span>
+<span class=giallo-l><span class="z-entity z-name z-function">kubectl</span><span class=z-string> config set-context ci --cluster=office --user=gitlab --namespace=version4</span></span></code></pre><h2 id=cun-zai-de-wen-ti>存在的问题</h2><p>脚本跑完后发现还不能使用 <code>kubectl get pods</code>，错误 Unauthorized。<p>再看了一遍文档，发现有这么一句。<blockquote><p>下面的脚本展示了如何生成 PKI 私钥和 CSR。 设置 CSR 的 CN 和 O 属性很重要。CN 是用户名，O 是该用户归属的组。 你可以参考 RBAC 了解标准组的信息。</blockquote><p>顺着链接去看了下 RBAC，结果也没找到什么“标准组”。<p>对于文中说的两个“很重要”的字段，CN 我猜测是 Common Name，O 就是 Organization。现在就不知道怎么填 O，行吧。<p>等啥时候搞清楚了再补一篇。</article><p class=tags-data><a href=/tags/kubernetes>/kubernetes/</a></p><script data-repo-id="MDEwOlJlcG9zaXRvcnkzOTg0ODYyMTg=" async crossorigin data-category=Announcements data-category-id=DIC_kwDOF8Bqys4Cegmn data-emit-metadata=0 data-input-position=bottom data-lang=zh-CN data-mapping=pathname data-reactions-enabled=1 data-repo=nnnewb/nnnewb.github.io data-strict=0 data-theme=noborder_light id=giscus_script src=https://giscus.app/client.js></script></main><footer><hr><div id=footer-container><div><p style=text-align:center>Copyright © 2018-2024 weakptr <a href=mailto:weak_ptr@outlook.com>&lt;weak_ptr@outlook.com></a><p style=text-align:center>Built with <a rel="noopener noreferrer" href=https://www.getzola.org target=_blank>Zola</a> using <a rel="noopener noreferrer" href=https://github.com/Speyll/anemone target=_blank>anemone</a> theme, <a rel="noopener noreferrer" href=https://speyll.github.io/suCSS/ target=_blank>suCSS</a> framework & <a rel="noopener noreferrer" href=https://github.com/Speyll/veqev target=_blank>veqev</a>, modified by <a rel="noopener noreferrer" href=https://github.com/nnnewb/ target=_blank>nnnewb</a>.<p style=text-align:center>Theme and color theme licensed under <a rel="noopener noreferrer" href=https://en.wikipedia.org/wiki/Licence_MIT target=_blank>MIT</a>.</div></div></footer>
